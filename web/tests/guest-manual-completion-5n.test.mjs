@@ -1,0 +1,12 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+const checkout=readFileSync(new URL('../components/GuestContributionCheckout.tsx',import.meta.url),'utf8');
+const detail=readFileSync(new URL('../components/GuestVerifiedDestination.tsx',import.meta.url),'utf8');
+const service=readFileSync(new URL('../../backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java',import.meta.url),'utf8');
+test('manual guest button and completion message',()=>{assert.match(checkout,/I have done the payment/);assert.match(checkout,/Thank you for sharing your love!/);assert.match(checkout,/directStatus\?<div role="status"/);});
+test('guest success follows successful backend response',()=>{assert.match(checkout,/const result=await json/);assert.match(checkout,/setDirectStatus\(`/);});
+test('no reconciliation language shown to guests',()=>{assert.doesNotMatch(checkout,/Available only when a verified destination and reconciliation are enabled|Awaiting independent verification|Request verification/);assert.doesNotMatch(detail,/Payment is not confirmed until independently reconciled/);});
+test('preferred host payment destination remains server controlled',()=>{assert.match(checkout,/availableDirect\.some/);assert.match(detail,/d\.preferred/);});
+test('guest data saved for reporting without financial ledger credit',()=>{assert.match(service,/guest_email,guest_phone/);assert.match(service,/reference_hash/);assert.match(service,/AWAITING_VERIFICATION/);assert.doesNotMatch(service,/INSERT INTO wallet_ledger_entries|INSERT INTO contributions/);});
+test('Razorpay provider signature confirmation preserved',()=>{assert.match(checkout,/razorpaySignature:result\.razorpay_signature/);assert.match(checkout,/setReceipt\(confirmation\)/);});

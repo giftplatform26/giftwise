@@ -1,0 +1,12 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+const checkout=readFileSync(new URL('../components/GuestContributionCheckout.tsx',import.meta.url),'utf8');
+const destination=readFileSync(new URL('../components/GuestVerifiedDestination.tsx',import.meta.url),'utf8');
+const backend=readFileSync(new URL('../../backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java',import.meta.url),'utf8');
+test('direct methods require eligible server results',()=>{assert.match(checkout,/availableDirect\.some/);assert.match(checkout,/canUseDirect/);});
+test('guest transfer report is not payment capture',()=>{assert.match(checkout,/Thank you for sharing your love!/);assert.match(checkout,/I have done the payment/);assert.match(backend,/AWAITING_VERIFICATION/);assert.doesNotMatch(backend,/HOST_AVAILABLE|GIFT_ALLOCATED/);});
+test('archived direct destinations excluded',()=>{assert.ok((backend.match(/archived_at IS NULL/g)||[]).length>=3);});
+test('direct UPI requires stored QR',()=>{assert.ok((backend.match(/host_upi_qr_images/g)||[]).length>=2);});
+test('verified guest detail requires preferred destination and UPI QR',()=>{assert.match(destination,/d\.preferred/);assert.match(destination,/d\.qrPngBase64 && d\.upiId/);});
+test('Razorpay capture still requires provider signature',()=>{assert.match(checkout,/razorpaySignature:result\.razorpay_signature/);assert.match(checkout,/setReceipt\(confirmation\)/);});

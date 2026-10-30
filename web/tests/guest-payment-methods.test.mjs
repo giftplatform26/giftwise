@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+const source=readFileSync(new URL('../components/GuestContributionCheckout.tsx',import.meta.url),'utf8');
+test('guest payment methods are visible',()=>{for(const label of ['Razorpay Checkout','Direct UPI / QR','Bank Transfer'])assert.ok(source.includes(label));});
+test('UPI and bank default disabled; require eligible server destinations',()=>{assert.match(source,/id:'razorpay'[^\n]*available:true/);assert.match(source,/id:'upi'[^\n]*available:false/);assert.match(source,/id:'bank'[^\n]*available:false/);assert.ok(source.includes('availableDirect.some(d=>d.method===method.id.toUpperCase())'));});
+test('unavailable options cannot be selected',()=>assert.ok(source.includes('availableDirect.some')));
+test('submission is restricted to Razorpay',()=>assert.ok(source.includes("paymentMethod!=='razorpay'")));
+test('existing checkout and confirmation endpoints remain intact',()=>{assert.ok(source.includes('/backend/api/public/payments/checkout'));assert.ok(source.includes('/backend/api/public/payments/confirm'));});
+test('Razorpay payment confirmation remains provider based',()=>assert.ok(source.includes('razorpaySignature:result.razorpay_signature')));
+test('receipt still requires capture result',()=>assert.ok(source.includes('setReceipt(confirmation)')));

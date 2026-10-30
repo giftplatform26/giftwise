@@ -1,0 +1,14 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+const file=(p)=>readFileSync(new URL(p,import.meta.url),'utf8');
+const guest=file('../../backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java');
+const member=file('../../backend/src/main/java/com/giftplatform/group/GroupContributionController.java');
+const checkout=file('../components/GroupGuestCheckout.tsx');
+const page=file('../app/groups/[token]/[groupId]/page.tsx');
+test('member session must be approved and group scoped',()=>{assert.match(guest,/groups.member\(groupId,req\)/);assert.match(member,/status='APPROVED'/);assert.match(member,/group_id=\?/);assert.match(member,/versions.current\("GROUP_MEMBER",memberId\)/);assert.match(guest,/member_id/)});
+test('member report identity comes from server session',()=>{assert.match(guest,/approvedMember\(groupId,request\)/);assert.match(guest,/new Report\(input.destinationId\(\),name,null/)});
+test('guest reports require a contact and never credit balances',()=>{assert.match(guest,/memberId==null/);assert.match(guest,/valid mobile number or email address/);assert.match(guest,/REPORTED_UNVERIFIED/);assert.doesNotMatch(guest,/HOST_AVAILABLE|GIFT_RESERVED|wallet_ledger_entries/)});
+test('member session restores and has logout',()=>{assert.match(page,/member-view\/\$\{groupId\}/);assert.match(page,/member-logout\/\$\{groupId\}/);assert.match(member,/@PostMapping\("\/member-logout\/\{groupId\}"\)/)});
+test('member history and creator history remain separate and scoped',()=>{assert.match(guest,/@GetMapping\("\/member-history"\)/);assert.match(guest,/@GetMapping\("\/history"\)/);assert.match(guest,/m.display_name AS member_name/)});
+test('checkout collects guest contact and renders member history',()=>{assert.match(checkout,/Mobile or email \*/);assert.match(checkout,/member\?'\/member-report':'\/report'/);assert.match(checkout,/My reported contributions/)});

@@ -1,0 +1,63 @@
+spring.application.name=gift-platform-backend
+
+# PostgreSQL connection
+spring.datasource.url=jdbc:postgresql://localhost:5433/giftplatform
+spring.datasource.username=${DB_USERNAME:giftapp}
+spring.datasource.password=${SPRING_DATASOURCE_PASSWORD}
+
+# JDBC driver
+spring.datasource.driver-class-name=org.postgresql.Driver
+
+# JPA
+spring.jpa.hibernate.ddl-auto=validate
+spring.jpa.open-in-view=false
+
+# Flyway
+spring.flyway.enabled=true
+spring.flyway.locations=classpath:db/migration
+
+gift.otp.secret-base64=${GIFT_OTP_SECRET_BASE64}
+
+# Maximum size of an individual uploaded file
+spring.servlet.multipart.max-file-size=5MB
+
+# Maximum size of the complete multipart request
+spring.servlet.multipart.max-request-size=6MB
+# Razorpay Test Mode configuration
+# Never commit real credentials.
+gift.payment.razorpay.key-id=${RAZORPAY_KEY_ID}
+gift.payment.razorpay.key-secret=${RAZORPAY_KEY_SECRET}
+gift.payment.razorpay.webhook-secret=${RAZORPAY_WEBHOOK_SECRET}
+
+# Host payment profile management
+gift.payment.profiles.enabled=true
+gift.payment.direct-transfers.enabled=true
+gift.payment.direct-transfers.reconciliation.enabled=false
+
+
+# Cashfree Secure ID sandbox (disabled pending approved entitlement and confirmed API schema)
+gift.cashfree.secureid.sandbox.enabled=${CASHFREE_SECUREID_SANDBOX_ENABLED:false}
+gift.cashfree.secureid.client-id=${CASHFREE_SECUREID_CLIENT_ID}
+gift.cashfree.secureid.client-secret=${CASHFREE_SECUREID_CLIENT_SECRET}
+
+# Operational request timings. SecurityConfig restricts metrics to platform administrators.
+management.endpoints.web.exposure.include=health,metrics
+management.metrics.distribution.percentiles-histogram.http.server.requests=true
+management.metrics.distribution.slo.http.server.requests=100ms,300ms,1s,3s
+
+# Independent bank/UPI verification. Sandbox results do not verify production accounts.
+gift.payment.account-verification.enabled=${GIFT_ACCOUNT_VERIFICATION_ENABLED:true}
+gift.payment.account-verification.environment=${GIFT_ACCOUNT_VERIFICATION_ENVIRONMENT:SANDBOX}
+
+# AI invitation design. Keep the API key in the backend environment only.
+gift.invitation.ai.enabled=${GIFT_INVITATION_AI_ENABLED:true}
+gift.invitation.ai.api-key=${OPENAI_API_KEY}
+gift.invitation.ai.model=${OPENAI_INVITATION_MODEL:gpt-4.1-mini}
+
+# Recovery/contact OTP signing: preserve an explicit recovery key, otherwise use the existing OTP secret.
+gift.otp.hmac-key-base64=${GIFT_OTP_HMAC_KEY_BASE64:${gift.otp.secret-base64}}
+
+# Verified-email recovery delivery. Configure secrets in the backend environment.
+gift.otp.email.provider=${GIFT_OTP_EMAIL_PROVIDER:resend}
+gift.otp.email.resend.api-key=${GIFT_OTP_EMAIL_RESEND_API_KEY}
+gift.otp.email.from=${GIFT_OTP_EMAIL_FROM:support@giftwiser.in}

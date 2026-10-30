@@ -1,0 +1,9 @@
+# Merge these properties into your existing application.yml, do not replace it.
+# SNS disabled by default, including on EC2 until explicitly enabled.
+gift:
+  sms:
+    provider: ${GIFT_SMS_PROVIDER:disabled}
+    aws:
+      region: ${GIFT_SMS_AWS_REGION:ap-south-1}
+      sender-id: ${GIFT_SMS_SENDER_ID:}
+      sms-type: Transactional

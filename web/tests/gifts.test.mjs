@@ -1,0 +1,20 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {createGift, updateGift, validateGift, normalizeProductUrl, publicGifts, parseDraft} from '../lib/gifts.mjs';
+const base={name:'Coffee Maker',targetAmount:10000,description:'',productUrl:'',status:'DRAFT',contributionsEnabled:false};
+test('manual gift creation',()=>assert.equal(createGift(base,'id-1').id,'id-1'));
+test('public gift enables contribution choice',()=>assert.equal(validateGift({...base,status:'PUBLIC',contributionsEnabled:true}).contributionsEnabled,true));
+test('draft gift never enables contributions',()=>assert.equal(validateGift({...base,contributionsEnabled:true}).contributionsEnabled,false));
+test('rejects zero and negative targets',()=>{for(const n of [0,-1])assert.throws(()=>validateGift({...base,targetAmount:n}))});
+test('rejects sub-paise and excessive targets',()=>{for(const n of [1.234,10000001])assert.throws(()=>validateGift({...base,targetAmount:n}))});
+test('requires gift name',()=>assert.throws(()=>validateGift({...base,name:' '})));
+test('normalizes HTTPS product links',()=>assert.equal(normalizeProductUrl('https://www.example.org/item#reviews'),'https://www.example.org/item'));
+test('rejects HTTP and credentialed links',()=>{for(const s of ['http://store.com/a','https://user:pass@store.com/a'])assert.throws(()=>normalizeProductUrl(s))});
+test('rejects local/internal URLs',()=>{for(const s of ['https://localhost/a','https://127.0.0.1/a','https://foo.internal/a','https://[::1]/a'])assert.throws(()=>normalizeProductUrl(s))});
+test('updating gift is immutable',()=>{const g=createGift(base,'one');const result=updateGift([g],'one',{...base,name:'New'});assert.equal(g.name,'Coffee Maker');assert.equal(result[0].name,'New')});
+test('public filter hides drafts',()=>assert.equal(publicGifts([createGift(base,'a'),createGift({...base,status:'PUBLIC'},'b')]).length,1));
+test('draft round trip',()=>{const g=createGift(base,'a');assert.equal(parseDraft(JSON.stringify([g]))[0].name,g.name)});
+test('draft rejects duplicate ids',()=>{const g=createGift(base,'a');assert.throws(()=>parseDraft(JSON.stringify([g,g])))});
+test('draft rejects invalid visibility',()=>assert.throws(()=>parseDraft(JSON.stringify([{...createGift(base,'a'),status:'HIDDEN'}]))));
+
+test('retailer prices accept two decimal places',()=>assert.equal(validateGift({...base,targetAmount:19.99}).targetAmount,19.99));

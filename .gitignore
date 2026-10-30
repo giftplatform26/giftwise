@@ -1,0 +1,39 @@
+# Only application source directories belong in this repository.
+/*
+!/.gitignore
+!/README.md
+!/backend/
+!/web/
+!/website/
+
+# Generated files and local configuration
+**/node_modules/
+**/.next/
+**/out/
+**/target/
+**/build/
+**/.idea/
+**/.vscode/
+**/.DS_Store
+**/*.log
+**/*.tsbuildinfo
+**/.env*
+!**/.env.example
+**/application.properties
+**/application-local.*
+**/*.pem
+**/*.key
+**/*.p12
+**/*.jks
+**/*.zip
+**/*.backup*
+**/*-backup*/
+**/.batch*/
+**/gift_batch_*/
+**/....
+
+# Historical editor copies
+**/*.bak*
+**/*.before-*
+**/*.pre-*
+**/*~
