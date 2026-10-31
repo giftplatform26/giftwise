@@ -1,6 +1,7 @@
 'use client';
 import GroupContribution from '../../../components/GroupContribution';
 import GiftDescription from '../../../components/GiftDescription';
+import CommercialPlacements from '../../../components/CommercialPlacements';
 import dynamic from 'next/dynamic';
 import {useExperience} from '../../../components/ExperienceProvider';
 const FocusedInvitation=dynamic(()=>import('../../../components/focused/Invitation'),{loading:()=> <main className="focusPage" role="status">Opening…</main>});
@@ -15,7 +16,7 @@ import type {EventFeatures} from '../../../components/useEventFeatures';
 import GuestActions from '../../../components/GuestActions';
 import GuestCelebration from '../../../components/GuestCelebration';
 
-type Gift={contributionEnabled?:boolean;contributionDisabledReason?:string;id:string;name:string;description:string|null;targetAmount:number;imageUrl?:string|null;priority?:'HIGH'|'MEDIUM'|'LOW'};
+type Gift={contributionEnabled?:boolean;contributionDisabledReason?:string;id:string;name:string;description:string|null;targetAmount:number;productUrl?:string|null;imageUrl?:string|null;priority?:'HIGH'|'MEDIUM'|'LOW'};
 type Progress={giftId:string;contributedPaise:number;contributionCount:number};
 type Event={title:string;description:string|null;occasionType:string;eventDate:string|null;gifts:Gift[];features?:EventFeatures};
 const icon:Record<string,string>={WEDDING:'💍',BIRTHDAY:'🎂',BABY_SHOWER:'🧸',HOUSEWARMING:'🏡',ANNIVERSARY:'🥂',OTHER:'✨'};
@@ -65,7 +66,7 @@ function ClassicPublicEventPage(){
         const remaining=Math.max(0,total-given);const percent=total>0?Math.min(100,Math.round(given/total*100)):0;
         return <article className="publicEventGift loveGiftCard" key={g.id}>
           <div className="publicEventGiftSymbol" aria-hidden="true">🎁</div><span className="loveGiftPercent">{progressState==='ready'?`${percent}% Gifted`:progressValue('')}</span>
-          <h3>{g.name}</h3>{g.imageUrl&&<img src={g.imageUrl} alt={g.name} loading="lazy" style={{width:140,height:140,objectFit:'contain'}}/>}<GiftDescription name={g.name} description={g.description}/>
+          <h3>{g.name}</h3>{g.productUrl&&<a href={g.productUrl} target="_blank" rel="sponsored noopener noreferrer">View retailer product · may earn a commission</a>}{g.imageUrl&&<img src={g.imageUrl} alt={g.name} loading="lazy" style={{width:140,height:140,objectFit:'contain'}}/>}<GiftDescription name={g.name} description={g.description}/>
           <div className="loveGiftMetrics"><div><small>Gift Value</small><b>{rupees(total/100)}</b></div><div><small>Contributions Received</small><b>{progressValue(rupees(given/100))}</b></div><div><small>Still to Be Gifted</small><b>{progressValue(rupees(remaining/100))}</b></div><div><small>Contributions Made</small><b>{progressValue(progress[g.id]?.contributionCount??0)}</b></div></div>
           {progressState==='ready'&&<div className="loveGiftTrack" role="progressbar" aria-label={`${g.name} gifted`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={percent}><div style={{width:`${percent}%`}}/></div>}
           {progressState==='ready'&&remaining===0?<div className="loveGiftComplete">❤️ This Gift Is Complete with Love!<small>Thank you to everyone who made this gift special.</small></div>:
@@ -78,7 +79,7 @@ function ClassicPublicEventPage(){
       {selectedGift&&<div className="loveModalGift"><h2>{selectedGift.name}</h2><p>{selectedGift.description}</p><div className="loveModalMetrics"><span>Gift Value: {rupees(selectedGift.targetAmount)}</span><span>Contributions Received: {progressValue(rupees((progress[selectedGift.id]?.contributedPaise??0)/100))}</span><span>Still to Be Gifted: {progressValue(rupees(Math.max(0,selectedGift.targetAmount-(progress[selectedGift.id]?.contributedPaise??0)/100)))}</span><span>Contributions Made: {progressValue(progress[selectedGift.id]?.contributionCount??0)}</span></div></div>}
       <GuestContributionCheckout key={selectedGift?.id??'wallet'} token={token} gifts={selectedGift?[selectedGift]:[]} selectedGiftId={selectedGift?.id??''} onClose={()=>{setSelectedGift(null);setWalletOpen(false);void refreshProgress();}}/>
     </div></div>}
-    <GuestCelebration token={token} title={event.title} features={event.features}/>
+    <CommercialPlacements occasion={event.occasionType}/><CommercialPlacements stream="VENDOR_LISTING" occasion={event.occasionType}/><GuestCelebration token={token} title={event.title} features={event.features}/>
     <footer className="publicEventFooter">Made for meaningful celebrations ✦ Gift Platform</footer>
   </div></main>;
 }

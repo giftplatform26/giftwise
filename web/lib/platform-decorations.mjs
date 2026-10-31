@@ -21,7 +21,7 @@ export function validPlatformDecorationElement(element) {
 
   if(!UUID.test(id))return false;
 
-  return element.src===publicAssetImageUrl(id);
+  return element.src===publicAssetImageUrl(id)||element.src===`/backend/api/v1/commerce/templates/${id}/image`;
 }
 
 export function eligiblePlatformDecorations(assets,occasion) {

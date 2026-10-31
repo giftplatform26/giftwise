@@ -3,9 +3,10 @@
 import {useCallback,useEffect,useState} from 'react';
 import {useExperience} from '../../../components/ExperienceProvider';
 import {adminGallery,assetImageUrl,categories,occasions} from '../../../lib/admin-gallery.mjs';
+import {commercialApi} from '../../../components/CommercePurchase';
 import {optimizeGalleryImage} from '../../../lib/gallery-image-optimizer.mjs';
 
-type Asset={id:string;category:string;occasion:string;title:string;published:boolean;width:number;height:number};
+type Asset={id:string;category:string;occasion:string;title:string;published:boolean;width:number;height:number;tier:string};
 
 export default function AdminInvitationAssetsPage(){
  const {mode}=useExperience();const focused=mode==='FOCUSED';
@@ -108,6 +109,7 @@ export default function AdminInvitationAssetsPage(){
        <strong style={{display:'block',overflowWrap:'anywhere'}}>{a.title}</strong>
        <div style={{fontSize:12,color:'#656d7b',margin:'6px 0'}}>{a.category} · {a.occasion} · {a.width} × {a.height}</div>
        <div style={{fontSize:13,marginBottom:12}}>{a.published?'● Published':'○ Draft / unpublished'}</div>
+       <label>Access tier<select disabled={busy} value={a.tier||'FREE'} onChange={async e=>{setBusy(true);setError('');try{const saved=await commercialApi<Asset>(`/api/admin/invitation-assets/${a.id}/tier`,{tier:e.target.value},'PUT');setAssets(rows=>rows.map(x=>x.id===a.id?saved:x));setNotice('Asset access tier saved and audited.')}catch(e){setError(String(e))}finally{setBusy(false)}}}><option value="FREE">Free</option><option value="PREMIUM">Premium</option></select></label>
        <button disabled={busy} onClick={()=>void toggle(a)} style={{...primary,width:'100%',background:a.published?'#fff':'#5d4bb0',color:a.published?'#45368c':'white',border:'1px solid #5d4bb0'}}>{a.published?'Unpublish':'Publish'}</button>
       </div>
      </article>)}

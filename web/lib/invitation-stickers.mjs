@@ -19,7 +19,7 @@ export const STICKERS = Object.freeze([
 ].map(s=>Object.freeze({...s,src:`/invitation-stickers/${s.id}.svg`})));
 export function stickerById(id){return STICKERS.find(s=>s.id===id)}
 export function validStickerElement(el){return el?.type==='sticker' && typeof el.stickerId==='string' && (stickerById(el.stickerId)?.src===el.src || validPlatformDecorationElement(el))}
-export function addSticker(design,id){
+export function addSticker(design,id,authenticated=false){
   const sticker=stickerById(id) ||
     (typeof id==='string' && id.startsWith('platform:')
       ? (() => {
@@ -28,7 +28,7 @@ export function addSticker(design,id){
             if(platformDecorationId(assetId)!==id)return null;
             return {
               id,
-              src:`/backend/api/public/invitation-assets/${assetId}/image`
+              src:authenticated?`/backend/api/v1/commerce/templates/${assetId}/image`:`/backend/api/public/invitation-assets/${assetId}/image`
             };
           } catch {
             return null;

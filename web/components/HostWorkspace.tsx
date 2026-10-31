@@ -23,7 +23,7 @@ export default function HostWorkspace({children}:{children:ReactNode}){
  function showTooltip(element:HTMLElement,label:string){if(!collapsed)return;const rect=element.getBoundingClientRect();setTooltip({label,x:rect.right+10,y:rect.top+rect.height/2})}
  function navigate(){setTooltip(null);if(window.matchMedia('(max-width:700px)').matches)setCollapsed(true)}
  async function signOut(){if(busy)return;setBusy(true);setError('');try{await hostApi.logout(fetch);router.replace('/login');router.refresh()}catch(e){setError(e instanceof Error?e.message:'Sign out failed');setBusy(false)}}
- const account:Item[]=[{href:'/dashboard',label:'Overview',Icon:LayoutDashboard},{href:'/events',label:'Celebrations',Icon:CalendarDays},{href:'/events/new',label:'Create celebration',Icon:Plus},{href:'/host/payment-settings',label:'Receiving accounts',Icon:Landmark},{href:'/host/account',label:'Account',Icon:UserRound}];
+ const account:Item[]=[{href:'/dashboard',label:'Overview',Icon:LayoutDashboard},{href:'/events',label:'Celebrations',Icon:CalendarDays},{href:'/events/new',label:'Create celebration',Icon:Plus},{href:'/host/payment-settings',label:'Receiving accounts',Icon:Landmark},{href:'/host/monetization',label:'Plans & partnerships',Icon:Sparkles},{href:'/host/account',label:'Account',Icon:UserRound}];
  const base=eventId?`/events/${eventId}`:'';
  const eventLinks:Item[]=eventId?[
   {href:base,label:'Celebration overview',Icon:CheckSquare},
