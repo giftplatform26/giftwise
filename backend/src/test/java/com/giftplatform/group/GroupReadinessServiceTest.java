@@ -9,7 +9,7 @@ import static org.mockito.ArgumentMatchers.*;
 
 class GroupReadinessServiceTest {
  private final JdbcTemplate db=mock(JdbcTemplate.class);
- private final GroupReadinessService service=new GroupReadinessService(db);
+ private final GroupReadinessService service=new GroupReadinessService(db,new com.giftplatform.security.verification.VerificationSettings(db,false,true));
  private final UUID group=UUID.randomUUID();
  @Test void invitationRequiresEmailAndAccountIndependently(){
   when(db.queryForObject(contains("a.email_verified_at"),eq(Boolean.class),eq(group))).thenReturn(false);

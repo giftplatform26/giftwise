@@ -26,12 +26,11 @@ public class EmailDeliveryConfiguration {
         return transport(provider,apiKey,from,"Your Gift Platform username");
     }
     private MessageDelivery transport(String provider,String apiKey,String from,String subject) {
-        if ("disabled".equals(provider)) return new MessageDelivery() {
+        if ("disabled".equals(provider)||("resend".equals(provider)&&(apiKey.isBlank()||from.isBlank()))) return new MessageDelivery() {
             @Override public boolean isAvailable() { return false; }
             @Override public void send(String to,String body) { throw new IllegalStateException("Email OTP delivery is not configured"); }
         };
         if (!"resend".equals(provider)) throw new IllegalStateException("Unsupported email OTP provider");
-        if (apiKey.isBlank() || from.isBlank()) throw new IllegalStateException("Resend credentials and sender are required");
         HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build();
         return (to, body) -> {
             if (to == null || !to.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) throw new IllegalArgumentException("Invalid recipient");

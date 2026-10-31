@@ -20,7 +20,7 @@ class GroupCollectionDatabaseIntegrationTest {
   db.update("INSERT INTO events(id,title,occasion_type,owner_id,host_display_name) VALUES(?,'Party','BIRTHDAY',?,'Host')",event,host);
   db.update("INSERT INTO gift_group_accounts(id,event_id,username,password_hash,email_verified_at) VALUES(?,?,'creator','hash',now())",admin,event);
   db.update("INSERT INTO gift_groups(id,event_id,admin_id,name,creator_name,creator_mobile) VALUES(?,?,?,'Friends','Creator','+919876543210')",group,event,admin);
-  var ready=new GroupReadinessService(db);
+  var ready=new GroupReadinessService(db,new com.giftplatform.security.verification.VerificationSettings(db,false,true));
   assertFalse(ready.invitation(group).enabled());
   db.update("INSERT INTO gift_group_payment_destinations(id,group_id,kind,label,upi_ciphertext,upi_fingerprint) VALUES(?,?,'UPI','Account','cipher','fingerprint')",UUID.randomUUID(),group);
   assertTrue(ready.invitation(group).enabled());
@@ -54,6 +54,7 @@ class GroupCollectionDatabaseIntegrationTest {
   var actor=org.mockito.Mockito.mock(com.giftplatform.security.ActorContext.class);
   org.mockito.Mockito.when(actor.requireAuthenticatedUserId()).thenReturn(host);
   var collections=new GroupGiftCollectionController(db,groups,actor);
+  org.springframework.test.util.ReflectionTestUtils.setField(collections,"verification",new com.giftplatform.security.verification.VerificationSettings(db,false,true));
   collections.reserve(token,group,new GroupGiftCollectionController.Reservation(gift),request);
   assertEquals(gift,db.queryForObject("SELECT reserved_gift_id FROM gift_groups WHERE id=?",UUID.class,group));
   assertTrue(collections.report(event).isEmpty());

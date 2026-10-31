@@ -57,13 +57,15 @@ class EventAccountScopeIntegrationTest {
     @Test void unverifiedHostCannotPublishEvenWithPreferredAccount() {
         UUID h=host(); Event e=event(h); prefer(bank(h,e.getId()));
         jdbc.update("UPDATE users SET email_verified_at=NULL WHERE id=?",h);
-        var readiness=new EventPublishReadiness(jdbc);
+        var readiness=new EventPublishReadiness(jdbc,new com.giftplatform.security.verification.VerificationSettings(jdbc,false,true));
         assertFalse(readiness.canPublish(e));
         assertEquals(java.util.List.of("Verify your email in Account"),readiness.reasons(e));
+        assertTrue(new EventPublishReadiness(jdbc,new com.giftplatform.security.verification.VerificationSettings(jdbc,false,false)).canPublish(e));
+        assertNull(jdbc.queryForObject("SELECT email_verified_at FROM users WHERE id=?",java.sql.Timestamp.class,h));
     }
     @Test void eventAccountOnlyUnlocksItsOwnEventAndMustBeActiveAndPreferred() {
         UUID h=host(); Event first=event(h),second=event(h);
-        var readiness=new EventPublishReadiness(jdbc);
+        var readiness=new EventPublishReadiness(jdbc,new com.giftplatform.security.verification.VerificationSettings(jdbc,false,true));
         assertFalse(readiness.canPublish(first));
         UUID id=bank(h,first.getId());
         assertFalse(readiness.canPublish(first));
@@ -76,7 +78,7 @@ class EventAccountScopeIntegrationTest {
     @Test void hostPreferenceNeverUnlocksAnEventWithoutItsOwnEnabledPreferredLink() {
         UUID h=host(); Event first=event(h),second=event(h),foreign=event(host());
         UUID id=bank(h,null); prefer(id);
-        var readiness=new EventPublishReadiness(jdbc);
+        var readiness=new EventPublishReadiness(jdbc,new com.giftplatform.security.verification.VerificationSettings(jdbc,false,true));
         assertFalse(readiness.canPublish(first)); assertFalse(readiness.canPublish(second));
         var links=links(h);links.link(first.getId(),"BANK",id);
         assertFalse(readiness.canPublish(first)); // Host preference is not inherited by a link.
@@ -107,7 +109,7 @@ class EventAccountScopeIntegrationTest {
     @Test void upiRequiresExplicitPreferenceAndQrAndHostDisableClearsEventPreference() {
         UUID h=host();Event e=event(h);UUID id=UUID.randomUUID();
         jdbc.update("INSERT INTO host_upi_accounts(id,host_id,upi_id_encrypted,upi_id_fingerprint,upi_id_masked,host_confirmed_at,preferred) VALUES(?,?,'cipher',?,'j***@bank',now(),true)",id,h,id.toString());
-        var readiness=new EventPublishReadiness(jdbc);assertFalse(readiness.canPublish(e));
+        var readiness=new EventPublishReadiness(jdbc,new com.giftplatform.security.verification.VerificationSettings(jdbc,false,true));assertFalse(readiness.canPublish(e));
         var actor=org.mockito.Mockito.mock(com.giftplatform.security.ActorContext.class);org.mockito.Mockito.when(actor.requireAuthenticatedUserId()).thenReturn(h);
         var qr=org.mockito.Mockito.mock(com.giftplatform.hostpayment.qr.UpiQrImageStorage.class);
         var links=new com.giftplatform.hostpayment.service.EventAccountLinkService(jdbc,actor,qr,org.mockito.Mockito.mock(com.giftplatform.audit.service.AuditService.class));
@@ -123,7 +125,7 @@ class EventAccountScopeIntegrationTest {
     @Test void removingEventOnlyAccountArchivesItWithoutAffectingSharedHostAccounts() {
         UUID h=host();Event e=event(h);UUID shared=bank(h,null),local=bank(h,e.getId());prefer(local);
         links(h).update(e.getId(),"BANK",local,"unlink");
-        assertFalse(new EventPublishReadiness(jdbc).canPublish(e));assertTrue(links(h).banks(e.getId()).isEmpty());
+        assertFalse(new EventPublishReadiness(jdbc,new com.giftplatform.security.verification.VerificationSettings(jdbc,false,true)).canPublish(e));assertTrue(links(h).banks(e.getId()).isEmpty());
         assertTrue(jdbc.queryForObject("SELECT archived_at IS NOT NULL FROM host_bank_accounts WHERE id=?",Boolean.class,local));
         assertTrue(jdbc.queryForObject("SELECT archived_at IS NULL AND enabled FROM host_bank_accounts WHERE id=?",Boolean.class,shared));
     }

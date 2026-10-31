@@ -21,7 +21,7 @@ class GroupPolicyFlowTest {
  final EffectiveRecoveryPolicyService policies=mock(EffectiveRecoveryPolicyService.class);
  final CredentialSessionVersionStore versions=mock(CredentialSessionVersionStore.class);
  final UUID token=UUID.randomUUID(),eventId=UUID.randomUUID(),groupId=UUID.randomUUID();
- final GroupContributionController controller=new GroupContributionController(db,events,new BCryptPasswordEncoder(4),versions,policies);
+ final GroupContributionController controller=new GroupContributionController(db,events,new BCryptPasswordEncoder(4),versions,policies,new GroupReadinessService(db,new com.giftplatform.security.verification.VerificationSettings(db,false,true)));
  @BeforeEach void setup(){
   var signup=mock(SignupEmailVerificationService.class);when(signup.consume(anyString(),anyString(),any(),anyString())).thenReturn(true);org.springframework.test.util.ReflectionTestUtils.setField(controller,"signupEmails",signup);
   Event event=mock(Event.class);when(event.getId()).thenReturn(eventId);when(event.getStatus()).thenReturn(EventStatus.PUBLISHED);
@@ -49,6 +49,18 @@ class GroupPolicyFlowTest {
   var error=assertThrows(ResponseStatusException.class,()->controller.join(token,groupId,new GroupContributionController.JoinRequest("Unverified Member","+919876543210","Password123!","Password123!",null,null,"member@example.test",null)));
   assertEquals(400,error.getStatusCode().value());
   verify(db,never()).update(contains("INSERT INTO gift_group_members"),any(),any(),any(),any(),any(),any(),any(),any());
+ }
+ @Test void memberContributionRequiresEnabledMobileVerification(){
+  var mobilePolicy=new GroupReadinessService(db,new com.giftplatform.security.verification.VerificationSettings(db,true,false));
+  var protectedGroups=new GroupContributionController(db,events,new BCryptPasswordEncoder(4),versions,policies,mobilePolicy);
+  UUID memberId=UUID.randomUUID();
+  var failure=assertThrows(ResponseStatusException.class,()->protectedGroups.requireMemberContact(groupId,memberId));assertEquals(409,failure.getStatusCode().value());
+  when(db.queryForObject(contains("SELECT mobile_verified_at"),eq(Boolean.class),eq(memberId),eq(groupId))).thenReturn(true);
+  assertDoesNotThrow(()->protectedGroups.requireMemberContact(groupId,memberId));
+ }
+ @Test void memberContributionDoesNotRequireVerificationWhenBothChannelsBypassed(){
+  var bypassed=new GroupContributionController(db,events,new BCryptPasswordEncoder(4),versions,policies);
+  assertDoesNotThrow(()->bypassed.requireMemberContact(groupId,UUID.randomUUID()));
  }
  @Test void disabledPinRejectsCreatorLoginBeforeHashLookup(){
   var error=assertThrows(ResponseStatusException.class,()->controller.login(token,new GroupContributionController.Credentials("creator",null,"123456",null),new MockHttpServletRequest()));

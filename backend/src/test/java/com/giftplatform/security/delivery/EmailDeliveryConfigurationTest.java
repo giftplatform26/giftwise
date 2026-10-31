@@ -16,8 +16,8 @@ class EmailDeliveryConfigurationTest {
     @Test void configuredProviderReportsLocalReadinessWithoutSendingEmail(){
         assertTrue(configuration.usernameReminderDelivery("resend","test-key","sender@example.test").isAvailable());
     }
-    @Test void enablingProviderWithoutCredentialsFailsConfiguration(){
-        assertThrows(IllegalStateException.class,()->configuration.usernameReminderDelivery("resend","",""));
+    @Test void missingCredentialsDoNotBlockStartupInBypassMode(){
+        assertFalse(configuration.usernameReminderDelivery("resend","","").isAvailable());
     }
     @Test void domainErrorIsActionableWithoutExposingProviderBody(){
         var failure=EmailDeliveryException.rejected(403,"domain not verified; private@example.test; secret-provider-value");

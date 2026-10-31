@@ -17,6 +17,7 @@ import java.util.*;
 /** Pre-account email ownership proof; never creates a login session. */
 @Service
 public class SignupEmailVerificationService {
+    @Autowired(required=false) private com.giftplatform.security.verification.VerificationSettings verification;
     private static final UUID HOST_SCOPE=new UUID(0,0);
     private final JdbcTemplate db;private final TransactionTemplate tx;private final MessageDelivery delivery;
     private final EffectiveModulePermissionService permissions;private final byte[] key;
@@ -76,6 +77,7 @@ public class SignupEmailVerificationService {
     /** Must join account creation's transaction so a failed signup does not spend the proof. */
     @Transactional(propagation=Propagation.MANDATORY)
     public boolean consume(String token,String kind,UUID scope,String email){
+        if(verification!=null&&!verification.emailEnabled())return false;
         if(token==null||token.isBlank())return false;
         if(!token.matches("[A-Za-z0-9_-]{43}"))throw bad();
         int changed=db.update("UPDATE signup_email_verifications SET consumed_at=now() WHERE proof_hash=? AND account_kind=? AND scope_id=? AND email=? AND verified_at IS NOT NULL AND consumed_at IS NULL AND expires_at>now()",digest(token),kind,scope==null?HOST_SCOPE:scope,address(email));

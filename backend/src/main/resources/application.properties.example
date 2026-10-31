@@ -16,7 +16,7 @@ spring.jpa.open-in-view=false
 spring.flyway.enabled=true
 spring.flyway.locations=classpath:db/migration
 
-gift.otp.secret-base64=${GIFT_OTP_SECRET_BASE64}
+gift.otp.secret-base64=${GIFT_OTP_SECRET_BASE64:}
 
 # Maximum size of an individual uploaded file
 spring.servlet.multipart.max-file-size=5MB
@@ -58,6 +58,34 @@ gift.invitation.ai.model=${OPENAI_INVITATION_MODEL:gpt-4.1-mini}
 gift.otp.hmac-key-base64=${GIFT_OTP_HMAC_KEY_BASE64:${gift.otp.secret-base64}}
 
 # Verified-email recovery delivery. Configure secrets in the backend environment.
-gift.otp.email.provider=${GIFT_OTP_EMAIL_PROVIDER:resend}
-gift.otp.email.resend.api-key=${GIFT_OTP_EMAIL_RESEND_API_KEY}
+gift.otp.email.provider=${GIFT_OTP_EMAIL_PROVIDER:disabled}
+gift.otp.email.resend.api-key=${GIFT_OTP_EMAIL_RESEND_API_KEY:}
 gift.otp.email.from=${GIFT_OTP_EMAIL_FROM:support@giftwiser.in}
+
+# Contact verification defaults. Both channels are hidden/bypassed until enabled.
+# Platform Admin > Authentication & policies persists overrides in the database;
+# these defaults apply only until an administrator saves an override.
+gift.verification.mobile.enabled=${GIFT_MOBILE_OTP_ENABLED:false}
+gift.verification.email.enabled=${GIFT_EMAIL_VERIFICATION_ENABLED:false}
+
+# Future MSG91 setup (server secrets only):
+# 1. Set GIFT_OTP_SMS_PROVIDER=msg91.
+# 2. Set GIFT_MSG91_AUTH_KEY and GIFT_MSG91_TEMPLATE_ID (OTP > Templates).
+# 3. Approve/map sender header, PE/Entity ID and DLT content template in MSG91
+#    for Indian delivery. Use ##OTP## in the approved OTP template; these DLT
+#    details are mapped in MSG91, not passed as separate application properties.
+# 4. Set GIFT_OTP_SECRET_BASE64 to a stable Base64-encoded random key >=32 bytes.
+#    GIFT_OTP_HMAC_KEY_BASE64 may override it for contact-verification signing.
+# 5. Test delivery, then enable mobile OTP in Platform Admin. Six digits, 1-10 min.
+#    Requests are limited to 3/account/hour, 5/destination/hour, 60s resend cooldown.
+gift.otp.sms.provider=${GIFT_OTP_SMS_PROVIDER:disabled}
+gift.otp.sms.msg91.auth-key=${GIFT_MSG91_AUTH_KEY:}
+gift.otp.sms.msg91.template-id=${GIFT_MSG91_TEMPLATE_ID:}
+gift.otp.sms.expiry-minutes=${GIFT_OTP_SMS_EXPIRY_MINUTES:5}
+
+# Future email setup: set GIFT_OTP_EMAIL_PROVIDER=resend,
+# GIFT_OTP_EMAIL_RESEND_API_KEY and GIFT_OTP_EMAIL_FROM (verified sender/domain),
+# plus the signing key above. Then enable email verification in Platform Admin.
+# Disable/bypass either channel there during provider outages; bypass never sets
+# email_verified_at / phone_verified_at / mobile_verified_at. Account collection,
+# passwords, PINs, ownership checks and receiving-account requirements still apply.

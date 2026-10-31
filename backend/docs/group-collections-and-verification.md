@@ -1,5 +1,7 @@
 # Group collections and email verification
 
+Global switches added in V81 override the contact-verification requirements below. Both channels default to disabled; see `platform-verification-controls.md`. Receiving-account requirements remain in force.
+
 Migration: `V80__group_surprises_and_member_verification.sql` (run with normal Flyway startup).
 
 - Group member email and its verification are optional by default. Platform admins can require verification for a particular host under **Hosts & privileges**; hosts can also require it in **Account**. Verification is required when either switch is enabled. Disabling a host switch cannot remove an administrator requirement. New registrations enforce this on the server.

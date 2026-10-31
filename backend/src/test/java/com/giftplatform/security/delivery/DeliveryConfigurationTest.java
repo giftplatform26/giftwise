@@ -10,7 +10,7 @@ class DeliveryConfigurationTest {
         assertThrows(IllegalStateException.class, () -> sender.send("person@example.com", "code"));
     }
     @Test void resendRequiresCredentials() {
-        assertThrows(IllegalStateException.class, () -> new EmailDeliveryConfiguration().emailDelivery("resend", "", ""));
+        assertFalse(new EmailDeliveryConfiguration().emailDelivery("resend", "", "").isAvailable());
     }
     @Test void smsSimulatorIsNotAvailableOutsideLocal() {
         assertThrows(IllegalStateException.class, () -> new SmsDeliveryConfiguration().smsDelivery("simulator", true, new MockEnvironment()));

@@ -18,8 +18,9 @@ class GroupGiftCollectionControllerTest {
  private final UUID token=UUID.randomUUID(),group=UUID.randomUUID(),creator=UUID.randomUUID(),gift=UUID.randomUUID(),event=UUID.randomUUID();
  private final MockHttpServletRequest request=new MockHttpServletRequest();
  @Test void unverifiedCreatorCannotReserve(){
+  var verification=mock(com.giftplatform.security.verification.VerificationSettings.class);when(verification.emailEnabled()).thenReturn(true);org.springframework.test.util.ReflectionTestUtils.setField(controller,"verification",verification);
   when(groups.requireGroupCreator(token,group,request)).thenReturn(creator);
-  assertThatThrownBy(()->controller.reserve(token,group,new GroupGiftCollectionController.Reservation(gift),request)).isInstanceOf(ResponseStatusException.class).hasMessageContaining("Verify your email or mobile");
+  assertThatThrownBy(()->controller.reserve(token,group,new GroupGiftCollectionController.Reservation(gift),request)).isInstanceOf(ResponseStatusException.class).hasMessageContaining("Verify your email");
   verify(db,never()).update(anyString(),any(Object[].class));
  }
  @Test void verifiedCreatorCanReserveWithinOwnEvent(){

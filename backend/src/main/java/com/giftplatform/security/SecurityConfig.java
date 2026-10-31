@@ -112,15 +112,15 @@ public class SecurityConfig {
                                 "/api/auth/login"
                         ).permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/recovery/request", "/api/auth/recovery/complete", "/api/auth/recovery/username/request", "/api/auth/signup-email/start", "/api/auth/signup-email/verify").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/auth/recovery/enroll-email", "/api/auth/recovery/verify-email").authenticated()
-                        .requestMatchers(HttpMethod.GET,"/api/auth/recovery/email-status").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/contact-mobile/start", "/api/auth/contact-mobile/complete", "/api/auth/recovery/enroll-email", "/api/auth/recovery/verify-email").authenticated()
+                        .requestMatchers(HttpMethod.GET,"/api/auth/recovery/email-status", "/api/auth/contact-mobile/status").authenticated()
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/api/auth/csrf"
                         ).permitAll()
                         .requestMatchers(
                                 HttpMethod.GET,
-                                "/api/public/events/*", "/api/public/events/*/features", "/api/public/events/*/gifts/*/photo", "/api/public/experience"
+                                "/api/public/verification-settings", "/api/public/events/*", "/api/public/events/*/features", "/api/public/events/*/gifts/*/photo", "/api/public/experience"
                         ).permitAll()
                          .requestMatchers(HttpMethod.GET,
                                  "/api/public/celebrations/*/wishes").permitAll()
@@ -227,7 +227,7 @@ public class SecurityConfig {
                                 "/api/public/groups/*/gift-reservation/*", "/api/public/groups/*/publish/*").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/public/groups/*/account-policy").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/public/groups/*/contact-email/start", "/api/public/groups/*/contact-email/complete").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/api/public/groups/*/contact-email/status").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/public/groups/*/contact-mobile/status", "/api/public/groups/*/contact-email/status").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/public/groups/*/contact-mobile/start", "/api/public/groups/*/contact-mobile/complete").permitAll()
                         .anyRequest().denyAll()
                 )

@@ -7,11 +7,15 @@ import org.springframework.stereotype.Service;
 @Service
 public class EventPublishReadiness {
     private final JdbcTemplate jdbc;
-    public EventPublishReadiness(JdbcTemplate jdbc) { this.jdbc = jdbc; }
+    private final com.giftplatform.security.verification.VerificationSettings settings;
+    public EventPublishReadiness(JdbcTemplate jdbc) { this(jdbc,new com.giftplatform.security.verification.VerificationSettings(jdbc,false,false)); }
+    @org.springframework.beans.factory.annotation.Autowired
+    public EventPublishReadiness(JdbcTemplate jdbc,com.giftplatform.security.verification.VerificationSettings settings) { this.jdbc=jdbc;this.settings=settings; }
 
     public java.util.List<String> reasons(Event event) {
         var reasons=new java.util.ArrayList<String>();
-        if(!Boolean.TRUE.equals(jdbc.queryForObject("SELECT email_verified_at IS NOT NULL FROM users WHERE id=?",Boolean.class,event.getOwnerId()))) reasons.add("Verify your email in Account");
+        if(settings.emailEnabled()&&!Boolean.TRUE.equals(jdbc.queryForObject("SELECT email_verified_at IS NOT NULL FROM users WHERE id=?",Boolean.class,event.getOwnerId()))) reasons.add("Verify your email in Account");
+        if(settings.mobileEnabled()&&!Boolean.TRUE.equals(jdbc.queryForObject("SELECT phone_verified_at IS NOT NULL FROM users WHERE id=?",Boolean.class,event.getOwnerId()))) reasons.add("Verify your mobile in Account");
         if(!hasAccount(event)) reasons.add("Link an enabled receiving account and select it as preferred");
         return java.util.List.copyOf(reasons);
     }

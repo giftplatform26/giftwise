@@ -17,13 +17,14 @@ import java.time.Instant;
 import java.util.*;
 
 /**
- * Group mobile OTP enrollment. SIMULATED delivery is for local testing only.
- * This controller refuses to assert mobile ownership unless a real provider
- * is implemented and explicitly enabled in a future release.
+ * Page-bound group mobile verification. Production uses the shared MSG91 service.
+ * The legacy development simulator never asserts ownership.
  */
 @RestController
 @RequestMapping("/api/public/groups/{token}/contact-mobile")
 public class GroupMobileEnrollmentController {
+    @org.springframework.beans.factory.annotation.Autowired(required=false)
+    private com.giftplatform.security.verification.MobileVerificationService mobileService;
     private final JdbcTemplate db;
     private final RecoveryChallengeStore challenges;
     private final CredentialSessionVersionStore versions;
@@ -86,6 +87,11 @@ public class GroupMobileEnrollmentController {
         if(approved==null||approved!=1)throw denied();
         return new Account("GROUP_MEMBER",id);
     }
+    @GetMapping("/status")
+    public com.giftplatform.security.verification.MobileVerificationService.Status status(@PathVariable UUID token,@RequestParam(required=false) UUID groupId,HttpServletRequest request){
+        if(mobileService==null)throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE);
+        Account a=account(token,groupId,request);return mobileService.status(a.kind,a.id);
+    }
     private String fingerprint(String value) {
         try{return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(value.getBytes(StandardCharsets.UTF_8)));}
         catch(Exception ex){throw new IllegalStateException(ex);}
@@ -96,6 +102,12 @@ public class GroupMobileEnrollmentController {
     @PostMapping("/start")
     @Transactional
     public Started start(@PathVariable UUID token,@RequestBody Start body,HttpServletRequest req) {
+        if(mobileService!=null){
+            if(body==null)throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            Account a=account(token,body.groupId(),req);
+            var result=mobileService.start(a.kind,a.id,body.mobile());
+            return new Started(result.challengeId(),result.message());
+        }
         ready();
         if(body==null||body.mobile()==null||!body.mobile().matches("\\+[1-9][0-9]{7,14}"))
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Use international mobile format, e.g. +919876543210");
@@ -113,6 +125,12 @@ public class GroupMobileEnrollmentController {
     @PostMapping("/complete")
     @Transactional
     public Result complete(@PathVariable UUID token,@RequestBody Complete body,HttpServletRequest req) {
+        if(mobileService!=null){
+            if(body==null)throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            Account a=account(token,body.groupId(),req);
+            mobileService.complete(a.kind,a.id,body.challengeId(),body.code());
+            return new Result("Mobile number verified");
+        }
         ready();
         if(body==null||body.challengeId()==null||body.code()==null||!body.code().matches("[0-9]{6}"))
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid code");

@@ -24,6 +24,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(GroupContributionController.class)
 @Import(SecurityConfig.class)
 class GroupLogoutRoutingTest {
+ @MockitoBean com.giftplatform.security.verification.VerificationSettings verificationSettings;
+ @MockitoBean GroupReadinessService readiness;
  @MockitoBean com.giftplatform.admin.EffectiveModulePermissionService modulePermissions;
  @Autowired MockMvc mvc;
  @MockitoBean SignupEmailVerificationService signupEmails;
@@ -34,6 +36,7 @@ class GroupLogoutRoutingTest {
  @MockitoBean EffectiveRecoveryPolicyService policies;
  UUID token=UUID.randomUUID(),eventId=UUID.randomUUID(),groupId=UUID.randomUUID();
  @BeforeEach void setup(){
+  when(readiness.invitation(org.mockito.ArgumentMatchers.any())).thenReturn(new GroupReadinessService.Readiness(true,java.util.List.of()));
   Event event=mock(Event.class);when(event.getId()).thenReturn(eventId);when(event.getStatus()).thenReturn(EventStatus.PUBLISHED);
   when(events.findByPublicToken(token)).thenReturn(Optional.of(event));
   when(db.queryForObject("SELECT count(*) FROM gift_groups WHERE id=? AND event_id=?",Integer.class,groupId,eventId)).thenReturn(1);

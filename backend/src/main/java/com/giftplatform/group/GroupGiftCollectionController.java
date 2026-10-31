@@ -11,6 +11,7 @@ import java.util.*;
 
 @RestController
 public class GroupGiftCollectionController {
+ @org.springframework.beans.factory.annotation.Autowired(required=false) private com.giftplatform.security.verification.VerificationSettings verification;
  private final JdbcTemplate db; private final GroupContributionController groups; private final ActorContext actor;
  public GroupGiftCollectionController(JdbcTemplate db,GroupContributionController groups,ActorContext actor){this.db=db;this.groups=groups;this.actor=actor;}
  public record Reservation(UUID giftId){}
@@ -18,7 +19,11 @@ public class GroupGiftCollectionController {
  public Map<String,String> reserve(@PathVariable UUID token,@PathVariable UUID groupId,@RequestBody Reservation input,HttpServletRequest req){
   UUID creator=groups.requireGroupCreator(token,groupId,req);
   if(input==null||input.giftId()==null)throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Select a gift");
-  if(!Boolean.TRUE.equals(db.queryForObject("SELECT email_verified_at IS NOT NULL OR mobile_verified_at IS NOT NULL FROM gift_group_accounts WHERE id=?",Boolean.class,creator)))throw new ResponseStatusException(HttpStatus.CONFLICT,"Verify your email or mobile before reserving a gift");
+  if(verification!=null){
+   boolean mail=verification.emailEnabled(),phone=verification.mobileEnabled();
+   if((mail||phone)&&!Boolean.TRUE.equals(db.queryForObject("SELECT (? AND email_verified_at IS NOT NULL) OR (? AND mobile_verified_at IS NOT NULL) FROM gift_group_accounts WHERE id=?",Boolean.class,mail,phone,creator)))
+    throw new ResponseStatusException(HttpStatus.CONFLICT,"Verify your "+(mail&&phone?"email or mobile":mail?"email":"mobile")+" in Account before reserving a gift");
+  }
   UUID eventId=db.queryForObject("SELECT event_id FROM gift_groups WHERE id=? FOR UPDATE",UUID.class,groupId);
   var gifts=db.queryForList("SELECT id FROM gifts WHERE id=? AND event_id=? AND status='ACTIVE' AND visibility='PUBLIC' FOR UPDATE",input.giftId(),eventId);
   if(gifts.isEmpty())throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Gift is unavailable");

@@ -26,6 +26,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest(GroupContributionController.class)
 @org.springframework.context.annotation.Import(com.giftplatform.security.SecurityConfig.class)
 class GroupContributionValidCsrfHttpTest {
+ @MockitoBean com.giftplatform.security.verification.VerificationSettings verificationSettings;
+ @MockitoBean GroupReadinessService readiness;
  @MockitoBean com.giftplatform.admin.EffectiveModulePermissionService modulePermissions;
  @Autowired MockMvc mvc;
  @MockitoBean com.giftplatform.security.GiftUserDetailsService users;

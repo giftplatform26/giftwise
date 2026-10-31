@@ -20,9 +20,14 @@ public class SmsDeliveryConfiguration {
             @Value("${gift.otp.sms.provider:disabled}") String provider,
             @Value("${gift.otp.sms.simulator.enabled:false}") boolean simulatorEnabled,
             Environment environment) {
-        if ("disabled".equals(provider)) return (to, body) -> {
-            throw new IllegalStateException("SMS OTP delivery is not configured");
+        if ("disabled".equals(provider)) return new MessageDelivery(){
+            public boolean isAvailable(){return false;}
+            public void send(String to,String body){throw new IllegalStateException("SMS OTP delivery is not configured");}
         };
+        if ("msg91".equals(provider)) return new Msg91SmsDelivery(
+            environment.getProperty("gift.otp.sms.msg91.auth-key",""),
+            environment.getProperty("gift.otp.sms.msg91.template-id",""),
+            environment.getProperty("gift.otp.sms.expiry-minutes",Integer.class,5));
         if ("simulator".equals(provider)) {
             boolean localProfile = Arrays.stream(environment.getActiveProfiles()).anyMatch("local"::equals);
             if (!localProfile || !simulatorEnabled) throw new IllegalStateException("SMS simulator requires explicit local profile and opt-in");

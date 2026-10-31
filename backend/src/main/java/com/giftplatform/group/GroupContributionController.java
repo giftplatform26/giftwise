@@ -33,7 +33,8 @@ public class GroupContributionController {
  private static final long GROUP_IDLE_TIMEOUT_MS=10L*60L*1000L;
  private static final GroupLoginRateLimiter LOGIN_LIMITER = new GroupLoginRateLimiter();
  @org.springframework.beans.factory.annotation.Autowired
- public GroupContributionController(JdbcTemplate db,EventRepository events,PasswordEncoder passwords,com.giftplatform.security.recovery.CredentialSessionVersionStore versions,com.giftplatform.security.recovery.EffectiveRecoveryPolicyService policies){this.db=db;this.readiness=new GroupReadinessService(db);this.events=events;this.passwords=passwords;this.versions=versions;this.policies=policies;}
+ public GroupContributionController(JdbcTemplate db,EventRepository events,PasswordEncoder passwords,com.giftplatform.security.recovery.CredentialSessionVersionStore versions,com.giftplatform.security.recovery.EffectiveRecoveryPolicyService policies,GroupReadinessService readiness){this.db=db;this.readiness=readiness;this.events=events;this.passwords=passwords;this.versions=versions;this.policies=policies;}
+ public GroupContributionController(JdbcTemplate db,EventRepository events,PasswordEncoder passwords,com.giftplatform.security.recovery.CredentialSessionVersionStore versions,com.giftplatform.security.recovery.EffectiveRecoveryPolicyService policies){this(db,events,passwords,versions,policies,new GroupReadinessService(db));}
  public GroupContributionController(JdbcTemplate db,EventRepository events,PasswordEncoder passwords,com.giftplatform.security.recovery.CredentialSessionVersionStore versions){this(db,events,passwords,versions,null);}
  public record Credentials(String username,String password,String pin,String confirmPin,String fullName,String email,String mobile,String emailVerificationToken){
  public Credentials(String username,String password,String pin,String confirmPin,String fullName,String email,String mobile){this(username,password,pin,confirmPin,fullName,email,mobile,null);}
@@ -101,7 +102,7 @@ public class GroupContributionController {
  String phone=mobile(c.mobile());
  // Mandatory contact collection does not imply verified ownership.
  // Contact-verification timestamps remain NULL until real independent verification.
- UUID accountId=UUID.randomUUID();if(pin!=null)ensureUniqueAdminPin(e,pin,null);try{db.update("INSERT INTO gift_group_accounts(id,event_id,username,password_hash,pin_hash,full_name,email,mobile,email_verified_at,mobile_verified_at) VALUES(?,?,?,?,?,?,?,?,NULL,NULL)",accountId,e,u,passwords.encode(pw),pin==null?null:passwords.encode(pin),fullName,email,phone);}catch(org.springframework.dao.DuplicateKeyException ex){throw new ResponseStatusException(HttpStatus.CONFLICT,"Username already exists");}if(c.emailVerificationToken()!=null&&!c.emailVerificationToken().isBlank()&&signupEmails.consume(c.emailVerificationToken(),"GROUP_ADMIN",e,email))db.update("UPDATE gift_group_accounts SET email_verified_at=now() WHERE id=?",accountId);return Map.of("username",u);}
+ UUID accountId=UUID.randomUUID();if(pin!=null)ensureUniqueAdminPin(e,pin,null);try{db.update("INSERT INTO gift_group_accounts(id,event_id,username,password_hash,pin_hash,full_name,email,mobile,email_verified_at,mobile_verified_at) VALUES(?,?,?,?,?,?,?,?,NULL,NULL)",accountId,e,u,passwords.encode(pw),pin==null?null:passwords.encode(pin),fullName,email,phone);}catch(org.springframework.dao.DuplicateKeyException ex){throw new ResponseStatusException(HttpStatus.CONFLICT,"Username already exists");}if(readiness.emailEnabled()&&c.emailVerificationToken()!=null&&!c.emailVerificationToken().isBlank()&&signupEmails.consume(c.emailVerificationToken(),"GROUP_ADMIN",e,email))db.update("UPDATE gift_group_accounts SET email_verified_at=now() WHERE id=?",accountId);return Map.of("username",u);}
  @PostMapping("/login")
  public Map<String,String> login(@PathVariable UUID token,@RequestBody Credentials c,HttpServletRequest req){UUID e=event(token);if(c==null)throw bad("Credentials required");if(c.pin()!=null&&!c.pin().isBlank())requirePinAllowed(e);boolean pinLogin=c.pin()!=null&&!c.pin().isBlank();
   if(pinLogin&&!c.pin().matches("[0-9]{6}"))throw bad("PIN must be six digits");
@@ -233,7 +234,7 @@ public class GroupContributionController {
   boolean emailRequired=readiness.memberEmailRequired(event(token));
   if(emailRequired&&signupEmail==null)throw bad("Verify your email before joining this group");
   boolean emailVerified=false;
-  if(request.emailVerificationToken()!=null&&!request.emailVerificationToken().isBlank()){
+  if(readiness.emailEnabled()&&request.emailVerificationToken()!=null&&!request.emailVerificationToken().isBlank()){
    if(signupEmail==null)throw bad("Email is required to use a verification");
    emailVerified=signupEmails.consume(request.emailVerificationToken(),"GROUP_MEMBER",groupId,signupEmail);
   }
@@ -272,6 +273,11 @@ public class GroupContributionController {
   Integer n=db.queryForObject("SELECT count(*) FROM gift_group_members WHERE id=? AND group_id=? AND status='APPROVED'",Integer.class,memberId,groupId);
   if(n==null||n!=1)throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
   return memberId;
+ }
+ void requireMemberContact(UUID groupId,UUID memberId){
+  UUID eventId=db.queryForObject("SELECT event_id FROM gift_groups WHERE id=?",UUID.class,groupId);
+  if(readiness.mobileEnabled()&&!Boolean.TRUE.equals(db.queryForObject("SELECT mobile_verified_at IS NOT NULL FROM gift_group_members WHERE id=? AND group_id=?",Boolean.class,memberId,groupId)))throw new ResponseStatusException(HttpStatus.CONFLICT,"Verify your mobile in Account before contributing");
+  if(readiness.memberEmailRequired(eventId)&&!Boolean.TRUE.equals(db.queryForObject("SELECT email_verified_at IS NOT NULL FROM gift_group_members WHERE id=? AND group_id=?",Boolean.class,memberId,groupId)))throw new ResponseStatusException(HttpStatus.CONFLICT,"Verify your email in Account before contributing");
  }
  @PostMapping("/member-logout/{groupId}")
  public Map<String,String> memberLogout(@PathVariable UUID token,@PathVariable UUID groupId,HttpServletRequest req){
