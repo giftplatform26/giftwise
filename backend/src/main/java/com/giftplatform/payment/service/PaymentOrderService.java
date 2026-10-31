@@ -20,20 +20,23 @@ import java.util.UUID;
 @Service
 public class PaymentOrderService {
 
+    @org.springframework.beans.factory.annotation.Autowired private com.giftplatform.payment.control.PaymentControlService controls;
     private final EventRepository events;
     private final GiftRepository gifts;
     private final PaymentOrderRepository orders;
     private final JdbcTemplate jdbc;
+    private final com.giftplatform.monetization.MonetizationService monetization;
 
     public PaymentOrderService(
             EventRepository events,
             GiftRepository gifts,
             PaymentOrderRepository orders,
-            JdbcTemplate jdbc) {
+            JdbcTemplate jdbc, com.giftplatform.monetization.MonetizationService monetization) {
         this.events = events;
         this.gifts = gifts;
         this.orders = orders;
         this.jdbc = jdbc;
+        this.monetization = monetization;
     }
 
     @Transactional
@@ -47,7 +50,7 @@ public class PaymentOrderService {
         if (eventId == null || idempotencyKey == null ||
                 idempotencyKey.isBlank() ||
                 idempotencyKey.length() > 120 ||
-                amountPaise <= 0) {
+                amountPaise <= 0 || amountPaise > 100_000_000L) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST, "Invalid payment request");
         }
@@ -67,7 +70,7 @@ public class PaymentOrderService {
             if (!order.getEventId().equals(eventId) ||
                     !java.util.Objects.equals(order.getGiftId(), giftId) ||
                     !order.getContributionType().equals(contributionType) ||
-                    order.getAmountPaise() != amountPaise) {
+                    order.getRequestedAmountPaise() != amountPaise) {
                 throw new ResponseStatusException(
                         HttpStatus.CONFLICT,
                         "Idempotency key belongs to another request");
@@ -124,6 +127,10 @@ public class PaymentOrderService {
                     HttpStatus.BAD_REQUEST, "Invalid contribution type");
         }
 
+        if(controls!=null) {
+            controls.require(eventId,"RAZORPAY");
+            if(controls.event(eventId).get("ROUTING"))throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Routing is selected but linked-account onboarding, provider fee allocation and settlement integration must be completed before collection");
+        }
         PaymentOrder order = new PaymentOrder(
                 eventId,
                 giftId,
@@ -132,6 +139,7 @@ public class PaymentOrderService {
                 idempotencyKey
         );
 
+        order.applyPricing(monetization.quote("EVENT_WALLET".equals(contributionType)?"WALLET":"CONTRIBUTION", amountPaise));
         return orders.saveAndFlush(order);
     }
 }

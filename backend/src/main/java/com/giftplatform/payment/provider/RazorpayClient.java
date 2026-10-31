@@ -67,8 +67,13 @@ public class RazorpayClient {
             String bank,
             String bankTransactionId,
             String rrn,
-            String upiTransactionId
+            String upiTransactionId,
+            Long feePaise,
+            Long taxPaise
     ) {
+        public ProviderPayment(String id,String orderId,long amount,String currency,String status,String method,String bank,String bankTransactionId,String rrn,String upiTransactionId) {
+            this(id,orderId,amount,currency,status,method,bank,bankTransactionId,rrn,upiTransactionId,null,null);
+        }
         public ProviderPayment(String id, String orderId, long amount, String currency, String status) {
             this(id, orderId, amount, currency, status, null, null, null, null, null);
         }
@@ -133,6 +138,11 @@ public class RazorpayClient {
         return value.isMissingNode() || value.isNull() ? null : value.asText();
     }
 
+    private static Long optionalAmount(JsonNode value) {
+        if(value.isMissingNode()||value.isNull())return null;
+        if(!value.isIntegralNumber()||!value.canConvertToLong()||value.asLong()<0)throw new IllegalStateException("Invalid provider charge amount");
+        return value.asLong();
+    }
     public ProviderPayment fetchPayment(String paymentId) {
         requireCredentials();
 
@@ -163,7 +173,8 @@ public class RazorpayClient {
                 optionalText(result.path("bank")),
                 optionalText(result.path("acquirer_data").path("bank_transaction_id")),
                 optionalText(result.path("acquirer_data").path("rrn")),
-                optionalText(result.path("acquirer_data").path("upi_transaction_id"))
+                optionalText(result.path("acquirer_data").path("upi_transaction_id")),
+                optionalAmount(result.path("fee")),optionalAmount(result.path("tax"))
         );
     }
 }

@@ -16,6 +16,7 @@ import java.util.UUID;
 
 @Service
 public class RazorpayWebhookService {
+    @org.springframework.beans.factory.annotation.Autowired private com.giftplatform.monetization.CommercialPurchaseService commerce;
     private final RazorpaySignatureVerifier signatures;
     private final RazorpayCaptureService capture;
     private final JdbcTemplate jdbc;
@@ -102,12 +103,16 @@ public class RazorpayWebhookService {
                         SELECT id FROM payment_orders
                         WHERE provider = 'RAZORPAY' AND provider_order_id = ?
                         """, (rs, i) -> rs.getObject(1, UUID.class), finalOrderId);
-                    if (localIds.size() != 1) {
-                        throw new IllegalStateException("Local payment order not found");
-                    }
+                    if (localIds.isEmpty()) {
+                        var commercialIds=jdbc.query("SELECT id FROM commercial_orders WHERE provider_order_id=?",(rs,n)->rs.getObject(1,UUID.class),finalOrderId);
+                        if(commercialIds.size()!=1)throw new IllegalStateException("Local payment order not found");
+                        commerce.verifyCapture(commercialIds.getFirst(),finalOrderId,finalPaymentId);
+                    } else {
                     // Independently fetches the provider payment, verifies amount/order/currency,
                     // and uses existing transaction and allocation idempotency protections.
+                    if(localIds.size()!=1)throw new IllegalStateException("Ambiguous payment order");
                     capture.confirmVerifiedWebhook(localIds.get(0), finalOrderId, finalPaymentId);
+                    }
                 }
                 jdbc.update("""
                     UPDATE payment_webhook_events

@@ -36,6 +36,7 @@ public class GroupContributionController {
  public GroupContributionController(JdbcTemplate db,EventRepository events,PasswordEncoder passwords,com.giftplatform.security.recovery.CredentialSessionVersionStore versions,com.giftplatform.security.recovery.EffectiveRecoveryPolicyService policies,GroupReadinessService readiness){this.db=db;this.readiness=readiness;this.events=events;this.passwords=passwords;this.versions=versions;this.policies=policies;}
  public GroupContributionController(JdbcTemplate db,EventRepository events,PasswordEncoder passwords,com.giftplatform.security.recovery.CredentialSessionVersionStore versions,com.giftplatform.security.recovery.EffectiveRecoveryPolicyService policies){this(db,events,passwords,versions,policies,new GroupReadinessService(db));}
  public GroupContributionController(JdbcTemplate db,EventRepository events,PasswordEncoder passwords,com.giftplatform.security.recovery.CredentialSessionVersionStore versions){this(db,events,passwords,versions,null);}
+ @org.springframework.beans.factory.annotation.Autowired private com.giftplatform.monetization.CommercialAccessService commerce;
  public record Credentials(String username,String password,String pin,String confirmPin,String fullName,String email,String mobile,String emailVerificationToken){
  public Credentials(String username,String password,String pin,String confirmPin,String fullName,String email,String mobile){this(username,password,pin,confirmPin,fullName,email,mobile,null);}
  public Credentials(String username,String password){this(username,password,null,null,null,null,null);}
@@ -216,6 +217,7 @@ public class GroupContributionController {
   List<Map<String,Object>> rows=db.queryForList("SELECT name,description,gift_name,gift_description,gift_link,target_paise,join_policy,status FROM gift_groups WHERE id=? AND event_id=?",groupId,e);
   if(rows.isEmpty())throw new ResponseStatusException(HttpStatus.NOT_FOUND);
   Map<String,Object> r=new LinkedHashMap<>(rows.get(0));
+  if(commerce!=null)commerce.requireGroupFee(groupId);
   if(!readiness.invitation(groupId).enabled())throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Group invitation is not ready");
   return r;
  }
@@ -313,6 +315,7 @@ public class GroupContributionController {
  @PostMapping("/publish/{groupId}") @Transactional
  public Map<String,String> publish(@PathVariable UUID token,@PathVariable UUID groupId,HttpServletRequest req){
   adminGroup(token,groupId,req);
+  if(commerce!=null)commerce.requireGroupFee(groupId);
   var ready=readiness.invitation(groupId);
   if(!ready.enabled())throw new ResponseStatusException(HttpStatus.CONFLICT,String.join("; ",ready.reasons()));
   int n=db.update("UPDATE gift_groups SET status='PUBLISHED',collection_published_at=now() WHERE id=? AND collection_published_at IS NULL",groupId);

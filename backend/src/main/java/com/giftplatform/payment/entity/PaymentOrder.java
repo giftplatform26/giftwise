@@ -29,6 +29,15 @@ public class PaymentOrder {
     @Column(name = "amount_paise")
     private Long amountPaise;
 
+    @Column(name = "requested_amount_paise", nullable = false)
+    private Long requestedAmountPaise;
+    @Column(name = "platform_fee_paise", nullable = false)
+    private long platformFeePaise;
+    @Column(name = "host_receives_paise")
+    private Long hostReceivesPaise;
+    @Column(name = "monetization_revision")
+    private Long monetizationRevision;
+
     @Column(name = "currency")
     private String currency;
 
@@ -91,12 +100,27 @@ public class PaymentOrder {
         this.giftId = giftId;
         this.contributionType = contributionType;
         this.amountPaise = amountPaise;
+        this.requestedAmountPaise = amountPaise;
+        this.hostReceivesPaise = amountPaise;
         this.idempotencyKey = idempotencyKey;
         this.provider = "RAZORPAY";
         this.currency = "INR";
         this.status = "CREATED";
     }
 
+
+    public void applyPricing(com.giftplatform.monetization.MonetizationService.Quote quote) {
+        if (quote.contributionPaise() != requestedAmountPaise || monetizationRevision != null)
+            throw new IllegalStateException("Invalid pricing snapshot");
+        this.amountPaise=quote.totalPaise();
+        this.platformFeePaise=quote.platformFeePaise();
+        this.hostReceivesPaise=quote.hostReceivesPaise();
+        this.monetizationRevision=quote.revision();
+    }
+    public Long getRequestedAmountPaise() {return requestedAmountPaise;}
+    public long getPlatformFeePaise() {return platformFeePaise;}
+    public Long getHostReceivesPaise() {return hostReceivesPaise==null?amountPaise:hostReceivesPaise;}
+    public Long getMonetizationRevision() {return monetizationRevision;}
 
     public UUID getId() { return id; }
     public UUID getEventId() { return eventId; }

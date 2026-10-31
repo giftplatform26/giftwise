@@ -16,6 +16,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class GuestDirectTransferService {
+ @org.springframework.beans.factory.annotation.Autowired private com.giftplatform.payment.control.PaymentControlService controls;
  private final JdbcTemplate jdbc;
  private final com.giftplatform.notification.ManualClaimNotificationService notifications;
  private final boolean enabled;
@@ -60,7 +61,7 @@ public class GuestDirectTransferService {
     WHERE host_id=(SELECT owner_id FROM events WHERE id=?) AND EXISTS (SELECT 1 FROM event_payment_account_links l WHERE l.event_id=? AND l.host_id=host_bank_accounts.host_id AND l.destination_id=host_bank_accounts.id AND l.destination_kind='BANK' AND l.enabled AND l.preferred)
       AND enabled=TRUE AND archived_at IS NULL AND verification_status NOT IN ('FAILED','REVOKED') AND (host_confirmed_at IS NOT NULL OR verification_status='VERIFIED')
     """,(rs,i)->new Destination(rs.getObject(1,UUID.class),rs.getString(2),
-      rs.getString(3),true),eventId,eventId,eventId,eventId);
+      rs.getString(3),true),eventId,eventId,eventId,eventId).stream().filter(d->controls==null||Boolean.TRUE.equals(controls.event(eventId).get(d.method()))).toList();
  }
  @Transactional
  public ClaimResult claim(UUID token,ClaimRequest r) {
@@ -74,6 +75,7 @@ public class GuestDirectTransferService {
     (r.guestPhone()!=null && (r.guestPhone().length()>30 || !r.guestPhone().matches("[+0-9 ()-]{5,30}"))) ||
     r.idempotencyKey()==null || !r.idempotencyKey().matches("[A-Za-z0-9-]{8,120}"))
    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid transfer confirmation");
+  if(controls!=null)controls.require(eventId,r.method());
   if(r.giftId()!=null) {
    Integer count=jdbc.queryForObject("""
     SELECT COUNT(*) FROM gifts WHERE id=? AND event_id=? AND status='ACTIVE' AND visibility='PUBLIC'

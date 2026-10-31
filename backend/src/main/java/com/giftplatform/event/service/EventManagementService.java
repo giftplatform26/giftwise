@@ -14,6 +14,7 @@ import java.util.*;
 
 @Service
 public class EventManagementService {
+    @org.springframework.beans.factory.annotation.Autowired private com.giftplatform.monetization.CommercialAccessService commerce;
     private final EventRepository repository;
     private final ActorContext actors;
     private final AuditService audit;
@@ -62,6 +63,7 @@ public class EventManagementService {
     @Transactional
     public EventResponse changeStatus(UUID id, EventStatus next) {
         Event event=owned(id);
+        if(next==EventStatus.PUBLISHED && event.getStatus()!=EventStatus.PUBLISHED && commerce!=null)commerce.requireEventCapacity(event.getOwnerId(),event.getId());
         if(next==EventStatus.PUBLISHED)event=repository.findForUpdate(id).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
         Map<String,Object> before=snapshot(event);
         if(next==EventStatus.PUBLISHED && !readiness.canPublish(event))

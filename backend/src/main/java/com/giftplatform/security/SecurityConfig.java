@@ -131,6 +131,9 @@ public class SecurityConfig {
                           .requestMatchers(HttpMethod.GET,
                                   "/api/public/celebrations/*/wishes/*/photo").permitAll()
 
+                        .requestMatchers(HttpMethod.GET,"/api/public/commerce/**").permitAll()
+                        .requestMatchers("/api/v1/commerce", "/api/v1/commerce/**").authenticated()
+                        .requestMatchers("/api/public/groups/*/coordination/*", "/api/public/groups/*/coordination/*/checkout", "/api/public/groups/*/coordination/*/confirm").permitAll()
                         .requestMatchers(HttpMethod.GET,
                                 "/api/public/payments/direct/*/destinations").permitAll()
                         .requestMatchers(HttpMethod.POST,
@@ -140,6 +143,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/api/public/payments/context/*",
+                                "/api/public/payments/controls/*",
                                 "/api/public/gifts/progress/*"
                         ).permitAll()
                         .requestMatchers(
@@ -150,6 +154,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 HttpMethod.POST,
                                 "/api/public/payments/checkout",
+                                "/api/public/payments/hybrid/quote",
                                 "/api/public/payments/confirm"
                         ).permitAll()
                         .requestMatchers(

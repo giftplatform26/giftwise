@@ -51,8 +51,8 @@ class ContributionAllocationServiceIntegrationTest {
             "test-hash", "CUSTOMER");
 
         jdbc.update("""
-            INSERT INTO events(id,title,occasion_type,status,owner_id)
-            VALUES (?,?,?,?,?)
+            INSERT INTO events(id,title,occasion_type,status,owner_id,host_display_name)
+            VALUES (?,?,?,?,?,'Test Host')
             """, event, "Allocation Test",
             "BIRTHDAY", "PUBLISHED", user);
 

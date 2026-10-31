@@ -26,11 +26,15 @@ public class GuestCheckoutService {
 
     public record Request(UUID eventId, UUID giftId, String contributionType,
                           long amountPaise, String idempotencyKey,
-                          String guestName, String guestEmail, String guestPhone) {}
+                          String guestName, String guestEmail, String guestPhone, Long acceptedFeePaise, Long acceptedTotalPaise, Long acceptedHostReceivesPaise) {
+        public Request(UUID eventId,UUID giftId,String type,long amount,String key,String name,String email,String phone) {
+            this(eventId,giftId,type,amount,key,name,email,phone,null,null,null);
+        }
+    }
 
     public record Response(UUID localOrderId, String razorpayOrderId,
                            String razorpayKeyId, long amountPaise, String currency,
-                           String status) {}
+                           String status, long platformFeePaise, long hostReceivesPaise) {}
 
     private record Existing(String name, String email, String phone, long amount) {}
 
@@ -51,7 +55,7 @@ public class GuestCheckoutService {
 
         // The underlying order service locks the idempotency key until commit.
         var order = orderCreation.create(request.eventId(), request.giftId(),
-                request.contributionType(), request.amountPaise(), request.idempotencyKey());
+                request.contributionType(), request.amountPaise(), request.idempotencyKey(),request.acceptedFeePaise(),request.acceptedTotalPaise(),request.acceptedHostReceivesPaise());
 
         List<Existing> previous = jdbc.query("""
             SELECT guest_name, guest_email, guest_phone, amount_paise
@@ -66,12 +70,12 @@ public class GuestCheckoutService {
                    guest_email, guest_phone, amount_paise)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 """, UUID.randomUUID(), order.localOrderId(), request.eventId(),
-                    request.giftId(), name, email, phone, request.amountPaise());
+                    request.giftId(), name, email, phone, order.amountPaise());
         } else if (previous.size() != 1 ||
                 !previous.get(0).name().equals(name) ||
                 !Objects.equals(previous.get(0).email(), email) ||
                 !Objects.equals(previous.get(0).phone(), phone) ||
-                previous.get(0).amount() != request.amountPaise()) {
+                previous.get(0).amount() != order.amountPaise()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     "Idempotency key belongs to different guest details");
         }
@@ -89,7 +93,7 @@ public class GuestCheckoutService {
             """, UUID.randomUUID(), request.eventId(), order.localOrderId());
 
         return new Response(order.localOrderId(), order.razorpayOrderId(),
-                publicKey, order.amountPaise(), order.currency(), order.status());
+                publicKey, order.amountPaise(), order.currency(), order.status(),order.platformFeePaise(),order.hostReceivesPaise());
     }
 
     private String normalize(String value) {

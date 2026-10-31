@@ -10,6 +10,7 @@ import java.util.*;
 
 @Service
 public class GalleryAssetService {
+ @org.springframework.beans.factory.annotation.Autowired private com.giftplatform.monetization.CommercialAccessService commerce;
  private final GalleryAssetRepository repo; private final GalleryImageProcessor processor;
  private final AuditService audit; private final ActorContext actor;
  public GalleryAssetService(GalleryAssetRepository repo,GalleryImageProcessor processor,AuditService audit,ActorContext actor){
@@ -20,6 +21,18 @@ public class GalleryAssetService {
  public List<AssetInfo> published(){return repo.findByPublishedTrueOrderByTitleAsc().stream().map(this::info).toList();}
  public List<AssetInfo> all(){requireAdmin();return repo.findAll().stream().map(this::info).toList();}
  public GalleryAsset publishedImage(UUID id){GalleryAsset a=get(id);if(!a.isPublished() || !"FREE".equals(a.getTier())) throw new ResponseStatusException(HttpStatus.NOT_FOUND);return a;}
+ public GalleryAsset purchasedImage(UUID id){
+  UUID host=actor.requireAuthenticatedUserId();GalleryAsset asset=get(id);
+  if(!asset.isPublished())throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+  if(!"FREE".equals(asset.getTier())&&!commerce.template(host,id))throw new ResponseStatusException(HttpStatus.PAYMENT_REQUIRED,"Purchase this template or upgrade your host plan");
+  return asset;
+ }
+ @Transactional public AssetInfo tier(UUID id,String tier){
+  requireAdmin();if(!Set.of("FREE","PREMIUM").contains(tier==null?"":tier))throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+  GalleryAsset asset=get(id);String old=asset.getTier();asset.setTier(tier);
+  audit.recordChange(actor.requireAuthenticatedUserId(),AuditActorType.ADMIN,"INVITATION_ASSET",id,AuditAction.UPDATE,Map.of("tier",old),Map.of("tier",tier),null);
+  return info(asset);
+ }
  public GalleryAsset adminImage(UUID id){requireAdmin();return get(id);}
  private GalleryAsset get(UUID id){return repo.findById(id).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));}
  private void requireAdmin(){if(!actor.isPlatformAdmin()) throw new ResponseStatusException(HttpStatus.FORBIDDEN);}

@@ -45,7 +45,7 @@ class GuestCheckoutServiceIntegrationTest {
         UUID owner = UUID.randomUUID(), event = UUID.randomUUID();
         jdbc.update("INSERT INTO users(id,email,password_hash,role) VALUES (?,?,?,?)",
                 owner, owner + "@example.test", "hash", "CUSTOMER");
-        jdbc.update("INSERT INTO events(id,title,occasion_type,status,owner_id) VALUES (?,?,?,?,?)",
+        jdbc.update("INSERT INTO events(id,title,occasion_type,status,owner_id,host_display_name) VALUES (?,?,?,?,?,'Test Host')",
                 event, "Checkout", "BIRTHDAY", "PUBLISHED", owner);
         return event;
     }

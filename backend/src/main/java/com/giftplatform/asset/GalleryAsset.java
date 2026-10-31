@@ -30,5 +30,6 @@ public class GalleryAsset {
  public boolean isPublished(){return published;}
  public String getTier(){return tier;}
  public Instant getCreatedAt(){return createdAt;}
+ public void setTier(String tier){this.tier=tier;updatedAt=Instant.now();}
  public void setPublished(boolean value){published=value;updatedAt=Instant.now();}
 }

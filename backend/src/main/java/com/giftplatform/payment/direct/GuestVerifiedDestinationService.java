@@ -18,6 +18,7 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 public class GuestVerifiedDestinationService {
  private static final org.slf4j.Logger log=org.slf4j.LoggerFactory.getLogger(GuestVerifiedDestinationService.class);
+ @org.springframework.beans.factory.annotation.Autowired private com.giftplatform.payment.control.PaymentControlService controls;
  private final JdbcTemplate jdbc;
  private final PaymentDataProtector protector;
  private final boolean active;
@@ -77,6 +78,6 @@ public class GuestVerifiedDestinationService {
       }
       out.add(new Destination(id,"BANK",rs.getBoolean(2),rs.getString(6),null,null,holder,number,ifsc));
     },host,owners.get(0)[0]);
-  return List.copyOf(out);
+  return controls==null?List.copyOf(out):out.stream().filter(d->Boolean.TRUE.equals(controls.event(owners.get(0)[0]).get(d.method()))).toList();
  }
 }

@@ -6,7 +6,8 @@ import FocusedCheckout from './focused/Checkout';
 import GuestVerifiedDestination from './GuestVerifiedDestination';
 
 type Gift = {id:string;name:string;targetAmount:number};
-type Checkout = {localOrderId:string;razorpayOrderId:string;razorpayKeyId:string;amountPaise:number;currency:string;status:string};
+type Checkout = {localOrderId:string;razorpayOrderId:string;razorpayKeyId:string;amountPaise:number;currency:string;status:string;platformFeePaise:number;hostReceivesPaise:number};
+type Pricing = {eventId:string;giftId:string|null;contributionPaise:number;platformFeePaise:number;totalPaise:number;hostReceivesPaise:number;feeBearer:string};
 type Capture = {orderId:string;contributionId:string;paymentId:string;giftPaise:number;walletPaise:number;alreadyProcessed:boolean};
 type RazorpayResult = {razorpay_payment_id:string;razorpay_order_id:string;razorpay_signature:string};
 type RazorpayOptions = {key:string;amount:number;currency:string;name:string;description:string;order_id:string;prefill:{name:string;email:string;contact:string};handler:(result:RazorpayResult)=>void;modal:{ondismiss:()=>void}};
@@ -43,6 +44,7 @@ function loadRazorpay():Promise<void>{
 }
 export default function GuestContributionCheckout({token,gifts,selectedGiftId='',onClose,onBusyChange,onProviderVisibilityChange}:{token:string;gifts:Gift[];selectedGiftId?:string;onClose?:()=>void;onBusyChange?:(busy:boolean)=>void;onProviderVisibilityChange?:(open:boolean)=>void}){
   const {mode}=useExperience();
+  const [razorpayAllowed,setRazorpayAllowed]=useState(false);
   const [paymentMethod,setPaymentMethod]=useState<'razorpay'|'upi'|'bank'>('razorpay');
   const [directDestinations,setDirectDestinations]=useState<Array<{id:string;method:string;masked:string;available:boolean}>>([]);
   const [directDestinationId,setDirectDestinationId]=useState('');
@@ -55,6 +57,7 @@ export default function GuestContributionCheckout({token,gifts,selectedGiftId=''
   const [name,setName]=useState('');const [email,setEmail]=useState('');const [phone,setPhone]=useState('');
   const [showContact,setShowContact]=useState(false);const [busy,setBusy]=useState(false);const [error,setError]=useState('');const [receipt,setReceipt]=useState<Capture|null>(null);
   useEffect(()=>{onBusyChange?.(busy);return()=>onBusyChange?.(false)},[busy,onBusyChange]);
+  const [pricing,setPricing]=useState<Pricing|null>(null),[pricingError,setPricingError]=useState(''),[pricingRetry,setPricingRetry]=useState(0);
   const [eventId,setEventId]=useState('');const requestKey=useRef<string>('');
   useEffect(()=>{recordFlow('guest_contribution','opened');let active=true;json<{eventId:string}>(`/backend/api/public/payments/context/${encodeURIComponent(token)}`).then(v=>{if(active)setEventId(v.eventId)}).catch(()=>{if(active)setError('Contributions are temporarily unavailable')});return()=>{active=false}},[token]);
   useEffect(()=>{let active=true;setDestinationsLoading(true);setDestinationsError('');
@@ -65,6 +68,7 @@ export default function GuestContributionCheckout({token,gifts,selectedGiftId=''
       .finally(()=>{if(active)setDestinationsLoading(false)});
     return()=>{active=false};
   },[token,destinationRetry]);
+  useEffect(()=>{let active=true;setRazorpayAllowed(false);fetch(`/backend/api/public/payments/controls/${encodeURIComponent(token)}`,{credentials:'include',cache:'no-store'}).then(async r=>{if(!r.ok)throw Error();return r.json()}).then(x=>{if(active)setRazorpayAllowed(x.channels?.RAZORPAY===true&&(!x.channels?.ROUTING||x.routingIntegrationReady===true))}).catch(()=>{if(active)setError('Could not load payment availability. Reload before continuing.')});return()=>{active=false}},[token]);
   const availableDirect=directDestinations.filter(d=>d.available);
   // Direct transfers remain unavailable unless the server explicitly offers an eligible destination.
   const canUseDirect=(method:'upi'|'bank')=>availableDirect.some(d=>d.method===method.toUpperCase());
@@ -94,14 +98,22 @@ export default function GuestContributionCheckout({token,gifts,selectedGiftId=''
   }
   const amountPaise=Math.round(Number(amount)*100);
   const validAmount=Number.isFinite(amountPaise)&&Number.isSafeInteger(amountPaise)&&amountPaise>=100&&amountPaise<=100000000;
+  useEffect(()=>{
+    let active=true;setPricing(null);setPricingError('');
+    if(!eventId||!validAmount||paymentMethod!=='razorpay'||!razorpayAllowed)return;
+    const timer=setTimeout(()=>{void csrfHeader().then(headers=>json<Pricing>('/backend/api/public/payments/hybrid/quote',{method:'POST',headers,body:JSON.stringify({eventId,giftId:giftId||null,contributionPaise:amountPaise})})).then(q=>{if(active)setPricing(q)}).catch(()=>{if(active)setPricingError('Could not load platform fees. Please retry.');});},250);
+    return()=>{active=false;clearTimeout(timer)};
+  },[eventId,giftId,amountPaise,validAmount,paymentMethod,pricingRetry,razorpayAllowed]);
+  const quoteReady=!!pricing&&pricing.eventId===eventId&&pricing.giftId===(giftId||null)&&pricing.contributionPaise===amountPaise;
+  const pricingNotice=paymentMethod==='razorpay'&&!razorpayAllowed?<p>Razorpay checkout is unavailable for this event. Choose an available direct payment method.</p>:paymentMethod==='razorpay'?<div aria-live="polite">{pricingError?<p role="alert">{pricingError} <button type="button" onClick={()=>{requestKey.current='';setPricingRetry(v=>v+1)}}>Refresh fee</button></p>:quoteReady&&pricing?<p>Platform fee: <strong>{money(pricing.platformFeePaise)}</strong>{pricing.platformFeePaise>0?(pricing.feeBearer==='HOST'?' · deducted from host receipt':' · added to your contribution'):''} · You pay <strong>{money(pricing.totalPaise)}</strong> · Host receives <strong>{money(pricing.hostReceivesPaise)}</strong></p>:<p>Loading platform fees…</p>}</div>:null;
   async function submit(e:React.FormEvent){
-    e.preventDefault();if(paymentMethod!=='razorpay'||!validAmount||!name.trim()||!eventId||busy)return;
+    e.preventDefault();if(!razorpayAllowed||paymentMethod!=='razorpay'||!validAmount||!name.trim()||!eventId||busy||!quoteReady||!pricing)return;
     recordFlow('guest_contribution','started');setBusy(true);setError('');setReceipt(null);
     try{
       const headers=await csrfHeader();
       if(!requestKey.current)requestKey.current=crypto.randomUUID();
-      const order=await json<Checkout>('/backend/api/public/payments/checkout',{method:'POST',headers,body:JSON.stringify({eventId,giftId:giftId||null,contributionType:giftId?'GIFT_PARTIAL':'EVENT_WALLET',amountPaise,idempotencyKey:requestKey.current,guestName:name.trim(),guestEmail:email.trim()||null,guestPhone:phone.trim()||null})});
-      if(order.currency!=='INR'||order.amountPaise!==amountPaise||!order.razorpayKeyId.startsWith('rzp_test_'))throw new Error('Invalid test checkout response');
+      const order=await json<Checkout>('/backend/api/public/payments/checkout',{method:'POST',headers,body:JSON.stringify({eventId,giftId:giftId||null,contributionType:giftId?'GIFT_PARTIAL':'EVENT_WALLET',amountPaise,acceptedFeePaise:pricing.platformFeePaise,acceptedTotalPaise:pricing.totalPaise,acceptedHostReceivesPaise:pricing.hostReceivesPaise,idempotencyKey:requestKey.current,guestName:name.trim(),guestEmail:email.trim()||null,guestPhone:phone.trim()||null})});
+      if(order.currency!=='INR'||order.amountPaise!==pricing.totalPaise||order.platformFeePaise!==pricing.platformFeePaise||order.hostReceivesPaise!==pricing.hostReceivesPaise||!order.razorpayKeyId.startsWith('rzp_test_'))throw new Error('Invalid test checkout response');
       await loadRazorpay();
       if(!window.Razorpay)throw new Error('Razorpay checkout failed to load');
       const instance=new window.Razorpay({key:order.razorpayKeyId,amount:order.amountPaise,currency:'INR',name:'Gift Platform',description:giftId?'Gift contribution':'Event wallet contribution',order_id:order.razorpayOrderId,prefill:{name,email,contact:phone},modal:{ondismiss:()=>{onProviderVisibilityChange?.(false);recordFlow('guest_contribution','cancelled');setBusy(false)}},handler:async result=>{
@@ -113,9 +125,9 @@ export default function GuestContributionCheckout({token,gifts,selectedGiftId=''
       }});
       instance.on('payment.failed',()=>{onProviderVisibilityChange?.(false);recordFlow('guest_contribution','failed');setError('Payment failed or was cancelled. Please check Razorpay before retrying.');setBusy(false)});
       onProviderVisibilityChange?.(true);instance.open();
-    }catch(e){onProviderVisibilityChange?.(false);recordFlow('guest_contribution','failed');setError(e instanceof Error?e.message:'Unable to start payment');setBusy(false)}
+    }catch(e){setPricing(null);setPricingError('Checkout could not start. Refresh fees before retrying.');onProviderVisibilityChange?.(false);recordFlow('guest_contribution','failed');setError(e instanceof Error?e.message:'Unable to start payment');setBusy(false)}
   }
-  if(mode==='FOCUSED')return <><div aria-live="polite">{destinationsLoading&&<p role="status">Loading payment methods…</p>}{destinationsError&&<p role="alert">{destinationsError} <button type="button" onClick={()=>setDestinationRetry(v=>v+1)}>Retry</button></p>}</div><FocusedCheckout token={token} amount={amount} name={name} email={email} phone={phone} method={paymentMethod} busy={busy} error={error} valid={validAmount} ready={!!eventId} gift={!!giftId} destination={directDestinationId} reference={transferReference} referenceError={referenceError} reported={directStatus} receipt={receipt} available={canUseDirect} setAmount={v=>{setAmount(v);requestKey.current=''}} setName={v=>{setName(v);requestKey.current=''}} setEmail={v=>{setEmail(v);requestKey.current=''}} setPhone={v=>{setPhone(v);requestKey.current=''}} setMethod={v=>{setPaymentMethod(v);setDirectDestinationId('');setDirectStatus('');requestKey.current=''}} setDestination={v=>{setDirectDestinationId(v);requestKey.current='';setDirectStatus('')}} setReference={v=>{setTransferReference(v);requestKey.current='';setError('')}} submit={submit} report={()=>void reportDirectPayment()} close={onClose}/></>;
+  if(mode==='FOCUSED')return <><div aria-live="polite">{destinationsLoading&&<p role="status">Loading payment methods…</p>}{destinationsError&&<p role="alert">{destinationsError} <button type="button" onClick={()=>setDestinationRetry(v=>v+1)}>Retry</button></p>}</div><FocusedCheckout token={token} amount={amount} name={name} email={email} phone={phone} method={paymentMethod} busy={busy} error={error} valid={validAmount} ready={!!eventId&&quoteReady&&razorpayAllowed} razorpayAllowed={razorpayAllowed} pricingNotice={pricingNotice} totalPaise={pricing?.totalPaise} gift={!!giftId} destination={directDestinationId} reference={transferReference} referenceError={referenceError} reported={directStatus} receipt={receipt} available={canUseDirect} setAmount={v=>{setAmount(v);requestKey.current=''}} setName={v=>{setName(v);requestKey.current=''}} setEmail={v=>{setEmail(v);requestKey.current=''}} setPhone={v=>{setPhone(v);requestKey.current=''}} setMethod={v=>{setPaymentMethod(v);setDirectDestinationId('');setDirectStatus('');requestKey.current=''}} setDestination={v=>{setDirectDestinationId(v);requestKey.current='';setDirectStatus('')}} setReference={v=>{setTransferReference(v);requestKey.current='';setError('')}} submit={submit} report={()=>void reportDirectPayment()} close={onClose}/></>;
   return <section id="contribute" aria-label="Contribute to celebration" className="loveCheckout">
     <div className="loveCheckoutHeader"><div><h2>Share a Gift with Love ❤️</h2><p>Razorpay: card, UPI and netbanking · Direct transfers to the host when enabled</p></div>{onClose&&<button type="button" onClick={onClose} aria-label="Close contribution popup" className="loveModalClose">✕</button>}</div>
     {directStatus?<div role="status" className="loveCheckoutReceipt">
@@ -131,7 +143,7 @@ export default function GuestContributionCheckout({token,gifts,selectedGiftId=''
       {destinationsError&&<p role="alert">{destinationsError} <button type="button" onClick={()=>setDestinationRetry(v=>v+1)}>Retry</button></p>}
       <fieldset className="lovePaymentMethods" aria-label="Payment method" style={{border:'1px solid #ded6cc',borderRadius:12,padding:14,marginBottom:16}}>
         <legend style={{fontWeight:700,padding:'0 6px'}}>Choose how to send your gift</legend>
-        {guestPaymentMethodChoices.map(method=><label key={method.id} style={{display:'flex',alignItems:'flex-start',gap:10,margin:'10px 0',opacity:method.available||availableDirect.some(d=>d.method===method.id.toUpperCase())?1:0.65}}>
+        {guestPaymentMethodChoices.filter(method=>method.id!=='razorpay'||razorpayAllowed).map(method=><label key={method.id} style={{display:'flex',alignItems:'flex-start',gap:10,margin:'10px 0',opacity:method.available||availableDirect.some(d=>d.method===method.id.toUpperCase())?1:0.65}}>
           <input type="radio" name="guestPaymentMethod" value={method.id} checked={paymentMethod===method.id} disabled={busy||(!method.available&&!availableDirect.some(d=>d.method===method.id.toUpperCase()))} onChange={()=>{setPaymentMethod(method.id);setDirectDestinationId('');setDirectStatus('');requestKey.current=''}}/>
           <span><strong>{method.label}</strong>{!method.available&&!availableDirect.some(d=>d.method===method.id.toUpperCase())&&' · Unavailable'}<small style={{display:'block'}}>{method.description}</small></span>
         </label>)}
@@ -157,7 +169,8 @@ export default function GuestContributionCheckout({token,gifts,selectedGiftId=''
       </div>}
       <p className="loveCheckoutDisclosure">{giftId?'Your gift contribution may be split with the celebration wallet if the gift reaches its value. Any excess is handled in the celebration wallet when the payment is confirmed in our records.':'Your contribution goes to the celebration wallet.'}</p>
       {error&&<p role="alert" className="loveCheckoutError">{error}</p>}
-      <div className="loveCheckoutActions"><div className="loveCheckoutTotal"><span>Total</span><strong>{validAmount?money(amountPaise):'Invalid amount'}</strong></div><button className="loveCheckoutPay" type="submit" style={{display:paymentMethod==='razorpay'?undefined:'none'}} disabled={paymentMethod!=='razorpay'||!eventId||!validAmount||!name.trim()||busy}>{busy?'Processing…':`Pay ${validAmount?money(amountPaise):''} (Test Mode)`}</button></div>
+      {pricingNotice}
+      <div className="loveCheckoutActions"><div className="loveCheckoutTotal"><span>Total</span><strong>{validAmount?money(paymentMethod==='razorpay'&&pricing?pricing.totalPaise:amountPaise):'Invalid amount'}</strong></div><button className="loveCheckoutPay" type="submit" style={{display:paymentMethod==='razorpay'?undefined:'none'}} disabled={paymentMethod!=='razorpay'||!razorpayAllowed||!eventId||!validAmount||!name.trim()||busy||!quoteReady}>{busy?'Processing…':`Pay ${validAmount&&pricing?money(pricing.totalPaise):''} (Test Mode)`}</button></div>
     </form>}
   </section>;
 }

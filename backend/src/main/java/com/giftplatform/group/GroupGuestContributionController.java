@@ -17,6 +17,7 @@ import java.util.regex.Pattern;
 public class GroupGuestContributionController {
  private static final java.util.concurrent.ConcurrentHashMap<String,java.util.ArrayDeque<Long>> REPORT_ATTEMPTS=new java.util.concurrent.ConcurrentHashMap<>();
  private static void limit(String key){long now=System.currentTimeMillis();if(REPORT_ATTEMPTS.size()>10000)REPORT_ATTEMPTS.entrySet().removeIf(e->{synchronized(e.getValue()){return e.getValue().isEmpty()||now-e.getValue().peekLast()>600000;}});var q=REPORT_ATTEMPTS.computeIfAbsent(key,k->new java.util.ArrayDeque<>());synchronized(q){while(!q.isEmpty()&&now-q.peekFirst()>600000)q.removeFirst();if(q.size()>=10)throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,"Too many payment reports. Try again later");q.addLast(now);}}
+ @org.springframework.beans.factory.annotation.Autowired private com.giftplatform.payment.control.PaymentControlService controls;
  private final JdbcTemplate db;
  private final GroupContributionController groups;
  private final ObjectProvider<PaymentDataProtector> protectors;
@@ -30,11 +31,13 @@ public class GroupGuestContributionController {
  private boolean membersAllowed(Map<String,Object> g){return !"GUESTS_ONLY".equals(accessMode(g));}
  private UUID approvedMember(UUID groupId,HttpServletRequest req){return groups.member(groupId,req);}
  private List<Map<String,Object>> choices(UUID groupId){
-  return db.queryForList("SELECT id,kind,label,qr_image IS NOT NULL AS has_qr FROM gift_group_payment_destinations WHERE group_id=? AND enabled=TRUE AND status IN ('REGISTERED','VERIFIED') AND id IN (SELECT guest_upi_destination_id FROM gift_groups WHERE id=? UNION SELECT guest_bank_destination_id FROM gift_groups WHERE id=?) ORDER BY kind",groupId,groupId,groupId);
+  return db.queryForList("SELECT id,kind,label,qr_image IS NOT NULL AS has_qr FROM gift_group_payment_destinations WHERE group_id=? AND enabled=TRUE AND status IN ('REGISTERED','VERIFIED') AND id IN (SELECT guest_upi_destination_id FROM gift_groups WHERE id=? UNION SELECT guest_bank_destination_id FROM gift_groups WHERE id=?) ORDER BY kind",groupId,groupId,groupId).stream().filter(d->controls==null||Boolean.TRUE.equals(controls.event(db.queryForObject("SELECT event_id FROM gift_groups WHERE id=?",UUID.class,groupId)).get((String)d.get("kind")))).toList();
  }
  private Map<String,Object> chosen(UUID groupId,UUID destinationId){
   List<Map<String,Object>> rows=db.queryForList("SELECT * FROM gift_group_payment_destinations WHERE id=? AND group_id=? AND enabled=TRUE AND id IN (SELECT guest_upi_destination_id FROM gift_groups WHERE id=? UNION SELECT guest_bank_destination_id FROM gift_groups WHERE id=?) AND status IN ('REGISTERED','VERIFIED')",destinationId,groupId,groupId,groupId);
-  if(rows.isEmpty())throw new ResponseStatusException(HttpStatus.CONFLICT,"This payment destination is no longer available");return rows.get(0);
+  if(rows.isEmpty())throw new ResponseStatusException(HttpStatus.CONFLICT,"This payment destination is no longer available");
+  if(controls!=null)controls.require(db.queryForObject("SELECT event_id FROM gift_groups WHERE id=?",UUID.class,groupId),(String)rows.getFirst().get("kind"));
+  return rows.get(0);
  }
  @GetMapping("/invitation")
  public Map<String,Object> invitation(@PathVariable UUID token,@PathVariable UUID groupId){

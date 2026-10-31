@@ -14,6 +14,7 @@ import java.util.UUID;
 @Service
 public class RazorpayOrderCreationService {
 
+    @org.springframework.beans.factory.annotation.Autowired private com.giftplatform.payment.control.PaymentControlService controls;
     private final PaymentOrderService orders;
     private final RazorpayClient razorpay;
     private final JdbcTemplate jdbc;
@@ -32,8 +33,14 @@ public class RazorpayOrderCreationService {
             String razorpayOrderId,
             long amountPaise,
             String currency,
-            String status
-    ) {}
+            String status,
+            long platformFeePaise,
+            long hostReceivesPaise
+    ) {
+        public CheckoutOrder(UUID id,String provider,long amount,String currency,String status) {
+            this(id,provider,amount,currency,status,0,amount);
+        }
+    }
 
     @Transactional
     public CheckoutOrder create(
@@ -43,15 +50,28 @@ public class RazorpayOrderCreationService {
             long amountPaise,
             String idempotencyKey) {
 
+        return create(eventId,giftId,contributionType,amountPaise,idempotencyKey,null,null,null);
+    }
+
+    @Transactional
+    public CheckoutOrder create(UUID eventId, UUID giftId, String contributionType, long amountPaise,
+                                String idempotencyKey, Long acceptedFeePaise, Long acceptedTotalPaise, Long acceptedHostReceivesPaise) {
         // Existing service validates event, gift, amount and
         // idempotency, using a PostgreSQL advisory transaction lock.
         PaymentOrder order = orders.create(
                 eventId, giftId, contributionType,
                 amountPaise, idempotencyKey);
 
+        if ((order.getPlatformFeePaise()>0 && (acceptedFeePaise==null || acceptedTotalPaise==null || acceptedHostReceivesPaise==null)) ||
+                (acceptedFeePaise!=null && acceptedFeePaise!=order.getPlatformFeePaise()) ||
+                (acceptedTotalPaise!=null && !acceptedTotalPaise.equals(order.getAmountPaise())) ||
+                (acceptedHostReceivesPaise!=null && !acceptedHostReceivesPaise.equals(order.getHostReceivesPaise()))) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,"Platform fee changed. Review the fee and try again.");
+        }
+
         List<CheckoutOrder> existing = jdbc.query("""
             SELECT provider_order_id, amount_paise,
-                   currency, status
+                   currency, status, platform_fee_paise, COALESCE(host_receives_paise,amount_paise) AS host_receives_paise
             FROM payment_orders
             WHERE id = ?
             FOR UPDATE
@@ -60,7 +80,7 @@ public class RazorpayOrderCreationService {
                 rs.getString("provider_order_id"),
                 rs.getLong("amount_paise"),
                 rs.getString("currency"),
-                rs.getString("status")
+                rs.getString("status"),rs.getLong("platform_fee_paise"),rs.getLong("host_receives_paise")
             ), order.getId());
 
         if (existing.size() != 1) {
@@ -79,6 +99,10 @@ public class RazorpayOrderCreationService {
                     "Payment order is not eligible for provider creation");
         }
 
+        if(controls!=null) {
+            controls.require(eventId,"RAZORPAY");
+            if(controls.event(eventId).get("ROUTING"))throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Complete Route account, fee and settlement setup before routed collection");
+        }
         // UUID receipt is 36 characters (Razorpay max: 40).
         var provider = razorpay.createOrder(
                 order.getAmountPaise(),
@@ -111,6 +135,6 @@ public class RazorpayOrderCreationService {
 
         return new CheckoutOrder(
                 order.getId(), provider.id(),
-                order.getAmountPaise(), "INR", "PENDING");
+                order.getAmountPaise(), "INR", "PENDING",order.getPlatformFeePaise(),order.getHostReceivesPaise());
     }
 }

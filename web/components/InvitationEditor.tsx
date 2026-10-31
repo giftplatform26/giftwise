@@ -27,7 +27,7 @@ export default function SharedVisualInvitationEditor({eventId:linkedEventId = ""
  const [editBackground,setEditBackground]=useState(false);
  const [backgroundSize,setBackgroundSize]=useState<{w:number;h:number}|null>(null);
  const backgroundDrag=useRef<{sx:number;sy:number;before:Design;start:{x:number;y:number;zoom:number}}|null>(null);
- const [platformAssets,setPlatformAssets]=useState<{id:string;category:string;occasion:string;title:string}[]>([]);
+ const [platformAssets,setPlatformAssets]=useState<{id:string;category:string;occasion:string;title:string;tier?:string;accessible?:boolean}[]>([]);
  const [platformError,setPlatformError]=useState('');
  const [galleryCategory,setGalleryCategory]=useState('All');const [design,setDesign]=useState<Design>(initialDesign as Design);const [occasion,setOccasion]=useState('OTHER');const [eventTitle,setEventTitle]=useState('');const [selected,setSelected]=useState('title');const [history,setHistory]=useState<Design[]>([]);const [future,setFuture]=useState<Design[]>([]);const [ready,setReady]=useState(false);const [status,setStatus]=useState('Draft saved locally');const [scale,setScale]=useState(0.7);const [eventId,setEventId]=useState(linkedEventId);const [qrUrl,setQrUrl]=useState('');const drag=useRef<{id:string;sx:number;sy:number;ox:number;oy:number;ow:number;oh:number;mode:'move'|'resize';before:Design}|null>(null);
  useEffect(()=>{try{const saved=localStorage.getItem(linkedEventId ? `gift-invitation-studio-v1-${linkedEventId}` : 'gift-invitation-studio-v1');if(saved){const parsed=JSON.parse(saved);if(validateDesign(parsed)&&validateSafeLayout(parsed)){initialDraft.current=JSON.stringify(parsed)!==JSON.stringify(initialDesign);setDesign(parsed)}}}catch{}setReady(true)},[]);
@@ -37,7 +37,7 @@ export default function SharedVisualInvitationEditor({eventId:linkedEventId = ""
  useEffect(()=>{if(focused&&!linkedEventId)hostApi.events(fetch).then(setEventChoices).catch(()=>{})},[focused,linkedEventId]);
  useEffect(()=>{
   let active=true;
-  listPublishedAssets(fetch)
+  (linkedEventId?fetch('/backend/api/v1/commerce/templates',{credentials:'include',cache:'no-store'}).then(async r=>{if(!r.ok)throw Error();return r.json()}):listPublishedAssets(fetch))
    .then(items=>{if(active)setPlatformAssets(items);})
    .catch(()=>{if(active)setPlatformError('Unable to load published gallery assets');});
   return ()=>{active=false;};
@@ -98,7 +98,7 @@ export default function SharedVisualInvitationEditor({eventId:linkedEventId = ""
  }
  function commit(next:Design){if(next===design)return;editedDraft.current=true;if(!validateSafeLayout(next)){setStatus('Change blocked: QR protected area');return}setHistory(h=>[...h.slice(-49),design]);setFuture([]);setDesign(next)}
  function patch(id:string,p:Partial<Item>){commit(safeUpdateElement(design,id,p))}
- function insertSticker(id:string){const next=addSticker(design,id) as Design;if(next===design){setStatus('No QR-safe space for this decoration');return}commit(next);setSelected(next.elements[next.elements.length-1].id)}
+ function insertSticker(id:string,authenticated=false){const next=addSticker(design,id,authenticated) as Design;if(next===design){setStatus('No QR-safe space for this decoration');return}commit(next);setSelected(next.elements[next.elements.length-1].id)}
  function finishDrag(){const d=drag.current;drag.current=null;if(!d)return;setDesign(current=>{if(JSON.stringify(current)!==JSON.stringify(d.before)){setHistory(h=>[...h.slice(-49),d.before]);setFuture([])}return current})}
  function undo(){if(!history.length)return;setFuture(f=>[design,...f]);setDesign(history[history.length-1]);setHistory(h=>h.slice(0,-1))}
  function redo(){if(!future.length)return;setHistory(h=>[...h,design]);setDesign(future[0]);setFuture(f=>f.slice(1))}
@@ -204,12 +204,13 @@ async function downloadArtwork(){
       platformAssets.map(a=>({...a,published:true})),
       occasion
     ).map(a=>{
-      const src=publicAssetImageUrl(a.id);
+      const src=linkedEventId?`/backend/api/v1/commerce/templates/${a.id}/image`:publicAssetImageUrl(a.id);
+    if((a.tier==='PREMIUM'&&!linkedEventId)||a.accessible===false)return <a key={a.id} href="/host/monetization" style={{padding:12,border:'1px solid #ddd',borderRadius:8}}>{a.title} · Premium · Unlock →</a>;
       return <button
         key={a.id}
         type="button"
         title={`Add ${a.title}`}
-        onClick={()=>insertSticker(platformDecorationId(a.id))}
+        onClick={()=>insertSticker(platformDecorationId(a.id),!!linkedEventId)}
         style={{
           padding:6,
           border:'1px solid #ccc',
@@ -232,7 +233,7 @@ async function downloadArtwork(){
 
  <div className="section">
   <h3>Platform Backgrounds</h3>
- <p>Published backgrounds from the administrator gallery.</p>
+ <p>Published backgrounds from the administrator gallery. <a href="/host/monetization">Browse premium invitations and plans →</a></p>
  {platformError&&<p role="alert">{platformError}</p>}
  <div style={{
   display:'grid',
@@ -246,7 +247,8 @@ async function downloadArtwork(){
    .filter(a=>a.category==='BACKGROUND'&&
      (a.occasion===occasion||a.occasion==='OTHER'))
    .map(a=>{
-    const src=publicAssetImageUrl(a.id);
+    const src=linkedEventId?`/backend/api/v1/commerce/templates/${a.id}/image`:publicAssetImageUrl(a.id);
+    if((a.tier==='PREMIUM'&&!linkedEventId)||a.accessible===false)return <a key={a.id} href="/host/monetization" style={{padding:12,border:'1px solid #ddd',borderRadius:8}}>{a.title} · Premium · Unlock →</a>;
     return <button
      key={a.id}
      type="button"

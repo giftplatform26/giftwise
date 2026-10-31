@@ -13,6 +13,11 @@ public class GalleryAssetController {
  public List<GalleryAssetService.AssetInfo> published(){return service.published();}
  @GetMapping("/api/public/invitation-assets/{id}/image")
  public ResponseEntity<byte[]> publishedImage(@PathVariable UUID id){return image(service.publishedImage(id));}
+ @GetMapping("/api/v1/commerce/templates/{id}/image")
+ public ResponseEntity<byte[]> purchasedImage(@PathVariable UUID id){return image(service.purchasedImage(id));}
+ public record Tier(String tier){}
+ @PutMapping("/api/admin/invitation-assets/{id}/tier")
+ public GalleryAssetService.AssetInfo tier(@PathVariable UUID id,@RequestBody Tier input){return service.tier(id,input==null?null:input.tier());}
  @GetMapping("/api/admin/invitation-assets")
  public List<GalleryAssetService.AssetInfo> all(){return service.all();}
  @GetMapping("/api/admin/invitation-assets/{id}/image")

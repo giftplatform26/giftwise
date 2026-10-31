@@ -17,7 +17,7 @@ public class PaymentNotificationService {
     public void recordVerifiedContribution(RazorpayCaptureService.CaptureResult result) {
         UUID contributionId = result.contributionId();
         List<Detail> rows = jdbc.query("""
-            SELECT c.event_id, c.guest_email, c.amount_paise
+            SELECT c.event_id, c.guest_email, c.amount_paise-po.platform_fee_paise
             FROM contributions c
             JOIN payment_orders po ON po.id = c.payment_order_id AND po.status = 'CAPTURED'
             WHERE c.id = ?

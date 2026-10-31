@@ -268,6 +268,9 @@ public class RazorpayCaptureService {
                 """, payment.method(), payment.bank(), payment.bankTransactionId(), payment.rrn(),
                     payment.upiTransactionId(), localOrderId, paymentId);
 
+            if((payment.feePaise()!=null&&payment.feePaise()<0)||(payment.taxPaise()!=null&&payment.taxPaise()<0)||
+                    (payment.feePaise()!=null&&payment.taxPaise()!=null&&payment.taxPaise()>payment.feePaise()))throw new IllegalStateException("Invalid provider fee/tax breakdown");
+            jdbc.update("UPDATE payment_transactions SET provider_fee_paise=COALESCE(?,provider_fee_paise),provider_tax_paise=COALESCE(?,provider_tax_paise) WHERE payment_order_id=? AND provider_payment_id=? AND status='CAPTURED'",payment.feePaise(),payment.taxPaise(),localOrderId,paymentId);
             var allocation = allocations.allocate(contributionId);
 
             // This runs inside the verified-capture transaction. Never emit on an unverified claim.

@@ -53,8 +53,8 @@ class RazorpayOrderCreationServiceIntegrationTest {
             "test-hash", "CUSTOMER");
 
         jdbc.update("""
-            INSERT INTO events(id,title,occasion_type,status,owner_id)
-            VALUES (?,?,?,?,?)
+            INSERT INTO events(id,title,occasion_type,status,owner_id,host_display_name)
+            VALUES (?,?,?,?,?,'Test Host')
             """, event, "Razorpay Test",
             "BIRTHDAY", "PUBLISHED", user);
 

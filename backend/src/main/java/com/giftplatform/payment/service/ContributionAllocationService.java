@@ -114,6 +114,10 @@ public class ContributionAllocationService {
                     "Verified captured payment required");
         }
 
+        Long feeSnapshot=jdbc.queryForObject("SELECT platform_fee_paise FROM payment_orders WHERE id=?",Long.class,c.paymentOrderId());
+        long fee=feeSnapshot==null?0L:feeSnapshot;
+        if(fee<0 || fee>=c.amountPaise()) throw new IllegalStateException("Invalid fee snapshot");
+        long netPaise=c.amountPaise()-fee;
         long giftPaise = 0L;
 
         if (c.giftId() != null) {
@@ -164,10 +168,10 @@ public class ContributionAllocationService {
                     0L, Math.subtractExact(
                             targets.get(0), funded == null ? 0L : funded));
 
-            giftPaise = Math.min(c.amountPaise(), remaining);
+            giftPaise = Math.min(netPaise, remaining);
         }
 
-        long walletPaise = c.amountPaise() - giftPaise;
+        long walletPaise = netPaise - giftPaise;
         UUID group = UUID.randomUUID();
 
         // Unique contribution marker and all financial writes
@@ -213,6 +217,8 @@ public class ContributionAllocationService {
             ledger(c.eventId(), contributionId, group,
                     "HOST_PENDING", walletPaise);
         }
+
+        if(fee>0) ledger(c.eventId(),contributionId,group,"PLATFORM_REVENUE",fee);
 
         String status = giftPaise > 0 && walletPaise > 0
                 ? "REALLOCATED"
