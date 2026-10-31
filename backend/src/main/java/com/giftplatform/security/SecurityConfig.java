@@ -112,7 +112,7 @@ public class SecurityConfig {
                                 "/api/auth/login"
                         ).permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/recovery/request", "/api/auth/recovery/complete", "/api/auth/recovery/username/request", "/api/auth/signup-email/start", "/api/auth/signup-email/verify").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/auth/contact-mobile/start", "/api/auth/contact-mobile/complete", "/api/auth/recovery/enroll-email", "/api/auth/recovery/verify-email").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/contact-mobile/start", "/api/auth/contact-mobile/complete", "/api/auth/recovery/enroll-email", "/api/auth/recovery/verify-email", "/api/auth/recovery/update-email").authenticated()
                         .requestMatchers(HttpMethod.GET,"/api/auth/recovery/email-status", "/api/auth/contact-mobile/status").authenticated()
                         .requestMatchers(
                                 HttpMethod.GET,

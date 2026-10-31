@@ -58,7 +58,7 @@ public class SignupEmailVerificationService {
         });
         try{delivery.send(destination,"Your Gift Platform signup email verification code is "+code+". It expires in 10 minutes. Never share it.");}
         catch(com.giftplatform.security.delivery.EmailDeliveryException ex){throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,ex.getMessage());}
-        return new Started(id,"Check your email for a six-digit code.");
+        return new Started(id,com.giftplatform.security.delivery.EmailVerificationFeedback.REQUESTED);
     }
     public Verified verify(UUID id,String code){
         if(key.length<32)throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Email verification is not configured");

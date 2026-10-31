@@ -135,26 +135,47 @@ public class EmailRecoveryController {
         return new Result("Credential updated. Sign in again.");
     }
     public record EmailStatus(String email,boolean verified){}
-    @GetMapping("/email-status")
-    public EmailStatus emailStatus(Authentication auth){
+    public record UpdateEmail(String email){}
+    private Account authenticatedAccount(Authentication auth) {
         if(auth==null||!(auth.getPrincipal() instanceof GiftUserPrincipal p))throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
         String kind=p.getAuthorities().stream().anyMatch(x->x.getAuthority().equals("ROLE_PLATFORM_ADMIN"))?"PLATFORM_ADMIN":"HOST";
-        Account account=find(kind,p.getUsername());
-        if(account==null||!account.id.equals(p.getUserId()))throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+        var rows=db.query("SELECT id,email,email_verified_at FROM users WHERE id=? AND role=? AND enabled=true",
+                (rs,n)->new Account(kind,rs.getObject("id",UUID.class),rs.getString("email"),rs.getTimestamp("email_verified_at")!=null,null),
+                p.getUserId(),kind.equals("HOST")?"CUSTOMER":"PLATFORM_ADMIN");
+        if(rows.size()!=1)throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+        return rows.getFirst();
+    }
+    @PostMapping("/update-email") @Transactional
+    public Result updateEmail(@RequestBody UpdateEmail body,Authentication auth) {
+        Account a=authenticatedAccount(auth);
+        if(a.verified)throw new ResponseStatusException(HttpStatus.CONFLICT,"Verified email addresses cannot be changed.");
+        String destination=normalized(body==null?null:body.email());
+        if(destination.length()>254||!destination.matches("[^@\\s]+@[^@\\s]+\\.[^@\\s]+"))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Enter a valid email address");
+        try {
+            if(db.update("UPDATE users SET email=? WHERE id=? AND email_verified_at IS NULL",destination,a.id)!=1)
+                throw new ResponseStatusException(HttpStatus.CONFLICT,"The email is already verified or the account is unavailable.");
+        } catch(org.springframework.dao.DuplicateKeyException ex) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,"This email address is already in use.");
+        }
+        db.update("UPDATE account_contact_challenges SET consumed_at=now() WHERE account_kind=? AND account_id=? AND channel='EMAIL' AND purpose='VERIFY_CONTACT' AND consumed_at IS NULL",a.kind,a.id);
+        return new Result("Email updated. Send a new verification code to verify this address.");
+    }
+    @GetMapping("/email-status")
+    public EmailStatus emailStatus(Authentication auth){
+        Account account=authenticatedAccount(auth);
         return new EmailStatus(account.email,account.verified);
     }
     @PostMapping("/enroll-email")
     public CodeIssued enroll(Authentication auth, jakarta.servlet.http.HttpServletRequest req) {
         ready();
-        if(auth==null||!(auth.getPrincipal() instanceof GiftUserPrincipal p)) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+        Account a=authenticatedAccount(auth);
         if(!permitted(req.getRemoteAddr()==null?"unknown":req.getRemoteAddr())) throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS);
-        String kind=p.getAuthorities().stream().anyMatch(x->x.getAuthority().equals("ROLE_PLATFORM_ADMIN"))?"PLATFORM_ADMIN":"HOST";
-        Account a=find(kind,p.getUsername());
-        if(a==null||!a.id.equals(p.getUserId())) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+        String kind=a.kind;
         Integer count=db.queryForObject("SELECT count(*) FROM account_contact_challenges WHERE account_kind=? AND account_id=? AND purpose='VERIFY_CONTACT' AND created_at>now()-interval '1 hour'",Integer.class,kind,a.id);
         if(count!=null&&count>=3) throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS);
         if(!email.isAvailable())throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Email verification delivery is not configured. Please contact support.");
-        try{return new CodeIssued(issue(a,"VERIFY_CONTACT"),"A verification code has been sent to your registered email.");}
+        try{return new CodeIssued(issue(a,"VERIFY_CONTACT"),com.giftplatform.security.delivery.EmailVerificationFeedback.REQUESTED);}
         catch(com.giftplatform.security.delivery.EmailDeliveryException ex){
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,ex.getMessage());
         }
@@ -162,11 +183,11 @@ public class EmailRecoveryController {
     @PostMapping("/verify-email") @Transactional
     public Result verifyEmail(@RequestBody VerifyEmail body,Authentication auth) {
         ready();
-        if(auth==null||!(auth.getPrincipal() instanceof GiftUserPrincipal p)||body==null||body.challengeId()==null||body.code()==null||!body.code().matches("[0-9]{6}")) throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-        String kind=p.getAuthorities().stream().anyMatch(x->x.getAuthority().equals("ROLE_PLATFORM_ADMIN"))?"PLATFORM_ADMIN":"HOST";
-        Account a=find(kind,p.getUsername());
-        if(a==null||!a.id.equals(p.getUserId())||!challenges.verifyAndConsume(body.challengeId(),kind,a.id,"VERIFY_CONTACT",digest(normalized(a.email)),sign(body.challengeId(),a,"VERIFY_CONTACT",body.code()))) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid or expired code");
-        db.update("UPDATE users SET email_verified_at=now() WHERE id=? AND lower(email)=?",a.id,normalized(a.email));
+        if(body==null||body.challengeId()==null||body.code()==null||!body.code().matches("[0-9]{6}")) throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        Account a=authenticatedAccount(auth);
+        if(!challenges.verifyAndConsume(body.challengeId(),a.kind,a.id,"VERIFY_CONTACT",digest(normalized(a.email)),sign(body.challengeId(),a,"VERIFY_CONTACT",body.code()))) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid or expired code");
+        if(db.update("UPDATE users SET email_verified_at=now() WHERE id=? AND lower(email)=?",a.id,normalized(a.email))!=1)
+            throw new ResponseStatusException(HttpStatus.CONFLICT,"Email changed. Send a new verification code.");
         return new Result("Email verified for account recovery.");
     }
 }

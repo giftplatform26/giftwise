@@ -30,4 +30,12 @@ class EmailDeliveryConfigurationTest {
         assertTrue(EmailDeliveryException.rejected(429,"private").getMessage().contains("rate limited"));
         assertFalse(EmailDeliveryException.rejected(500,"private").getMessage().contains("private"));
     }
+    @Test void rejectedRecipientsGetActionableFeedbackWithoutProviderDetails(){
+        for(String reason:java.util.List.of("Invalid recipient", "Invalid `to` field", "Mailbox unavailable", "No such user")){
+            var failure=EmailDeliveryException.rejected(422,reason+" private@example.test secret-value");
+            assertTrue(failure.getMessage().contains("recipient email address was rejected"));
+            assertFalse(failure.getMessage().contains("private@example.test"));
+            assertFalse(failure.getMessage().contains("secret-value"));
+        }
+    }
 }

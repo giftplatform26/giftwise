@@ -94,6 +94,9 @@ public class GroupEmailEnrollmentController {
         ready();
         if(body==null||body.email()==null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Email required");
         Account a=account(token,body.groupId(),req);
+        String table=a.kind.equals("GROUP_ADMIN")?"gift_group_accounts":"gift_group_members";
+        Boolean verified=db.queryForObject("SELECT email_verified_at IS NOT NULL FROM "+table+" WHERE id=? FOR UPDATE",Boolean.class,a.id);
+        if(Boolean.TRUE.equals(verified))throw new ResponseStatusException(HttpStatus.CONFLICT,"Verified email addresses cannot be changed.");
         String destination=body.email().strip().toLowerCase(Locale.ROOT);
         if(destination.length()>254||!destination.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$"))
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Enter a valid email address");
@@ -104,7 +107,7 @@ public class GroupEmailEnrollmentController {
         db.update("INSERT INTO account_pending_email_verifications(challenge_id,account_kind,account_id,email,expires_at) VALUES(?,?,?,?,?)",id,a.kind,a.id,destination,java.sql.Timestamp.from(Instant.now().plusSeconds(600)));
         try { email.send(destination,"Your Gift Platform email verification code is "+code+". It expires in 10 minutes. Never share it."); }
         catch(RuntimeException ex) { throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Email delivery unavailable"); }
-        return new Started(id,"Verification code sent to your new email address");
+        return new Started(id,com.giftplatform.security.delivery.EmailVerificationFeedback.REQUESTED);
     }
     @PostMapping("/complete")
     @Transactional
@@ -119,8 +122,8 @@ public class GroupEmailEnrollmentController {
         if(!challenges.verifyAndConsume(body.challengeId(),a.kind,a.id,"VERIFY_CONTACT",fingerprint(destination),hash(body.challengeId(),a,destination,body.code())))
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid or expired code");
         String table=a.kind.equals("GROUP_ADMIN")?"gift_group_accounts":"gift_group_members";
-        if(db.update("UPDATE "+table+" SET email=?,email_verified_at=now() WHERE id=?",destination,a.id)!=1)
-            throw new ResponseStatusException(HttpStatus.CONFLICT,"Account no longer available");
+        if(db.update("UPDATE "+table+" SET email=?,email_verified_at=now() WHERE id=? AND email_verified_at IS NULL",destination,a.id)!=1)
+            throw new ResponseStatusException(HttpStatus.CONFLICT,"The email is already verified or the account is unavailable.");
         db.update("DELETE FROM account_pending_email_verifications WHERE challenge_id=?",body.challengeId());
         return new Result("Email verified. You can now use it for account recovery.");
     }

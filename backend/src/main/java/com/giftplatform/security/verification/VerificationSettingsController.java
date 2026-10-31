@@ -21,6 +21,11 @@ public class VerificationSettingsController {
   boolean valid;try{valid=Base64.getDecoder().decode(encoded).length>=32;}catch(IllegalArgumentException ex){valid=false;}keyReady=valid;
  }
  private void admin(){if(!actor.isPlatformAdmin())throw new ResponseStatusException(HttpStatus.FORBIDDEN);}
+ @ExceptionHandler(ResponseStatusException.class)
+ public ResponseEntity<ProblemDetail> failure(ResponseStatusException error){
+  return ResponseEntity.status(error.getStatusCode()).body(ProblemDetail.forStatusAndDetail(
+    error.getStatusCode(),error.getReason()==null?"Unable to change verification settings":error.getReason()));
+ }
  @GetMapping("/api/public/verification-settings")
  public ResponseEntity<VerificationSettings.Settings> current(){return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(settings.current());}
  @GetMapping("/api/admin/verification-settings")
