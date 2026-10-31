@@ -13,12 +13,15 @@ import static org.junit.jupiter.api.Assertions.*;
 class InvitationComposerTest {
  private final InvitationComposer c=new InvitationComposer(new QrRenderer());
  @Test void everyStyleProducesScannablePng() throws Exception {
-  String url="https://gifts.example.test/e/"+java.util.UUID.randomUUID();
-  for(InvitationStyle style:InvitationStyle.values()){
-   byte[] bytes=c.render(url,"Birthday Party","Join our celebration",style,null);
-   var img=ImageIO.read(new ByteArrayInputStream(bytes));assertEquals(900,img.getWidth());assertEquals(1200,img.getHeight());
-   var bitmap=new BinaryBitmap(new HybridBinarizer(new BufferedImageLuminanceSource(img)));
-   assertEquals(url,new MultiFormatReader().decode(bitmap).getText());
+  var random=new java.util.Random(0);
+  for(int sample=0;sample<100;sample++){
+   String url="https://gifts.example.test/e/"+new java.util.UUID(random.nextLong(),random.nextLong());
+   for(InvitationStyle style:InvitationStyle.values()){
+    byte[] bytes=assertDoesNotThrow(()->c.render(url,"Birthday Party","Join our celebration",style,null),style+" "+url);
+    var img=ImageIO.read(new ByteArrayInputStream(bytes));assertEquals(900,img.getWidth());assertEquals(1200,img.getHeight());
+    var bitmap=new BinaryBitmap(new HybridBinarizer(new BufferedImageLuminanceSource(img)));
+    assertEquals(url,new MultiFormatReader().decode(bitmap).getText());
+   }
   }
  }
  @Test void photoDoesNotChangeQrDestination() throws Exception {

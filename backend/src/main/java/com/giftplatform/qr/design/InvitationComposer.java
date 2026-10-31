@@ -29,8 +29,9 @@ public class InvitationComposer {
     if(greeting!=null&&!greeting.isBlank()){g.setFont(new Font("SansSerif",Font.PLAIN,24));drawCentered(g,trim(greeting,48),450,262);}
     // The complete quiet zone stays inside an opaque white panel.
     g.setColor(Color.WHITE);g.fillRect(130,340,640,640);
-    BufferedImage code=ImageIO.read(new ByteArrayInputStream(qr.png(url)));
-    g.drawImage(code,154,364,592,592,null);
+    BufferedImage code=ImageIO.read(new ByteArrayInputStream(qr.png(url,592)));
+    // Preserve the renderer's integer module widths instead of rescaling the QR bitmap.
+    g.drawImage(code,450-code.getWidth()/2,660-code.getHeight()/2,null);
     g.setColor(new Color(50,50,50));g.setFont(new Font("SansSerif",Font.PLAIN,22));
     drawCentered(g,"Scan to celebrate & explore gifts",450,1040);
    }finally{g.dispose();}

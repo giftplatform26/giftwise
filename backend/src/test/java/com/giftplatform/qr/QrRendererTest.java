@@ -21,5 +21,11 @@ class QrRendererTest {
         assertEquals(url, new MultiFormatReader().decode(bitmap).getText());
     }
     @Test void rejectsBlankUrl() { assertThrows(IllegalArgumentException.class, () -> renderer.png(" ")); }
+    @Test void unreadableDefaultMaskFallsBackToScannableMask() throws Exception {
+        String url = "https://gifts.example.test/e/86d5c620-b9cc-619d-e63a-d18dfc139ac0";
+        var image = ImageIO.read(new ByteArrayInputStream(renderer.png(url)));
+        var bitmap = new BinaryBitmap(new HybridBinarizer(new BufferedImageLuminanceSource(image)));
+        assertEquals(url, new MultiFormatReader().decode(bitmap).getText());
+    }
     @Test void rejectsOverlongUrl() { assertThrows(IllegalArgumentException.class, () -> renderer.png("x".repeat(2049))); }
 }

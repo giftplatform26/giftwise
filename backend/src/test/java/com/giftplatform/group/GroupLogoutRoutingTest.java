@@ -24,6 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(GroupContributionController.class)
 @Import(SecurityConfig.class)
 class GroupLogoutRoutingTest {
+ @MockitoBean com.giftplatform.monetization.CommercialAccessService commerce;
  @MockitoBean com.giftplatform.security.verification.VerificationSettings verificationSettings;
  @MockitoBean GroupReadinessService readiness;
  @MockitoBean com.giftplatform.admin.EffectiveModulePermissionService modulePermissions;
