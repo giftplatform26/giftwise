@@ -1,4 +1,5 @@
 'use client';
+import GroupContribution from '../../../components/GroupContribution';
 import GiftDescription from '../../../components/GiftDescription';
 import dynamic from 'next/dynamic';
 import {useExperience} from '../../../components/ExperienceProvider';
@@ -14,7 +15,7 @@ import type {EventFeatures} from '../../../components/useEventFeatures';
 import GuestActions from '../../../components/GuestActions';
 import GuestCelebration from '../../../components/GuestCelebration';
 
-type Gift={id:string;name:string;description:string|null;targetAmount:number;imageUrl?:string|null;priority?:'HIGH'|'MEDIUM'|'LOW'};
+type Gift={contributionEnabled?:boolean;contributionDisabledReason?:string;id:string;name:string;description:string|null;targetAmount:number;imageUrl?:string|null;priority?:'HIGH'|'MEDIUM'|'LOW'};
 type Progress={giftId:string;contributedPaise:number;contributionCount:number};
 type Event={title:string;description:string|null;occasionType:string;eventDate:string|null;gifts:Gift[];features?:EventFeatures};
 const icon:Record<string,string>={WEDDING:'💍',BIRTHDAY:'🎂',BABY_SHOWER:'🧸',HOUSEWARMING:'🏡',ANNIVERSARY:'🥂',OTHER:'✨'};
@@ -42,6 +43,7 @@ function ClassicPublicEventPage(){
   },[token]);
   useEffect(()=>{const controller=new AbortController();void refreshProgress(controller.signal);return()=>controller.abort()},[refreshProgress]);
   useEffect(()=>{const onKey=(e:KeyboardEvent)=>{if(e.key==='Escape'){setSelectedGift(null);setWalletOpen(false)}};window.addEventListener('keydown',onKey);return()=>window.removeEventListener('keydown',onKey)},[]);
+  useEffect(()=>{const reserved=(event:globalThis.Event)=>{const id=(event as CustomEvent<{giftId:string}>).detail?.giftId;setEvent(previous=>previous?{...previous,gifts:previous.gifts.map(g=>g.id===id?{...g,contributionEnabled:false,contributionDisabledReason:'A surprise is waiting'}:g)}:previous)};window.addEventListener('gift-group-reserved',reserved);return()=>window.removeEventListener('gift-group-reserved',reserved)},[]);
   const progressValue=(value:string|number)=>progressState==='ready'?value:progressState==='loading'?'Loading…':'Unavailable';
   const rupees=(v:number)=>new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:2}).format(v);
   if(state==='loading')return <main className="publicEventMessage">Preparing your celebration…</main>;
@@ -67,7 +69,8 @@ function ClassicPublicEventPage(){
           <div className="loveGiftMetrics"><div><small>Gift Value</small><b>{rupees(total/100)}</b></div><div><small>Contributions Received</small><b>{progressValue(rupees(given/100))}</b></div><div><small>Still to Be Gifted</small><b>{progressValue(rupees(remaining/100))}</b></div><div><small>Contributions Made</small><b>{progressValue(progress[g.id]?.contributionCount??0)}</b></div></div>
           {progressState==='ready'&&<div className="loveGiftTrack" role="progressbar" aria-label={`${g.name} gifted`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={percent}><div style={{width:`${percent}%`}}/></div>}
           {progressState==='ready'&&remaining===0?<div className="loveGiftComplete">❤️ This Gift Is Complete with Love!<small>Thank you to everyone who made this gift special.</small></div>:
-            <button type="button" className="loveGiftButton" onClick={()=>setSelectedGift(g)}>♡ Contribute with Love</button>}
+            <button type="button" className="loveGiftButton" disabled={g.contributionEnabled===false} title={g.contributionDisabledReason} onClick={()=>setSelectedGift(g)}>{g.contributionEnabled===false?g.contributionDisabledReason:"♡ Contribute with Love"}</button>}
+          {event.features?.GROUP_GIFTING&&g.contributionEnabled!==false&&<GroupContribution token={token} initialGiftId={g.id} compact/>}
         </article>
       })}</div>}
     </section><section className="loveWalletSection"><h2>Send Love to the Celebration</h2><p>Prefer to share a gift for the celebration as a whole?</p><button type="button" className="loveGiftButton" onClick={()=>setWalletOpen(true)}>♡ Contribute to the Celebration</button></section>

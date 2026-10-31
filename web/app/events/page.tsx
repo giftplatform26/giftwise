@@ -10,7 +10,7 @@ type EventItem = {
   occasionType: string;
   eventDate: string | null;
   status: string;
-  canPublish: boolean;
+  canPublish: boolean; publishDisabledReasons?: string[];
 };
 const symbols:Record<string,string>={WEDDING:'💍',BIRTHDAY:'🎂',BABY_SHOWER:'🧸',HOUSEWARMING:'🏡',ANNIVERSARY:'🥂',OTHER:'✨'};
 function ClassicEvents(){const router=useRouter();const [user,setUser]=useState('');const [profileName,setProfileName]=useState('');const [nameDraft,setNameDraft]=useState('');const [events,setEvents]=useState<EventItem[]>([]);const [loading,setLoading]=useState(true);const [busy,setBusy]=useState(false);const [error,setError]=useState('');const [title,setTitle]=useState('');const [description,setDescription]=useState('');const [occasionType,setOccasion]=useState('BIRTHDAY');const [eventDate,setDate]=useState('');const [addressLine1,setAddressLine1]=useState('');const [city,setCity]=useState('');const [state,setState]=useState('');const [postalCode,setPostalCode]=useState('');const [country,setCountry]=useState('India');const [hostName,setHostName]=useState('');const [contactName,setContactName]=useState('');const [contactPhone,setContactPhone]=useState('');const [contactEmail,setContactEmail]=useState('');
@@ -86,13 +86,13 @@ return <main className="hostShell"><HostToast/>{!loading&&<div style={{padding:'
   >
     Preview celebration →
   </Link>
-  {e.status === 'DRAFT' && !e.canPublish && <Link href={`/events/${e.id}/receiving-accounts`}>Link an account to this event, enable it, and choose a preferred account to publish.</Link>}
+  {e.status === 'DRAFT' && !e.canPublish && <Link href={`/events/${e.id}/receiving-accounts`}>{e.publishDisabledReasons?.join("; ")||"Verify email and add a preferred receiving account to publish."}</Link>}
   {e.status === 'DRAFT' && (
-  <button
+  <span title={e.publishDisabledReasons?.join("; ")}><button
     type="button"
     className="hostEventLink"
     disabled={busy || loading || !e.canPublish}
-    title={e.canPublish ? undefined : "Link an account to this event, enable it, and select a preferred account linked to this event."}
+    title={e.canPublish ? undefined : e.publishDisabledReasons?.join("; ")}
     onClick={() => {
       if (
         window.confirm(
@@ -104,7 +104,7 @@ return <main className="hostShell"><HostToast/>{!loading&&<div style={{padding:'
     }}
   >
     {busy ? 'Publishing…' : '✨ Publish event'}
-  </button>
+  </button></span>
 )}
 {e.status === 'PUBLISHED' && e.publicToken && (
   <Link

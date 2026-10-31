@@ -1,6 +1,7 @@
 'use client';
 import {useCallback,useEffect,useRef,useState} from 'react';
 import {useParams} from 'next/navigation';
+import GroupCollectionReport from '../../../../components/GroupCollectionReport';
 import Link from 'next/link';
 import {useExperience} from '../../../../components/ExperienceProvider';
 import './contributions.css';
@@ -35,7 +36,7 @@ export default function ContributionsPage(){
   const blob=await r.blob();const url=URL.createObjectURL(blob);const a=document.createElement('a');
   a.href=url;a.download=`contributions-${eventId}.csv`;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
  }catch(e){setError(e instanceof Error?e.message:'Export unavailable');}finally{setExporting(false);}};
- return <main className="contributionReport" aria-busy={loading}>{!focused&&<p><Link href="/events">← My events</Link> · <Link href={`/events/${encodeURIComponent(eventId)}/notifications`}>Notifications</Link></p>}
+ return <main className="contributionReport" aria-busy={loading}><GroupCollectionReport eventId={eventId}/>{!focused&&<p><Link href="/events">← My events</Link> · <Link href={`/events/${encodeURIComponent(eventId)}/notifications`}>Notifications</Link></p>}
  <h1>Contribution report</h1><p>Gift and celebration-wallet activity. Guest-reported transfers are not confirmed money.</p>
  <label className="reportSearch">Search contributions<input type="search" placeholder="Search guest, gift, or payment method" value={search} maxLength={120} onChange={e=>setSearch(e.target.value)}/></label>
  {focused&&<button type="button" aria-expanded={filterOpen} onClick={()=>setFilterOpen(v=>!v)}>Filter contributions</button>}

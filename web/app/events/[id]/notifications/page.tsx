@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
+import GroupCollectionReport from '../../../../components/GroupCollectionReport';
 import Link from 'next/link';
 import {useExperience} from '../../../../components/ExperienceProvider';
 import {ActivityRow} from '../../../../components/focused/ResponsiveTable';
@@ -87,7 +88,7 @@ export default function NotificationsPage() {
     }}>
       <Link href="/events">← Back to My Events</Link>
 
-      <h1>{focused?'Activity & notifications':'Notification History'}</h1>
+      <GroupCollectionReport eventId={id} notifications/><h1>{focused?'Activity & notifications':'Notification History'}</h1>
       <p>
         Review acknowledgments and notification records for this celebration.
         Queued notifications are not proof of external delivery.
