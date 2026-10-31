@@ -4,6 +4,8 @@ import Link from 'next/link';
 import {hostApi} from '../../lib/host-api.mjs';
 import ExperienceControl from '../../components/focused/ExperienceControl';
 import {useExperience} from '../../components/ExperienceProvider';
+import PlatformVerificationControls from '../../components/PlatformVerificationControls';
+import MobileVerification from '../../components/MobileVerification';
 import AccountEmailVerification from '../../components/AccountEmailVerification';
 import GroupMemberEmailPolicy from '../../components/GroupMemberEmailPolicy';
 import AccountPolicies from './AccountPolicies';
@@ -63,8 +65,8 @@ export default function AdminConsole(){
  {tab==='events'&&<section className="acPanel"><h2>Recent events</h2><div className="acTable"><table><thead><tr><th>Event</th><th>Host</th><th>Occasion</th><th>Status</th></tr></thead><tbody>{events.map(e=><tr key={e.id}><td>{e.title}</td><td>{e.host_name||'—'}</td><td>{e.occasion_type}</td><td>{e.status}</td></tr>)}</tbody></table></div></section>}
  {tab==='reports'&&<><section className="acPanel"><h2>Group transfer reports</h2><p>These are reported transactions, not independently confirmed financial balances. A VERIFIED record count is shown separately and is not proof of ledger settlement.</p><div className="acReportGrid"><div>Awaiting independent verification<strong>{groupReport?.reportedUnverified??'—'}</strong></div><div>Guest-reported amount (not received balance)<strong>{groupReport?`₹${(groupReport.reportedUnverifiedPaise/100).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2})}`:'—'}</strong></div><div>Records marked verified<strong>{groupReport?.verifiedRecords??'—'}</strong></div><div>Rejected reports<strong>{groupReport?.rejectedRecords??'—'}</strong></div></div></section><section className="acPanel"><h2>Guestbook moderation overview</h2><p>Event hosts moderate messages through their own celebration pages; administrators can review platform-wide status here.</p><div className="acReportGrid"><div>Pending approval<strong>{guestbookReport?.pending??'—'}</strong></div><div>Approved<strong>{guestbookReport?.approved??'—'}</strong></div><div>Hidden<strong>{guestbookReport?.hidden??'—'}</strong></div></div></section><section className="acPanel"><h2>Notification activity</h2><p>Outbox records do not mean an email or SMS was delivered.</p><div className="acReportGrid"><div>Manual-claim notification records<strong>{notificationReport?.manualClaimOutbox??'—'}</strong></div></div></section></>}
  {tab==='appearance'&&<ExperienceControl/>}
- {tab==='account'&&<section className="acPanel"><h2>My account</h2><AccountEmailVerification/></section>}
- {tab==='policies'&&<AccountPolicies hosts={hosts} events={events}/>}
+ {tab==='account'&&<section className="acPanel"><h2>My account</h2><AccountEmailVerification/><MobileVerification/></section>}
+ {tab==='policies'&&<><PlatformVerificationControls/><AccountPolicies hosts={hosts} events={events}/></>}
  {tab==='activity'&&<section className="acPanel"><h2>Administrative audit</h2>{history.length?history.map((x,i)=><p key={i}>{x.action} · {x.module_code||'—'} · {new Date(x.created_at).toLocaleString()}</p>):<p>No administrative permission changes recorded yet.</p>}</section>}
  <footer>Gift Platform · Administrator workspace · Payment confirmation remains independently verified</footer></div></main>;
 }

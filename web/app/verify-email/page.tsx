@@ -1,4 +1,5 @@
 'use client';
+import {useVerification} from '../../components/VerificationProvider';
 import {useEffect,useState} from 'react';
 import Link from 'next/link';
 import {Mail,ArrowLeft,CheckCircle2} from 'lucide-react';
@@ -6,6 +7,7 @@ import '../forgot-username/recovery.css';
 type Account={email:string;role:'CUSTOMER'|'PLATFORM_ADMIN'};
 function csrfCookie(){return decodeURIComponent(document.cookie.split('; ').find(x=>x.startsWith('XSRF-TOKEN='))?.slice(11)||'');}
 export default function VerifyEmail(){
+ const {emailVerificationEnabled}=useVerification();
  const [account,setAccount]=useState<Account|null>(null),[session,setSession]=useState<'checking'|'ready'|'required'|'error'>('checking'),[retry,setRetry]=useState(0);
  const [challengeId,setId]=useState(''),[code,setCode]=useState(''),[message,setMessage]=useState(''),[error,setError]=useState(''),[busy,setBusy]=useState(false),[verified,setVerified]=useState(false);
  useEffect(()=>{const controller=new AbortController();setSession('checking');setError('');fetch('/backend/api/auth/me',{credentials:'include',cache:'no-store',signal:controller.signal}).then(async response=>{
@@ -28,5 +30,6 @@ export default function VerifyEmail(){
  async function request(e:React.FormEvent){e.preventDefault();if(!account||busy)return;setBusy(true);setMessage('');setError('');try{const result=await post('enroll-email',{});setId(result.challengeId);setMessage(result.message)}catch(e){setError(e instanceof Error?e.message:'Unable to request code')}finally{setBusy(false)}}
  async function verify(e:React.FormEvent){e.preventDefault();if(!account||busy)return;setBusy(true);setMessage('');setError('');try{const result=await post('verify-email',{challengeId,code});setMessage(result.message);setId('');setCode('');setVerified(true)}catch(e){setError(e instanceof Error?e.message:'Unable to verify email')}finally{setBusy(false)}}
  const dashboard=account?.role==='PLATFORM_ADMIN'?'/admin':'/events';
+ if(!emailVerificationEnabled)return <main className="hostShell"><h1>Account help</h1><p>Use your existing username and password to sign in. Contact support if you need help accessing your account.</p><Link href={dashboard}>Continue to your workspace</Link></main>;
  return <main className="username-recovery"><Link className="username-back" href={account?dashboard:'/login?next=%2Fverify-email'}><ArrowLeft size={16}/> {account?'Back to your workspace':'Back to sign in'}</Link><section className="username-card"><span className="username-icon">{verified?<CheckCircle2 size={25}/>:<Mail size={25}/>}</span><p className="username-kicker">SECURE YOUR ACCOUNT</p><h1>{verified?'Email verified':'Verify your email'}</h1>{session==='checking'?<p role="status">Checking your sign-in session…</p>:session==='required'?<><p>Sign in using your registered email and password first. You’ll return here automatically to verify your email.</p><Link className="verification-sign-in" href="/login?next=%2Fverify-email">Sign in to verify email →</Link></>:session==='error'?<button type="button" onClick={()=>setRetry(v=>v+1)}>Check session again</button>:verified?<><p>Your email can now be used for account recovery.</p><Link href={`/forgot-username?kind=${account?.role==='PLATFORM_ADMIN'?'PLATFORM_ADMIN':'HOST'}&returnTo=%2Flogin`}>Request a username reminder</Link></>:<><p>Confirm ownership of <strong>{account?.email}</strong> to enable account recovery.</p>{!challengeId?<form onSubmit={request}><button type="submit" disabled={busy}>{busy?'Sending request…':'Send email verification code'}</button></form>:<form onSubmit={verify}><label>Six-digit code<input required pattern="[0-9]{6}" inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={code} onChange={e=>setCode(e.target.value)}/></label><button type="submit" disabled={busy}>{busy?'Verifying…':'Verify email'}</button></form>}</>}{error&&<p className="username-error" role="alert">{error}</p>}{message&&<p role="status">{message}</p>}</section></main>;
 }
