@@ -39,7 +39,7 @@ public class SignupEmailVerificationService {
         if(events.size()!=1)throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Invitation unavailable");
         permissions.require(events.getFirst()[1],"GROUP_GIFTING");
         if(kind.equals("GROUP_ADMIN"))return events.getFirst()[0];
-        Integer count=db.queryForObject("SELECT count(*) FROM gift_groups WHERE id=? AND event_id=? AND status='PUBLISHED' AND contribution_access_mode<>'GUESTS_ONLY' AND join_policy<>'INVITE_ONLY'",Integer.class,group,events.getFirst()[0]);
+        Integer count=db.queryForObject("SELECT count(*) FROM gift_groups WHERE id=? AND event_id=? AND contribution_access_mode<>'GUESTS_ONLY' AND join_policy<>'INVITE_ONLY'",Integer.class,group,events.getFirst()[0]);
         if(count==null||count!=1)throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Group registration unavailable");
         return group;
     }

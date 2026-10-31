@@ -108,6 +108,7 @@ class EventManagementServiceTest {
     @Test void missingPreferredAccountBlocksPublishingWithoutMutation() {
         Event e = owned();
         when(readiness.canPublish(e)).thenReturn(false);
+        when(readiness.reasons(e)).thenReturn(List.of("Link a preferred receiving account"));
         assertThat(service.get(e.getId()).canPublish()).isFalse();
         assertThatThrownBy(() -> service.changeStatus(e.getId(), EventStatus.PUBLISHED))
             .isInstanceOf(ResponseStatusException.class).hasMessageContaining("preferred");

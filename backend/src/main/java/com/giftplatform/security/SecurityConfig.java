@@ -171,7 +171,7 @@ public class SecurityConfig {
                                 "/api/v1/phone/otp/verify"
                         ).authenticated()
                         .requestMatchers(
-                                "/api/v1/events", "/api/v1/events/**"
+                                "/api/host/group-member-email-policy", "/api/v1/events", "/api/v1/events/**"
                         ).authenticated()
                         .requestMatchers(
                                 "/api/v1/host/notifications",
@@ -224,7 +224,7 @@ public class SecurityConfig {
                                 "/api/public/groups/*/member-view/*",
                                 "/api/public/groups/*/members/*",
                                 "/api/public/groups/*/members/*/review",
-                                "/api/public/groups/*/publish/*").permitAll()
+                                "/api/public/groups/*/gift-reservation/*", "/api/public/groups/*/publish/*").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/public/groups/*/account-policy").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/public/groups/*/contact-email/start", "/api/public/groups/*/contact-email/complete").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/public/groups/*/contact-email/status").permitAll()

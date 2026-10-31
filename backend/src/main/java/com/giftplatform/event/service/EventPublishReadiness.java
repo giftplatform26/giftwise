@@ -9,7 +9,14 @@ public class EventPublishReadiness {
     private final JdbcTemplate jdbc;
     public EventPublishReadiness(JdbcTemplate jdbc) { this.jdbc = jdbc; }
 
-    public boolean canPublish(Event event) {
+    public java.util.List<String> reasons(Event event) {
+        var reasons=new java.util.ArrayList<String>();
+        if(!Boolean.TRUE.equals(jdbc.queryForObject("SELECT email_verified_at IS NOT NULL FROM users WHERE id=?",Boolean.class,event.getOwnerId()))) reasons.add("Verify your email in Account");
+        if(!hasAccount(event)) reasons.add("Link an enabled receiving account and select it as preferred");
+        return java.util.List.copyOf(reasons);
+    }
+    public boolean canPublish(Event event) { return reasons(event).isEmpty(); }
+    private boolean hasAccount(Event event) {
         return Boolean.TRUE.equals(jdbc.queryForObject("""
             SELECT EXISTS (
                 SELECT 1 FROM host_bank_accounts b

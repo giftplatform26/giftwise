@@ -115,6 +115,7 @@ public class GuestDirectTransferService {
      SELECT id FROM gifts WHERE id=? AND event_id=? AND status='ACTIVE' AND visibility='PUBLIC' FOR UPDATE
      """,(rs,i)->rs.getObject(1,UUID.class),r.giftId(),eventId);
    if(locked.size()!=1) throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Gift unavailable");
+   if(Boolean.TRUE.equals(jdbc.queryForObject("SELECT EXISTS(SELECT 1 FROM gift_groups WHERE reserved_gift_id=?)",Boolean.class,r.giftId())))throw new ResponseStatusException(HttpStatus.CONFLICT,"A surprise is waiting for this gift");
   }
   UUID id=UUID.randomUUID();
   try {

@@ -17,6 +17,7 @@ import java.util.regex.Pattern;
 @RequestMapping("/api/public/groups/{token}")
 public class GroupContributionController {
  private final JdbcTemplate db;
+ private final GroupReadinessService readiness;
  @org.springframework.beans.factory.annotation.Autowired private com.giftplatform.security.recovery.SignupEmailVerificationService signupEmails;
  private final EventRepository events;
  private final PasswordEncoder passwords;
@@ -32,7 +33,7 @@ public class GroupContributionController {
  private static final long GROUP_IDLE_TIMEOUT_MS=10L*60L*1000L;
  private static final GroupLoginRateLimiter LOGIN_LIMITER = new GroupLoginRateLimiter();
  @org.springframework.beans.factory.annotation.Autowired
- public GroupContributionController(JdbcTemplate db,EventRepository events,PasswordEncoder passwords,com.giftplatform.security.recovery.CredentialSessionVersionStore versions,com.giftplatform.security.recovery.EffectiveRecoveryPolicyService policies){this.db=db;this.events=events;this.passwords=passwords;this.versions=versions;this.policies=policies;}
+ public GroupContributionController(JdbcTemplate db,EventRepository events,PasswordEncoder passwords,com.giftplatform.security.recovery.CredentialSessionVersionStore versions,com.giftplatform.security.recovery.EffectiveRecoveryPolicyService policies){this.db=db;this.readiness=new GroupReadinessService(db);this.events=events;this.passwords=passwords;this.versions=versions;this.policies=policies;}
  public GroupContributionController(JdbcTemplate db,EventRepository events,PasswordEncoder passwords,com.giftplatform.security.recovery.CredentialSessionVersionStore versions){this(db,events,passwords,versions,null);}
  public record Credentials(String username,String password,String pin,String confirmPin,String fullName,String email,String mobile,String emailVerificationToken){
  public Credentials(String username,String password,String pin,String confirmPin,String fullName,String email,String mobile){this(username,password,pin,confirmPin,fullName,email,mobile,null);}
@@ -53,7 +54,7 @@ public class GroupContributionController {
   return validatedPin(pin,confirm);
  }
  @GetMapping("/account-policy")
- public Map<String,Boolean> accountPolicy(@PathVariable UUID token){return Map.of("allowGroupPin",pinAllowed(event(token)));}
+ public Map<String,Boolean> accountPolicy(@PathVariable UUID token){UUID e=event(token);return Map.of("allowGroupPin",pinAllowed(e),"memberEmailVerificationRequired",readiness.memberEmailRequired(e));}
  private String validatedPin(String pin,String confirm){
   if(pin==null||!pin.matches("[0-9]{6}"))throw bad("PIN must be exactly six digits");
   if(!pin.equals(confirm))throw bad("PIN confirmation does not match");
@@ -145,6 +146,10 @@ public class GroupContributionController {
  @GetMapping("/dashboard") public Map<String,Object> dashboard(@PathVariable UUID token,HttpServletRequest req){UUID e=event(token),id=sessionAdmin(e,req);List<GroupView> g=groups(id);Map<String,Object> out=new LinkedHashMap<>();out.put("fullName",db.queryForObject("SELECT full_name FROM gift_group_accounts WHERE id=?",String.class,id));out.put("setupRequired",g.isEmpty());out.put("group",g.isEmpty()?null:g.get(0));
   if(!g.isEmpty()){
    UUID groupId=g.get(0).id();
+   out.put("reservedGiftId",db.queryForObject("SELECT reserved_gift_id FROM gift_groups WHERE id=?",UUID.class,groupId));
+   out.put("invitationReadiness",readiness.invitation(groupId));
+   out.put("publishReadiness",readiness.invitation(groupId));
+   out.put("collectionPublished",Boolean.TRUE.equals(db.queryForObject("SELECT collection_published_at IS NOT NULL FROM gift_groups WHERE id=?",Boolean.class,groupId)));
    out.put("summary",db.queryForMap("SELECT (SELECT count(*) FROM gift_group_members WHERE group_id=? AND status='APPROVED') AS member_count, (SELECT count(*) FROM gift_group_members WHERE group_id=? AND status='PENDING') AS pending_member_count, COALESCE(SUM(amount_paise) FILTER (WHERE state='REPORTED_UNVERIFIED'),0) AS reported_paise, count(*) FILTER (WHERE state='REPORTED_UNVERIFIED') AS report_count FROM gift_group_guest_reports WHERE group_id=?",groupId,groupId,groupId));
    out.put("privacy",db.queryForMap("SELECT join_policy,member_visibility,amount_visibility,creator_direct_payments_enabled FROM gift_groups WHERE id=?",groupId));
   }
@@ -202,6 +207,7 @@ public class GroupContributionController {
  @GetMapping("/join/{groupId}")
  public Map<String,Object> groupInvitation(@PathVariable UUID token,@PathVariable UUID groupId){
   Map<String,Object> view=new LinkedHashMap<>(publicGroup(token,groupId));
+  view.put("memberEmailVerificationRequired",readiness.memberEmailRequired(event(token)));
   view.put("allowGroupPin",pinAllowed(event(token)));return view;
  }
  public Map<String,Object> publicGroup(@PathVariable UUID token,@PathVariable UUID groupId){
@@ -209,7 +215,7 @@ public class GroupContributionController {
   List<Map<String,Object>> rows=db.queryForList("SELECT name,description,gift_name,gift_description,gift_link,target_paise,join_policy,status FROM gift_groups WHERE id=? AND event_id=?",groupId,e);
   if(rows.isEmpty())throw new ResponseStatusException(HttpStatus.NOT_FOUND);
   Map<String,Object> r=new LinkedHashMap<>(rows.get(0));
-  if(!"PUBLISHED".equals(r.get("status")))throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Group not published");
+  if(!readiness.invitation(groupId).enabled())throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Group invitation is not ready");
   return r;
  }
  private void requireMemberAccess(UUID groupId){String mode=db.queryForObject("SELECT contribution_access_mode FROM gift_groups WHERE id=?",String.class,groupId);if("GUESTS_ONLY".equals(mode))throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Member access disabled for this invitation");}
@@ -224,15 +230,19 @@ public class GroupContributionController {
   UUID memberId=UUID.randomUUID();
   String signupEmail=request.email()==null||request.email().isBlank()?null:request.email().strip().toLowerCase(Locale.ROOT);
   if(signupEmail!=null&&(signupEmail.length()>254||!signupEmail.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")))throw bad("Enter a valid email address");
-  if(signupEmail==null)throw bad("Enter a valid email address");
+  boolean emailRequired=readiness.memberEmailRequired(event(token));
+  if(emailRequired&&signupEmail==null)throw bad("Verify your email before joining this group");
+  boolean emailVerified=false;
+  if(request.emailVerificationToken()!=null&&!request.emailVerificationToken().isBlank()){
+   if(signupEmail==null)throw bad("Email is required to use a verification");
+   emailVerified=signupEmails.consume(request.emailVerificationToken(),"GROUP_MEMBER",groupId,signupEmail);
+  }
+  if(emailRequired&&!emailVerified)throw bad("Verify your email before joining this group");
   try{
    db.update("INSERT INTO gift_group_members(id,group_id,display_name,username,password_hash,mobile,status,pin_hash) VALUES(?,?,?,?,?,?,?,?)",memberId,groupId,name,name.toLowerCase(Locale.ROOT),passwords.encode(password),phone,"AUTO_JOIN".equals(group.get("join_policy"))?"APPROVED":"PENDING",pin==null?null:passwords.encode(pin));
   }catch(org.springframework.dao.DuplicateKeyException ex){throw new ResponseStatusException(HttpStatus.CONFLICT,"Display name already in use");}
   if(signupEmail!=null)db.update("UPDATE gift_group_members SET email=? WHERE id=?",signupEmail,memberId);
-  if(request.emailVerificationToken()!=null&&!request.emailVerificationToken().isBlank()){
-   if(signupEmail==null)throw bad("Email is required to use a verification");
-   if(signupEmails.consume(request.emailVerificationToken(),"GROUP_MEMBER",groupId,signupEmail))db.update("UPDATE gift_group_members SET email_verified_at=now() WHERE id=?",memberId);
-  }
+  if(emailVerified)db.update("UPDATE gift_group_members SET email_verified_at=now() WHERE id=?",memberId);
   boolean auto="AUTO_JOIN".equals(group.get("join_policy"));return Map.of("status",auto?"APPROVED":"PENDING","message",auto?"You have joined the group. Sign in to continue.":"Your request has been sent to the group admin");
  }
  @PostMapping("/member-login/{groupId}")
@@ -297,8 +307,11 @@ public class GroupContributionController {
  @PostMapping("/publish/{groupId}") @Transactional
  public Map<String,String> publish(@PathVariable UUID token,@PathVariable UUID groupId,HttpServletRequest req){
   adminGroup(token,groupId,req);
-  int n=db.update("UPDATE gift_groups SET status='PUBLISHED' WHERE id=? AND status='DRAFT'",groupId);
+  var ready=readiness.invitation(groupId);
+  if(!ready.enabled())throw new ResponseStatusException(HttpStatus.CONFLICT,String.join("; ",ready.reasons()));
+  int n=db.update("UPDATE gift_groups SET status='PUBLISHED',collection_published_at=now() WHERE id=? AND collection_published_at IS NULL",groupId);
   if(n!=1)throw new ResponseStatusException(HttpStatus.CONFLICT,"Group already published");
+  db.update("INSERT INTO group_collection_notifications(id,group_id,event_id) SELECT ?,id,event_id FROM gift_groups WHERE id=? ON CONFLICT(group_id) DO NOTHING",UUID.randomUUID(),groupId);
   return Map.of("status","PUBLISHED");
  }
 

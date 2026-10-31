@@ -25,7 +25,7 @@ class EventAccountScopeIntegrationTest {
     }
     private UUID host() {
         UUID id=UUID.randomUUID();
-        jdbc.update("INSERT INTO users(id,email,password_hash,role) VALUES (?,?,?,'CUSTOMER')",id,id+"@example.test","test");
+        jdbc.update("INSERT INTO users(id,email,password_hash,role,email_verified_at) VALUES (?,?,?,'CUSTOMER',now())",id,id+"@example.test","test");
         return id;
     }
     private Event event(UUID host) {
@@ -53,6 +53,13 @@ class EventAccountScopeIntegrationTest {
     private void prefer(UUID id) {
         jdbc.update("UPDATE host_bank_accounts SET host_confirmed_at=now(),preferred=TRUE WHERE id=?",id);
         jdbc.update("UPDATE event_payment_account_links SET preferred=TRUE WHERE bank_account_id=?",id);
+    }
+    @Test void unverifiedHostCannotPublishEvenWithPreferredAccount() {
+        UUID h=host(); Event e=event(h); prefer(bank(h,e.getId()));
+        jdbc.update("UPDATE users SET email_verified_at=NULL WHERE id=?",h);
+        var readiness=new EventPublishReadiness(jdbc);
+        assertFalse(readiness.canPublish(e));
+        assertEquals(java.util.List.of("Verify your email in Account"),readiness.reasons(e));
     }
     @Test void eventAccountOnlyUnlocksItsOwnEventAndMustBeActiveAndPreferred() {
         UUID h=host(); Event first=event(h),second=event(h);

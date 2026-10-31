@@ -26,6 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class GroupLogoutRoutingTest {
  @MockitoBean com.giftplatform.admin.EffectiveModulePermissionService modulePermissions;
  @Autowired MockMvc mvc;
+ @MockitoBean SignupEmailVerificationService signupEmails;
  @MockitoBean JdbcTemplate db;
  @MockitoBean EventRepository events;
  @MockitoBean GiftUserDetailsService users;
@@ -37,6 +38,8 @@ class GroupLogoutRoutingTest {
   when(events.findByPublicToken(token)).thenReturn(Optional.of(event));
   when(db.queryForObject("SELECT count(*) FROM gift_groups WHERE id=? AND event_id=?",Integer.class,groupId,eventId)).thenReturn(1);
   when(db.queryForList("SELECT name,description,gift_name,gift_description,gift_link,target_paise,join_policy,status FROM gift_groups WHERE id=? AND event_id=?",groupId,eventId)).thenReturn(List.of(Map.of("status","PUBLISHED")));
+  when(db.queryForObject(org.mockito.ArgumentMatchers.contains("a.email_verified_at"),eq(Boolean.class),eq(groupId))).thenReturn(true);
+  when(db.queryForObject(org.mockito.ArgumentMatchers.contains("payment_destinations"),eq(Boolean.class),eq(groupId))).thenReturn(true);
   when(policies.effective(null,eventId)).thenReturn(new EffectiveRecoveryPolicyService.Policy(true,true,true,true,true));
  }
  @Test void csrfProtectedLogoutClearsOnlyThisMemberSession() throws Exception {

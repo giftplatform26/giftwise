@@ -31,6 +31,7 @@ import java.util.UUID;
 public class PublicEventController {
     private final EventRepository events;
     private final GiftRepository gifts;
+    @org.springframework.beans.factory.annotation.Autowired private org.springframework.jdbc.core.JdbcTemplate db;
 
     private final EffectiveModulePermissionService permissions;
 
@@ -47,13 +48,14 @@ public class PublicEventController {
         Event event = events.findByPublicToken(token)
                 .filter(e -> e.getStatus() == EventStatus.PUBLISHED)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        java.util.Set<UUID> reserved=new java.util.HashSet<>(db.query("SELECT reserved_gift_id FROM gift_groups WHERE event_id=? AND reserved_gift_id IS NOT NULL",(rs,n)->rs.getObject(1,UUID.class),event.getId()));
         List<PublicGiftView> visibleGifts = gifts.findByEventIdOrderByCreatedAtAsc(event.getId())
                 .stream()
                 .filter(g -> g.getVisibility() == GiftVisibility.PUBLIC && g.getStatus() == GiftStatus.ACTIVE)
                 .sorted(Comparator.comparing((com.giftplatform.gift.entity.Gift g) -> g.getPriority().ordinal())
                         .thenComparing(com.giftplatform.gift.entity.Gift::getCreatedAt, Comparator.nullsLast(Comparator.naturalOrder()))
                         .thenComparing(g -> g.getId().toString()))
-                .map(g -> new PublicGiftView(g.getId(), g.getName(), g.getDescription(), g.getTargetAmount(), g.getPriority(),g.getImageKey()!=null&&g.getImageKey().startsWith("gift-photo:")?"/backend/api/public/events/"+token+"/gifts/"+g.getId()+"/photo":null))
+                .map(g -> new PublicGiftView(g.getId(), g.getName(), g.getDescription(), g.getTargetAmount(), g.getPriority(),g.getImageKey()!=null&&g.getImageKey().startsWith("gift-photo:")?"/backend/api/public/events/"+token+"/gifts/"+g.getId()+"/photo":null,!reserved.contains(g.getId()),reserved.contains(g.getId())?"A surprise is waiting":null))
                 .toList();
         return ResponseEntity.ok()
                 .cacheControl(CacheControl.noStore())
@@ -70,7 +72,7 @@ public class PublicEventController {
         return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(permissions.modules(event.getOwnerId()));
     }
 
-    public record PublicGiftView(UUID id, String name, String description, BigDecimal targetAmount, GiftPriority priority,String imageUrl) {}
+    public record PublicGiftView(UUID id, String name, String description, BigDecimal targetAmount, GiftPriority priority,String imageUrl,boolean contributionEnabled,String contributionDisabledReason) {}
     public record PublicEventView(String title, String description, String occasionType,
                                   LocalDate eventDate, List<PublicGiftView> gifts, Map<String,Boolean> features, String hostName, String invitationTheme) {}
 }

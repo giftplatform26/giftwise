@@ -109,6 +109,9 @@ public class PaymentOrderService {
                         HttpStatus.NOT_FOUND, "Gift not found");
             }
 
+            jdbc.queryForObject("SELECT id FROM gifts WHERE id=? FOR UPDATE",UUID.class,giftId);
+            if(Boolean.TRUE.equals(jdbc.queryForObject("SELECT EXISTS(SELECT 1 FROM gift_groups WHERE reserved_gift_id=?)",Boolean.class,giftId)))
+                throw new ResponseStatusException(HttpStatus.CONFLICT,"A surprise is waiting for this gift");
             if (gift.getStatus() != GiftStatus.ACTIVE ||
                     gift.getVisibility() != GiftVisibility.PUBLIC) {
                 throw new ResponseStatusException(

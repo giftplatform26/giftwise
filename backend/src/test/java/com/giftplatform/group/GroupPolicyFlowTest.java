@@ -28,6 +28,8 @@ class GroupPolicyFlowTest {
   when(events.findByPublicToken(token)).thenReturn(Optional.of(event));
   when(policies.effective(null,eventId)).thenReturn(new EffectiveRecoveryPolicyService.Policy(true,true,true,true,false));
   when(db.queryForObject("SELECT count(*) FROM gift_groups WHERE id=? AND event_id=?",Integer.class,groupId,eventId)).thenReturn(1);
+  when(db.queryForObject(contains("a.email_verified_at"),eq(Boolean.class),eq(groupId))).thenReturn(true);
+  when(db.queryForObject(contains("payment_destinations"),eq(Boolean.class),eq(groupId))).thenReturn(true);
   when(db.queryForList(contains("SELECT name,description"),eq(groupId),eq(eventId))).thenReturn(List.of(Map.of("status","PUBLISHED","join_policy","AUTO_JOIN")));
  }
  @Test void disabledPinStillAllowsPasswordRegistration(){
@@ -37,6 +39,16 @@ class GroupPolicyFlowTest {
  @Test void disabledPinStillAllowsMemberRegistration(){
   controller.join(token,groupId,new GroupContributionController.JoinRequest("Test Member","+919876543210","Password123!","Password123!",null,null,"member@example.test","proof"));
   verify(db).update(contains("INSERT INTO gift_group_members"),any(),eq(groupId),eq("Test Member"),eq("test member"),any(),any(),eq("APPROVED"),isNull());
+ }
+ @Test void optionalMemberVerificationAllowsJoiningWithoutEmail(){
+  controller.join(token,groupId,new GroupContributionController.JoinRequest("Optional Member","+919876543210","Password123!","Password123!",null,null,null,null));
+  verify(db).update(contains("INSERT INTO gift_group_members"),any(),eq(groupId),eq("Optional Member"),eq("optional member"),any(),any(),eq("APPROVED"),isNull());
+ }
+ @Test void requiredMemberVerificationRejectsMissingProofBeforeAccountInsert(){
+  when(db.queryForObject(contains("admin_enabled OR p.host_enabled"),eq(Boolean.class),eq(eventId))).thenReturn(true);
+  var error=assertThrows(ResponseStatusException.class,()->controller.join(token,groupId,new GroupContributionController.JoinRequest("Unverified Member","+919876543210","Password123!","Password123!",null,null,"member@example.test",null)));
+  assertEquals(400,error.getStatusCode().value());
+  verify(db,never()).update(contains("INSERT INTO gift_group_members"),any(),any(),any(),any(),any(),any(),any(),any());
  }
  @Test void disabledPinRejectsCreatorLoginBeforeHashLookup(){
   var error=assertThrows(ResponseStatusException.class,()->controller.login(token,new GroupContributionController.Credentials("creator",null,"123456",null),new MockHttpServletRequest()));

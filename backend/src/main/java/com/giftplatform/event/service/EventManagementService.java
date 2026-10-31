@@ -21,7 +21,7 @@ public class EventManagementService {
         this.readiness=readiness; this.repository=repository; this.actors=actors; this.audit=audit;
     }
     private final EventPublishReadiness readiness;
-    private EventResponse response(Event e) { return EventResponse.from(e,e.getStatus()==EventStatus.DRAFT && readiness.canPublish(e)); }
+    private EventResponse response(Event e) { return EventResponse.from(e,e.getStatus()==EventStatus.DRAFT && readiness.canPublish(e),readiness.reasons(e)); }
     @Transactional
     public EventResponse create(EventRequest input) {
         UUID actor=actors.requireAuthenticatedUserId();
@@ -65,7 +65,7 @@ public class EventManagementService {
         if(next==EventStatus.PUBLISHED)event=repository.findForUpdate(id).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
         Map<String,Object> before=snapshot(event);
         if(next==EventStatus.PUBLISHED && !readiness.canPublish(event))
-            throw new ResponseStatusException(HttpStatus.CONFLICT,"Link an account to this event, enable it, and select it as preferred before publishing");
+            throw new ResponseStatusException(HttpStatus.CONFLICT,String.join("; ",readiness.reasons(event)));
         try { event.transition(next); }
         catch (IllegalStateException ex) { throw new ResponseStatusException(HttpStatus.CONFLICT,"Invalid status transition"); }
         repository.saveAndFlush(event);

@@ -54,14 +54,25 @@ class PaymentOrderServiceIntegrationTest {
         jdbc.update(
             """
             INSERT INTO events(
-                id,title,occasion_type,status,owner_id
-            ) VALUES (?,?,?,?,?)
+                id,title,occasion_type,status,owner_id,host_display_name
+            ) VALUES (?,?,?,?,?,'Host')
             """,
             eventId, "Payment Test Event",
             "BIRTHDAY", status, userId
         );
 
         return eventId;
+    }
+
+    @Test void reservedGiftRejectsNewOrdersButPreservesExistingIdempotency() {
+        UUID eventId=event("PUBLISHED"),giftId=gift(eventId,"ACTIVE","PUBLIC"),admin=UUID.randomUUID(),group=UUID.randomUUID();
+        var order=service.create(eventId,giftId,"GIFT_PARTIAL",10000,"before-reservation");
+        jdbc.update("INSERT INTO gift_group_accounts(id,event_id,username,password_hash) VALUES(?,?,'creator','hash')",admin,eventId);
+        jdbc.update("INSERT INTO gift_groups(id,event_id,admin_id,name,creator_name,creator_mobile,reserved_gift_id) VALUES(?,?,?,'Group','Creator','+919876543210',?)",group,eventId,admin,giftId);
+        assertEquals(order.getId(),service.create(eventId,giftId,"GIFT_PARTIAL",10000,"before-reservation").getId());
+        var error=assertThrows(org.springframework.web.server.ResponseStatusException.class,()->service.create(eventId,giftId,"GIFT_PARTIAL",10000,"after-reservation"));
+        assertEquals(409,error.getStatusCode().value());
+        assertTrue(error.getReason().contains("surprise"));
     }
 
     private UUID gift(UUID eventId, String status, String visibility) {
