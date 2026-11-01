@@ -58,9 +58,9 @@ gift.invitation.ai.model=${OPENAI_INVITATION_MODEL:gpt-4.1-mini}
 gift.otp.hmac-key-base64=${GIFT_OTP_HMAC_KEY_BASE64:${gift.otp.secret-base64}}
 
 # Verified-email recovery delivery. Configure secrets in the backend environment.
-gift.otp.email.provider=${GIFT_OTP_EMAIL_PROVIDER:resend}
+gift.otp.email.provider=${GIFT_OTP_EMAIL_PROVIDER:}
 gift.otp.email.resend.api-key=${GIFT_OTP_EMAIL_RESEND_API_KEY:}
-gift.otp.email.from=${GIFT_OTP_EMAIL_FROM:support@giftwiser.in}
+gift.otp.email.from=${GIFT_OTP_EMAIL_FROM:}
 
 # Contact verification defaults. Both channels are hidden/bypassed until enabled.
 # Platform Admin > Authentication & policies persists overrides in the database;
