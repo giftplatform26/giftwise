@@ -83,4 +83,17 @@ class GroupContributionValidCsrfHttpTest {
     .content("{\"username\":\"groupguest1\",\"password\":\"securepassword123\",\"pin\":\"123456\",\"confirmPin\":\"123456\",\"fullName\":\"Test Creator\",\"email\":\"creator@example.com\",\"mobile\":\"+919876543210\",\"emailVerificationToken\":\"proof\"}"))
     .andExpect(status().isNotFound());
  }
+
+ @Test void optionalIndependentFlagDoesNotBypassLogin() throws Exception {
+  for(String flag:List.of(",\"independentGift\":null",",\"independentGift\":false",",\"independentGift\":true")){
+   mvc.perform(post(base+"/setup").with(csrf()).contentType(MediaType.APPLICATION_JSON)
+     .content("{\"name\":\"Friends\",\"creatorName\":\"Alice\",\"creatorMobile\":\"9876543210\""+flag+"}"))
+     .andExpect(status().isUnauthorized());
+  }
+  verify(db,never()).update(anyString(),any(Object[].class));
+ }
+ @Test void missingOrNullIndependentFlagDefaultsToExistingCollectionBehaviour(){
+  org.junit.jupiter.api.Assertions.assertFalse(new GroupContributionController.Setup("Friends","Alice","9876543210",null,null,null,null,null).independentGift());
+  org.junit.jupiter.api.Assertions.assertFalse(new GroupContributionController.Setup("Friends","Alice","9876543210",null,null,null,null,null,null,null).independentGift());
+ }
 }

@@ -1,0 +1,6 @@
+'use client';
+export type DeliveryAddress={addressLine1:string;city:string;state:string;postalCode:string;country:string};
+export const emptyDeliveryAddress:DeliveryAddress={addressLine1:'',city:'',state:'',postalCode:'',country:'India'};
+export default function DeliveryAddressFields({same,address,onSameChange,onAddressChange}:{same:boolean;address:DeliveryAddress;onSameChange:(same:boolean)=>void;onAddressChange:(address:DeliveryAddress)=>void}){
+ return <fieldset><legend>Gift delivery address</legend><label style={{display:'flex',alignItems:'center',gap:10}}><input type="checkbox" checked={same} onChange={e=>onSameChange(e.target.checked)} style={{width:'auto'}}/>Same as event address</label><p className="finePrint">The guest managing a selected gift can view this address to arrange delivery.</p>{!same&&<>{([['addressLine1','Street address',200,'street-address'],['city','City',120,'address-level2'],['state','State',120,'address-level1'],['postalCode','PIN / postal code',20,'postal-code'],['country','Country',80,'country-name']] as const).map(([key,label,maxLength,autoComplete])=><label key={key}>{label}<input required maxLength={maxLength} autoComplete={`section-delivery shipping ${autoComplete}`} value={address[key]} onChange={e=>onAddressChange({...address,[key]:e.target.value})}/></label>)}</>}</fieldset>;
+}

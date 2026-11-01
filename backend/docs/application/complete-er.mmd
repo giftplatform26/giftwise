@@ -1,0 +1,1072 @@
+erDiagram
+  account_contact_challenges {
+    uuid id
+    varchar account_kind
+    uuid account_id
+    varchar channel
+    varchar purpose
+    varchar destination_fingerprint
+    varchar secret_hash
+    timestamptz expires_at
+    timestamptz consumed_at
+    int4 attempt_count
+    timestamptz created_at
+  }
+  account_pending_email_verifications {
+    uuid challenge_id
+    varchar account_kind
+    uuid account_id
+    varchar email
+    timestamptz expires_at
+  }
+  account_pending_mobile_verifications {
+    uuid challenge_id
+    varchar account_kind
+    uuid account_id
+    varchar mobile
+    timestamptz expires_at
+    timestamptz delivered_at
+  }
+  account_recovery_challenges {
+    uuid id
+    varchar account_kind
+    uuid account_id
+    varchar secret_hash
+    timestamptz expires_at
+    timestamptz consumed_at
+    int4 attempt_count
+    timestamptz created_at
+  }
+  account_registration_policies {
+    varchar scope
+    uuid scope_id
+    bool require_email
+    bool require_mobile
+    bool verify_email
+    bool verify_mobile
+    bool allow_group_pin
+    uuid changed_by
+    timestamptz changed_at
+  }
+  affiliate_clicks {
+    uuid id
+    uuid partner_id
+    uuid event_id
+    uuid gift_id
+    text destination_url
+    timestamptz created_at
+  }
+  affiliate_commissions {
+    uuid id
+    uuid partner_id
+    uuid click_id
+    varchar external_reference
+    int8 amount_paise
+    varchar state
+    int8 revision
+    timestamptz changed_at
+  }
+  affiliate_partners {
+    uuid id
+    varchar name
+    varchar product_domain
+    bool enabled
+    varchar parameter_name
+    varchar parameter_value
+    varchar click_parameter
+    varchar redirect_template
+    int8 revision
+  }
+  audit_logs {
+    uuid id
+    uuid actor_id
+    varchar actor_type
+    varchar entity_type
+    uuid entity_id
+    varchar action
+    jsonb old_values
+    jsonb new_values
+    timestamptz occurred_at
+    varchar request_id
+  }
+  commercial_entitlements {
+    uuid order_id
+    varchar buyer_kind
+    uuid buyer_id
+    varchar stream
+    uuid resource_id
+    timestamptz starts_at
+    timestamptz expires_at
+  }
+  commercial_orders {
+    uuid id
+    varchar buyer_kind
+    uuid buyer_id
+    varchar stream
+    uuid resource_id
+    int8 amount_paise
+    int8 pricing_revision
+    int8 policy_revision
+    int4 duration_days
+    varchar idempotency_key
+    varchar provider_order_id
+    varchar provider_payment_id
+    varchar status
+    timestamptz created_at
+    timestamptz paid_at
+  }
+  commercial_placement_clicks {
+    uuid id
+    uuid placement_id
+    timestamptz created_at
+  }
+  commercial_placements {
+    uuid id
+    uuid owner_id
+    varchar stream
+    varchar title
+    varchar description
+    varchar url
+    varchar category
+    varchar occasion
+    varchar moderation
+    timestamptz created_at
+  }
+  commercial_policy {
+    int2 id
+    int8 revision
+    int4 free_active_events
+    int4 host_plan_days
+    int4 vendor_days
+    int4 sponsor_days
+  }
+  commercial_revenue {
+    uuid order_id
+    int8 amount_paise
+    varchar currency
+    timestamptz created_at
+  }
+  commercial_setup_history {
+    uuid id
+    uuid actor_id
+    varchar resource_type
+    varchar resource_id
+    varchar reason
+    jsonb before_config
+    jsonb after_config
+    timestamptz created_at
+  }
+  contribution_allocation_postings {
+    uuid contribution_id
+    uuid entry_group_id
+    timestamptz created_at
+  }
+  contribution_allocations {
+    uuid id
+    uuid contribution_id
+    uuid event_id
+    uuid gift_id
+    varchar allocation_type
+    int8 amount_paise
+    timestamptz created_at
+  }
+  contributions {
+    uuid id
+    uuid payment_order_id
+    uuid event_id
+    uuid gift_id
+    varchar guest_name
+    varchar guest_email
+    varchar guest_phone
+    int8 amount_paise
+    varchar allocation_status
+    timestamptz created_at
+  }
+  credential_session_versions {
+    varchar account_kind
+    uuid account_id
+    int8 version
+    timestamptz updated_at
+  }
+  event_guest_submission_limits {
+    uuid event_id
+    varchar fingerprint
+    date submission_date
+    varchar submission_type
+    int4 count
+  }
+  event_guestbook {
+    uuid id
+    uuid event_id
+    varchar guest_name
+    varchar message
+    varchar status
+    timestamptz created_at
+    timestamptz moderated_at
+    varchar photo_path
+  }
+  event_payment_account_links {
+    uuid event_id
+    uuid host_id
+    uuid bank_account_id
+    uuid upi_account_id
+    uuid destination_id
+    text destination_kind
+    bool enabled
+    bool preferred
+    timestamptz created_at
+  }
+  event_rsvps {
+    uuid id
+    uuid event_id
+    varchar guest_name
+    varchar guest_email
+    varchar attendance
+    int4 party_size
+    timestamptz created_at
+  }
+  event_thank_you_settings {
+    uuid event_id
+    varchar host_display_name
+    varchar email_subject
+    text email_body
+    text sms_body
+    varchar card_template
+    bool auto_send
+    bool email_enabled
+    bool sms_enabled
+    bool whatsapp_enabled
+    timestamptz updated_at
+  }
+  events {
+    uuid id
+    varchar title
+    text description
+    varchar occasion_type
+    date event_date
+    varchar status
+    timestamptz created_at
+    timestamptz updated_at
+    uuid owner_id
+    int8 version
+    varchar fulfillment_default
+    uuid public_token
+    varchar qr_theme
+    varchar address_line1
+    varchar address_city
+    varchar address_state
+    varchar address_postal_code
+    varchar address_country
+    varchar contact_name
+    varchar contact_phone
+    varchar contact_email
+    varchar host_display_name
+    bool delivery_same_as_event
+    varchar delivery_address_line1
+    varchar delivery_city
+    varchar delivery_state
+    varchar delivery_postal_code
+    varchar delivery_country
+  }
+  flyway_schema_history {
+    int4 installed_rank
+    varchar version
+    varchar description
+    varchar type
+    varchar script
+    int4 checksum
+    varchar installed_by
+    timestamp installed_on
+    int4 execution_time
+    bool success
+  }
+  gift_group_accounts {
+    uuid id
+    uuid event_id
+    varchar username
+    varchar password_hash
+    int4 failed_attempts
+    timestamptz locked_until
+    timestamptz created_at
+    varchar pin_hash
+    varchar full_name
+    varchar email
+    varchar mobile
+    timestamptz email_verified_at
+    timestamptz mobile_verified_at
+  }
+  gift_group_activity {
+    uuid id
+    uuid group_id
+    uuid actor_id
+    varchar action
+    jsonb details
+    timestamptz created_at
+  }
+  gift_group_destination_verification_attempts {
+    uuid id
+    uuid group_id
+    uuid destination_id
+    uuid requested_by
+    varchar provider
+    varchar environment
+    varchar request_reference
+    varchar provider_reference
+    varchar state
+    timestamptz created_at
+    timestamptz completed_at
+  }
+  gift_group_guest_reports {
+    uuid id
+    uuid group_id
+    uuid destination_id
+    varchar guest_name
+    varchar guest_contact
+    int8 amount_paise
+    varchar method
+    varchar transaction_reference
+    uuid submission_key
+    varchar state
+    timestamptz created_at
+    uuid member_id
+    uuid creator_admin_id
+    uuid gift_id_snapshot
+    timestamptz creator_received_at
+  }
+  gift_group_invitations {
+    uuid id
+    uuid group_id
+    varchar token_hash
+    timestamptz expires_at
+    timestamptz revoked_at
+    int4 max_uses
+    int4 used_count
+    timestamptz created_at
+  }
+  gift_group_members {
+    uuid id
+    uuid group_id
+    varchar display_name
+    varchar username
+    varchar password_hash
+    varchar status
+    timestamptz created_at
+    timestamptz reviewed_at
+    varchar mobile
+    varchar pin_hash
+    varchar email
+    timestamptz email_verified_at
+    timestamptz mobile_verified_at
+  }
+  gift_group_payment_audit {
+    uuid id
+    uuid group_id
+    varchar actor_type
+    uuid actor_id
+    varchar action
+    uuid destination_id
+    timestamptz created_at
+  }
+  gift_group_payment_destinations {
+    uuid id
+    uuid group_id
+    varchar kind
+    varchar label
+    text upi_ciphertext
+    varchar upi_fingerprint
+    text account_ciphertext
+    varchar account_fingerprint
+    text ifsc_ciphertext
+    text holder_ciphertext
+    varchar status
+    bool preferred
+    timestamptz created_at
+    bool enabled
+    bytea qr_image
+    varchar qr_source
+  }
+  gift_group_payment_permissions {
+    uuid group_id
+    bool switching_enabled
+    uuid changed_by
+    timestamptz changed_at
+  }
+  gift_group_payment_reports {
+    uuid id
+    uuid group_id
+    uuid member_id
+    int8 amount_paise
+    varchar method
+    varchar transaction_reference
+    varchar state
+    timestamptz created_at
+    timestamptz verified_at
+    uuid gift_id_snapshot
+    timestamptz creator_received_at
+  }
+  gift_groups {
+    uuid id
+    uuid event_id
+    uuid admin_id
+    varchar name
+    varchar creator_name
+    varchar creator_mobile
+    varchar description
+    varchar gift_name
+    varchar gift_description
+    varchar gift_link
+    int8 target_paise
+    varchar status
+    timestamptz created_at
+    varchar join_policy
+    varchar member_visibility
+    varchar amount_visibility
+    bool creator_direct_payments_enabled
+    int8 suggested_contribution_paise
+    bool manual_contributions_enabled
+    uuid guest_upi_destination_id
+    uuid guest_bank_destination_id
+    varchar contribution_access_mode
+    uuid reserved_gift_id
+    timestamptz collection_published_at
+    uuid selected_gift_id
+    timestamptz gift_published_at
+    varchar fulfilment_status
+    varchar tracking_details
+    bool independent_gift
+  }
+  gift_photos {
+    uuid id
+    uuid event_id
+    uuid actor_id
+    bytea content
+    int4 width
+    int4 height
+    timestamptz created_at
+  }
+  gift_retailer_metadata_audit {
+    uuid id
+    uuid event_id
+    uuid actor_id
+    uuid gift_id
+    varchar source_url
+    jsonb metadata
+    timestamptz fetched_at
+    timestamptz saved_at
+  }
+  gifts {
+    uuid id
+    uuid event_id
+    int8 version
+    varchar name
+    text description
+    varchar image_key
+    numeric target_amount
+    varchar status
+    varchar fulfillment_override
+    timestamptz created_at
+    timestamptz updated_at
+    varchar visibility
+    varchar product_url
+    varchar priority
+  }
+  group_collection_notifications {
+    uuid id
+    uuid group_id
+    uuid event_id
+    timestamptz created_at
+    timestamptz read_at
+  }
+  group_member_email_policies {
+    uuid host_id
+    bool admin_enabled
+    bool host_enabled
+  }
+  guest_direct_transfer_claims {
+    uuid id
+    uuid event_id
+    uuid gift_id
+    uuid destination_id
+    varchar method
+    int8 amount_paise
+    varchar guest_name
+    bpchar reference_hash
+    varchar client_key
+    varchar status
+    timestamptz created_at
+    varchar guest_email
+    varchar guest_phone
+  }
+  guest_gift_host_contributions {
+    uuid guest_gift_id
+    uuid claim_id
+    timestamptz created_at
+  }
+  guest_gifts {
+    uuid id
+    uuid event_id
+    uuid added_by
+    varchar name
+    varchar description
+    varchar product_url
+    uuid selected_by
+    varchar contribution_type
+    uuid group_id
+    timestamptz published_at
+    timestamptz created_at
+    varchar guest_name
+    varchar guest_email
+    varchar guest_mobile
+    int8 contribution_paise
+    varchar delivery_status
+    varchar tracking_details
+    varchar giving_method
+  }
+  guest_manual_display_allocations {
+    uuid claim_id
+    uuid event_id
+    uuid gift_id
+    int8 gift_paise
+    int8 wallet_paise
+    timestamptz created_at
+  }
+  host_account_verification_checks {
+    uuid id
+    uuid host_id
+    uuid destination_id
+    varchar destination_kind
+    varchar environment
+    varchar outcome
+    varchar provider_status
+    varchar provider_reference
+    bool name_matched
+    timestamptz created_at
+    timestamptz completed_at
+  }
+  host_bank_accounts {
+    uuid id
+    uuid host_id
+    text account_number_encrypted
+    varchar account_fingerprint
+    varchar account_number_masked
+    text ifsc_encrypted
+    varchar ifsc_masked
+    text account_holder_encrypted
+    varchar verification_status
+    bool enabled
+    bool preferred
+    int8 version
+    timestamptz created_at
+    timestamptz updated_at
+    timestamptz host_confirmed_at
+    varchar account_label
+    timestamptz archived_at
+    uuid event_id
+  }
+  host_destination_verification_attempts {
+    uuid id
+    uuid host_id
+    uuid destination_id
+    varchar destination_kind
+    varchar state
+    varchar provider
+    varchar provider_reference
+    timestamptz created_at
+    timestamptz updated_at
+    varchar request_provider
+    varchar request_reference
+    varchar request_fund_account_id
+  }
+  host_payout_requests {
+    uuid id
+    uuid host_id
+    uuid event_id
+    uuid destination_id
+    int8 amount_paise
+    varchar currency
+    varchar idempotency_key
+    varchar state
+    varchar reason
+    timestamptz created_at
+    timestamptz cancelled_at
+    varchar cancellation_reason
+  }
+  host_upi_accounts {
+    uuid id
+    uuid host_id
+    text upi_id_encrypted
+    varchar upi_id_fingerprint
+    varchar upi_id_masked
+    varchar verification_status
+    bool enabled
+    bool preferred
+    int8 version
+    timestamptz created_at
+    timestamptz updated_at
+    timestamptz host_confirmed_at
+    varchar account_label
+    timestamptz archived_at
+    uuid event_id
+  }
+  host_upi_qr_assets {
+    uuid id
+    uuid host_id
+    uuid upi_account_id
+    varchar source
+    varchar storage_key
+    varchar payload_sha256
+    bool verified_payee_match
+    bool active
+    timestamptz created_at
+    bytea image_png
+  }
+  host_upi_qr_images {
+    uuid host_id
+    uuid upi_account_id
+    bytea image_png
+    bpchar payload_sha256
+    varchar source
+    timestamptz updated_at
+  }
+  hybrid_checkout_quotes {
+    uuid id
+    uuid event_id
+    uuid gift_id
+    int8 contribution_paise
+    int8 processing_fee_paise
+    int8 total_paise
+    varchar method
+    timestamptz created_at
+  }
+  invitation_ai_requests {
+    uuid id
+    uuid host_id
+    uuid event_id
+    varchar status
+    timestamptz created_at
+  }
+  invitation_gallery_assets {
+    uuid id
+    varchar category
+    varchar occasion
+    varchar title
+    varchar content_type
+    bytea image_png
+    int4 width
+    int4 height
+    bool published
+    timestamptz created_at
+    timestamptz updated_at
+    varchar tier
+  }
+  notification_outbox {
+    uuid id
+    uuid event_id
+    varchar notification_kind
+    varchar recipient_kind
+    varchar channel
+    varchar recipient_reference
+    varchar source_kind
+    uuid source_id
+    varchar payment_evidence
+    varchar subject
+    text message
+    varchar card_template
+    varchar status
+    int4 attempts
+    timestamptz next_attempt_at
+    timestamptz created_at
+    timestamptz sent_at
+    varchar last_error_code
+    timestamptz read_at
+  }
+  otp_request_rate_limits {
+    varchar scope
+    varchar subject_key
+    timestamptz window_start
+    int4 request_count
+  }
+  payment_channel_controls {
+    varchar scope
+    uuid scope_id
+    varchar channel
+    bool enabled
+    uuid changed_by
+    timestamptz changed_at
+  }
+  payment_control_history {
+    int8 revision
+    uuid actor_id
+    varchar scope
+    uuid scope_id
+    varchar channel
+    varchar reason
+    bool before_enabled
+    bool after_enabled
+    timestamptz created_at
+  }
+  payment_control_revision {
+    int2 id
+    int8 revision
+  }
+  payment_notifications {
+    uuid id
+    uuid contribution_id
+    varchar recipient_type
+    varchar recipient_address
+    uuid event_id
+    int8 gift_amount_paise
+    int8 wallet_amount_paise
+    varchar status
+    timestamptz created_at
+    timestamptz sent_at
+  }
+  payment_orders {
+    uuid id
+    uuid event_id
+    uuid gift_id
+    varchar provider
+    varchar provider_order_id
+    varchar contribution_type
+    int8 amount_paise
+    varchar currency
+    varchar status
+    varchar idempotency_key
+    timestamptz created_at
+    timestamptz updated_at
+    int8 requested_amount_paise
+    int8 platform_fee_paise
+    int8 host_receives_paise
+    int8 monetization_revision
+  }
+  payment_transactions {
+    uuid id
+    uuid payment_order_id
+    varchar provider_payment_id
+    int8 amount_paise
+    varchar currency
+    varchar status
+    timestamptz verified_at
+    timestamptz created_at
+    text payment_method
+    text bank_code
+    text bank_transaction_id
+    text rrn
+    text upi_transaction_id
+    int8 provider_fee_paise
+    int8 provider_tax_paise
+  }
+  payment_webhook_events {
+    uuid id
+    varchar provider
+    varchar provider_event_id
+    varchar event_type
+    varchar status
+    timestamptz received_at
+    timestamptz processed_at
+    text raw_payload
+    int4 attempt_count
+    text last_error
+    timestamptz last_attempt_at
+  }
+  payout_reconciliation_observations {
+    uuid id
+    uuid payout_request_id
+    varchar source
+    varchar observed_state
+    varchar correlation_reference
+    timestamptz observed_at
+  }
+  payout_reservations {
+    uuid id
+    uuid payout_request_id
+    uuid event_id
+    int8 amount_paise
+    varchar state
+    timestamptz created_at
+    timestamptz released_at
+  }
+  phone_otp_challenges {
+    uuid id
+    uuid user_id
+    varchar phone_number
+    varchar otp_digest
+    timestamptz created_at
+    timestamptz expires_at
+    timestamptz consumed_at
+    int4 attempt_count
+    varchar delivery_status
+    timestamptz delivery_updated_at
+  }
+  platform_admin_action_audit {
+    uuid id
+    uuid actor_id
+    varchar action
+    uuid target_id
+    varchar module_code
+    timestamptz created_at
+  }
+  platform_event_ai_design_settings {
+    uuid event_id
+    bool enabled
+    uuid changed_by
+    timestamptz changed_at
+  }
+  platform_event_album_settings {
+    uuid event_id
+    bool enabled
+    uuid changed_by
+    timestamptz changed_at
+  }
+  platform_event_message_settings {
+    uuid event_id
+    varchar display_mode
+    timestamptz changed_at
+  }
+  platform_experience_settings {
+    int2 id
+    varchar view_mode
+    uuid changed_by
+    timestamptz changed_at
+  }
+  platform_host_module_grants {
+    uuid host_id
+    varchar module_code
+    bool enabled
+    uuid changed_by
+    timestamptz changed_at
+  }
+  platform_module_controls {
+    varchar module_code
+    bool enabled
+    uuid changed_by
+    timestamptz changed_at
+  }
+  platform_monetization_history {
+    int8 revision
+    uuid actor_id
+    varchar reason
+    jsonb before_config
+    jsonb after_config
+    timestamptz created_at
+  }
+  platform_monetization_settings {
+    int2 id
+    bool enabled
+    int8 revision
+    uuid changed_by
+    timestamptz changed_at
+  }
+  platform_monetization_streams {
+    varchar code
+    bool enabled
+    varchar fee_mode
+    int8 fixed_paise
+    int4 rate_bps
+    int8 cap_paise
+    varchar fee_bearer
+  }
+  platform_verification_settings {
+    int4 id
+    bool mobile_otp_enabled
+    bool email_verification_enabled
+    uuid changed_by
+    timestamptz changed_at
+  }
+  qr_invitation_designs {
+    uuid id
+    uuid event_id
+    varchar name
+    varchar style
+    varchar greeting
+    bytea image_png
+    timestamptz created_at
+  }
+  routing_commission_history {
+    int8 revision
+    uuid actor_id
+    int4 before_rate_bps
+    int4 after_rate_bps
+    varchar reason
+    timestamptz created_at
+  }
+  routing_commission_settings {
+    int2 id
+    int8 revision
+    int4 rate_bps
+    uuid changed_by
+    timestamptz changed_at
+  }
+  signup_email_verifications {
+    uuid id
+    varchar account_kind
+    uuid scope_id
+    varchar email
+    bpchar ip_fingerprint
+    bpchar secret_hash
+    bpchar proof_hash
+    int4 attempt_count
+    timestamptz created_at
+    timestamptz expires_at
+    timestamptz verified_at
+    timestamptz consumed_at
+  }
+  username_recovery_attempts {
+    uuid id
+    bpchar ip_fingerprint
+    varchar account_kind
+    uuid account_id
+    timestamptz requested_at
+  }
+  users {
+    uuid id
+    varchar email
+    varchar password_hash
+    varchar role
+    bool enabled
+    timestamptz created_at
+    timestamptz updated_at
+    varchar username
+    varchar phone_number
+    timestamptz phone_verified_at
+    varchar full_name
+    timestamptz email_verified_at
+  }
+  wallet_ledger_entries {
+    uuid id
+    uuid event_id
+    uuid contribution_id
+    uuid entry_group_id
+    varchar account_code
+    int8 amount_paise
+    varchar currency
+    varchar entry_type
+    timestamptz created_at
+  }
+  account_contact_challenges ||--o{ account_pending_email_verifications : "account_pending_email_verifications_challenge_id_fkey"
+  account_contact_challenges ||--o{ account_pending_mobile_verifications : "account_pending_mobile_verifications_challenge_id_fkey"
+  users ||--o{ account_registration_policies : "account_registration_policies_changed_by_fkey"
+  events ||--o{ affiliate_clicks : "affiliate_clicks_event_id_fkey"
+  gifts ||--o{ affiliate_clicks : "affiliate_clicks_gift_id_fkey"
+  affiliate_partners ||--o{ affiliate_clicks : "affiliate_clicks_partner_id_fkey"
+  affiliate_clicks ||--o{ affiliate_commissions : "affiliate_commissions_click_id_fkey"
+  affiliate_partners ||--o{ affiliate_commissions : "affiliate_commissions_partner_id_fkey"
+  commercial_orders ||--o{ commercial_entitlements : "commercial_entitlements_order_id_fkey"
+  platform_monetization_history ||--o{ commercial_orders : "commercial_orders_pricing_revision_fkey"
+  commercial_placements ||--o{ commercial_placement_clicks : "commercial_placement_clicks_placement_id_fkey"
+  users ||--o{ commercial_placements : "commercial_placements_owner_id_fkey"
+  commercial_orders ||--o{ commercial_revenue : "commercial_revenue_order_id_fkey"
+  users ||--o{ commercial_setup_history : "commercial_setup_history_actor_id_fkey"
+  contributions ||--o{ contribution_allocation_postings : "contribution_allocation_postings_contribution_id_fkey"
+  contributions ||--o{ contribution_allocations : "contribution_allocations_contribution_id_fkey"
+  events ||--o{ contribution_allocations : "contribution_allocations_event_id_fkey"
+  contributions ||--o{ contribution_allocations : "fk_allocation_contribution_event"
+  gifts ||--o{ contribution_allocations : "fk_allocation_gift_event"
+  events ||--o{ contributions : "contributions_event_id_fkey"
+  gifts ||--o{ contributions : "contributions_gift_id_fkey"
+  payment_orders ||--o{ contributions : "contributions_payment_order_id_fkey"
+  gifts ||--o{ contributions : "fk_contribution_gift_event"
+  events ||--o{ event_guest_submission_limits : "event_guest_submission_limits_event_id_fkey"
+  events ||--o{ event_guestbook : "event_guestbook_event_id_fkey"
+  host_bank_accounts ||--o{ event_payment_account_links : "event_payment_account_links_bank_account_id_host_id_fkey"
+  events ||--o{ event_payment_account_links : "event_payment_account_links_event_id_host_id_fkey"
+  host_upi_accounts ||--o{ event_payment_account_links : "event_payment_account_links_upi_account_id_host_id_fkey"
+  events ||--o{ event_rsvps : "event_rsvps_event_id_fkey"
+  events ||--o{ event_thank_you_settings : "event_thank_you_settings_event_id_fkey"
+  users ||--o{ events : "fk_events_owner"
+  events ||--o{ gift_group_accounts : "gift_group_accounts_event_id_fkey"
+  gift_groups ||--o{ gift_group_activity : "gift_group_activity_group_id_fkey"
+  gift_group_payment_destinations ||--o{ gift_group_destination_verification_attempts : "gift_group_destination_verification_attempt_destination_id_fkey"
+  gift_groups ||--o{ gift_group_destination_verification_attempts : "gift_group_destination_verification_attempts_group_id_fkey"
+  users ||--o{ gift_group_destination_verification_attempts : "gift_group_destination_verification_attempts_requested_by_fkey"
+  gift_groups ||--o{ gift_group_guest_reports : "fk_group_report_creator"
+  gift_group_accounts ||--o{ gift_group_guest_reports : "gift_group_guest_reports_creator_admin_id_fkey"
+  gift_group_payment_destinations ||--o{ gift_group_guest_reports : "gift_group_guest_reports_destination_id_fkey"
+  gifts ||--o{ gift_group_guest_reports : "gift_group_guest_reports_gift_id_snapshot_fkey"
+  gift_groups ||--o{ gift_group_guest_reports : "gift_group_guest_reports_group_id_fkey"
+  gift_group_members ||--o{ gift_group_guest_reports : "gift_group_guest_reports_member_id_fkey"
+  gift_groups ||--o{ gift_group_invitations : "gift_group_invitations_group_id_fkey"
+  gift_groups ||--o{ gift_group_members : "gift_group_members_group_id_fkey"
+  gift_groups ||--o{ gift_group_payment_audit : "gift_group_payment_audit_group_id_fkey"
+  gift_groups ||--o{ gift_group_payment_destinations : "gift_group_payment_destinations_group_id_fkey"
+  users ||--o{ gift_group_payment_permissions : "gift_group_payment_permissions_changed_by_fkey"
+  gift_groups ||--o{ gift_group_payment_permissions : "gift_group_payment_permissions_group_id_fkey"
+  gifts ||--o{ gift_group_payment_reports : "gift_group_payment_reports_gift_id_snapshot_fkey"
+  gift_groups ||--o{ gift_group_payment_reports : "gift_group_payment_reports_group_id_fkey"
+  gift_group_members ||--o{ gift_group_payment_reports : "gift_group_payment_reports_member_id_fkey"
+  gifts ||--o{ gift_groups : "fk_reserved_group_gift"
+  gifts ||--o{ gift_groups : "fk_selected_group_gift"
+  gift_group_accounts ||--o{ gift_groups : "gift_groups_admin_id_fkey"
+  events ||--o{ gift_groups : "gift_groups_event_id_fkey"
+  gift_group_payment_destinations ||--o{ gift_groups : "gift_groups_guest_bank_destination_id_fkey"
+  gift_group_payment_destinations ||--o{ gift_groups : "gift_groups_guest_upi_destination_id_fkey"
+  users ||--o{ gift_photos : "gift_photos_actor_id_fkey"
+  events ||--o{ gift_photos : "gift_photos_event_id_fkey"
+  users ||--o{ gift_retailer_metadata_audit : "gift_retailer_metadata_audit_actor_id_fkey"
+  events ||--o{ gift_retailer_metadata_audit : "gift_retailer_metadata_audit_event_id_fkey"
+  gifts ||--o{ gift_retailer_metadata_audit : "gift_retailer_metadata_audit_gift_id_fkey"
+  events ||--o{ gifts : "gifts_event_id_fkey"
+  events ||--o{ group_collection_notifications : "group_collection_notifications_event_id_fkey"
+  gift_groups ||--o{ group_collection_notifications : "group_collection_notifications_group_id_fkey"
+  users ||--o{ group_member_email_policies : "group_member_email_policies_host_id_fkey"
+  events ||--o{ guest_direct_transfer_claims : "guest_direct_transfer_claims_event_id_fkey"
+  gifts ||--o{ guest_direct_transfer_claims : "guest_direct_transfer_claims_gift_id_fkey"
+  guest_direct_transfer_claims ||--o{ guest_gift_host_contributions : "guest_gift_host_contributions_claim_id_fkey"
+  guest_gifts ||--o{ guest_gift_host_contributions : "guest_gift_host_contributions_guest_gift_id_fkey"
+  gift_group_accounts ||--o{ guest_gifts : "guest_gifts_added_by_fkey"
+  events ||--o{ guest_gifts : "guest_gifts_event_id_fkey"
+  gift_groups ||--o{ guest_gifts : "guest_gifts_group_id_fkey"
+  gift_group_accounts ||--o{ guest_gifts : "guest_gifts_selected_by_fkey"
+  guest_direct_transfer_claims ||--o{ guest_manual_display_allocations : "guest_manual_display_allocations_claim_id_fkey"
+  events ||--o{ guest_manual_display_allocations : "guest_manual_display_allocations_event_id_fkey"
+  gifts ||--o{ guest_manual_display_allocations : "guest_manual_display_allocations_gift_id_fkey"
+  users ||--o{ host_account_verification_checks : "host_account_verification_checks_host_id_fkey"
+  events ||--o{ host_bank_accounts : "fk_bank_event_owner"
+  users ||--o{ host_bank_accounts : "host_bank_accounts_host_id_fkey"
+  users ||--o{ host_destination_verification_attempts : "host_destination_verification_attempts_host_id_fkey"
+  host_bank_accounts ||--o{ host_payout_requests : "host_payout_requests_destination_id_fkey"
+  events ||--o{ host_payout_requests : "host_payout_requests_event_id_fkey"
+  users ||--o{ host_payout_requests : "host_payout_requests_host_id_fkey"
+  events ||--o{ host_upi_accounts : "fk_upi_event_owner"
+  users ||--o{ host_upi_accounts : "host_upi_accounts_host_id_fkey"
+  users ||--o{ host_upi_qr_assets : "host_upi_qr_assets_host_id_fkey"
+  host_upi_accounts ||--o{ host_upi_qr_assets : "host_upi_qr_assets_upi_account_id_fkey"
+  users ||--o{ host_upi_qr_images : "host_upi_qr_images_host_id_fkey"
+  host_upi_accounts ||--o{ host_upi_qr_images : "host_upi_qr_images_upi_account_id_fkey"
+  events ||--o{ hybrid_checkout_quotes : "hybrid_checkout_quotes_event_id_fkey"
+  gifts ||--o{ hybrid_checkout_quotes : "hybrid_checkout_quotes_gift_id_fkey"
+  events ||--o{ invitation_ai_requests : "invitation_ai_requests_event_id_fkey"
+  users ||--o{ invitation_ai_requests : "invitation_ai_requests_host_id_fkey"
+  events ||--o{ notification_outbox : "notification_outbox_event_id_fkey"
+  users ||--o{ payment_channel_controls : "payment_channel_controls_changed_by_fkey"
+  users ||--o{ payment_control_history : "payment_control_history_actor_id_fkey"
+  contributions ||--o{ payment_notifications : "payment_notifications_contribution_id_fkey"
+  events ||--o{ payment_notifications : "payment_notifications_event_id_fkey"
+  gifts ||--o{ payment_orders : "fk_payment_order_gift_event"
+  events ||--o{ payment_orders : "payment_orders_event_id_fkey"
+  gifts ||--o{ payment_orders : "payment_orders_gift_id_fkey"
+  platform_monetization_history ||--o{ payment_orders : "payment_orders_monetization_revision_fkey"
+  payment_orders ||--o{ payment_transactions : "payment_transactions_payment_order_id_fkey"
+  host_payout_requests ||--o{ payout_reconciliation_observations : "payout_reconciliation_observations_payout_request_id_fkey"
+  events ||--o{ payout_reservations : "payout_reservations_event_id_fkey"
+  host_payout_requests ||--o{ payout_reservations : "payout_reservations_payout_request_id_fkey"
+  users ||--o{ phone_otp_challenges : "phone_otp_challenges_user_id_fkey"
+  users ||--o{ platform_admin_action_audit : "platform_admin_action_audit_actor_id_fkey"
+  users ||--o{ platform_event_ai_design_settings : "platform_event_ai_design_settings_changed_by_fkey"
+  events ||--o{ platform_event_ai_design_settings : "platform_event_ai_design_settings_event_id_fkey"
+  users ||--o{ platform_event_album_settings : "platform_event_album_settings_changed_by_fkey"
+  events ||--o{ platform_event_album_settings : "platform_event_album_settings_event_id_fkey"
+  events ||--o{ platform_event_message_settings : "platform_event_message_settings_event_id_fkey"
+  users ||--o{ platform_experience_settings : "platform_experience_settings_changed_by_fkey"
+  users ||--o{ platform_host_module_grants : "platform_host_module_grants_changed_by_fkey"
+  users ||--o{ platform_host_module_grants : "platform_host_module_grants_host_id_fkey"
+  platform_module_controls ||--o{ platform_host_module_grants : "platform_host_module_grants_module_code_fkey"
+  users ||--o{ platform_module_controls : "platform_module_controls_changed_by_fkey"
+  users ||--o{ platform_monetization_history : "platform_monetization_history_actor_id_fkey"
+  users ||--o{ platform_monetization_settings : "platform_monetization_settings_changed_by_fkey"
+  users ||--o{ platform_verification_settings : "platform_verification_settings_changed_by_fkey"
+  events ||--o{ qr_invitation_designs : "qr_invitation_designs_event_id_fkey"
+  users ||--o{ routing_commission_history : "routing_commission_history_actor_id_fkey"
+  users ||--o{ routing_commission_settings : "routing_commission_settings_changed_by_fkey"
+  contributions ||--o{ wallet_ledger_entries : "wallet_ledger_entries_contribution_id_fkey"
+  events ||--o{ wallet_ledger_entries : "wallet_ledger_entries_event_id_fkey"

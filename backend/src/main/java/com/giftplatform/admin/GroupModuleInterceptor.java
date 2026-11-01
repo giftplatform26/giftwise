@@ -30,6 +30,7 @@ public final class GroupModuleInterceptor implements HandlerInterceptor {
         var event=events.findByPublicToken(id).filter(e->e.getStatus()==EventStatus.PUBLISHED)
             .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
         permissions.require(event.getOwnerId(),"GROUP_GIFTING");
+        if(path.matches(".*/guest-gifts(?:/.*)?"))permissions.require(event.getOwnerId(),"GUEST_GIFTS");
         return true;
     }
 }

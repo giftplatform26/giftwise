@@ -4,9 +4,9 @@ import './guest-upi-qr.css';
 import {useExperience} from './ExperienceProvider';
 type Destination={id:string;method:'UPI'|'BANK';preferred:boolean;label:string;upiId:string|null;
   qrPngBase64:string|null;beneficiaryName:string|null;accountNumber:string|null;ifsc:string|null};
-export default function GuestVerifiedDestination({token,method,destinationId,onSelect,amountPaise}:{
-  token:string;method:'upi'|'bank';destinationId:string;onSelect:(id:string)=>void;amountPaise?:number}){
-  const {mode}=useExperience();const focused=mode==='FOCUSED';const [copyNotice,setCopyNotice]=useState('');
+export default function GuestVerifiedDestination({token,method,destinationId,onSelect,amountPaise,inlineQr=false}:{
+  token:string;method:'upi'|'bank';destinationId:string;onSelect:(id:string)=>void;amountPaise?:number;inlineQr?:boolean}){
+  const {mode}=useExperience();const focused=mode==='FOCUSED'||inlineQr;const [copyNotice,setCopyNotice]=useState('');
   const [rows,setRows]=useState<Destination[]>([]);
   const [loading,setLoading]=useState(true);
   const [error,setError]=useState('');

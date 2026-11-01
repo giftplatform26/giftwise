@@ -54,7 +54,6 @@ class GroupCollectionDatabaseIntegrationTest {
   var actor=org.mockito.Mockito.mock(com.giftplatform.security.ActorContext.class);
   org.mockito.Mockito.when(actor.requireAuthenticatedUserId()).thenReturn(host);
   var collections=new GroupGiftCollectionController(db,groups,actor);
-  org.springframework.test.util.ReflectionTestUtils.setField(collections,"verification",new com.giftplatform.security.verification.VerificationSettings(db,false,true));
   collections.reserve(token,group,new GroupGiftCollectionController.Reservation(gift),request);
   assertEquals(gift,db.queryForObject("SELECT reserved_gift_id FROM gift_groups WHERE id=?",UUID.class,group));
   assertTrue(collections.report(event).isEmpty());

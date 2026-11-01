@@ -1,5 +1,6 @@
 'use client';
 import GroupContribution from '../../../components/GroupContribution';
+import GuestGiftBoard from '../../../components/GuestGiftBoard';
 import GiftDescription from '../../../components/GiftDescription';
 import CommercialPlacements from '../../../components/CommercialPlacements';
 import dynamic from 'next/dynamic';
@@ -44,7 +45,7 @@ function ClassicPublicEventPage(){
   },[token]);
   useEffect(()=>{const controller=new AbortController();void refreshProgress(controller.signal);return()=>controller.abort()},[refreshProgress]);
   useEffect(()=>{const onKey=(e:KeyboardEvent)=>{if(e.key==='Escape'){setSelectedGift(null);setWalletOpen(false)}};window.addEventListener('keydown',onKey);return()=>window.removeEventListener('keydown',onKey)},[]);
-  useEffect(()=>{const reserved=(event:globalThis.Event)=>{const id=(event as CustomEvent<{giftId:string}>).detail?.giftId;setEvent(previous=>previous?{...previous,gifts:previous.gifts.map(g=>g.id===id?{...g,contributionEnabled:false,contributionDisabledReason:'A surprise is waiting'}:g)}:previous)};window.addEventListener('gift-group-reserved',reserved);return()=>window.removeEventListener('gift-group-reserved',reserved)},[]);
+  useEffect(()=>{const updated=(event:globalThis.Event)=>{const detail=(event as CustomEvent<{token:string;gifts:Gift[]}>).detail;if(detail?.token===token)setEvent(previous=>previous?{...previous,gifts:detail.gifts}:previous)};window.addEventListener('gift-group-updated',updated);return()=>window.removeEventListener('gift-group-updated',updated)},[token]);
   const progressValue=(value:string|number)=>progressState==='ready'?value:progressState==='loading'?'Loading…':'Unavailable';
   const rupees=(v:number)=>new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:2}).format(v);
   if(state==='loading')return <main className="publicEventMessage">Preparing your celebration…</main>;
@@ -71,10 +72,10 @@ function ClassicPublicEventPage(){
           {progressState==='ready'&&<div className="loveGiftTrack" role="progressbar" aria-label={`${g.name} gifted`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={percent}><div style={{width:`${percent}%`}}/></div>}
           {progressState==='ready'&&remaining===0?<div className="loveGiftComplete">❤️ This Gift Is Complete with Love!<small>Thank you to everyone who made this gift special.</small></div>:
             <button type="button" className="loveGiftButton" disabled={g.contributionEnabled===false} title={g.contributionDisabledReason} onClick={()=>setSelectedGift(g)}>{g.contributionEnabled===false?g.contributionDisabledReason:"♡ Contribute with Love"}</button>}
-          {event.features?.GROUP_GIFTING&&g.contributionEnabled!==false&&<GroupContribution token={token} initialGiftId={g.id} compact/>}
+          {event.features?.GROUP_GIFTING&&<GroupContribution token={token} initialGiftId={g.id} giftAvailable={g.contributionEnabled!==false} compact/>}
         </article>
       })}</div>}
-    </section><section className="loveWalletSection"><h2>Send Love to the Celebration</h2><p>Prefer to share a gift for the celebration as a whole?</p><button type="button" className="loveGiftButton" onClick={()=>setWalletOpen(true)}>♡ Contribute to the Celebration</button></section>
+    </section>{event.features?.GROUP_GIFTING&&event.features?.GUEST_GIFTS&&<GuestGiftBoard token={token}/>}<section className="loveWalletSection"><h2>Send Love to the Celebration</h2><p>Prefer to share a gift for the celebration as a whole?</p><button type="button" className="loveGiftButton" onClick={()=>setWalletOpen(true)}>♡ Contribute to the Celebration</button></section>
     {(selectedGift||walletOpen)&&<div className="loveModalBackdrop" role="presentation" onMouseDown={e=>{if(e.target===e.currentTarget){setSelectedGift(null);setWalletOpen(false)}}}><div className="loveModal" role="dialog" aria-modal="true" aria-label={selectedGift?`Contribute to ${selectedGift.name}`:'Contribute to the celebration'}>
       {selectedGift&&<div className="loveModalGift"><h2>{selectedGift.name}</h2><p>{selectedGift.description}</p><div className="loveModalMetrics"><span>Gift Value: {rupees(selectedGift.targetAmount)}</span><span>Contributions Received: {progressValue(rupees((progress[selectedGift.id]?.contributedPaise??0)/100))}</span><span>Still to Be Gifted: {progressValue(rupees(Math.max(0,selectedGift.targetAmount-(progress[selectedGift.id]?.contributedPaise??0)/100)))}</span><span>Contributions Made: {progressValue(progress[selectedGift.id]?.contributionCount??0)}</span></div></div>}
       <GuestContributionCheckout key={selectedGift?.id??'wallet'} token={token} gifts={selectedGift?[selectedGift]:[]} selectedGiftId={selectedGift?.id??''} onClose={()=>{setSelectedGift(null);setWalletOpen(false);void refreshProgress();}}/>

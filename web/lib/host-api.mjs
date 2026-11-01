@@ -10,7 +10,7 @@ export function validateRegistration({fullName,username,email,mobile,password,em
  if(!password || password.length<12) throw Error('Password must have at least 12 characters');
  return {fullName:fullName.trim(),username,email,mobile,password,...(emailVerificationToken?{emailVerificationToken}:{})};
 }
-export function validateEvent({title,description='',occasionType,eventDate='',addressLine1='',city='',state='',postalCode='',country='India',contactName='',contactPhone='',contactEmail='',hostName=''}) {
+export function validateEvent({title,description='',occasionType,eventDate='',addressLine1='',city='',state='',postalCode='',country='India',contactName='',contactPhone='',contactEmail='',hostName='',deliverySameAsEvent=true,deliveryAddress=null}) {
  if(!title?.trim()||title.trim().length>200) throw Error('Event title must be 1–200 characters');
  if(typeof hostName!=='string'||hostName.trim().length>200)throw Error('Host name must be at most 200 characters');
  if(description.length>10000) throw Error('Description too long');
@@ -21,7 +21,17 @@ export function validateEvent({title,description='',occasionType,eventDate='',ad
   if(country.trim().toLowerCase()==='india'&&!/^[1-9][0-9]{5}$/.test(postalCode.trim()))throw Error('Enter a valid 6-digit Indian PIN code');
   if(!/^[+0-9()\- ]{7,30}$/.test(contactPhone.trim()))throw Error('Enter a valid contact phone');
   if(contactEmail&&(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail)||contactEmail.length>254))throw Error('Enter a valid contact email');
-  return {title:title.trim(),description,occasionType,eventDate:eventDate||null,addressLine1:addressLine1.trim(),city:city.trim(),state:state.trim(),postalCode:postalCode.trim(),country:country.trim(),contactName:contactName.trim(),contactPhone:contactPhone.trim(),contactEmail:contactEmail.trim()||null,...(hostName.trim()?{hostName:hostName.trim()}:{})};
+  let normalizedDelivery=null;
+  if(deliverySameAsEvent===false){
+   normalizedDelivery={};
+   for(const [key,max] of Object.entries({addressLine1:200,city:120,state:120,postalCode:20,country:80})){
+    const value=deliveryAddress?.[key];
+    if(typeof value!=='string'||!value.trim()||value.trim().length>max)throw Error(`Enter a valid delivery ${key}`);
+    normalizedDelivery[key]=value.trim();
+   }
+   if(normalizedDelivery.country.toLowerCase()==='india'&&!/^[1-9][0-9]{5}$/.test(normalizedDelivery.postalCode))throw Error('Enter a valid 6-digit Indian delivery PIN code');
+  }
+  return {deliverySameAsEvent:deliverySameAsEvent!==false,deliveryAddress:normalizedDelivery,title:title.trim(),description,occasionType,eventDate:eventDate||null,addressLine1:addressLine1.trim(),city:city.trim(),state:state.trim(),postalCode:postalCode.trim(),country:country.trim(),contactName:contactName.trim(),contactPhone:contactPhone.trim(),contactEmail:contactEmail.trim()||null,...(hostName.trim()?{hostName:hostName.trim()}:{})};
 }
 export async function bootstrapCsrf(fetcher) {
  const r=await fetcher(`${base}/auth/csrf`,{method:'GET',credentials:'include',cache:'no-store'});

@@ -49,6 +49,25 @@ public class Event {
       this.addressLine1=line;this.city=city;this.state=state;this.postalCode=postal;
       this.country=country;this.contactName=name;this.contactPhone=phone;this.contactEmail=email;
     }
+    @Embedded
+    @AttributeOverrides({
+        @AttributeOverride(name="addressLine1", column=@Column(name="delivery_address_line1", length=200)),
+        @AttributeOverride(name="city", column=@Column(name="delivery_city", length=120)),
+        @AttributeOverride(name="state", column=@Column(name="delivery_state", length=120)),
+        @AttributeOverride(name="postalCode", column=@Column(name="delivery_postal_code", length=20)),
+        @AttributeOverride(name="country", column=@Column(name="delivery_country", length=80))
+    })
+    private DeliveryAddress deliveryAddress;
+    @Column(name="delivery_same_as_event", nullable=false)
+    private boolean deliverySameAsEvent = true;
+    public DeliveryAddress getDeliveryAddress() {
+        return deliverySameAsEvent ? new DeliveryAddress(addressLine1,city,state,postalCode,country) : deliveryAddress;
+    }
+    public boolean isDeliverySameAsEvent(){return deliverySameAsEvent;}
+    public void setDeliveryAddress(boolean same, DeliveryAddress address){
+        if(!same && address==null) throw new IllegalArgumentException("Delivery address required");
+        deliverySameAsEvent=same; deliveryAddress=same?null:address;
+    }
     @Column(name = "event_date")
     private LocalDate eventDate;
 

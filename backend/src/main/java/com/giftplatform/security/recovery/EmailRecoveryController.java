@@ -121,12 +121,12 @@ public class EmailRecoveryController {
         if(!valid) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid or expired code");
         String table=switch(a.kind){case "HOST","PLATFORM_ADMIN"->"users";case "GROUP_ADMIN"->"gift_group_accounts";default->"gift_group_members";};
         if(action.equals("RESET_PIN")) {
-            // Keep existing PIN uniqueness guarantees within the event/group.
+            // PIN reuse is allowed across usernames; scope conflicts to this login identity.
             String scopeColumn=a.kind.equals("GROUP_ADMIN")?"event_id":"group_id";
             UUID scope=db.queryForObject("SELECT "+scopeColumn+" FROM "+table+" WHERE id=?",UUID.class,a.id);
             db.queryForObject("SELECT id FROM "+(a.kind.equals("GROUP_ADMIN")?"events":"gift_groups")+" WHERE id=? FOR UPDATE",UUID.class,scope);
-            for(Map<String,Object> other:db.queryForList("SELECT id,pin_hash FROM "+table+" WHERE "+scopeColumn+"=? AND id<>? AND pin_hash IS NOT NULL",scope,a.id)) {
-                if(passwords.matches(body.newCredential(),(String)other.get("pin_hash"))) throw new ResponseStatusException(HttpStatus.CONFLICT,"Choose a different PIN");
+            for(Map<String,Object> other:db.queryForList("SELECT id,pin_hash FROM "+table+" WHERE "+scopeColumn+"=? AND username=(SELECT username FROM "+table+" WHERE id=?) AND id<>? AND pin_hash IS NOT NULL",scope,a.id,a.id)) {
+                if(passwords.matches(body.newCredential(),(String)other.get("pin_hash"))) throw new ResponseStatusException(HttpStatus.CONFLICT,"PIN already taken for this group. Choose a different PIN");
             }
         }
         String field=action.equals("RESET_PIN")?"pin_hash":"password_hash";

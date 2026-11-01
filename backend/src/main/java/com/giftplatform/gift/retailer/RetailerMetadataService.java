@@ -67,7 +67,7 @@ public class RetailerMetadataService {
             """,giftId,lookupId,eventId,actor,sourceUrl,giftId);
         if(changed!=1)throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Retailer lookup expired or does not match this gift and URL. Fetch it again.");
     }
-    Map<String,Object> parse(String html,String source) {
+    public Map<String,Object> parse(String html,String source) {
         Document doc=Jsoup.parse(html,source);
         String host=java.net.URI.create(source).getHost();
         boolean amazonIndia="amazon.in".equalsIgnoreCase(host)||"www.amazon.in".equalsIgnoreCase(host);

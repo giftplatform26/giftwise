@@ -15,3 +15,16 @@ test('generation sends a credentialed CSRF-protected request and no API key',asy
 
 test('event context prefills available fields and leaves unknown time empty',()=>{const form=preferencesFromEvent({hostName:'Jiju & Family',venue:'Rose Garden, Kochi',description:'Join us for a special birthday',visualStyle:'PLAYFUL'});assert.equal(form.displayNames,'Jiju & Family');assert.equal(form.publicVenue,'Rose Garden, Kochi');assert.equal(form.specialMessage,'Join us for a special birthday');assert.equal(form.visualStyle,'PLAYFUL');assert.equal(form.startTime,'');});
 test('event prefill respects form limits without mutating the source',()=>{const context={hostName:'x'.repeat(200),venue:'y'.repeat(160),description:'z'.repeat(900)};const form=preferencesFromEvent(context);assert.equal(form.displayNames.length,200);assert.equal(form.specialMessage.length,400);assert.equal(context.description.length,900);assert.equal(form.language,'English');});
+
+test('exhausted AI credits tell the host what to fix instead of suggesting retries',async()=>{
+ const fetcher=async(url)=>url.endsWith('/csrf')?{ok:true,status:200}:{ok:false,status:402,json:async()=>({code:'AI_CREDITS_EXHAUSTED',detail:'private provider error'})};
+ await assert.rejects(generateAiInvitation(fetcher,id,{},'XSRF-TOKEN=test'),/credits have run out/);
+});
+test('provider throttling is distinct from the application hourly limit',async()=>{
+ const fetcher=async(url)=>url.endsWith('/csrf')?{ok:true,status:200}:{ok:false,status:503,json:async()=>({code:'AI_PROVIDER_RATE_LIMITED'})};
+ await assert.rejects(generateAiInvitation(fetcher,id,{},'XSRF-TOKEN=test'),/provider is busy/);
+});
+test('AI provider errors never display arbitrary upstream detail',async()=>{
+ const fetcher=async(url)=>url.endsWith('/csrf')?{ok:true,status:200}:{ok:false,status:502,json:async()=>({code:'AI_PROVIDER_UNAVAILABLE',detail:'PRIVATE_PROVIDER_MESSAGE'})};
+ try{await generateAiInvitation(fetcher,id,{},'XSRF-TOKEN=test');assert.fail('Expected failure')}catch(error){assert.doesNotMatch(error.message,/PRIVATE_PROVIDER_MESSAGE/);assert.match(error.message,/invitation has not changed/)}
+});

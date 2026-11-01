@@ -19,6 +19,7 @@ import java.util.*;
 @RestController
 @RequestMapping("/api/public/groups/{token}/contact-email")
 public class GroupEmailEnrollmentController {
+    @org.springframework.beans.factory.annotation.Autowired(required=false) private com.giftplatform.group.GroupGiftLifecycleService giftLifecycle;
     private final JdbcTemplate db;
     private final RecoveryChallengeStore challenges;
     private final CredentialSessionVersionStore versions;
@@ -125,6 +126,7 @@ public class GroupEmailEnrollmentController {
         if(db.update("UPDATE "+table+" SET email=?,email_verified_at=now() WHERE id=? AND email_verified_at IS NULL",destination,a.id)!=1)
             throw new ResponseStatusException(HttpStatus.CONFLICT,"The email is already verified or the account is unavailable.");
         db.update("DELETE FROM account_pending_email_verifications WHERE challenge_id=?",body.challengeId());
+        if(a.kind.equals("GROUP_ADMIN")&&giftLifecycle!=null)giftLifecycle.activateForCreator(a.id);
         return new Result("Email verified. You can now use it for account recovery.");
     }
 }

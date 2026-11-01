@@ -230,6 +230,10 @@ public class SecurityConfig {
                                 "/api/public/groups/*/members/*",
                                 "/api/public/groups/*/members/*/review",
                                 "/api/public/groups/*/gift-reservation/*", "/api/public/groups/*/publish/*").permitAll()
+                        .requestMatchers("/api/public/groups/*/gift-metadata", "/api/public/groups/*/gift-plan/*", "/api/public/groups/*/gift-board", "/api/public/groups/*/gift-receipts/*/*", "/api/public/groups/*/gift-progress/*",
+                                "/api/public/groups/*/gift-publish/*", "/api/public/groups/*/gift-fulfilment/*",
+                                "/api/public/groups/*/gift-delivery-address/*").permitAll()
+                        .requestMatchers("/api/public/groups/*/guest-gifts", "/api/public/groups/*/guest-gifts/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/public/groups/*/account-policy").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/public/groups/*/contact-email/start", "/api/public/groups/*/contact-email/complete").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/public/groups/*/contact-mobile/status", "/api/public/groups/*/contact-email/status").permitAll()

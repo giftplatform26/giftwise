@@ -19,8 +19,13 @@ public record EventRequest(
     @Size(max=150) String contactName,
     @Size(max=30) String contactPhone,
     @Size(max=254) String contactEmail,
-    @NotBlank @Size(max=200) String hostName
+    @NotBlank @Size(max=200) String hostName,
+    Boolean deliverySameAsEvent,
+    @jakarta.validation.Valid com.giftplatform.event.entity.DeliveryAddress deliveryAddress
 ) {
+    public EventRequest(String title,String description,OccasionType occasionType,LocalDate eventDate,String addressLine1,String city,String state,String postalCode,String country,String contactName,String contactPhone,String contactEmail,String hostName){
+        this(title,description,occasionType,eventDate,addressLine1,city,state,postalCode,country,contactName,contactPhone,contactEmail,hostName,true,null);
+    }
     public EventRequest(String title,String description,OccasionType occasionType,LocalDate eventDate){
         this(title,description,occasionType,eventDate,null,null,null,null,null,null,null,null,"Event Host");
     }

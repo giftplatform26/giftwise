@@ -28,6 +28,7 @@ public class EventManagementService {
         UUID actor=actors.requireAuthenticatedUserId();
         Event event=new Event(input.title().trim(), input.occasionType());
         validateContact(input);
+        applyDelivery(event,input);
         event.assignOwner(actor);
         event.setHostDisplayName(input.hostName().trim());
         event.setEventContact(input.addressLine1().trim(),input.city().trim(),input.state().trim(),
@@ -51,6 +52,7 @@ public class EventManagementService {
         if (event.getStatus()!=EventStatus.DRAFT) throw new ResponseStatusException(HttpStatus.CONFLICT,"Only drafts can be edited");
         Map<String,Object> before=snapshot(event);
         validateContact(input);
+        applyDelivery(event,input);
         event.setEventContact(input.addressLine1().trim(),input.city().trim(),input.state().trim(),
             input.postalCode().trim(),input.country().trim(),input.contactName().trim(),
             input.contactPhone().trim(),input.contactEmail()==null?null:input.contactEmail().trim());
@@ -73,6 +75,16 @@ public class EventManagementService {
         repository.saveAndFlush(event);
         log(actors.requireAuthenticatedUserId(),event,AuditAction.STATUS_CHANGE,before,snapshot(event));
         return response(event);
+    }
+    private void applyDelivery(Event event,EventRequest input){
+        boolean same=!Boolean.FALSE.equals(input.deliverySameAsEvent());
+        var a=input.deliveryAddress();
+        if(!same && (a==null || a.addressLine1()==null || a.addressLine1().isBlank()
+            || a.city()==null || a.city().isBlank() || a.state()==null || a.state().isBlank()
+            || a.postalCode()==null || a.postalCode().isBlank() || a.country()==null || a.country().isBlank()
+            || ("India".equalsIgnoreCase(a.country()) && !a.postalCode().matches("[1-9][0-9]{5}"))))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Valid delivery address required");
+        event.setDeliveryAddress(same,a);
     }
     private void validateContact(EventRequest r){
       if(r.addressLine1()==null||r.addressLine1().isBlank()||r.city()==null||r.city().isBlank()
@@ -104,6 +116,8 @@ public class EventManagementService {
         if(e.getContactName()!=null)m.put("contactName",e.getContactName());
         if(e.getContactPhone()!=null)m.put("contactPhone",e.getContactPhone());
         if(e.getContactEmail()!=null)m.put("contactEmail",e.getContactEmail());
+        m.put("deliverySameAsEvent",e.isDeliverySameAsEvent());
+        m.put("deliveryAddress",e.getDeliveryAddress());
         return m;
     }
     private void log(UUID actor,Event e,AuditAction action,Map<String,Object> oldValues,Map<String,Object> newValues) {

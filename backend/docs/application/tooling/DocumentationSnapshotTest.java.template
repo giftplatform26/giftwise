@@ -1,0 +1,87 @@
+package com.giftplatform.documentation;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.*;
+import java.nio.file.*;
+import java.util.*;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.*;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.*;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
+import org.springframework.web.bind.annotation.*;
+import org.testcontainers.junit.jupiter.*;
+import org.testcontainers.postgresql.PostgreSQLContainer;
+import tools.jackson.databind.ObjectMapper;
+
+/** Documentation-only export from an empty, isolated database. Never calls business endpoints. */
+@SpringBootTest(properties="gift.otp.secret-base64=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")
+@Testcontainers
+class DocumentationSnapshotTest {
+ @Container static PostgreSQLContainer postgres=new PostgreSQLContainer("postgres:17");
+ @DynamicPropertySource static void database(DynamicPropertyRegistry registry){registry.add("spring.datasource.url",postgres::getJdbcUrl);registry.add("spring.datasource.username",postgres::getUsername);registry.add("spring.datasource.password",postgres::getPassword);}
+ @Autowired JdbcTemplate db;
+ @Autowired @Qualifier("requestMappingHandlerMapping") RequestMappingHandlerMapping mappings;
+ @Autowired ObjectMapper mapper;
+ final Map<String,Object> models=new TreeMap<>();
+ void describe(Type type){
+  if(type instanceof ParameterizedType generic){describe(generic.getRawType());for(Type item:generic.getActualTypeArguments())describe(item);return;}
+  if(!(type instanceof Class<?> cls)||!cls.getName().startsWith("com.giftplatform.")||models.containsKey(cls.getName()))return;
+  models.put(cls.getName(),Map.of("kind",cls.isEnum()?"enum":cls.isRecord()?"record":"class"));
+  var fields=new ArrayList<Map<String,Object>>();
+  if(cls.isEnum()){models.put(cls.getName(),Map.of("kind","enum","values",Arrays.stream(cls.getEnumConstants()).map(Object::toString).toList()));return;}
+  if(cls.isRecord())for(var field:cls.getRecordComponents()){
+   fields.add(Map.of("name",field.getName(),"type",field.getGenericType().getTypeName(),"annotations",Arrays.stream(field.getAnnotations()).map(Annotation::toString).toList()));describe(field.getGenericType());
+  }else for(var field:cls.getDeclaredFields())if(!Modifier.isStatic(field.getModifiers())&&!field.isSynthetic()){
+   fields.add(Map.of("name",field.getName(),"type",field.getGenericType().getTypeName(),"annotations",Arrays.stream(field.getAnnotations()).map(Annotation::toString).toList()));describe(field.getGenericType());
+  }
+  models.put(cls.getName(),Map.of("kind",cls.isRecord()?"record":"class","fields",fields));
+ }
+ @Test void exportSourceOfTruth() throws Exception {
+  var schema=new LinkedHashMap<String,Object>();
+  schema.put("tables",db.queryForList("SELECT table_name,table_type FROM information_schema.tables WHERE table_schema='public' ORDER BY table_name"));
+  schema.put("columns",db.queryForList("SELECT table_name,column_name,ordinal_position,data_type,udt_name,is_nullable,column_default,character_maximum_length,numeric_precision,numeric_scale FROM information_schema.columns WHERE table_schema='public' ORDER BY table_name,ordinal_position"));
+  schema.put("constraints",db.queryForList("SELECT r.relname AS table_name,c.conname AS name,c.contype AS type,pg_get_constraintdef(c.oid) AS definition,CASE WHEN c.confrelid=0 THEN NULL ELSE c.confrelid::regclass::text END AS referenced_table FROM pg_constraint c JOIN pg_class r ON r.oid=c.conrelid JOIN pg_namespace n ON n.oid=r.relnamespace WHERE n.nspname='public' ORDER BY r.relname,c.conname"));
+  schema.put("relationships",db.queryForList("SELECT c.conname AS name,r.relname AS source_table,a.attname AS source_column,f.relname AS target_table,b.attname AS target_column,pg_get_constraintdef(c.oid) AS definition FROM pg_constraint c JOIN pg_class r ON r.oid=c.conrelid JOIN pg_namespace n ON n.oid=r.relnamespace JOIN pg_class f ON f.oid=c.confrelid CROSS JOIN LATERAL unnest(c.conkey,c.confkey) WITH ORDINALITY AS k(src,dst,ord) JOIN pg_attribute a ON a.attrelid=r.oid AND a.attnum=k.src JOIN pg_attribute b ON b.attrelid=f.oid AND b.attnum=k.dst WHERE c.contype='f' AND n.nspname='public' ORDER BY r.relname,c.conname,k.ord"));
+  schema.put("indexes",db.queryForList("SELECT tablename AS table_name,indexname AS name,indexdef AS definition FROM pg_indexes WHERE schemaname='public' ORDER BY tablename,indexname"));
+  schema.put("views",db.queryForList("SELECT viewname AS name,definition FROM pg_views WHERE schemaname='public' ORDER BY viewname"));
+  schema.put("triggers",db.queryForList("SELECT r.relname AS table_name,t.tgname AS name,pg_get_triggerdef(t.oid) AS definition FROM pg_trigger t JOIN pg_class r ON r.oid=t.tgrelid JOIN pg_namespace n ON n.oid=r.relnamespace WHERE n.nspname='public' AND NOT t.tgisinternal ORDER BY r.relname,t.tgname"));
+  schema.put("routines",db.queryForList("SELECT p.proname AS name,pg_get_function_identity_arguments(p.oid) AS arguments,pg_get_functiondef(p.oid) AS definition FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='public' AND p.prokind IN ('f','p') ORDER BY p.proname"));
+  schema.put("row_security",db.queryForList("SELECT c.relname AS table_name,c.relrowsecurity AS enabled,c.relforcerowsecurity AS forced FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public' AND c.relkind='r' ORDER BY c.relname"));
+  schema.put("policies",db.queryForList("SELECT schemaname,tablename,policyname,permissive,roles::text,cmd,qual,with_check FROM pg_policies WHERE schemaname='public'"));
+  schema.put("migration_version",db.queryForObject("SELECT version FROM flyway_schema_history WHERE success AND version IS NOT NULL ORDER BY installed_rank DESC LIMIT 1",String.class));
+  var endpoints=new ArrayList<Map<String,Object>>();
+  for(var entry:mappings.getHandlerMethods().entrySet()){
+   var method=entry.getValue().getMethod();var owner=entry.getValue().getBeanType();if(!owner.getName().startsWith("com.giftplatform."))continue;
+   var parameters=new ArrayList<Map<String,Object>>();
+   for(var parameter:method.getParameters()){
+    var row=new LinkedHashMap<String,Object>();row.put("name",parameter.getName());row.put("type",parameter.getParameterizedType().getTypeName());row.put("annotations",Arrays.stream(parameter.getAnnotations()).map(Annotation::toString).toList());parameters.add(row);describe(parameter.getParameterizedType());
+   }
+   describe(method.getGenericReturnType());
+   var row=new LinkedHashMap<String,Object>();row.put("controller",owner.getName());row.put("method",method.getName());row.put("paths",entry.getKey().getPatternValues());row.put("verbs",entry.getKey().getMethodsCondition().getMethods());row.put("consumes",entry.getKey().getConsumesCondition().getConsumableMediaTypes().stream().map(Object::toString).toList());row.put("produces",entry.getKey().getProducesCondition().getProducibleMediaTypes().stream().map(Object::toString).toList());row.put("parameters",parameters);row.put("response",method.getGenericReturnType().getTypeName());row.put("annotations",Arrays.stream(method.getAnnotations()).map(Annotation::toString).toList());endpoints.add(row);
+  }
+  var declarations=new ArrayList<Map<String,Object>>();
+  try(var paths=Files.walk(Path.of("src/main/java/com/giftplatform"))){
+   for(var source:paths.filter(p->p.toString().endsWith(".java")).toList()){
+    String name=Path.of("src/main/java").relativize(source).toString().replace(java.io.File.separatorChar,'.').replaceAll("\\.java$","");
+    Class<?> owner;try{owner=Class.forName(name,false,getClass().getClassLoader());}catch(LinkageError|ClassNotFoundException ignored){continue;}
+    if(!owner.isAnnotationPresent(RestController.class)&&!owner.isAnnotationPresent(org.springframework.stereotype.Controller.class))continue;
+    var prefix=org.springframework.core.annotation.AnnotatedElementUtils.findMergedAnnotation(owner,RequestMapping.class);
+    String[] bases=prefix==null||prefix.path().length==0?new String[]{""}:prefix.path();
+    for(var method:owner.getDeclaredMethods()){
+     var mapping=org.springframework.core.annotation.AnnotatedElementUtils.findMergedAnnotation(method,RequestMapping.class);if(mapping==null)continue;
+     var routes=new ArrayList<String>();for(String base:bases)for(String route:mapping.path().length==0?new String[]{""}:mapping.path())routes.add((base+"/"+route).replaceAll("/+","/"));
+     var parameters=new ArrayList<Map<String,Object>>();for(var parameter:method.getParameters()){
+      parameters.add(Map.of("name",parameter.getName(),"type",parameter.getParameterizedType().getTypeName(),"annotations",Arrays.stream(parameter.getAnnotations()).map(Annotation::toString).toList()));describe(parameter.getParameterizedType());
+     }
+     describe(method.getGenericReturnType());var row=new LinkedHashMap<String,Object>();row.put("controller",owner.getName());row.put("method",method.getName());row.put("paths",routes);row.put("verbs",Arrays.stream(mapping.method()).map(Object::toString).toList());row.put("parameters",parameters);row.put("response",method.getGenericReturnType().getTypeName());row.put("consumes",List.of(mapping.consumes()));row.put("produces",List.of(mapping.produces()));row.put("annotations",Arrays.stream(method.getAnnotations()).map(Annotation::toString).toList());declarations.add(row);
+    }
+   }
+  }
+  endpoints.sort(Comparator.comparing(row->row.get("paths").toString()+row.get("verbs")));
+  var root=Path.of("docs/application/catalogue");Files.createDirectories(root);
+  Files.writeString(root.resolve("database.json"),mapper.writerWithDefaultPrettyPrinter().writeValueAsString(schema));
+  Files.writeString(root.resolve("api-runtime.json"),mapper.writerWithDefaultPrettyPrinter().writeValueAsString(Map.of("endpoints",endpoints,"declaredEndpoints",declarations,"models",models)));
+ }
+}

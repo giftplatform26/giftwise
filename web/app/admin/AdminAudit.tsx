@@ -1,0 +1,24 @@
+'use client';
+import {useCallback,useEffect,useState} from 'react';
+type Entry={id:string;actor_id:string;actor_name:string;action:string;target_id:string|null;module_code:string|null;created_at:string};
+type AuditPage={entries:Entry[];total:number;page:number;pageSize:number;totalPages:number;actions:string[]};
+const empty={search:'',from:'',to:'',action:'',module:''};
+export default function AdminAudit({revision,modules}:{revision:number;modules:Record<string,string>}){
+ const [draft,setDraft]=useState(empty),[filters,setFilters]=useState(empty),[page,setPage]=useState(0),[result,setResult]=useState<AuditPage|null>(null),[loading,setLoading]=useState(true),[error,setError]=useState(''),[reload,setReload]=useState(0);
+ const load=useCallback(async(signal:AbortSignal)=>{
+  setLoading(true);setError('');
+  try{
+   const query=new URLSearchParams({page:String(page)});
+   for(const [key,value] of Object.entries(filters))if(value)query.set(key,value);
+   const response=await fetch(`/backend/api/admin/console/audit/page?${query}`,{credentials:'include',cache:'no-store',signal});
+   if(!response.ok)throw Error(response.status===403?'Platform administrator access required':`Could not load audit records (${response.status}).`);
+   const data:AuditPage=await response.json();
+   if(!signal.aborted){setResult(data);if(data.page!==page)setPage(data.page)}
+  }catch(e){if(!signal.aborted){setError(e instanceof Error?e.message:'Could not load audit records.');setResult(null)}}
+  finally{if(!signal.aborted)setLoading(false)}
+ },[filters,page]);
+ useEffect(()=>{const controller=new AbortController();void load(controller.signal);return()=>controller.abort()},[load,revision,reload]);
+ function apply(e:React.FormEvent){e.preventDefault();setError('');if(draft.from&&draft.to&&draft.from>draft.to){setError('The start date must be on or before the end date.');return;}setPage(0);setFilters({...draft,search:draft.search.trim()})}
+ const actions=result?.actions||[];
+ return <section className="acPanel" aria-busy={loading}><h2>Administrative audit</h2><p>20 records per page. Dates and times use UTC.</p><form onSubmit={apply} style={{display:'flex',gap:12,flexWrap:'wrap',alignItems:'end',marginBottom:20}}><label>Keyword<input type="search" maxLength={200} placeholder="Action, module, administrator, or ID" value={draft.search} onChange={e=>setDraft({...draft,search:e.target.value})}/></label><label>From date (UTC)<input type="date" value={draft.from} max={draft.to||'9999-12-31'} onChange={e=>setDraft({...draft,from:e.target.value})}/></label><label>To date (UTC)<input type="date" value={draft.to} min={draft.from||undefined} max="9999-12-31" onChange={e=>setDraft({...draft,to:e.target.value})}/></label><label>Action<select value={draft.action} onChange={e=>setDraft({...draft,action:e.target.value})}><option value="">All actions</option>{actions.map(action=><option key={action} value={action}>{action.replaceAll('_',' ')}</option>)}</select></label><label>Module<select value={draft.module} onChange={e=>setDraft({...draft,module:e.target.value})}><option value="">All modules</option>{Object.entries(modules).map(([code,label])=><option key={code} value={code}>{label}</option>)}</select></label><button type="submit" disabled={loading}>Apply filters</button><button type="button" disabled={loading} onClick={()=>{setDraft(empty);setFilters(empty);setPage(0)}}>Clear filters</button></form>{error&&<p role="alert" className="acError">{error} <button type="button" onClick={()=>setReload(value=>value+1)}>Retry</button></p>}{loading?<p role="status">Loading audit records…</p>:result&&<><p role="status">{result.total?`${result.page*20+1}–${Math.min(result.total,(result.page+1)*20)} of ${result.total} records`:'No audit records match these filters.'}</p><div className="acTable"><table><thead><tr><th>Date / time (UTC)</th><th>Administrator</th><th>Action</th><th>Module</th><th>Target</th></tr></thead><tbody>{result.entries.map(entry=><tr key={entry.id}><td>{new Date(entry.created_at).toLocaleString(undefined,{timeZone:'UTC'})}</td><td>{entry.actor_name}<small style={{display:'block',overflowWrap:'anywhere'}}>{entry.actor_id}</small></td><td>{entry.action.replaceAll('_',' ')}</td><td>{entry.module_code?(modules[entry.module_code]||entry.module_code):'Platform'}</td><td style={{overflowWrap:'anywhere'}}>{entry.target_id||'—'}</td></tr>)}</tbody></table></div><nav aria-label="Audit pagination" style={{display:'flex',alignItems:'center',gap:16,marginTop:20}}><button type="button" disabled={loading||result.page===0} onClick={()=>setPage(value=>Math.max(0,value-1))}>Previous</button><span>Page {result.page+1} of {Math.max(1,result.totalPages)}</span><button type="button" disabled={loading||result.page+1>=result.totalPages} onClick={()=>setPage(value=>value+1)}>Next</button></nav></>}</section>;
+}

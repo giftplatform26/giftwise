@@ -10,6 +10,11 @@ import java.util.UUID;
 public class AiInvitationController {
     private final AiInvitationService service;
     public AiInvitationController(AiInvitationService service){this.service=service;}
+    @ExceptionHandler(AiInvitationFailure.class)
+    public ResponseEntity<ProblemDetail> failure(AiInvitationFailure error){
+        var problem=ProblemDetail.forStatusAndDetail(error.getStatusCode(),error.getReason());problem.setProperty("code",error.code());
+        return ResponseEntity.status(error.getStatusCode()).cacheControl(CacheControl.noStore()).body(problem);
+    }
     @GetMapping("/context") public ResponseEntity<AiInvitationService.EventContext> context(@PathVariable UUID eventId){return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(service.context(eventId));}
     @GetMapping public ResponseEntity<AiInvitationService.Settings> settings(@PathVariable UUID eventId){return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(service.settings(eventId));}
     @PostMapping public ResponseEntity<AiInvitationService.Suggestion> generate(@PathVariable UUID eventId,@Valid @RequestBody AiInvitationService.Preferences input){return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(service.generate(eventId,input));}

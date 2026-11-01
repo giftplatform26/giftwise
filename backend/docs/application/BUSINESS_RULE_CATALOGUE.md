@@ -1,0 +1,17157 @@
+# Business-rule and validation guard catalogue
+
+A guard is an observed enforcement point, not necessarily a complete product requirement. Why a developer chose a threshold, legal exceptions, or support override policy may be unspecified. Preserve these guards until a reviewed business change updates code, tests, diagrams and this catalogue. General rationale: prevent the rejected condition from entering the corresponding operation; exact business rationale and permitted exceptions are not inferred. For every entry, applicability is the linked guard context, failure is the exact throw, exceptions are only those explicitly bypassed by code, and edge cases include boundary/null/concurrent/replay values.
+
+## admin
+
+### RULE-0001 — backend/src/main/java/com/giftplatform/admin/AccountPolicyController.java:19
+
+[backend/src/main/java/com/giftplatform/admin/AccountPolicyController.java:19](../../src/main/java/com/giftplatform/admin/AccountPolicyController.java#L19)
+
+When / guard context:
+```java
+RequestMapping("/api/admin/account-policies")
+public class AccountPolicyController {
+ private static final UUID ROOT = new UUID(0,0);
+ private final JdbcTemplate db;
+ private final ActorContext actor;
+ public AccountPolicyController(JdbcTemplate db, ActorContext actor){this.db=db;this.actor=actor;}
+ private UUID admin(){if(!actor.isPlatformAdmin())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0002 — backend/src/main/java/com/giftplatform/admin/AccountPolicyController.java:21
+
+[backend/src/main/java/com/giftplatform/admin/AccountPolicyController.java:21](../../src/main/java/com/giftplatform/admin/AccountPolicyController.java#L21)
+
+When / guard context:
+```java
+if(!actor.isPlatformAdmin())throw new ResponseStatusException(HttpStatus.FORBIDDEN);return actor.requireAuthenticatedUserId();}
+ public record Policy(boolean requireEmail,boolean requireMobile,boolean verifyEmail,boolean verifyMobile,boolean allowGroupPin){}
+ private String scope(String value){if(!List.of("PLATFORM","HOST","EVENT").contains(value))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid policy scope");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0003 — backend/src/main/java/com/giftplatform/admin/AccountPolicyController.java:22
+
+[backend/src/main/java/com/giftplatform/admin/AccountPolicyController.java:22](../../src/main/java/com/giftplatform/admin/AccountPolicyController.java#L22)
+
+When / guard context:
+```java
+bile,boolean verifyEmail,boolean verifyMobile,boolean allowGroupPin){}
+ private String scope(String value){if(!List.of("PLATFORM","HOST","EVENT").contains(value))throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid policy scope");return value;}
+ private UUID target(String scope,UUID id){if("PLATFORM".equals(scope)){if(!ROOT.equals(id))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0004 — backend/src/main/java/com/giftplatform/admin/AccountPolicyController.java:22
+
+[backend/src/main/java/com/giftplatform/admin/AccountPolicyController.java:22](../../src/main/java/com/giftplatform/admin/AccountPolicyController.java#L22)
+
+When / guard context:
+```java
+pe(String value){if(!List.of("PLATFORM","HOST","EVENT").contains(value))throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid policy scope");return value;}
+ private UUID target(String scope,UUID id){if("PLATFORM".equals(scope)){if(!ROOT.equals(id))throw new ResponseStatusException(HttpStatus.BAD_REQUEST);return ROOT;}if(ROOT.equals(id))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0005 — backend/src/main/java/com/giftplatform/admin/AccountPolicyController.java:22
+
+[backend/src/main/java/com/giftplatform/admin/AccountPolicyController.java:22](../../src/main/java/com/giftplatform/admin/AccountPolicyController.java#L22)
+
+When / guard context:
+```java
+HttpStatus.BAD_REQUEST);return ROOT;}if(ROOT.equals(id))throw new ResponseStatusException(HttpStatus.BAD_REQUEST);String table="HOST".equals(scope)?"users":"events";String extra="HOST".equals(scope)?" AND role='CUSTOMER'":"";Integer count=db.queryForObject("SELECT count(*) FROM "+table+" WHERE id=?"+extra,Integer.class,id);if(count==null||count!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Target not found");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0006 — backend/src/main/java/com/giftplatform/admin/AccountPolicyController.java:27
+
+[backend/src/main/java/com/giftplatform/admin/AccountPolicyController.java:27](../../src/main/java/com/giftplatform/admin/AccountPolicyController.java#L27)
+
+When / guard context:
+```java
+n new Policy(base.requireEmail()||override.requireEmail(),base.requireMobile()||override.requireMobile(),base.verifyEmail()||override.verifyEmail(),base.verifyMobile()||override.verifyMobile(),base.allowGroupPin()&&override.allowGroupPin());}
+ public Policy effective(String scope,UUID id){scope=scope(scope);Policy p=row("PLATFORM",ROOT);if(p==null)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Platform policy unavailable");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0007 — backend/src/main/java/com/giftplatform/admin/AccountPolicyController.java:29
+
+[backend/src/main/java/com/giftplatform/admin/AccountPolicyController.java:29](../../src/main/java/com/giftplatform/admin/AccountPolicyController.java#L29)
+
+When / guard context:
+```java
+ForObject("SELECT owner_id FROM events WHERE id=?",UUID.class,id):id;return merge(merge(p,row("HOST",host)),row("EVENT",id));}
+ @PutMapping("/{scope}/{id}") @Transactional
+ public Map<String,Object> update(@PathVariable String scope,@PathVariable UUID id,@RequestBody Policy input){UUID who=admin();scope=scope(scope);target(scope,id);if(input==null)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0008 — backend/src/main/java/com/giftplatform/admin/AccountPolicyController.java:29
+
+[backend/src/main/java/com/giftplatform/admin/AccountPolicyController.java:29](../../src/main/java/com/giftplatform/admin/AccountPolicyController.java#L29)
+
+When / guard context:
+```java
+d}") @Transactional
+ public Map<String,Object> update(@PathVariable String scope,@PathVariable UUID id,@RequestBody Policy input){UUID who=admin();scope=scope(scope);target(scope,id);if(input==null)throw new ResponseStatusException(HttpStatus.BAD_REQUEST);if(!input.requireEmail()||!input.requireMobile()||!input.verifyEmail()||!input.verifyMobile())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Verified email and mobile are mandatory security minimums");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0009 — backend/src/main/java/com/giftplatform/admin/AiInvitationAdminController.java:16
+
+[backend/src/main/java/com/giftplatform/admin/AiInvitationAdminController.java:16](../../src/main/java/com/giftplatform/admin/AiInvitationAdminController.java#L16)
+
+When / guard context:
+```java
+dulePermissionService permissions;private final AiInvitationClient client;
+ public AiInvitationAdminController(JdbcTemplate db,ActorContext actors,EffectiveModulePermissionService permissions,AiInvitationClient client){this.db=db;this.actors=actors;this.permissions=permissions;this.client=client;}
+ private void admin(){if(!actors.isPlatformAdmin())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Platform admin only");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0010 — backend/src/main/java/com/giftplatform/admin/AiInvitationAdminController.java:28
+
+[backend/src/main/java/com/giftplatform/admin/AiInvitationAdminController.java:28](../../src/main/java/com/giftplatform/admin/AiInvitationAdminController.java#L28)
+
+When / guard context:
+```java
+d_at>now()-interval '24 hours'"+(event==null?"":" AND event_id=?"),args.toArray()));
+  return out;
+ }
+ @GetMapping("/hosts/{hostId}/ai-design")
+ public ResponseEntity<Map<String,Object>> host(@PathVariable UUID hostId){
+  admin();var rows=db.queryForList("SELECT id,username,email FROM users WHERE id=? AND role='CUSTOMER'",hostId);if(rows.isEmpty())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Host not found");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0011 — backend/src/main/java/com/giftplatform/admin/AiInvitationAdminController.java:36
+
+[backend/src/main/java/com/giftplatform/admin/AiInvitationAdminController.java:36](../../src/main/java/com/giftplatform/admin/AiInvitationAdminController.java#L36)
+
+When / guard context:
+```java
+rows=db.queryForList("SELECT e.id,e.title,e.status,e.occasion_type,e.event_date,e.host_display_name,e.owner_id,u.username AS host_name,u.email AS host_email,COALESCE(a.enabled,FALSE) AS enabled FROM events e JOIN users u ON u.id=e.owner_id LEFT JOIN platform_event_ai_design_settings a ON a.event_id=e.id WHERE e.id=?",eventId);
+  if(rows.isEmpty())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Event not found");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0012 — backend/src/main/java/com/giftplatform/admin/EffectiveModulePermissionService.java:32
+
+[backend/src/main/java/com/giftplatform/admin/EffectiveModulePermissionService.java:32](../../src/main/java/com/giftplatform/admin/EffectiveModulePermissionService.java#L32)
+
+When / guard context:
+```java
+code=rs.getString("module_code");if(result.containsKey(code))result.put(code,rs.getBoolean("enabled"));},hostId);
+  result.put("GUEST_GIFTS",Boolean.TRUE.equals(result.get("GUEST_GIFTS"))&&Boolean.TRUE.equals(result.get("GROUP_GIFTING")));
+  return Map.copyOf(result);
+ }
+ public void require(UUID hostId,String module){
+  if(!enabled(hostId,module))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Feature unavailable");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0013 — backend/src/main/java/com/giftplatform/admin/EffectiveModulePermissionService.java:41
+
+[backend/src/main/java/com/giftplatform/admin/EffectiveModulePermissionService.java:41](../../src/main/java/com/giftplatform/admin/EffectiveModulePermissionService.java#L41)
+
+When / guard context:
+```java
+c Map<String,Boolean> eventModules(UUID hostId,UUID eventId){
+  var result=new LinkedHashMap<>(modules(hostId));result.put("MEMORY_ALBUM",albumEnabled(hostId,eventId));result.put("AI_INVITATION",aiInvitationEnabled(hostId,eventId));return Map.copyOf(result);
+ }
+ public void requireAlbum(UUID hostId,UUID eventId){
+  if(!albumEnabled(hostId,eventId))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Memory album unavailable");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0014 — backend/src/main/java/com/giftplatform/admin/EffectiveModulePermissionService.java:47
+
+[backend/src/main/java/com/giftplatform/admin/EffectiveModulePermissionService.java:47](../../src/main/java/com/giftplatform/admin/EffectiveModulePermissionService.java#L47)
+
+When / guard context:
+```java
+hostId,"AI_INVITATION")&&Boolean.TRUE.equals(db.queryForObject("SELECT EXISTS(SELECT 1 FROM platform_event_ai_design_settings a JOIN events e ON e.id=a.event_id WHERE a.event_id=? AND e.owner_id=? AND a.enabled)",Boolean.class,eventId,hostId));
+ }
+ public void requireAiInvitation(UUID hostId,UUID eventId){
+  if(!aiInvitationEnabled(hostId,eventId))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Design with AI is not enabled for this host and event");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0015 — backend/src/main/java/com/giftplatform/admin/ExperienceSettingsService.java:22
+
+[backend/src/main/java/com/giftplatform/admin/ExperienceSettingsService.java:22](../../src/main/java/com/giftplatform/admin/ExperienceSettingsService.java#L22)
+
+When / guard context:
+```java
+s=actors;}
+ public record Settings(String viewMode){}
+ public Settings current(){
+  String mode=db.queryForObject("SELECT view_mode FROM platform_experience_settings WHERE id=1",String.class);
+  return new Settings("FOCUSED".equals(mode)?"FOCUSED":"CLASSIC");
+ }
+ @Transactional public Settings update(Settings input){
+  if(!actors.isPlatformAdmin())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0016 — backend/src/main/java/com/giftplatform/admin/ExperienceSettingsService.java:25
+
+[backend/src/main/java/com/giftplatform/admin/ExperienceSettingsService.java:25](../../src/main/java/com/giftplatform/admin/ExperienceSettingsService.java#L25)
+
+When / guard context:
+```java
+ew Settings("FOCUSED".equals(mode)?"FOCUSED":"CLASSIC");
+ }
+ @Transactional public Settings update(Settings input){
+  if(!actors.isPlatformAdmin())throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+  UUID admin=actors.requireAuthenticatedUserId();
+  if(input==null||!("CLASSIC".equals(input.viewMode())||"FOCUSED".equals(input.viewMode())))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Choose Classic or Focused");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0017 — backend/src/main/java/com/giftplatform/admin/GroupMemberEmailPolicyController.java:16
+
+[backend/src/main/java/com/giftplatform/admin/GroupMemberEmailPolicyController.java:16](../../src/main/java/com/giftplatform/admin/GroupMemberEmailPolicyController.java#L16)
+
+When / guard context:
+```java
+;
+import java.util.*;
+
+@RestController
+public class GroupMemberEmailPolicyController {
+ private final JdbcTemplate db; private final ActorContext actor;
+ public GroupMemberEmailPolicyController(JdbcTemplate db,ActorContext actor){this.db=db;this.actor=actor;}
+ public record Input(boolean enabled){}
+ private void admin(){if(!actor.isPlatformAdmin())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0018 — backend/src/main/java/com/giftplatform/admin/GroupMemberEmailPolicyController.java:17
+
+[backend/src/main/java/com/giftplatform/admin/GroupMemberEmailPolicyController.java:17](../../src/main/java/com/giftplatform/admin/GroupMemberEmailPolicyController.java#L17)
+
+When / guard context:
+```java
+orContext actor){this.db=db;this.actor=actor;}
+ public record Input(boolean enabled){}
+ private void admin(){if(!actor.isPlatformAdmin())throw new ResponseStatusException(HttpStatus.FORBIDDEN);}
+ private void host(UUID id){if(!Integer.valueOf(1).equals(db.queryForObject("SELECT count(*) FROM users WHERE id=? AND role='CUSTOMER'",Integer.class,id)))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0019 — backend/src/main/java/com/giftplatform/admin/GroupMemberEmailPolicyController.java:21
+
+[backend/src/main/java/com/giftplatform/admin/GroupMemberEmailPolicyController.java:21](../../src/main/java/com/giftplatform/admin/GroupMemberEmailPolicyController.java#L21)
+
+When / guard context:
+```java
+osts/{hostId}/group-member-email-policy") public Map<String,Object> read(@PathVariable UUID hostId){admin();host(hostId);return policy(hostId);}
+ @PutMapping("/api/admin/hosts/{hostId}/group-member-email-policy") @Transactional
+ public Map<String,Object> update(@PathVariable UUID hostId,@RequestBody Input input){admin();host(hostId);if(input==null)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0020 — backend/src/main/java/com/giftplatform/admin/GroupMemberEmailPolicyController.java:24
+
+[backend/src/main/java/com/giftplatform/admin/GroupMemberEmailPolicyController.java:24](../../src/main/java/com/giftplatform/admin/GroupMemberEmailPolicyController.java#L24)
+
+When / guard context:
+```java
+Mapping("/api/host/group-member-email-policy") public Map<String,Object> mine(){UUID id=actor.requireAuthenticatedUserId();host(id);return policy(id);}
+ @PutMapping("/api/host/group-member-email-policy") @Transactional
+ public Map<String,Object> updateMine(@RequestBody Input input){UUID id=actor.requireAuthenticatedUserId();host(id);if(input==null)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0021 — backend/src/main/java/com/giftplatform/admin/GroupModuleInterceptor.java:27
+
+[backend/src/main/java/com/giftplatform/admin/GroupModuleInterceptor.java:27](../../src/main/java/com/giftplatform/admin/GroupModuleInterceptor.java#L27)
+
+When / guard context:
+```java
+equestURI();
+        if("POST".equals(request.getMethod())&&(path.endsWith("/logout")||path.contains("/member-logout/")))return true;
+        Object attributes=request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
+        if(!(attributes instanceof Map<?,?> variables)||!(variables.get("token") instanceof String token))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Invitation unavailable");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0022 — backend/src/main/java/com/giftplatform/admin/GroupModuleInterceptor.java:29
+
+[backend/src/main/java/com/giftplatform/admin/GroupModuleInterceptor.java:29](../../src/main/java/com/giftplatform/admin/GroupModuleInterceptor.java#L29)
+
+When / guard context:
+```java
+tribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
+        if(!(attributes instanceof Map<?,?> variables)||!(variables.get("token") instanceof String token))
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Invitation unavailable");
+        UUID id;
+        try{id=UUID.fromString(token);}catch(IllegalArgumentException ex){
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0023 — backend/src/main/java/com/giftplatform/admin/PlatformAdminAuditController.java:32
+
+[backend/src/main/java/com/giftplatform/admin/PlatformAdminAuditController.java:32](../../src/main/java/com/giftplatform/admin/PlatformAdminAuditController.java#L32)
+
+When / guard context:
+```java
+lue="") String action,
+                     @RequestParam(defaultValue="") String module,
+                     @RequestParam(required=false) @DateTimeFormat(iso=DateTimeFormat.ISO.DATE) LocalDate from,
+                     @RequestParam(required=false) @DateTimeFormat(iso=DateTimeFormat.ISO.DATE) LocalDate to){
+        if(!actors.isPlatformAdmin())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Platform admin only");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0024 — backend/src/main/java/com/giftplatform/admin/PlatformAdminAuditController.java:38
+
+[backend/src/main/java/com/giftplatform/admin/PlatformAdminAuditController.java:38](../../src/main/java/com/giftplatform/admin/PlatformAdminAuditController.java#L38)
+
+When / guard context:
+```java
+admin only");
+        actors.requireAuthenticatedUserId();
+        if(page<0||page>1000000||search.length()>200||action.length()>60||module.length()>40
+            ||(from!=null&&(from.getYear()<1||from.getYear()>9999))
+            ||(to!=null&&(to.getYear()<1||to.getYear()>9999))
+            ||(from!=null&&to!=null&&from.isAfter(to)))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid audit filters");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0025 — backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:18
+
+[backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:18](../../src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java#L18)
+
+When / guard context:
+```java
+FTING","GUEST_GIFTS","RSVP","GUEST_ATTENDANCE","WHATSAPP_SHARING","GUESTBOOK","SOCIAL_SHARING","MEMORY_ALBUM","AI_INVITATION");
+ private final JdbcTemplate db;
+ private final ActorContext actor;
+ public PlatformAdminConsoleController(JdbcTemplate db,ActorContext actor){this.db=db;this.actor=actor;}
+ private UUID admin(){if(!actor.isPlatformAdmin())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Platform admin only");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0026 — backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:21
+
+[backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:21](../../src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java#L21)
+
+When / guard context:
+```java
+s.db=db;this.actor=actor;}
+ private UUID admin(){if(!actor.isPlatformAdmin())throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Platform admin only");return actor.requireAuthenticatedUserId();}
+ public record Toggle(boolean enabled){}
+ public record Mode(String mode){}
+ private String module(String code){if(code==null||!MODULES.contains(code))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Unknown module");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0027 — backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:30
+
+[backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:30](../../src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java#L30)
+
+When / guard context:
+```java
+lass),
+  "publishedEvents",db.queryForObject("SELECT count(*) FROM events WHERE status='PUBLISHED'",Long.class),
+  "groups",db.queryForObject("SELECT count(*) FROM gift_groups",Long.class));}
+ @GetMapping("/hosts")
+ public List<Map<String,Object>> hosts(@RequestParam(defaultValue="") String search){admin();String q=search.strip();if(q.length()>100)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Search too long");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0028 — backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:34
+
+[backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:34](../../src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java#L34)
+
+When / guard context:
+```java
+ist<Map<String,Object>> modules(){admin();return db.queryForList("SELECT module_code,enabled,changed_at FROM platform_module_controls ORDER BY module_code");}
+ @PostMapping("/modules/{code}") @Transactional
+ public Map<String,Object> platformModule(@PathVariable String code,@RequestBody Toggle input){UUID a=admin();code=module(code);if(input==null)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0029 — backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:38
+
+[backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:38](../../src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java#L38)
+
+When / guard context:
+```java
+LEFT JOIN platform_host_module_grants h ON h.module_code=p.module_code AND h.host_id=? ORDER BY p.module_code",hostId);}
+ @PostMapping("/hosts/{hostId}/modules/{code}") @Transactional
+ public Map<String,Object> hostModule(@PathVariable UUID hostId,@PathVariable String code,@RequestBody Toggle input){UUID a=admin();code=module(code);if(input==null)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0030 — backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:38
+
+[backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:38](../../src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java#L38)
+
+When / guard context:
+```java
+public Map<String,Object> hostModule(@PathVariable UUID hostId,@PathVariable String code,@RequestBody Toggle input){UUID a=admin();code=module(code);if(input==null)throw new ResponseStatusException(HttpStatus.BAD_REQUEST);Integer n=db.queryForObject("SELECT count(*) FROM users WHERE id=? AND role='CUSTOMER'",Integer.class,hostId);if(n==null||n!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Host not found");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0031 — backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:40
+
+[backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:40](../../src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java#L40)
+
+When / guard context:
+```java
+UDED.enabled,changed_by=EXCLUDED.changed_by,changed_at=now()",hostId,code,input.enabled(),a);audit(a,"HOST_MODULE_CHANGED",hostId,code);return Map.of("hostId",hostId,"module",code,"enabled",input.enabled());}
+ @GetMapping("/events")
+ public List<Map<String,Object>> events(@RequestParam(defaultValue="") String search){admin();if(search.length()>100)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0032 — backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:43
+
+[backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:43](../../src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java#L43)
+
+When / guard context:
+```java
+N u.id=e.owner_id WHERE LOWER(e.title) LIKE LOWER(?) OR LOWER(COALESCE(u.username,'')) LIKE LOWER(?) ORDER BY e.event_date DESC NULLS LAST LIMIT 100",q,q);}
+ @PostMapping("/events/{eventId}/album-settings") @Transactional
+ public Map<String,Object> albumSettings(@PathVariable UUID eventId,@RequestBody Toggle input){
+  UUID a=admin();if(input==null)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0033 — backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:44
+
+[backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:44](../../src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java#L44)
+
+When / guard context:
+```java
+vents/{eventId}/album-settings") @Transactional
+ public Map<String,Object> albumSettings(@PathVariable UUID eventId,@RequestBody Toggle input){
+  UUID a=admin();if(input==null)throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+  if(!Integer.valueOf(1).equals(db.queryForObject("SELECT count(*) FROM events WHERE id=?",Integer.class,eventId)))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Event not found");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0034 — backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:50
+
+[backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:50](../../src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java#L50)
+
+When / guard context:
+```java
+)",eventId,input.enabled(),a);
+  audit(a,"EVENT_ALBUM_CHANGED",eventId,"MEMORY_ALBUM");return Map.of("eventId",eventId,"enabled",input.enabled());
+ }
+ @PostMapping("/events/{eventId}/ai-design-settings") @Transactional
+ public Map<String,Object> aiDesignSettings(@PathVariable UUID eventId,@RequestBody Toggle input){
+  UUID a=admin();if(input==null)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0035 — backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:51
+
+[backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:51](../../src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java#L51)
+
+When / guard context:
+```java
+eventId}/ai-design-settings") @Transactional
+ public Map<String,Object> aiDesignSettings(@PathVariable UUID eventId,@RequestBody Toggle input){
+  UUID a=admin();if(input==null)throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+  if(!Integer.valueOf(1).equals(db.queryForObject("SELECT count(*) FROM events WHERE id=?",Integer.class,eventId)))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Event not found");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0036 — backend/src/main/java/com/giftplatform/admin/bootstrap/AdminPasswordRecoveryRunner.java:23
+
+[backend/src/main/java/com/giftplatform/admin/bootstrap/AdminPasswordRecoveryRunner.java:23](../../src/main/java/com/giftplatform/admin/bootstrap/AdminPasswordRecoveryRunner.java#L23)
+
+When / guard context:
+```java
+ionRunner {
+ private final UserRepository users;
+ private final PasswordEncoder passwords;
+ public AdminPasswordRecoveryRunner(UserRepository users,PasswordEncoder passwords){this.users=users;this.passwords=passwords;}
+ @Override @Transactional
+ public void run(ApplicationArguments args){
+  if(!"YES".equals(System.getenv("ADMIN_RECOVERY_CONFIRM")))
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Explicit ADMIN_RECOVERY_CONFIRM=YES required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0037 — backend/src/main/java/com/giftplatform/admin/bootstrap/AdminPasswordRecoveryRunner.java:25
+
+[backend/src/main/java/com/giftplatform/admin/bootstrap/AdminPasswordRecoveryRunner.java:25](../../src/main/java/com/giftplatform/admin/bootstrap/AdminPasswordRecoveryRunner.java#L25)
+
+When / guard context:
+```java
+icationArguments args){
+  if(!"YES".equals(System.getenv("ADMIN_RECOVERY_CONFIRM")))throw new IllegalStateException("Explicit ADMIN_RECOVERY_CONFIRM=YES required");
+  String email=System.getenv("ADMIN_RECOVERY_EMAIL"),password=System.getenv("ADMIN_RECOVERY_NEW_PASSWORD");
+  if(email==null||password==null||password.length()<16||password.length()>72)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Valid email and password of 16–72 characters required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0038 — backend/src/main/java/com/giftplatform/admin/bootstrap/AdminPasswordRecoveryRunner.java:27
+
+[backend/src/main/java/com/giftplatform/admin/bootstrap/AdminPasswordRecoveryRunner.java:27](../../src/main/java/com/giftplatform/admin/bootstrap/AdminPasswordRecoveryRunner.java#L27)
+
+When / guard context:
+```java
+||password.length()<16||password.length()>72)throw new IllegalArgumentException("Valid email and password of 16–72 characters required");
+  User admin=users.findByEmailIgnoreCase(email.strip().toLowerCase(Locale.ROOT)).orElseThrow(()->new IllegalStateException("Account not found"));
+  if(admin.getRole()!=UserRole.PLATFORM_ADMIN||!admin.isEnabled())
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Account is not an enabled platform administrator");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0039 — backend/src/main/java/com/giftplatform/admin/bootstrap/AdminProvisionRunner.java:26
+
+[backend/src/main/java/com/giftplatform/admin/bootstrap/AdminProvisionRunner.java:26](../../src/main/java/com/giftplatform/admin/bootstrap/AdminProvisionRunner.java#L26)
+
+When / guard context:
+```java
+users;
+    private final PasswordEncoder encoder;
+    public AdminProvisionRunner(UserRepository users, PasswordEncoder encoder) {
+        this.users=users; this.encoder=encoder;
+    }
+    @Override
+    @Transactional
+    public void run(ApplicationArguments args) {
+        if (!"YES".equals(System.getenv("ADMIN_PROVISION_CONFIRM"))) {
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Set ADMIN_PROVISION_CONFIRM=YES explicitly");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0040 — backend/src/main/java/com/giftplatform/admin/bootstrap/AdminProvisionRunner.java:31
+
+[backend/src/main/java/com/giftplatform/admin/bootstrap/AdminProvisionRunner.java:31](../../src/main/java/com/giftplatform/admin/bootstrap/AdminProvisionRunner.java#L31)
+
+When / guard context:
+```java
+NFIRM"))) {
+            throw new IllegalStateException("Set ADMIN_PROVISION_CONFIRM=YES explicitly");
+        }
+        String rawEmail=System.getenv("ADMIN_PROVISION_EMAIL");
+        String password=System.getenv("ADMIN_PROVISION_PASSWORD");
+        if (rawEmail == null || !rawEmail.trim().matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) {
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Valid ADMIN_PROVISION_EMAIL required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0041 — backend/src/main/java/com/giftplatform/admin/bootstrap/AdminProvisionRunner.java:34
+
+[backend/src/main/java/com/giftplatform/admin/bootstrap/AdminProvisionRunner.java:34](../../src/main/java/com/giftplatform/admin/bootstrap/AdminProvisionRunner.java#L34)
+
+When / guard context:
+```java
+String password=System.getenv("ADMIN_PROVISION_PASSWORD");
+        if (rawEmail == null || !rawEmail.trim().matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) {
+            throw new IllegalArgumentException("Valid ADMIN_PROVISION_EMAIL required");
+        }
+        if (password==null || password.length()<16 || password.length()>128) {
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("ADMIN_PROVISION_PASSWORD must be 16-128 characters");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0042 — backend/src/main/java/com/giftplatform/admin/bootstrap/AdminProvisionRunner.java:38
+
+[backend/src/main/java/com/giftplatform/admin/bootstrap/AdminProvisionRunner.java:38](../../src/main/java/com/giftplatform/admin/bootstrap/AdminProvisionRunner.java#L38)
+
+When / guard context:
+```java
+ION_EMAIL required");
+        }
+        if (password==null || password.length()<16 || password.length()>128) {
+            throw new IllegalArgumentException("ADMIN_PROVISION_PASSWORD must be 16-128 characters");
+        }
+        String email=rawEmail.trim().toLowerCase(Locale.ROOT);
+        if (users.existsByEmailIgnoreCase(email)) {
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Account already exists; refusing to elevate an existing account");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+## asset
+
+### RULE-0043 — backend/src/main/java/com/giftplatform/asset/GalleryAssetService.java:23
+
+[backend/src/main/java/com/giftplatform/asset/GalleryAssetService.java:23](../../src/main/java/com/giftplatform/asset/GalleryAssetService.java#L23)
+
+When / guard context:
+```java
+());}
+ public List<AssetInfo> published(){return repo.findByPublishedTrueOrderByTitleAsc().stream().map(this::info).toList();}
+ public List<AssetInfo> all(){requireAdmin();return repo.findAll().stream().map(this::info).toList();}
+ public GalleryAsset publishedImage(UUID id){GalleryAsset a=get(id);if(!a.isPublished() || !"FREE".equals(a.getTier()))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0044 — backend/src/main/java/com/giftplatform/asset/GalleryAssetService.java:26
+
+[backend/src/main/java/com/giftplatform/asset/GalleryAssetService.java:26](../../src/main/java/com/giftplatform/asset/GalleryAssetService.java#L26)
+
+When / guard context:
+```java
+nfo).toList();}
+ public GalleryAsset publishedImage(UUID id){GalleryAsset a=get(id);if(!a.isPublished() || !"FREE".equals(a.getTier())) throw new ResponseStatusException(HttpStatus.NOT_FOUND);return a;}
+ public GalleryAsset purchasedImage(UUID id){
+  UUID host=actor.requireAuthenticatedUserId();GalleryAsset asset=get(id);
+  if(!asset.isPublished())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0045 — backend/src/main/java/com/giftplatform/asset/GalleryAssetService.java:27
+
+[backend/src/main/java/com/giftplatform/asset/GalleryAssetService.java:27](../../src/main/java/com/giftplatform/asset/GalleryAssetService.java#L27)
+
+When / guard context:
+```java
+.getTier())) throw new ResponseStatusException(HttpStatus.NOT_FOUND);return a;}
+ public GalleryAsset purchasedImage(UUID id){
+  UUID host=actor.requireAuthenticatedUserId();GalleryAsset asset=get(id);
+  if(!asset.isPublished())throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+  if(!"FREE".equals(asset.getTier())&&!commerce.template(host,id))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.PAYMENT_REQUIRED,"Purchase this template or upgrade your host plan");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0046 — backend/src/main/java/com/giftplatform/asset/GalleryAssetService.java:31
+
+[backend/src/main/java/com/giftplatform/asset/GalleryAssetService.java:31](../../src/main/java/com/giftplatform/asset/GalleryAssetService.java#L31)
+
+When / guard context:
+```java
+us.NOT_FOUND);
+  if(!"FREE".equals(asset.getTier())&&!commerce.template(host,id))throw new ResponseStatusException(HttpStatus.PAYMENT_REQUIRED,"Purchase this template or upgrade your host plan");
+  return asset;
+ }
+ @Transactional public AssetInfo tier(UUID id,String tier){
+  requireAdmin();if(!Set.of("FREE","PREMIUM").contains(tier==null?"":tier))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0047 — backend/src/main/java/com/giftplatform/asset/GalleryAssetService.java:38
+
+[backend/src/main/java/com/giftplatform/asset/GalleryAssetService.java:38](../../src/main/java/com/giftplatform/asset/GalleryAssetService.java#L38)
+
+When / guard context:
+```java
+AuditAction.UPDATE,Map.of("tier",old),Map.of("tier",tier),null);
+  return info(asset);
+ }
+ public GalleryAsset adminImage(UUID id){requireAdmin();return get(id);}
+ private GalleryAsset get(UUID id){return repo.findById(id).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));}
+ private void requireAdmin(){if(!actor.isPlatformAdmin())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0048 — backend/src/main/java/com/giftplatform/asset/GalleryAssetService.java:42
+
+[backend/src/main/java/com/giftplatform/asset/GalleryAssetService.java:42](../../src/main/java/com/giftplatform/asset/GalleryAssetService.java#L42)
+
+When / guard context:
+```java
+throw new ResponseStatusException(HttpStatus.FORBIDDEN);}
+ @Transactional public AssetInfo upload(String category,String occasion,String title,byte[] image){
+  requireAdmin();
+  if(!Set.of("BACKGROUND","DECORATION").contains(category)||occasion==null||!occasion.matches("[A-Za-z0-9_-]{1,50}")
+     ||title==null||title.isBlank()||title.length()>120)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid asset metadata");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0049 — backend/src/main/java/com/giftplatform/asset/GalleryImageProcessor.java:15
+
+[backend/src/main/java/com/giftplatform/asset/GalleryImageProcessor.java:15](../../src/main/java/com/giftplatform/asset/GalleryImageProcessor.java#L15)
+
+When / guard context:
+```java
+rt javax.imageio.stream.ImageInputStream;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.util.Iterator;
+
+@Component
+public class GalleryImageProcessor {
+ public record Processed(byte[] png,int width,int height) {}
+ public Processed process(byte[] input,String category){
+  if(input==null||input.length==0||input.length>2_000_000)
+```
+Failure / enforcement:
+```java
+throw invalid();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0050 — backend/src/main/java/com/giftplatform/asset/GalleryImageProcessor.java:20
+
+[backend/src/main/java/com/giftplatform/asset/GalleryImageProcessor.java:20](../../src/main/java/com/giftplatform/asset/GalleryImageProcessor.java#L20)
+
+When / guard context:
+```java
+==80&&input[2]==78&&input[3]==71;
+  boolean jpg=input.length>3&&(input[0]&255)==255&&(input[1]&255)==216&&(input[2]&255)==255;
+  boolean webp=input.length>12&&new String(input,0,4,java.nio.charset.StandardCharsets.US_ASCII).equals("RIFF")
+    &&new String(input,8,4,java.nio.charset.StandardCharsets.US_ASCII).equals("WEBP");
+  if(!png&&!jpg&&!webp)
+```
+Failure / enforcement:
+```java
+throw invalid();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0051 — backend/src/main/java/com/giftplatform/asset/GalleryImageProcessor.java:24
+
+[backend/src/main/java/com/giftplatform/asset/GalleryImageProcessor.java:24](../../src/main/java/com/giftplatform/asset/GalleryImageProcessor.java#L24)
+
+When / guard context:
+```java
+t,0,4,java.nio.charset.StandardCharsets.US_ASCII).equals("RIFF")
+    &&new String(input,8,4,java.nio.charset.StandardCharsets.US_ASCII).equals("WEBP");
+  if(!png&&!jpg&&!webp) throw invalid();
+  String format=png?"png":jpg?"jpeg":"webp";
+  try {
+   Iterator<ImageReader> readers=ImageIO.getImageReadersByFormatName(format);
+   if(!readers.hasNext())
+```
+Failure / enforcement:
+```java
+throw invalid();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0052 — backend/src/main/java/com/giftplatform/asset/GalleryImageProcessor.java:29
+
+[backend/src/main/java/com/giftplatform/asset/GalleryImageProcessor.java:29](../../src/main/java/com/giftplatform/asset/GalleryImageProcessor.java#L29)
+
+When / guard context:
+```java
+()) throw invalid(); // WebP requires an installed ImageIO reader
+   ImageReader reader=readers.next();
+   try(ImageInputStream stream=ImageIO.createImageInputStream(new ByteArrayInputStream(input))){
+    reader.setInput(stream,true,true);
+    int w=reader.getWidth(0),h=reader.getHeight(0);
+    if(w<32||h<32||w>4096||h>4096||(long)w*h>12_000_000L)
+```
+Failure / enforcement:
+```java
+throw invalid();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0053 — backend/src/main/java/com/giftplatform/asset/GalleryImageProcessor.java:31
+
+[backend/src/main/java/com/giftplatform/asset/GalleryImageProcessor.java:31](../../src/main/java/com/giftplatform/asset/GalleryImageProcessor.java#L31)
+
+When / guard context:
+```java
+eReader reader=readers.next();
+   try(ImageInputStream stream=ImageIO.createImageInputStream(new ByteArrayInputStream(input))){
+    reader.setInput(stream,true,true);
+    int w=reader.getWidth(0),h=reader.getHeight(0);
+    if(w<32||h<32||w>4096||h>4096||(long)w*h>12_000_000L) throw invalid();
+    BufferedImage src=reader.read(0);
+    if(src==null)
+```
+Failure / enforcement:
+```java
+throw invalid();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0054 — backend/src/main/java/com/giftplatform/asset/GalleryImageProcessor.java:36
+
+[backend/src/main/java/com/giftplatform/asset/GalleryImageProcessor.java:36](../../src/main/java/com/giftplatform/asset/GalleryImageProcessor.java#L36)
+
+When / guard context:
+```java
+if(src==null) throw invalid();
+    BufferedImage output=new BufferedImage(w,h,BufferedImage.TYPE_INT_ARGB);
+    var graphics=output.createGraphics();
+    try {graphics.drawImage(src,0,0,null);}finally{graphics.dispose();}
+    ByteArrayOutputStream bytes=new ByteArrayOutputStream();
+    if(!ImageIO.write(output,"png",bytes)||bytes.size()>8_000_000)
+```
+Failure / enforcement:
+```java
+throw invalid();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0055 — backend/src/main/java/com/giftplatform/asset/GalleryImageProcessor.java:39
+
+[backend/src/main/java/com/giftplatform/asset/GalleryImageProcessor.java:39](../../src/main/java/com/giftplatform/asset/GalleryImageProcessor.java#L39)
+
+When / guard context:
+```java
+,null);}finally{graphics.dispose();}
+    ByteArrayOutputStream bytes=new ByteArrayOutputStream();
+    if(!ImageIO.write(output,"png",bytes)||bytes.size()>8_000_000) throw invalid();
+    return new Processed(bytes.toByteArray(),w,h);
+   } finally {reader.dispose();}
+  }catch(IOException|RuntimeException e){if(e instanceof ResponseStatusException r)
+```
+Failure / enforcement:
+```java
+throw r;
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0056 — backend/src/main/java/com/giftplatform/asset/GalleryImageProcessor.java:39
+
+[backend/src/main/java/com/giftplatform/asset/GalleryImageProcessor.java:39](../../src/main/java/com/giftplatform/asset/GalleryImageProcessor.java#L39)
+
+When / guard context:
+```java
+finally{graphics.dispose();}
+    ByteArrayOutputStream bytes=new ByteArrayOutputStream();
+    if(!ImageIO.write(output,"png",bytes)||bytes.size()>8_000_000) throw invalid();
+    return new Processed(bytes.toByteArray(),w,h);
+   } finally {reader.dispose();}
+  }catch(IOException|RuntimeException e){if(e instanceof ResponseStatusException r) throw r;
+```
+Failure / enforcement:
+```java
+throw invalid();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+## audit
+
+### RULE-0057 — backend/src/main/java/com/giftplatform/audit/api/AdminAuditController.java:26
+
+[backend/src/main/java/com/giftplatform/audit/api/AdminAuditController.java:26](../../src/main/java/com/giftplatform/audit/api/AdminAuditController.java#L26)
+
+When / guard context:
+```java
+@RequestParam UUID entityId,
+                                      @RequestParam(defaultValue = "0") int page,
+                                      @RequestParam(defaultValue = "20") int size) {
+        if (entityType == null || !entityType.matches("[A-Z_]{2,50}") || page < 0 || size < 1 || size > 100)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid audit query");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0058 — backend/src/main/java/com/giftplatform/audit/service/AuditServiceImpl.java:52
+
+[backend/src/main/java/com/giftplatform/audit/service/AuditServiceImpl.java:52](../../src/main/java/com/giftplatform/audit/service/AuditServiceImpl.java#L52)
+
+When / guard context:
+```java
+yType,
+            UUID entityId,
+            AuditAction action,
+            Map<String, Object> oldValues,
+            Map<String, Object> newValues,
+            String requestId
+    ) {
+        if (actorType == null || action == null
+                || entityId == null || entityType == null
+                || entityType.isBlank()) {
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException(
+                    "Required audit fields are missing"
+            );
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0059 — backend/src/main/java/com/giftplatform/audit/service/AuditServiceImpl.java:59
+
+[backend/src/main/java/com/giftplatform/audit/service/AuditServiceImpl.java:59](../../src/main/java/com/giftplatform/audit/service/AuditServiceImpl.java#L59)
+
+When / guard context:
+```java
+ull || action == null
+                || entityId == null || entityType == null
+                || entityType.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Required audit fields are missing"
+            );
+        }
+
+        if (actorType != AuditActorType.SYSTEM
+                && actorId == null) {
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException(
+                    "Actor ID is required for non-system actions"
+            );
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+## celebration
+
+### RULE-0060 — backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:47
+
+[backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:47](../../src/main/java/com/giftplatform/celebration/CelebrationController.java#L47)
+
+When / guard context:
+```java
+dUserId();
+  return events.findById(id).filter(e->user.equals(e.getOwnerId()))
+   .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
+ }
+ private String field(String value,int max,String label) {
+  if(value==null || value.isBlank() || value.strip().length()>max || value.chars().anyMatch(c->Character.isISOControl(c) && c!='\n'))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid "+label);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0061 — backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:55
+
+[backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:55](../../src/main/java/com/giftplatform/celebration/CelebrationController.java#L55)
+
+When / guard context:
+```java
+lue.strip();
+ }
+ private String fingerprint(HttpServletRequest request) {
+  // Only the socket peer address; never trust user-controlled X-Forwarded-For.
+  try {
+   byte[] digest=MessageDigest.getInstance("SHA-256").digest(request.getRemoteAddr().getBytes(StandardCharsets.UTF_8));
+   return HexFormat.of().formatHex(digest);
+  } catch(Exception e) {
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException(e);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0062 — backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:62
+
+[backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:62](../../src/main/java/com/giftplatform/celebration/CelebrationController.java#L62)
+
+When / guard context:
+```java
+s(event_id,fingerprint,submission_date,submission_type,count) VALUES (?,?,?, ?,1) " +
+    "ON CONFLICT(event_id,fingerprint,submission_date,submission_type) DO UPDATE SET count=event_guest_submission_limits.count+1 " +
+    "WHERE event_guest_submission_limits.count < ?",eventId,fp,LocalDate.now(java.time.ZoneOffset.UTC),type,max);
+  if(updated==0)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,"Please try again later");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0063 — backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:70
+
+[backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:70](../../src/main/java/com/giftplatform/celebration/CelebrationController.java#L70)
+
+When / guard context:
+```java
+_REQUESTS,"Please try again later");
+ }
+ @PostMapping("/api/public/celebrations/{token}/rsvp")
+ @ResponseStatus(HttpStatus.CREATED)
+ @Transactional
+ public Map<String,String> rsvp(@PathVariable UUID token,@RequestBody RsvpRequest req,HttpServletRequest http) {
+  Event e=published(token);
+  permissions.require(e.getOwnerId(),"RSVP");
+  if(req==null)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0064 — backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:73
+
+[backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:73](../../src/main/java/com/giftplatform/celebration/CelebrationController.java#L73)
+
+When / guard context:
+```java
+Request http) {
+  Event e=published(token);
+  permissions.require(e.getOwnerId(),"RSVP");
+  if(req==null)throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+  String name=field(req.guestName(),120,"guest name");
+  String email=field(req.guestEmail(),254,"email").toLowerCase(Locale.ROOT);
+  if(!email.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$"))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid email");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0065 — backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:75
+
+[backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:75](../../src/main/java/com/giftplatform/celebration/CelebrationController.java#L75)
+
+When / guard context:
+```java
+.guestName(),120,"guest name");
+  String email=field(req.guestEmail(),254,"email").toLowerCase(Locale.ROOT);
+  if(!email.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$"))throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid email");
+  String attendance=req.attendance();
+  if(attendance==null || !Set.of("YES","NO","MAYBE").contains(attendance))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid attendance");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0066 — backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:78
+
+[backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:78](../../src/main/java/com/giftplatform/celebration/CelebrationController.java#L78)
+
+When / guard context:
+```java
+ail");
+  String attendance=req.attendance();
+  if(attendance==null || !Set.of("YES","NO","MAYBE").contains(attendance))throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid attendance");
+  int size=req.partySize()==null?0:req.partySize();
+  if(("YES".equals(attendance) && (size<1||size>10)) || (!"YES".equals(attendance) && size!=0))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid party size");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0067 — backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:83
+
+[backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:83](../../src/main/java/com/giftplatform/celebration/CelebrationController.java#L83)
+
+When / guard context:
+```java
+size!=0))
+   throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid party size");
+  limit(e.getId(),http,"RSVP",5);
+  try {
+   db.update("INSERT INTO event_rsvps(id,event_id,guest_name,guest_email,attendance,party_size) VALUES (?,?,?,?,?,?)",
+    UUID.randomUUID(),e.getId(),name,email,attendance,size);
+  }catch(DuplicateKeyException ex){
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"An RSVP already exists for this email");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0068 — backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:92
+
+[backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:92](../../src/main/java/com/giftplatform/celebration/CelebrationController.java#L92)
+
+When / guard context:
+```java
+","Thank you for replying!");
+ }
+ @PostMapping("/api/public/celebrations/{token}/wishes")
+ @ResponseStatus(HttpStatus.CREATED)
+ @Transactional
+ public Map<String,String> wish(@PathVariable UUID token,@RequestBody WishRequest req,HttpServletRequest http) {
+  Event e=published(token);
+  permissions.require(e.getOwnerId(),"GUESTBOOK");
+  if(req==null)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0069 — backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:137
+
+[backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:137](../../src/main/java/com/giftplatform/celebration/CelebrationController.java#L137)
+
+When / guard context:
+```java
+equest(String mode){}
+ @PostMapping("/api/v1/events/{id}/wishes/settings")
+ @Transactional
+ public Map<String,String> setGuestbookSettings(@PathVariable UUID id,@RequestBody GuestbookModeRequest request){
+  Event e=owned(id);permissions.require(e.getOwnerId(),"GUESTBOOK");
+  if(request==null||!Set.of("AUTO","APPROVAL").contains(request.mode()))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid guestbook mode");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0070 — backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:145
+
+[backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:145](../../src/main/java/com/giftplatform/celebration/CelebrationController.java#L145)
+
+When / guard context:
+```java
+,request.mode());
+ }
+ @PostMapping("/api/v1/events/{id}/wishes/{wishId}/moderate")
+ @Transactional
+ public Map<String,String> moderate(@PathVariable UUID id,@PathVariable UUID wishId,@RequestParam String status) {
+  Event e=owned(id);permissions.require(e.getOwnerId(),"GUESTBOOK");
+  if(status==null || !Set.of("APPROVED","HIDDEN").contains(status))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid moderation status");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0071 — backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:147
+
+[backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:147](../../src/main/java/com/giftplatform/celebration/CelebrationController.java#L147)
+
+When / guard context:
+```java
+(id);permissions.require(e.getOwnerId(),"GUESTBOOK");
+  if(status==null || !Set.of("APPROVED","HIDDEN").contains(status))throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid moderation status");
+  int changed=db.update("UPDATE event_guestbook SET status=?,moderated_at=now() WHERE id=? AND event_id=?",status,wishId,id);
+  if(changed==0)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0072 — backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:42
+
+[backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:42](../../src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java#L42)
+
+When / guard context:
+```java
+{UUID user=actor.requireAuthenticatedUserId();return events.findById(id)
+   .filter(e->user.equals(e.getOwnerId()))
+   .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));}
+ private static String text(String s,int max){if(s==null||s.isBlank()||s.strip().length()>max||
+   s.chars().anyMatch(c->Character.isISOControl(c)&&c!='\n'))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid message details");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0073 — backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:57
+
+[backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:57](../../src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java#L57)
+
+When / guard context:
+```java
+ivate static void runMagick(List<String> command) throws Exception {
+  ProcessBuilder pb=new ProcessBuilder(command);pb.redirectErrorStream(true);
+  pb.environment().put("MAGICK_TEMPORARY_PATH",System.getProperty("java.io.tmpdir"));
+  Process proc=pb.start();boolean finished=proc.waitFor(20,TimeUnit.SECONDS);
+  if(!finished){proc.destroyForcibly();
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Image processing timed out");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0074 — backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:58
+
+[backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:58](../../src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java#L58)
+
+When / guard context:
+```java
+new ProcessBuilder(command);pb.redirectErrorStream(true);
+  pb.environment().put("MAGICK_TEMPORARY_PATH",System.getProperty("java.io.tmpdir"));
+  Process proc=pb.start();boolean finished=proc.waitFor(20,TimeUnit.SECONDS);
+  if(!finished){proc.destroyForcibly();throw new IllegalStateException("Image processing timed out");}
+  if(proc.exitValue()!=0)
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Image conversion unavailable or unsupported");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0075 — backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:62
+
+[backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:62](../../src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java#L62)
+
+When / guard context:
+```java
+20,TimeUnit.SECONDS);
+  if(!finished){proc.destroyForcibly();throw new IllegalStateException("Image processing timed out");}
+  if(proc.exitValue()!=0)throw new IllegalStateException("Image conversion unavailable or unsupported");
+ }
+ private byte[] normalize(MultipartFile image) {
+  if(image==null||image.isEmpty()||image.getSize()>5L*1024*1024)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.PAYLOAD_TOO_LARGE,"Photo must be 5 MB or less");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0076 — backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:66
+
+[backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:66](../../src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java#L66)
+
+When / guard context:
+```java
+ed");
+ }
+ private byte[] normalize(MultipartFile image) {
+  if(image==null||image.isEmpty()||image.getSize()>5L*1024*1024)
+   throw new ResponseStatusException(HttpStatus.PAYLOAD_TOO_LARGE,"Photo must be 5 MB or less");
+  Path input=null,output=null;
+  try{
+   byte[] bytes=image.getBytes();String type=signature(bytes);
+   if(type.equals("UNKNOWN"))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE,"Use JPG, PNG, WebP, HEIC or HEIF");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0077 — backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:73
+
+[backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:73](../../src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java#L73)
+
+When / guard context:
+```java
+runMagick(List.of("magick","-limit","memory","128MiB","-limit","map","256MiB","-limit","disk","512MiB",
+    input.toString()+"[0]","-auto-orient","-strip","-resize","1600x1600>","-quality","78","jpeg:"+output));
+   byte[] result=Files.readAllBytes(output);
+   if(result.length==0||result.length>3L*1024*1024||!signature(result).equals("JPEG"))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.PAYLOAD_TOO_LARGE,"Optimized photo exceeds 3 MB");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0078 — backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:75
+
+[backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:75](../../src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java#L75)
+
+When / guard context:
+```java
+strip","-resize","1600x1600>","-quality","78","jpeg:"+output));
+   byte[] result=Files.readAllBytes(output);
+   if(result.length==0||result.length>3L*1024*1024||!signature(result).equals("JPEG"))
+    throw new ResponseStatusException(HttpStatus.PAYLOAD_TOO_LARGE,"Optimized photo exceeds 3 MB");
+   return result;
+  }catch(ResponseStatusException e){
+```
+Failure / enforcement:
+```java
+throw e;
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0079 — backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:76
+
+[backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:76](../../src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java#L76)
+
+When / guard context:
+```java
+quality","78","jpeg:"+output));
+   byte[] result=Files.readAllBytes(output);
+   if(result.length==0||result.length>3L*1024*1024||!signature(result).equals("JPEG"))
+    throw new ResponseStatusException(HttpStatus.PAYLOAD_TOO_LARGE,"Optimized photo exceeds 3 MB");
+   return result;
+  }catch(ResponseStatusException e){throw e;}
+   catch(Exception e){
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Photo conversion unavailable; try a smaller JPEG or PNG",e);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0080 — backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:85
+
+[backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:85](../../src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java#L85)
+
+When / guard context:
+```java
+ion_limits(event_id,fingerprint,submission_date,submission_type,count) VALUES (?,?,?,?,1) "+
+    "ON CONFLICT(event_id,fingerprint,submission_date,submission_type) DO UPDATE SET count=event_guest_submission_limits.count+1 "+
+    "WHERE event_guest_submission_limits.count < ?",eventId,fp,LocalDate.now(java.time.ZoneOffset.UTC),"WISH",5);
+   if(n==0)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,"Please try again later");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0081 — backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:86
+
+[backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:86](../../src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java#L86)
+
+When / guard context:
+```java
+rint,submission_date,submission_type) DO UPDATE SET count=event_guest_submission_limits.count+1 "+
+    "WHERE event_guest_submission_limits.count < ?",eventId,fp,LocalDate.now(java.time.ZoneOffset.UTC),"WISH",5);
+   if(n==0)throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,"Please try again later");
+  }catch(ResponseStatusException e){
+```
+Failure / enforcement:
+```java
+throw e;
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0082 — backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:86
+
+[backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:86](../../src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java#L86)
+
+When / guard context:
+```java
+ion_type) DO UPDATE SET count=event_guest_submission_limits.count+1 "+
+    "WHERE event_guest_submission_limits.count < ?",eventId,fp,LocalDate.now(java.time.ZoneOffset.UTC),"WISH",5);
+   if(n==0)throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,"Please try again later");
+  }catch(ResponseStatusException e){throw e;}catch(Exception e){
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException(e);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0083 — backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:98
+
+[backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:98](../../src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java#L98)
+
+When / guard context:
+```java
+equire(event.getOwnerId(),"GUESTBOOK");String name=text(guestName,120),wish=text(message,1000);
+  byte[] jpg=normalize(photo);limit(event.getId(),request);
+  UUID id=UUID.randomUUID();String file=UUID.randomUUID()+".jpg";Path path=storage.resolve(file).normalize();
+  try{
+   Files.createDirectories(storage);
+   if(!path.getParent().equals(storage))
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Invalid photo path");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0084 — backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:108
+
+[backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:108](../../src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java#L108)
+
+When / guard context:
+```java
+on.support.TransactionSynchronization.STATUS_COMMITTED)
+       try{Files.deleteIfExists(path);}catch(Exception ignored){}}
+    });
+   return Map.of("message",auto?"Thank you for sharing your wishes and photo!":"Your wishes and photo have been sent for host approval.");
+  }catch(Exception e){try{Files.deleteIfExists(path);}catch(Exception ignored){}
+```
+Failure / enforcement:
+```java
+throw e instanceof RuntimeException re?re:new IllegalStateException(e);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0085 — backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:113
+
+[backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:113](../../src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java#L113)
+
+When / guard context:
+```java
+alStateException(e);}
+ }
+ private ResponseEntity<byte[]> photo(UUID wishId,UUID eventId,boolean requireApproved){
+  List<String> files=db.query("SELECT photo_path FROM event_guestbook WHERE id=? AND event_id=? AND photo_path IS NOT NULL"+
+   (requireApproved?" AND status='APPROVED'":""),(rs,i)->rs.getString(1),wishId,eventId);
+  if(files.isEmpty())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0086 — backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:115
+
+[backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:115](../../src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java#L115)
+
+When / guard context:
+```java
+iles=db.query("SELECT photo_path FROM event_guestbook WHERE id=? AND event_id=? AND photo_path IS NOT NULL"+
+   (requireApproved?" AND status='APPROVED'":""),(rs,i)->rs.getString(1),wishId,eventId);
+  if(files.isEmpty())throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+  String name=files.get(0);
+  if(!name.matches("[0-9a-fA-F-]{36}\\.jpg"))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0087 — backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:116
+
+[backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:116](../../src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java#L116)
+
+When / guard context:
+```java
+s='APPROVED'":""),(rs,i)->rs.getString(1),wishId,eventId);
+  if(files.isEmpty())throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+  String name=files.get(0);
+  if(!name.matches("[0-9a-fA-F-]{36}\\.jpg"))throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+  Path path=storage.resolve(name).normalize();if(!path.getParent().equals(storage))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0088 — backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:119
+
+[backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:119](../../src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java#L119)
+
+When / guard context:
+```java
+D);
+  Path path=storage.resolve(name).normalize();if(!path.getParent().equals(storage))throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+  try{return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG)
+    .cacheControl(CacheControl.noStore()).header("X-Content-Type-Options","nosniff").body(Files.readAllBytes(path));}
+  catch(Exception e){
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0089 — backend/src/main/java/com/giftplatform/celebration/MemoryAlbumController.java:30
+
+[backend/src/main/java/com/giftplatform/celebration/MemoryAlbumController.java:30](../../src/main/java/com/giftplatform/celebration/MemoryAlbumController.java#L30)
+
+When / guard context:
+```java
+0") int offset,@RequestParam(defaultValue="false") boolean includeHidden){
+  UUID host=actors.requireAuthenticatedUserId();
+  var event=events.findById(id).filter(e->host.equals(e.getOwnerId())).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
+  permissions.requireAlbum(host,id);
+  if(limit<1||limit>200||offset<0||offset>1000000)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid album page");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+## event
+
+### RULE-0090 — backend/src/main/java/com/giftplatform/event/entity/Event.java:68
+
+[backend/src/main/java/com/giftplatform/event/entity/Event.java:68](../../src/main/java/com/giftplatform/event/entity/Event.java#L68)
+
+When / guard context:
+```java
+ic DeliveryAddress getDeliveryAddress() {
+        return deliverySameAsEvent ? new DeliveryAddress(addressLine1,city,state,postalCode,country) : deliveryAddress;
+    }
+    public boolean isDeliverySameAsEvent(){return deliverySameAsEvent;}
+    public void setDeliveryAddress(boolean same, DeliveryAddress address){
+        if(!same && address==null)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Delivery address required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0091 — backend/src/main/java/com/giftplatform/event/entity/Event.java:115
+
+[backend/src/main/java/com/giftplatform/event/entity/Event.java:115](../../src/main/java/com/giftplatform/event/entity/Event.java#L115)
+
+When / guard context:
+```java
+t;
+    }
+
+    public void changeFulfillmentDefault(com.giftplatform.gift.entity.FulfillmentPreference preference) {
+        this.fulfillmentDefault = java.util.Objects.requireNonNull(preference);
+    }
+
+    public UUID getOwnerId() { return ownerId; }
+
+    public void assignOwner(UUID ownerId) {
+        if (this.ownerId != null || ownerId == null)
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Invalid owner assignment");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0092 — backend/src/main/java/com/giftplatform/event/entity/Event.java:141
+
+[backend/src/main/java/com/giftplatform/event/entity/Event.java:141](../../src/main/java/com/giftplatform/event/entity/Event.java#L141)
+
+When / guard context:
+```java
+next == EventStatus.CANCELLED;
+
+            case PUBLISHED ->
+                    next == EventStatus.DRAFT ||
+                            next == EventStatus.COMPLETED ||
+                            next == EventStatus.CANCELLED;
+
+            case COMPLETED, CANCELLED -> false;
+        };
+
+        if (!allowed) {
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException(
+                    "Invalid event status transition"
+            );
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0093 — backend/src/main/java/com/giftplatform/event/service/EventManagementService.java:52
+
+[backend/src/main/java/com/giftplatform/event/service/EventManagementService.java:52](../../src/main/java/com/giftplatform/event/service/EventManagementService.java#L52)
+
+When / guard context:
+```java
+ist<EventResponse> list() {
+        return repository.findByOwnerIdOrderByCreatedAtDesc(actors.requireAuthenticatedUserId())
+                .stream().map(this::response).toList();
+    }
+    @Transactional
+    public EventResponse update(UUID id, EventRequest input) {
+        Event event=owned(id);
+        if (event.getStatus()!=EventStatus.DRAFT)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Only drafts can be edited");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0094 — backend/src/main/java/com/giftplatform/event/service/EventManagementService.java:72
+
+[backend/src/main/java/com/giftplatform/event/service/EventManagementService.java:72](../../src/main/java/com/giftplatform/event/service/EventManagementService.java#L72)
+
+When / guard context:
+```java
+e!=null)commerce.requireEventCapacity(event.getOwnerId(),event.getId());
+        if(next==EventStatus.PUBLISHED)event=repository.findForUpdate(id).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
+        Map<String,Object> before=snapshot(event);
+        if(next==EventStatus.PUBLISHED && !readiness.canPublish(event))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,String.join("; ",readiness.reasons(event)));
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0095 — backend/src/main/java/com/giftplatform/event/service/EventManagementService.java:74
+
+[backend/src/main/java/com/giftplatform/event/service/EventManagementService.java:74](../../src/main/java/com/giftplatform/event/service/EventManagementService.java#L74)
+
+When / guard context:
+```java
+xception(HttpStatus.NOT_FOUND));
+        Map<String,Object> before=snapshot(event);
+        if(next==EventStatus.PUBLISHED && !readiness.canPublish(event))
+            throw new ResponseStatusException(HttpStatus.CONFLICT,String.join("; ",readiness.reasons(event)));
+        try { event.transition(next); }
+        catch (IllegalStateException ex) {
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Invalid status transition");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0096 — backend/src/main/java/com/giftplatform/event/service/EventManagementService.java:86
+
+[backend/src/main/java/com/giftplatform/event/service/EventManagementService.java:86](../../src/main/java/com/giftplatform/event/service/EventManagementService.java#L86)
+
+When / guard context:
+```java
+ll || a.addressLine1().isBlank()
+            || a.city()==null || a.city().isBlank() || a.state()==null || a.state().isBlank()
+            || a.postalCode()==null || a.postalCode().isBlank() || a.country()==null || a.country().isBlank()
+            || ("India".equalsIgnoreCase(a.country()) && !a.postalCode().matches("[1-9][0-9]{5}"))))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Valid delivery address required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0097 — backend/src/main/java/com/giftplatform/event/service/EventManagementService.java:96
+
+[backend/src/main/java/com/giftplatform/event/service/EventManagementService.java:96](../../src/main/java/com/giftplatform/event/service/EventManagementService.java#L96)
+
+When / guard context:
+```java
+ontactName().isBlank()
+        ||r.contactPhone()==null||!r.contactPhone().matches("[+0-9()\\- ]{7,30}")
+        ||(r.contactEmail()!=null&&!r.contactEmail().isBlank()&&!r.contactEmail().matches("[^@\\s]+@[^@\\s]+\\.[^@\\s]+"))
+        ||(r.country()!=null&&r.country().equalsIgnoreCase("India")&&!r.postalCode().matches("[1-9][0-9]{5}")))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Valid event address and contact details are required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0098 — backend/src/main/java/com/giftplatform/event/service/EventManagementService.java:101
+
+[backend/src/main/java/com/giftplatform/event/service/EventManagementService.java:101](../../src/main/java/com/giftplatform/event/service/EventManagementService.java#L101)
+
+When / guard context:
+```java
+sponseStatusException(HttpStatus.BAD_REQUEST,"Valid event address and contact details are required");
+    }
+    private Event owned(UUID id) {
+        UUID actor=actors.requireAuthenticatedUserId();
+        Event e=repository.findById(id).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
+        if (!actor.equals(e.getOwnerId()))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+## gift
+
+### RULE-0099 — backend/src/main/java/com/giftplatform/gift/controller/GiftController.java:37
+
+[backend/src/main/java/com/giftplatform/gift/controller/GiftController.java:37](../../src/main/java/com/giftplatform/gift/controller/GiftController.java#L37)
+
+When / guard context:
+```java
+record PublicationRequest(GiftVisibility visibility) {}
+    public record ProductLinkRequest(@Size(max = 2048) String productUrl) {}
+    @PutMapping("/{giftId}/publication")
+    public GiftResponse publication(@PathVariable UUID eventId, @PathVariable UUID giftId, @RequestBody PublicationRequest request) {
+        if (request.visibility() == null)
+```
+Failure / enforcement:
+```java
+throw new org.springframework.web.server.ResponseStatusException(HttpStatus.BAD_REQUEST, "Visibility required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0100 — backend/src/main/java/com/giftplatform/gift/entity/Gift.java:54
+
+[backend/src/main/java/com/giftplatform/gift/entity/Gift.java:54](../../src/main/java/com/giftplatform/gift/entity/Gift.java#L54)
+
+When / guard context:
+```java
+gDecimal targetAmount) {
+        this.id = UUID.randomUUID();
+        this.event = Objects.requireNonNull(event);
+        setDetails(name, null, null, targetAmount);
+    }
+    public void setDetails(String name, String description, String imageKey, BigDecimal targetAmount) {
+        if (name == null || name.isBlank() || name.trim().length() > 200)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Invalid gift name");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0101 — backend/src/main/java/com/giftplatform/gift/entity/Gift.java:56
+
+[backend/src/main/java/com/giftplatform/gift/entity/Gift.java:56](../../src/main/java/com/giftplatform/gift/entity/Gift.java#L56)
+
+When / guard context:
+```java
+g description, String imageKey, BigDecimal targetAmount) {
+        if (name == null || name.isBlank() || name.trim().length() > 200) throw new IllegalArgumentException("Invalid gift name");
+        if (targetAmount == null || targetAmount.signum() <= 0 || targetAmount.scale() > 2 || targetAmount.precision() - targetAmount.scale() > 13)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Invalid target amount");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0102 — backend/src/main/java/com/giftplatform/gift/entity/Gift.java:57
+
+[backend/src/main/java/com/giftplatform/gift/entity/Gift.java:57](../../src/main/java/com/giftplatform/gift/entity/Gift.java#L57)
+
+When / guard context:
+```java
+ength() > 200) throw new IllegalArgumentException("Invalid gift name");
+        if (targetAmount == null || targetAmount.signum() <= 0 || targetAmount.scale() > 2 || targetAmount.precision() - targetAmount.scale() > 13)
+            throw new IllegalArgumentException("Invalid target amount");
+        if (imageKey != null && imageKey.length() > 512)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Invalid image key");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0103 — backend/src/main/java/com/giftplatform/gift/entity/Gift.java:64
+
+[backend/src/main/java/com/giftplatform/gift/entity/Gift.java:64](../../src/main/java/com/giftplatform/gift/entity/Gift.java#L64)
+
+When / guard context:
+```java
+public void setFulfillmentOverride(FulfillmentPreference override) { this.fulfillmentOverride = override; }
+    public FulfillmentPreference effectiveFulfillmentPreference() {
+        return fulfillmentOverride != null ? fulfillmentOverride : event.getFulfillmentDefault();
+    }
+    public void closeUnfunded() { if (status != GiftStatus.ACTIVE)
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Gift not active");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0104 — backend/src/main/java/com/giftplatform/gift/entity/Gift.java:65
+
+[backend/src/main/java/com/giftplatform/gift/entity/Gift.java:65](../../src/main/java/com/giftplatform/gift/entity/Gift.java#L65)
+
+When / guard context:
+```java
+veFulfillmentPreference() {
+        return fulfillmentOverride != null ? fulfillmentOverride : event.getFulfillmentDefault();
+    }
+    public void closeUnfunded() { if (status != GiftStatus.ACTIVE) throw new IllegalStateException("Gift not active"); status = GiftStatus.CLOSED_UNFUNDED; }
+    public void cancel() { if (status != GiftStatus.ACTIVE)
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Gift not active");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0105 — backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoController.java:16
+
+[backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoController.java:16](../../src/main/java/com/giftplatform/gift/photo/GiftPhotoController.java#L16)
+
+When / guard context:
+```java
+ontroller(GiftPhotoService photos){this.photos=photos;}
+    @PostMapping(path="/api/v1/events/{eventId}/gifts/photos",consumes=MediaType.MULTIPART_FORM_DATA_VALUE)
+    public GiftPhotoService.Photo upload(@PathVariable UUID eventId,@RequestPart("photo") MultipartFile photo) throws IOException {
+        if(photo.isEmpty()||photo.getSize()>2_000_000)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Choose a JPEG or PNG photo under 2 MB");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0106 — backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java:36
+
+[backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java:36](../../src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java#L36)
+
+When / guard context:
+```java
+ion {
+        requireOwner(eventId,actor);
+        return store(eventId,actor,retailer.fetchImage(url));
+    }
+    private void requireOwner(UUID eventId,UUID actor){
+        Integer n=db.queryForObject("SELECT count(*) FROM events WHERE id=? AND owner_id=? AND status IN ('DRAFT','PUBLISHED')",Integer.class,eventId,actor);
+        if(n==null||n!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Editable event not found");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0107 — backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java:41
+
+[backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java:41](../../src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java#L41)
+
+When / guard context:
+```java
+FT','PUBLISHED')",Integer.class,eventId,actor);
+        if(n==null||n!=1)throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Editable event not found");
+    }
+    public Photo store(UUID eventId,UUID actor,byte[] input){
+        var processed=processor.process(input,"GIFT");
+        if(processed.width()<160||processed.height()<160)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Choose a clear photo at least 160 × 160 pixels");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0108 — backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java:46
+
+[backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java:46](../../src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java#L46)
+
+When / guard context:
+```java
+t 160 × 160 pixels");
+        try {
+            BufferedImage source=ImageIO.read(new ByteArrayInputStream(processed.png()));
+            double scale=Math.min(1,1200.0/Math.max(source.getWidth(),source.getHeight()));
+            int w=(int)Math.round(source.getWidth()*scale),h=(int)Math.round(source.getHeight()*scale);
+            if(w<160||h<160)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Photo is too narrow. Use a less panoramic image.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0109 — backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java:54
+
+[backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java:54](../../src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java#L54)
+
+When / guard context:
+```java
+output=new ByteArrayOutputStream();ImageIO.write(result,"jpeg",output);
+            UUID id=UUID.randomUUID();
+            db.update("INSERT INTO gift_photos(id,event_id,actor_id,content,width,height) VALUES (?,?,?,?,?,?)",id,eventId,actor,output.toByteArray(),w,h);
+            return new Photo("gift-photo:"+id,w,h);
+        }catch(IOException e){
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Photo could not be read. Choose a JPEG or PNG.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0110 — backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java:59
+
+[backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java:59](../../src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java#L59)
+
+When / guard context:
+```java
+sException(HttpStatus.BAD_REQUEST,"Photo could not be read. Choose a JPEG or PNG.");}
+    }
+    public void validateReference(UUID eventId,String key){
+        if(key==null||!key.startsWith("gift-photo:"))return; // Keep existing gallery/storage keys compatible.
+        UUID id;
+        try{id=UUID.fromString(key.substring(11));}catch(Exception e){
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid gift photo");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0111 — backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java:61
+
+[backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java:61](../../src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java#L61)
+
+When / guard context:
+```java
+gallery/storage keys compatible.
+        UUID id;
+        try{id=UUID.fromString(key.substring(11));}catch(Exception e){throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid gift photo");}
+        Integer n=db.queryForObject("SELECT count(*) FROM gift_photos WHERE id=? AND event_id=?",Integer.class,id,eventId);
+        if(n==null||n!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Photo does not belong to this event");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0112 — backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java:65
+
+[backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java:65](../../src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java#L65)
+
+When / guard context:
+```java
+if(n==null||n!=1)throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Photo does not belong to this event");
+    }
+    public byte[] owned(UUID eventId,UUID id){
+        Integer n=db.queryForObject("SELECT count(*) FROM events WHERE id=? AND owner_id=?",Integer.class,eventId,actors.requireAuthenticatedUserId());
+        if(n==null||n!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0113 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java:34
+
+[backend/src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java:34](../../src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java#L34)
+
+When / guard context:
+```java
+currency,String imageKey,String imageWarning){}
+    public Preview lookup(UUID eventId,String url) {
+        UUID actor=actors.requireAuthenticatedUserId();
+        Integer owns=db.queryForObject("SELECT count(*) FROM events WHERE id=? AND owner_id=? AND status IN ('DRAFT','PUBLISHED')",Integer.class,eventId,actor);
+        if(owns==null||owns!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Editable event not found");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0114 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java:50
+
+[backend/src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java:50](../../src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java#L50)
+
+When / guard context:
+```java
+jsonb)",
+                lookup,eventId,actor,source,mapper.writeValueAsString(parsed));
+            return new Preview(lookup,source,(String)parsed.get("name"),(String)parsed.get("description"),
+                (BigDecimal)parsed.get("targetAmount"),(String)parsed.get("currency"),imageKey,imageWarning);
+        } catch(IllegalArgumentException e){
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,e.getMessage());
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0115 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java:51
+
+[backend/src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java:51](../../src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java#L51)
+
+When / guard context:
+```java
+,source,(String)parsed.get("name"),(String)parsed.get("description"),
+                (BigDecimal)parsed.get("targetAmount"),(String)parsed.get("currency"),imageKey,imageWarning);
+        } catch(IllegalArgumentException e){throw new ResponseStatusException(HttpStatus.BAD_REQUEST,e.getMessage());}
+          catch(java.net.SocketTimeoutException e){
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.GATEWAY_TIMEOUT,"The retailer took too long to respond. Try again or enter the details manually.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0116 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java:52
+
+[backend/src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java:52](../../src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java#L52)
+
+When / guard context:
+```java
+(IllegalArgumentException e){throw new ResponseStatusException(HttpStatus.BAD_REQUEST,e.getMessage());}
+          catch(java.net.SocketTimeoutException e){throw new ResponseStatusException(HttpStatus.GATEWAY_TIMEOUT,"The retailer took too long to respond. Try again or enter the details manually.");}
+          catch(java.net.UnknownHostException e){
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,"The retailer address could not be reached. Check the product link.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0117 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java:57
+
+[backend/src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java:57](../../src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java#L57)
+
+When / guard context:
+```java
+catch(java.io.IOException e){
+              String detail=e.getMessage();
+              // Only our own, user-facing messages are returned; TLS/socket internals stay private.
+              boolean safe=detail!=null && (detail.startsWith("This retailer ")||detail.startsWith("The retailer ")||detail.startsWith("Retailer "));
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,safe?detail:"Could not connect securely to the retailer. Try again or enter the details manually.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0118 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java:68
+
+[backend/src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java:68](../../src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java#L68)
+
+When / guard context:
+```java
+UPDATE gift_retailer_metadata_audit SET gift_id=?,saved_at=CURRENT_TIMESTAMP
+            WHERE id=? AND event_id=? AND actor_id=? AND source_url=?
+              AND fetched_at>CURRENT_TIMESTAMP-INTERVAL '24 hours'
+              AND (gift_id IS NULL OR gift_id=?)
+            """,giftId,lookupId,eventId,actor,sourceUrl,giftId);
+        if(changed!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Retailer lookup expired or does not match this gift and URL. Fetch it again.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0119 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java:76
+
+[backend/src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java:76](../../src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java#L76)
+
+When / guard context:
+```java
+String host=java.net.URI.create(source).getHost();
+        boolean amazonIndia="amazon.in".equalsIgnoreCase(host)||"www.amazon.in".equalsIgnoreCase(host);
+        if(amazonIndia && (!doc.select("form[action*=validateCaptcha], #captchacharacters").isEmpty() ||
+            doc.title().toLowerCase(Locale.ROOT).contains("robot check")))
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Amazon requires a browser verification for this request. Open the retailer link and enter the gift details manually.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0120 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java:107
+
+[backend/src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java:107](../../src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java#L107)
+
+When / guard context:
+```java
+insKey("product:price:amount") || doc.select("[itemtype]").stream().anyMatch(e->e.attr("itemtype").matches("(?i)https?://schema.org/Product/?"));
+        if(amazonIndia)isProduct=!retailerFields.getOrDefault("name","").isBlank() && java.net.URI.create(source).getPath().matches("(?i).*/(?:dp|gp/product)/[A-Z0-9]{10}(?:/.*)?");
+        if(!isProduct)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("This link is not a recognizable product page. Use the individual product link, not a store home page, category, or search page.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0121 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java:126
+
+[backend/src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java:126](../../src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java#L126)
+
+When / guard context:
+```java
+name).text(),160));result.put("description",limit(Jsoup.parse(description).text(),2000));
+        result.put("imageUrl",imageUrl);result.put("targetAmount",amount);result.put("currency",currency);result.put("retailerFields",retailerFields);result.put("metaTags",tags);result.put("jsonLd",structured);
+        if(name.isBlank()&&description.isBlank())
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("No retailer details found. Enter gift details manually.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0122 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java:26
+
+[backend/src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java:26](../../src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java#L26)
+
+When / guard context:
+```java
+ttps".equalsIgnoreCase(uri.getScheme()) || host==null ||
+               uri.getUserInfo()!=null || (uri.getPort()!=-1 && uri.getPort()!=443) ||
+               !host.contains(".") || host.contains(":") || host.matches("[0-9.]+") ||
+               host.toLowerCase().matches(".*\\.(localhost|local|internal|test|invalid|example)\\.?"))
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0123 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java:28
+
+[backend/src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java:28](../../src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java#L28)
+
+When / guard context:
+```java
+ull || (uri.getPort()!=-1 && uri.getPort()!=443) ||
+               !host.contains(".") || host.contains(":") || host.matches("[0-9.]+") ||
+               host.toLowerCase().matches(".*\\.(localhost|local|internal|test|invalid|example)\\.?"))
+                throw new IllegalArgumentException();
+            return uri;
+        } catch(Exception e) {
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Enter a public retailer HTTPS URL");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0124 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java:51
+
+[backend/src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java:51](../../src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java#L51)
+
+When / guard context:
+```java
+source,boolean image) throws IOException {
+        URI uri=validateUrl(source);
+        DnsResolver resolver=new DnsResolver(){
+            public InetAddress[] resolve(String host) throws UnknownHostException {
+                InetAddress[] addresses=InetAddress.getAllByName(host);
+                for(InetAddress a:addresses)if(!publicAddress(a))
+```
+Failure / enforcement:
+```java
+throw new UnknownHostException("Retailer must resolve to public addresses");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0125 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java:70
+
+[backend/src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java:70](../../src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java#L70)
+
+When / guard context:
+```java
+t.setHeader("Accept",image?"image/jpeg,image/png,image/webp":"text/html,application/xhtml+xml");
+                Page page=client.execute(request,response->{
+                    if(response.getCode()>=300 && response.getCode()<400) {
+                        var location=response.getFirstHeader("Location");
+                        if(location==null)
+```
+Failure / enforcement:
+```java
+throw new IOException("Retailer redirect has no destination");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0126 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java:74
+
+[backend/src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java:74](../../src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java#L74)
+
+When / guard context:
+```java
+var location=response.getFirstHeader("Location");
+                        if(location==null)throw new IOException("Retailer redirect has no destination");
+                        return new Page(null,location.getValue());
+                    }
+                    if(response.getCode()==403 || response.getCode()==429)
+```
+Failure / enforcement:
+```java
+throw new IOException("This retailer blocks automated lookups. You can still save its link and enter the gift details.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0127 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java:75
+
+[backend/src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java:75](../../src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java#L75)
+
+When / guard context:
+```java
+return new Page(null,location.getValue());
+                    }
+                    if(response.getCode()==403 || response.getCode()==429)
+                        throw new IOException("This retailer blocks automated lookups. You can still save its link and enter the gift details.");
+                    if(response.getCode()==404)
+```
+Failure / enforcement:
+```java
+throw new IOException("The retailer product page was not found. Check the product link.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0128 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java:76
+
+[backend/src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java:76](../../src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java#L76)
+
+When / guard context:
+```java
+se.getCode()==429)
+                        throw new IOException("This retailer blocks automated lookups. You can still save its link and enter the gift details.");
+                    if(response.getCode()==404)throw new IOException("The retailer product page was not found. Check the product link.");
+                    if(response.getCode()!=200)
+```
+Failure / enforcement:
+```java
+throw new IOException("The retailer returned HTTP "+response.getCode()+". Try its direct product page link.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0129 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java:80
+
+[backend/src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java:80](../../src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java#L80)
+
+When / guard context:
+```java
+page link.");
+                    var entity=response.getEntity();
+                    if(entity==null || entity.getContentType()==null ||
+                        (image?!entity.getContentType().startsWith("image/"):!(entity.getContentType().contains("text/html")||entity.getContentType().contains("application/xhtml+xml"))))
+```
+Failure / enforcement:
+```java
+throw new IOException("Retailer did not return HTML");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0130 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java:85
+
+[backend/src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java:85](../../src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java#L85)
+
+When / guard context:
+```java
+ty.getContent()) {
+                        // Product metadata is normally in the head. Parse a bounded prefix so
+                        // large retailer pages do not fail solely because of their total size.
+                        byte[] bytes=stream.readNBytes(image?2_000_001:MAX_BYTES);
+                        if(image&&bytes.length>2_000_000)
+```
+Failure / enforcement:
+```java
+throw new IOException("Retailer photo exceeds 2 MB");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0131 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java:92
+
+[backend/src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java:92](../../src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java#L92)
+
+When / guard context:
+```java
+row new IOException("Retailer photo exceeds 2 MB");
+                        return new Page(new Resource(bytes,entity.getContentType()),null);
+                    }
+                });
+                if(page.redirect()==null)return page.resource();
+                uri=validateUrl(uri.resolve(page.redirect()).toString());
+            }
+```
+Failure / enforcement:
+```java
+throw new IOException("Retailer redirected too many times; use the direct product URL");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0132 — backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:56
+
+[backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:56](../../src/main/java/com/giftplatform/gift/service/GiftManagementService.java#L56)
+
+When / guard context:
+```java
+nk() && !request.productUrl().trim().equals(gift.getProductUrl()))
+            lookup=retailer.lookup(eventId,request.productUrl().trim()).lookupId();
+        if(photos!=null)photos.validateReference(eventId,request.imageKey());
+        apply(gift, request);
+        gifts.saveAndFlush(gift);
+        if(lookup!=null) {
+            if(retailer==null)
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Retailer audit service unavailable");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0133 — backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:91
+
+[backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:91](../../src/main/java/com/giftplatform/gift/service/GiftManagementService.java#L91)
+
+When / guard context:
+```java
+nk() && !request.productUrl().trim().equals(gift.getProductUrl()))
+            lookup=retailer.lookup(eventId,request.productUrl().trim()).lookupId();
+        if(photos!=null)photos.validateReference(eventId,request.imageKey());
+        apply(gift, request);
+        gifts.saveAndFlush(gift);
+        if(lookup!=null) {
+            if(retailer==null)
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Retailer audit service unavailable");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0134 — backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:105
+
+[backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:105](../../src/main/java/com/giftplatform/gift/service/GiftManagementService.java#L105)
+
+When / guard context:
+```java
+enticatedUserId();
+        Event event = ownedEvent(eventId, actor);
+        // Once contributions are introduced, this endpoint must check reserved funds before allowing cancellation.
+        // Until then, only DRAFT events can cancel gifts, where guest contributions cannot exist.
+        if (event.getStatus() != EventStatus.DRAFT) {
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT, "Gift cancellation requires a draft event");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0135 — backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:146
+
+[backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:146](../../src/main/java/com/giftplatform/gift/service/GiftManagementService.java#L146)
+
+When / guard context:
+```java
+ull || url.length() > 2048 ||
+                    uri.getHost().equalsIgnoreCase("localhost") ||
+                    uri.getHost().endsWith(".localhost") ||
+                    uri.getHost().endsWith(".local") ||
+                    uri.getHost().matches("(?i)(127\\..*|10\\..*|192\\.168\\..*|172\\.(1[6-9]|2[0-9]|3[01])\\..*)"))
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Invalid product URL");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0136 — backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:148
+
+[backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:148](../../src/main/java/com/giftplatform/gift/service/GiftManagementService.java#L148)
+
+When / guard context:
+```java
+t().endsWith(".localhost") ||
+                    uri.getHost().endsWith(".local") ||
+                    uri.getHost().matches("(?i)(127\\..*|10\\..*|192\\.168\\..*|172\\.(1[6-9]|2[0-9]|3[01])\\..*)"))
+                    throw new IllegalArgumentException("Invalid product URL");
+            } catch (IllegalArgumentException ex) {
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid product URL");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0137 — backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:164
+
+[backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:164](../../src/main/java/com/giftplatform/gift/service/GiftManagementService.java#L164)
+
+When / guard context:
+```java
+or audit payloads.
+        record(actor, gift, AuditAction.UPDATE, before, snapshot(gift));
+        return GiftResponse.from(gift);
+    }
+
+    private Event ownedEvent(UUID id, UUID actor) {
+        Event event = events.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        if (!actor.equals(event.getOwnerId()))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0138 — backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:170
+
+[backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:170](../../src/main/java/com/giftplatform/gift/service/GiftManagementService.java#L170)
+
+When / guard context:
+```java
+if (!actor.equals(event.getOwnerId())) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        return event;
+    }
+
+    private Gift ownedGift(UUID eventId, UUID giftId) {
+        Gift gift = gifts.findById(giftId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        if (!eventId.equals(gift.getEvent().getId()))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0139 — backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:176
+
+[backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:176](../../src/main/java/com/giftplatform/gift/service/GiftManagementService.java#L176)
+
+When / guard context:
+```java
+> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        if (!eventId.equals(gift.getEvent().getId())) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        return gift;
+    }
+
+    private void ensureEditable(Event event) {
+        if (event.getStatus() != EventStatus.DRAFT && event.getStatus() != EventStatus.PUBLISHED)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT, "Event cannot be edited");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0140 — backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:181
+
+[backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:181](../../src/main/java/com/giftplatform/gift/service/GiftManagementService.java#L181)
+
+When / guard context:
+```java
+private void ensureEditable(Event event) {
+        if (event.getStatus() != EventStatus.DRAFT && event.getStatus() != EventStatus.PUBLISHED)
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Event cannot be edited");
+    }
+
+    private void ensureActive(Gift gift) {
+        if (gift.getStatus() != GiftStatus.ACTIVE)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT, "Gift is not active");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0141 — backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:188
+
+[backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:188](../../src/main/java/com/giftplatform/gift/service/GiftManagementService.java#L188)
+
+When / guard context:
+```java
+HttpStatus.CONFLICT, "Gift is not active");
+    }
+
+    private void apply(Gift gift, GiftRequest request) {
+        if(request.productUrl()!=null) {
+            String url=request.productUrl().trim();
+            try{if(!url.isEmpty())com.giftplatform.gift.retailer.RetailerPageClient.validateUrl(url);}
+            catch(IllegalArgumentException e){
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,e.getMessage());
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+## group
+
+### RULE-0142 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:57
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:57](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L57)
+
+When / guard context:
+```java
+targetPaise,String status,boolean independentGift){}
+ UUID event(UUID token){return events.findByPublicToken(token).filter(e->e.getStatus()==EventStatus.PUBLISHED).map(e->e.getId()).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));}
+ private String username(String v){if(v==null||!USER.matcher(v.toLowerCase(Locale.ROOT)).matches())
+```
+Failure / enforcement:
+```java
+throw bad("Username must have 3–40 letters, digits or underscores");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0143 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:58
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:58](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L58)
+
+When / guard context:
+```java
+>new ResponseStatusException(HttpStatus.NOT_FOUND));}
+ private String username(String v){if(v==null||!USER.matcher(v.toLowerCase(Locale.ROOT)).matches())throw bad("Username must have 3–40 letters, digits or underscores");return v.toLowerCase(Locale.ROOT);}
+ private String text(String v,int max,boolean required){if(v==null||v.isBlank()){if(required)
+```
+Failure / enforcement:
+```java
+throw bad("Required field missing");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0144 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:58
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:58](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L58)
+
+When / guard context:
+```java
+Case(Locale.ROOT)).matches())throw bad("Username must have 3–40 letters, digits or underscores");return v.toLowerCase(Locale.ROOT);}
+ private String text(String v,int max,boolean required){if(v==null||v.isBlank()){if(required)throw bad("Required field missing");return null;}v=v.strip();if(v.length()>max||v.chars().anyMatch(Character::isISOControl))
+```
+Failure / enforcement:
+```java
+throw bad("Invalid field");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0145 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:61
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:61](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L61)
+
+When / guard context:
+```java
+ISOControl))throw bad("Invalid field");return v;}
+ private ResponseStatusException bad(String msg){return new ResponseStatusException(HttpStatus.BAD_REQUEST,msg);}
+ private boolean pinAllowed(UUID eventId){return policies==null||policies.effective(null,eventId).allowGroupPin();}
+ private void requirePinAllowed(UUID eventId){if(!pinAllowed(eventId))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.FORBIDDEN,"PIN sign in is disabled. Use your username and password.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0146 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:69
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:69](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L69)
+
+When / guard context:
+```java
+(pin,confirm);
+ }
+ @GetMapping("/account-policy")
+ public Map<String,Boolean> accountPolicy(@PathVariable UUID token){UUID e=event(token);return Map.of("allowGroupPin",pinAllowed(e),"memberEmailVerificationRequired",readiness.memberEmailRequired(e));}
+ private String validatedPin(String pin,String confirm){
+  if(pin==null||!pin.matches("[0-9]{6}"))
+```
+Failure / enforcement:
+```java
+throw bad("PIN must be exactly six digits");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0147 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:70
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:70](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L70)
+
+When / guard context:
+```java
+olean> accountPolicy(@PathVariable UUID token){UUID e=event(token);return Map.of("allowGroupPin",pinAllowed(e),"memberEmailVerificationRequired",readiness.memberEmailRequired(e));}
+ private String validatedPin(String pin,String confirm){
+  if(pin==null||!pin.matches("[0-9]{6}"))throw bad("PIN must be exactly six digits");
+  if(!pin.equals(confirm))
+```
+Failure / enforcement:
+```java
+throw bad("PIN confirmation does not match");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0148 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:81
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:81](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L81)
+
+When / guard context:
+```java
+b.queryForObject("SELECT id FROM gift_groups WHERE id=? FOR UPDATE",UUID.class,groupId);
+  for(Map<String,Object> row:db.queryForList("SELECT id,pin_hash FROM gift_group_members WHERE group_id=? AND username=? AND pin_hash IS NOT NULL",groupId,username)){
+   if(!row.get("id").equals(exclude)&&passwords.matches(pin,(String)row.get("pin_hash")))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"PIN already taken for this group. Choose a different PIN");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0149 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:88
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:88](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L88)
+
+When / guard context:
+```java
+db.queryForObject("SELECT id FROM events WHERE id=? FOR UPDATE",UUID.class,eventId);
+  for(Map<String,Object> row:db.queryForList("SELECT id,pin_hash FROM gift_group_accounts WHERE event_id=? AND username=? AND pin_hash IS NOT NULL",eventId,username)){
+   if(!row.get("id").equals(exclude)&&passwords.matches(pin,(String)row.get("pin_hash")))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"PIN already taken for this group. Choose a different PIN");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0150 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:91
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:91](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L91)
+
+When / guard context:
+```java
+ords.matches(pin,(String)row.get("pin_hash")))
+    throw new ResponseStatusException(HttpStatus.CONFLICT,"PIN already taken for this group. Choose a different PIN");
+  }
+ }
+ UUID sessionAdmin(UUID eventId,HttpServletRequest req){HttpSession s=req.getSession(false);Object o=s==null?null:s.getAttribute(SESSION_KEY+eventId);if(!(o instanceof UUID id))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0151 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:95
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:95](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L95)
+
+When / guard context:
+```java
+req.getSession(false);Object o=s==null?null:s.getAttribute(SESSION_KEY+eventId);if(!(o instanceof UUID id))throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+  Object bound=s.getAttribute(PAGE_KEY+eventId);
+  String presented=req.getHeader(PAGE_HEADER);
+  if(!(bound instanceof String pageId)||presented==null||!pageId.equals(presented))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"Group login required for this page");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0152 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:100
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:100](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L100)
+
+When / guard context:
+```java
+tus.UNAUTHORIZED,"Group login required for this page");
+  Object last=s.getAttribute(ACTIVITY_KEY+eventId);
+  long now=System.currentTimeMillis();
+  if(!(last instanceof Long time)||now-time<0||now-time>=GROUP_IDLE_TIMEOUT_MS){
+   s.removeAttribute(SESSION_KEY+eventId);s.removeAttribute(ACTIVITY_KEY+eventId);s.removeAttribute(PAGE_KEY+eventId);
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"Group session expired");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0153 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:104
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:104](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L104)
+
+When / guard context:
+```java
+ribute(ACTIVITY_KEY+eventId);s.removeAttribute(PAGE_KEY+eventId);
+   throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"Group session expired");
+  }
+  Object epoch=s.getAttribute("gift.group.admin.epoch."+eventId);
+  if(!(epoch instanceof Long v)||v.longValue()!=versions.current("GROUP_ADMIN",id)){
+   s.removeAttribute(SESSION_KEY+eventId);
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"Group session expired");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0154 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:106
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:106](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L106)
+
+When / guard context:
+```java
+versions.current("GROUP_ADMIN",id)){
+   s.removeAttribute(SESSION_KEY+eventId);throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"Group session expired");
+  }
+  s.setAttribute(ACTIVITY_KEY+eventId,now);Integer n=db.queryForObject("SELECT count(*) FROM gift_group_accounts WHERE id=? AND event_id=?",Integer.class,id,eventId);if(n==null||n!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0155 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:108
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:108](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L108)
+
+When / guard context:
+```java
+p_accounts WHERE id=? AND event_id=?",Integer.class,id,eventId);if(n==null||n!=1)throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);return id;}
+ @PostMapping("/register") @ResponseStatus(HttpStatus.CREATED) @Transactional
+ public Map<String,String> register(@PathVariable UUID token,@RequestBody Credentials c){UUID e=event(token);if(c==null)
+```
+Failure / enforcement:
+```java
+throw bad("Credentials required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0156 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:108
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:108](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L108)
+
+When / guard context:
+```java
+id;}
+ @PostMapping("/register") @ResponseStatus(HttpStatus.CREATED) @Transactional
+ public Map<String,String> register(@PathVariable UUID token,@RequestBody Credentials c){UUID e=event(token);if(c==null)throw bad("Credentials required");String u=username(c.username());String pw=c.password();if(pw==null||pw.length()<8||pw.length()>128||pw.isBlank())
+```
+Failure / enforcement:
+```java
+throw bad("Password must contain 8–128 characters");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0157 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:108
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:108](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L108)
+
+When / guard context:
+```java
+UUID e=event(token);if(c==null)throw bad("Credentials required");String u=username(c.username());String pw=c.password();if(pw==null||pw.length()<8||pw.length()>128||pw.isBlank())throw bad("Password must contain 8–128 characters");String pin=registrationPin(e,c.pin(),c.confirmPin());String fullName=text(c.fullName(),120,true);if(fullName.length()<2)
+```
+Failure / enforcement:
+```java
+throw bad("Full name must be at least two characters");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0158 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:110
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:110](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L110)
+
+When / guard context:
+```java
+k())throw bad("Password must contain 8–128 characters");String pin=registrationPin(e,c.pin(),c.confirmPin());String fullName=text(c.fullName(),120,true);if(fullName.length()<2)throw bad("Full name must be at least two characters");
+ String email=text(c.email(),254,true).toLowerCase(Locale.ROOT);
+ if(!email.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$"))
+```
+Failure / enforcement:
+```java
+throw bad("Valid email required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0159 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:114
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:114](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L114)
+
+When / guard context:
+```java
+u,pin,null);try{db.update("INSERT INTO gift_group_accounts(id,event_id,username,password_hash,pin_hash,full_name,email,mobile,email_verified_at,mobile_verified_at) VALUES(?,?,?,?,?,?,?,?,NULL,NULL)",accountId,e,u,passwords.encode(pw),pin==null?null:passwords.encode(pin),fullName,email,phone);}catch(org.springframework.dao.DuplicateKeyException ex){
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Username already exists");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0160 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:116
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:116](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L116)
+
+When / guard context:
+```java
+upEmails.consume(c.emailVerificationToken(),"GROUP_ADMIN",e,email))db.update("UPDATE gift_group_accounts SET email_verified_at=now() WHERE id=?",accountId);return Map.of("username",u);}
+ @PostMapping("/login")
+ public Map<String,String> login(@PathVariable UUID token,@RequestBody Credentials c,HttpServletRequest req){UUID e=event(token);if(c==null)
+```
+Failure / enforcement:
+```java
+throw bad("Credentials required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0161 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:117
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:117](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L117)
+
+When / guard context:
+```java
+PostMapping("/login")
+ public Map<String,String> login(@PathVariable UUID token,@RequestBody Credentials c,HttpServletRequest req){UUID e=event(token);if(c==null)throw bad("Credentials required");if(c.pin()!=null&&!c.pin().isBlank())requirePinAllowed(e);boolean pinLogin=c.pin()!=null&&!c.pin().isBlank();
+  if(pinLogin&&!c.pin().matches("[0-9]{6}"))
+```
+Failure / enforcement:
+```java
+throw bad("PIN must be six digits");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0162 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:118
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:118](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L118)
+
+When / guard context:
+```java
+lank())requirePinAllowed(e);boolean pinLogin=c.pin()!=null&&!c.pin().isBlank();
+  if(pinLogin&&!c.pin().matches("[0-9]{6}"))throw bad("PIN must be six digits");
+  String u=username(c.username()==null?null:c.username().strip());String loginKey=req.getRemoteAddr()+"|"+e+"|"+u;String ipKey=req.getRemoteAddr();if(!LOGIN_LIMITER.allowed(loginKey,ipKey))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,"Try again later");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0163 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:120
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:120](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L120)
+
+When / guard context:
+```java
+again later");
+  List<Map<String,Object>> rows=db.queryForList("SELECT id,password_hash,pin_hash,locked_until FROM gift_group_accounts WHERE event_id=? AND username=?",e,u);
+  if(rows.isEmpty()){LOGIN_LIMITER.failed(loginKey,ipKey);passwords.matches(c.password()==null?"":c.password(),"$2a$12$0VdzzV7Z6d1XIf5PjCPZkuoFw73qhOUmIZ.3mxY0C7hzXEKpBQeNa");
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"Invalid credentials");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0164 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:120
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:120](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L120)
+
+When / guard context:
+```java
+),"$2a$12$0VdzzV7Z6d1XIf5PjCPZkuoFw73qhOUmIZ.3mxY0C7hzXEKpBQeNa");throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"Invalid credentials");}Map<String,Object> row=rows.get(0);UUID id=(UUID)row.get("id");java.sql.Timestamp locked=(java.sql.Timestamp)row.get("locked_until");if(locked!=null&&locked.toInstant().isAfter(java.time.Instant.now()))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,"Try again later");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0165 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:120
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:120](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L120)
+
+When / guard context:
+```java
+ts SET failed_attempts=CASE WHEN locked_until IS NOT NULL AND locked_until<=now() THEN 1 ELSE failed_attempts+1 END,locked_until=CASE WHEN (CASE WHEN locked_until IS NOT NULL AND locked_until<=now() THEN 1 ELSE failed_attempts+1 END)>=5 THEN now()+interval '15 minutes' ELSE NULL END WHERE id=? AND (locked_until IS NULL OR locked_until<=now())",id);
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"Invalid credentials");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0166 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:121
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:121](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L121)
+
+When / guard context:
+```java
+until IS NULL OR locked_until<=now())",id);throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"Invalid credentials");}db.update("UPDATE gift_group_accounts SET failed_attempts=0,locked_until=NULL WHERE id=?",id);LOGIN_LIMITER.succeeded(loginKey);String pageId=req.getHeader(PAGE_HEADER);
+  if(pageId==null||!pageId.matches("[0-9a-fA-F-]{36}"))
+```
+Failure / enforcement:
+```java
+throw bad("Missing page identity");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0167 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:122
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:122](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L122)
+
+When / guard context:
+```java
+Invalid credentials");}db.update("UPDATE gift_group_accounts SET failed_attempts=0,locked_until=NULL WHERE id=?",id);LOGIN_LIMITER.succeeded(loginKey);String pageId=req.getHeader(PAGE_HEADER);
+  if(pageId==null||!pageId.matches("[0-9a-fA-F-]{36}"))throw bad("Missing page identity");
+  try{UUID.fromString(pageId);}catch(IllegalArgumentException ex){
+```
+Failure / enforcement:
+```java
+throw bad("Invalid page identity");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0168 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:128
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:128](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L128)
+
+When / guard context:
+```java
+_hash")==null?"true":"false");}
+ public record PinSetup(String password,String pin,String confirmPin){}
+ @PostMapping("/pin/setup") @Transactional
+ public Map<String,String> adminPinSetup(@PathVariable UUID token,@RequestBody PinSetup input,HttpServletRequest req){
+  UUID e=event(token),id=sessionAdmin(e,req);requirePinAllowed(e);
+  if(input==null)
+```
+Failure / enforcement:
+```java
+throw bad("PIN setup required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0169 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:131
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:131](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L131)
+
+When / guard context:
+```java
+sessionAdmin(e,req);requirePinAllowed(e);
+  if(input==null)throw bad("PIN setup required");
+  String pin=validatedPin(input.pin(),input.confirmPin());
+  String hash=db.queryForObject("SELECT password_hash FROM gift_group_accounts WHERE id=? AND event_id=?",String.class,id,e);
+  if(!passwords.matches(input.password()==null?"":input.password(),hash))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Current password is incorrect");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0170 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:138
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:138](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L138)
+
+When / guard context:
+```java
+n Map.of("message","PIN saved");
+ }
+ @PostMapping("/member-pin/setup/{groupId}") @Transactional
+ public Map<String,String> memberPinSetup(@PathVariable UUID token,@PathVariable UUID groupId,@RequestBody PinSetup input,HttpServletRequest req){
+  publicGroup(token,groupId);requirePinAllowed(event(token));UUID id=member(groupId,req);
+  if(input==null)
+```
+Failure / enforcement:
+```java
+throw bad("PIN setup required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0171 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:141
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:141](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L141)
+
+When / guard context:
+```java
+token));UUID id=member(groupId,req);
+  if(input==null)throw bad("PIN setup required");
+  String pin=validatedPin(input.pin(),input.confirmPin());
+  String hash=db.queryForObject("SELECT password_hash FROM gift_group_members WHERE id=? AND group_id=?",String.class,id,groupId);
+  if(!passwords.matches(input.password()==null?"":input.password(),hash))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Current password is incorrect");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0172 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:146
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:146](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L146)
+
+When / guard context:
+```java
+ash=? WHERE id=?",passwords.encode(pin),id);
+  return Map.of("message","PIN saved");
+ }
+ @PostMapping("/logout") public void logout(@PathVariable UUID token,HttpServletRequest req){UUID e=event(token);HttpSession s=req.getSession(false);if(s!=null){Object bound=s.getAttribute(PAGE_KEY+e);
+  if(bound!=null&&!bound.equals(req.getHeader(PAGE_HEADER)))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0173 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:152
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:152](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L152)
+
+When / guard context:
+```java
+public record FullNameInput(String fullName){}
+ @PostMapping("/profile-name") public Map<String,String> setAdminName(@PathVariable UUID token,@RequestBody FullNameInput input,HttpServletRequest req){
+  UUID eventId=event(token),adminId=sessionAdmin(eventId,req);
+  String name=text(input==null?null:input.fullName(),120,true);
+  if(name.length()<2)
+```
+Failure / enforcement:
+```java
+throw bad("Full name must be at least two characters");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0174 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:171
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:171](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L171)
+
+When / guard context:
+```java
+yments_enabled FROM gift_groups WHERE id=?",groupId));
+  }
+  return out;}
+ public record PrivacySettings(String joinPolicy,String memberVisibility,String amountVisibility,Boolean creatorDirectPaymentsEnabled){}
+ private static String choice(String value,String allowed,String field){if(value==null||!Arrays.asList(allowed.split(",")).contains(value))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid "+field);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0175 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:172
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:172](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L172)
+
+When / guard context:
+```java
+value;}
+ @GetMapping("/privacy") public Map<String,Object> privacy(@PathVariable UUID token,HttpServletRequest req){UUID e=event(token),id=sessionAdmin(e,req);List<Map<String,Object>> rows=db.queryForList("SELECT join_policy,member_visibility,amount_visibility,creator_direct_payments_enabled FROM gift_groups WHERE admin_id=?",id);if(rows.isEmpty())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Create group first");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0176 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:173
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:173](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L173)
+
+When / guard context:
+```java
+RE admin_id=?",id);if(rows.isEmpty())throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Create group first");return rows.get(0);}
+ @PostMapping("/privacy") @Transactional public Map<String,Object> privacyUpdate(@PathVariable UUID token,@RequestBody PrivacySettings p,HttpServletRequest req){UUID e=event(token),id=sessionAdmin(e,req);if(p==null)
+```
+Failure / enforcement:
+```java
+throw bad("Privacy settings required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0177 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:174
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:174](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L174)
+
+When / guard context:
+```java
+,INVITE_ONLY","join policy"),members=choice(p.memberVisibility(),"ADMIN_ONLY,MEMBERS","member visibility"),amounts=choice(p.amountVisibility(),"ADMIN_ONLY,OWN_ONLY","amount visibility");// Direct payments cannot be enabled until encrypted creator destinations are implemented and validated.
+  if(Boolean.TRUE.equals(p.creatorDirectPaymentsEnabled()))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Creator payment destinations are not configured; direct payments remain disabled");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0178 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:175
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:175](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L175)
+
+When / guard context:
+```java
+eption(HttpStatus.CONFLICT,"Creator payment destinations are not configured; direct payments remain disabled");
+  int n=db.update("UPDATE gift_groups SET join_policy=?,member_visibility=?,amount_visibility=?,creator_direct_payments_enabled=FALSE WHERE admin_id=? AND event_id=? AND status IN ('DRAFT','PUBLISHED')",join,members,amounts,id,e);if(n!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Group not found or not editable");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0179 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:178
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:178](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L178)
+
+When / guard context:
+```java
+etObject("target_paise")==null?null:rs.getLong("target_paise"),rs.getString("status"),rs.getBoolean("independent_gift")),id);}
+ @PostMapping("/setup") @ResponseStatus(HttpStatus.CREATED) @Transactional
+ public GroupView setup(@PathVariable UUID token,@RequestBody Setup s,HttpServletRequest req){UUID e=event(token),id=sessionAdmin(e,req);if(s==null)
+```
+Failure / enforcement:
+```java
+throw bad("Setup required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0180 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:178
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:178](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L178)
+
+When / guard context:
+```java
+ATED) @Transactional
+ public GroupView setup(@PathVariable UUID token,@RequestBody Setup s,HttpServletRequest req){UUID e=event(token),id=sessionAdmin(e,req);if(s==null)throw bad("Setup required");String name=text(s.name(),120,true),creator=text(s.creatorName(),120,true),mobile=text(s.creatorMobile(),20,true);if(!mobile.matches("\\+?[0-9 ]{8,20}"))
+```
+Failure / enforcement:
+```java
+throw bad("Invalid mobile number");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0181 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:178
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:178](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L178)
+
+When / guard context:
+```java
+stBody Setup s,HttpServletRequest req){UUID e=event(token),id=sessionAdmin(e,req);if(s==null)throw bad("Setup required");String name=text(s.name(),120,true),creator=text(s.creatorName(),120,true),mobile=text(s.creatorMobile(),20,true);if(!mobile.matches("\\+?[0-9 ]{8,20}"))throw bad("Invalid mobile number");if(s.independentGift()&&s.giftId()!=null)
+```
+Failure / enforcement:
+```java
+throw bad("Independent groups choose their own gift, outside the host wishlist");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0182 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:178
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:178](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L178)
+
+When / guard context:
+```java
+tId()!=null)throw bad("Independent groups choose their own gift, outside the host wishlist");boolean fromWishlist=s.giftId()!=null;String gift=fromWishlist?null:text(s.giftName(),160,false),desc=fromWishlist?null:text(s.giftDescription(),500,false),link=fromWishlist?null:text(s.giftLink(),1000,false);if(link!=null&&!link.matches("https://[^\\s]+"))
+```
+Failure / enforcement:
+```java
+throw bad("Gift link must use HTTPS");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0183 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:178
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:178](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L178)
+
+When / guard context:
+```java
+String gift=fromWishlist?null:text(s.giftName(),160,false),desc=fromWishlist?null:text(s.giftDescription(),500,false),link=fromWishlist?null:text(s.giftLink(),1000,false);if(link!=null&&!link.matches("https://[^\\s]+"))throw bad("Gift link must use HTTPS");if(!fromWishlist&&s.targetPaise()!=null&&(s.targetPaise()<=0||s.targetPaise()>100000000000L))
+```
+Failure / enforcement:
+```java
+throw bad("Invalid target amount");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0184 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:178
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:178](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L178)
+
+When / guard context:
+```java
+iftDescription(),500,false),link=fromWishlist?null:text(s.giftLink(),1000,false);if(link!=null&&!link.matches("https://[^\\s]+"))throw bad("Gift link must use HTTPS");if(!fromWishlist&&s.targetPaise()!=null&&(s.targetPaise()<=0||s.targetPaise()>100000000000L))throw bad("Invalid target amount");if(!fromWishlist&&(desc!=null||link!=null)&&gift==null)
+```
+Failure / enforcement:
+```java
+throw bad("Gift name required for gift details");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0185 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:178
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:178](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L178)
+
+When / guard context:
+```java
+false);if(link!=null&&!link.matches("https://[^\\s]+"))throw bad("Gift link must use HTTPS");if(!fromWishlist&&s.targetPaise()!=null&&(s.targetPaise()<=0||s.targetPaise()>100000000000L))throw bad("Invalid target amount");if(!fromWishlist&&(desc!=null||link!=null)&&gift==null)throw bad("Gift name required for gift details");if(!groups(id).isEmpty())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Group already created");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0186 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:178
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:178](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L178)
+
+When / guard context:
+```java
+min_id,name,creator_name,creator_mobile,description,gift_name,gift_description,gift_link,target_paise,independent_gift) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",createdGroup,e,id,name,creator,mobile,text(s.description(),500,false),gift,desc,link,fromWishlist?null:s.targetPaise(),s.independentGift());}catch(org.springframework.dao.DuplicateKeyException ex){
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Group already created");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0187 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:178
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:178](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L178)
+
+When / guard context:
+```java
+ES(?,?,?,?,?,?,?,?,?,?,?,?)",createdGroup,e,id,name,creator,mobile,text(s.description(),500,false),gift,desc,link,fromWishlist?null:s.targetPaise(),s.independentGift());}catch(org.springframework.dao.DuplicateKeyException ex){throw new ResponseStatusException(HttpStatus.CONFLICT,"Group already created");}if(s.giftId()!=null){if(giftLifecycle==null)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Gift selection is unavailable");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0188 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:191
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:191](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L191)
+
+When / guard context:
+```java
+blic MemberLogin(String displayName,String password,String pin){this(displayName,password,pin,null);}
+ }
+ public record Review(UUID memberId,String action){}
+ private UUID groupId(UUID eventId,UUID groupId){
+  Integer n=db.queryForObject("SELECT count(*) FROM gift_groups WHERE id=? AND event_id=?",Integer.class,groupId,eventId);
+  if(n==null||n!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0189 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:197
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:197](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L197)
+
+When / guard context:
+```java
+ResponseStatusException(HttpStatus.NOT_FOUND);
+  return groupId;
+ }
+ UUID requireGroupCreator(UUID token,UUID groupId,HttpServletRequest req){
+  UUID e=event(token),admin=sessionAdmin(e,req);
+  Integer n=db.queryForObject("SELECT count(*) FROM gift_groups WHERE id=? AND event_id=? AND admin_id=?",Integer.class,groupId,e,admin);
+  if(n==null||n!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0190 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:203
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:203](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L203)
+
+When / guard context:
+```java
+new ResponseStatusException(HttpStatus.FORBIDDEN);
+  return admin;
+ }
+ private UUID adminGroup(UUID token,UUID groupId,HttpServletRequest req){
+  UUID e=event(token),admin=sessionAdmin(e,req);
+  Integer n=db.queryForObject("SELECT count(*) FROM gift_groups WHERE id=? AND event_id=? AND admin_id=?",Integer.class,groupId,e,admin);
+  if(n==null||n!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0191 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:208
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:208](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L208)
+
+When / guard context:
+```java
+onAdmin(e,req);
+  Integer n=db.queryForObject("SELECT count(*) FROM gift_groups WHERE id=? AND event_id=? AND admin_id=?",Integer.class,groupId,e,admin);
+  if(n==null||n!=1)throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+  return groupId;
+ }
+ private String memberName(String value){
+  String name=text(value,120,true);
+  if(name.length()<2)
+```
+Failure / enforcement:
+```java
+throw bad("Display name must have at least two characters");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0192 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:213
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:213](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L213)
+
+When / guard context:
+```java
+s.FORBIDDEN);
+  return groupId;
+ }
+ private String memberName(String value){
+  String name=text(value,120,true);
+  if(name.length()<2)throw bad("Display name must have at least two characters");
+  return name;
+ }
+ private String mobile(String value){
+  String m=value==null?"":value.replace(" ","").replace("-","");
+  if(!MOBILE.matcher(m).matches())
+```
+Failure / enforcement:
+```java
+throw bad("Enter a valid international mobile number");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0193 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:217
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:217](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L217)
+
+When / guard context:
+```java
+s");
+  return name;
+ }
+ private String mobile(String value){
+  String m=value==null?"":value.replace(" ","").replace("-","");
+  if(!MOBILE.matcher(m).matches())throw bad("Enter a valid international mobile number");
+  return m;
+ }
+ private String memberPassword(String value){
+  if(value==null||value.length()<10||value.length()>128||value.isBlank())
+```
+Failure / enforcement:
+```java
+throw bad("Member password must have 10–128 characters");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0194 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:229
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:229](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L229)
+
+When / guard context:
+```java
+S NOT NULL THEN gift_description END AS gift_description,    CASE WHEN gift_published_at IS NOT NULL THEN gift_link END AS gift_link,    CASE WHEN gift_published_at IS NULL THEN 'Something is Cooking 🍳' ELSE '100% Contributed ✅' END AS display_status,    join_policy,status FROM gift_groups WHERE id=? AND event_id=?",groupId,e);
+  if(rows.isEmpty())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0195 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:232
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:232](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L232)
+
+When / guard context:
+```java
+ontributed ✅' END AS display_status,    join_policy,status FROM gift_groups WHERE id=? AND event_id=?",groupId,e);
+  if(rows.isEmpty())throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+  Map<String,Object> r=new LinkedHashMap<>(rows.get(0));
+  if(commerce!=null)commerce.requireGroupFee(groupId);
+  if(!readiness.invitation(groupId).enabled())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Group invitation is not ready");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0196 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:235
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:235](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L235)
+
+When / guard context:
+```java
+oupId);
+  if(!readiness.invitation(groupId).enabled())throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Group invitation is not ready");
+  return r;
+ }
+ private void requireMemberAccess(UUID groupId){String mode=db.queryForObject("SELECT contribution_access_mode FROM gift_groups WHERE id=?",String.class,groupId);if("GUESTS_ONLY".equals(mode))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Member access disabled for this invitation");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0197 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:239
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:239](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L239)
+
+When / guard context:
+```java
+sException(HttpStatus.FORBIDDEN,"Member access disabled for this invitation");}
+ @PostMapping("/join/{groupId}") @Transactional
+ public Map<String,String> join(@PathVariable UUID token,@PathVariable UUID groupId,@RequestBody JoinRequest request){
+  Map<String,Object> group=publicGroup(token,groupId);requireMemberAccess(groupId);
+  if(request==null)
+```
+Failure / enforcement:
+```java
+throw bad("Member details required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0198 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:241
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:241](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L241)
+
+When / guard context:
+```java
+,@RequestBody JoinRequest request){
+  Map<String,Object> group=publicGroup(token,groupId);requireMemberAccess(groupId);
+  if(request==null)throw bad("Member details required");
+  String name=memberName(request.displayName()),phone=mobile(request.mobile()),password=memberPassword(request.password());
+  if(!password.equals(request.confirmPassword()))
+```
+Failure / enforcement:
+```java
+throw bad("Password confirmation does not match");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0199 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:243
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:243](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L243)
+
+When / guard context:
+```java
+memberPassword(request.password());
+  if(!password.equals(request.confirmPassword()))throw bad("Password confirmation does not match");
+  String pin=registrationPin(event(token),request.pin(),request.confirmPin());if(pin!=null)ensureUniqueMemberPin(groupId,name.toLowerCase(Locale.ROOT),pin,null);
+  if("INVITE_ONLY".equals(group.get("join_policy")))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Invitation-only membership requires an individual invitation credential");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0200 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:246
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:246](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L246)
+
+When / guard context:
+```java
+BIDDEN,"Invitation-only membership requires an individual invitation credential");
+  UUID memberId=UUID.randomUUID();
+  String signupEmail=request.email()==null||request.email().isBlank()?null:request.email().strip().toLowerCase(Locale.ROOT);
+  if(signupEmail!=null&&(signupEmail.length()>254||!signupEmail.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")))
+```
+Failure / enforcement:
+```java
+throw bad("Enter a valid email address");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0201 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:248
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:248](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L248)
+
+When / guard context:
+```java
+ail()==null||request.email().isBlank()?null:request.email().strip().toLowerCase(Locale.ROOT);
+  if(signupEmail!=null&&(signupEmail.length()>254||!signupEmail.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")))throw bad("Enter a valid email address");
+  boolean emailRequired=readiness.memberEmailRequired(event(token));
+  if(emailRequired&&signupEmail==null)
+```
+Failure / enforcement:
+```java
+throw bad("Verify your email before joining this group");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0202 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:251
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:251](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L251)
+
+When / guard context:
+```java
+l address");
+  boolean emailRequired=readiness.memberEmailRequired(event(token));
+  if(emailRequired&&signupEmail==null)throw bad("Verify your email before joining this group");
+  boolean emailVerified=false;
+  if(readiness.emailEnabled()&&request.emailVerificationToken()!=null&&!request.emailVerificationToken().isBlank()){
+   if(signupEmail==null)
+```
+Failure / enforcement:
+```java
+throw bad("Email is required to use a verification");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0203 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:254
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:254](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L254)
+
+When / guard context:
+```java
+=false;
+  if(readiness.emailEnabled()&&request.emailVerificationToken()!=null&&!request.emailVerificationToken().isBlank()){
+   if(signupEmail==null)throw bad("Email is required to use a verification");
+   emailVerified=signupEmails.consume(request.emailVerificationToken(),"GROUP_MEMBER",groupId,signupEmail);
+  }
+  if(emailRequired&&!emailVerified)
+```
+Failure / enforcement:
+```java
+throw bad("Verify your email before joining this group");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0204 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:257
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:257](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L257)
+
+When / guard context:
+```java
+ers(id,group_id,display_name,username,password_hash,mobile,status,pin_hash) VALUES(?,?,?,?,?,?,?,?)",memberId,groupId,name,name.toLowerCase(Locale.ROOT),passwords.encode(password),phone,"AUTO_JOIN".equals(group.get("join_policy"))?"APPROVED":"PENDING",pin==null?null:passwords.encode(pin));
+  }catch(org.springframework.dao.DuplicateKeyException ex){
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Display name already in use");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0205 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:265
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:265](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L265)
+
+When / guard context:
+```java
+group. Sign in to continue.":"Your request has been sent to the group admin");
+ }
+ @PostMapping("/member-login/{groupId}")
+ public Map<String,String> memberLogin(@PathVariable UUID token,@PathVariable UUID groupId,@RequestBody MemberLogin request,HttpServletRequest req){
+  publicGroup(token,groupId);requireMemberAccess(groupId);
+  if(request==null)
+```
+Failure / enforcement:
+```java
+throw bad("Credentials required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0206 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:268
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:268](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L268)
+
+When / guard context:
+```java
+request,HttpServletRequest req){
+  publicGroup(token,groupId);requireMemberAccess(groupId);
+  if(request==null)throw bad("Credentials required");
+  if(request.pin()!=null&&!request.pin().isBlank())requirePinAllowed(event(token));
+  String loginKey="member|"+groupId+"|"+req.getRemoteAddr();
+  if(!LOGIN_LIMITER.allowed(loginKey,req.getRemoteAddr()))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0207 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:270
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:270](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L270)
+
+When / guard context:
+```java
+.pin().isBlank())requirePinAllowed(event(token));
+  String loginKey="member|"+groupId+"|"+req.getRemoteAddr();
+  if(!LOGIN_LIMITER.allowed(loginKey,req.getRemoteAddr()))throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS);
+  boolean pinLogin=request.pin()!=null&&!request.pin().isBlank();
+  if(pinLogin&&!request.pin().matches("[0-9]{6}"))
+```
+Failure / enforcement:
+```java
+throw bad("PIN must be six digits");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0208 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:273
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:273](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L273)
+
+When / guard context:
+```java
+db.queryForList("SELECT id,password_hash,pin_hash,status FROM gift_group_members WHERE group_id=? AND username=?",groupId,name.toLowerCase(Locale.ROOT));
+  if(rows.isEmpty()||!validLogin(request.password(),request.pin(),(String)rows.get(0).get("password_hash"),(String)rows.get(0).get("pin_hash"))){LOGIN_LIMITER.failed(loginKey,req.getRemoteAddr());
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"Invalid member credentials");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0209 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:275
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:275](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L275)
+
+When / guard context:
+```java
+mpty()||!validLogin(request.password(),request.pin(),(String)rows.get(0).get("password_hash"),(String)rows.get(0).get("pin_hash"))){LOGIN_LIMITER.failed(loginKey,req.getRemoteAddr());throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"Invalid member credentials");}
+  Map<String,Object> m=rows.get(0);
+  if(!"APPROVED".equals(m.get("status")))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Membership not approved");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0210 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:281
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:281](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L281)
+
+When / guard context:
+```java
+.current("GROUP_MEMBER",(UUID)m.get("id")));
+  return Map.of("status","APPROVED","pinSetupRequired",m.get("pin_hash")==null?"true":"false");
+ }
+ UUID member(UUID groupId,HttpServletRequest req){
+  HttpSession session=req.getSession(false);Object id=session==null?null:session.getAttribute(MEMBER_SESSION+groupId);
+  if(!(id instanceof UUID memberId))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0211 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:284
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:284](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L284)
+
+When / guard context:
+```java
+getAttribute(MEMBER_SESSION+groupId);
+  if(!(id instanceof UUID memberId))throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+  Object epoch=session.getAttribute("gift.group.member.epoch."+groupId);
+  if(!(epoch instanceof Long v)||v.longValue()!=versions.current("GROUP_MEMBER",memberId)){
+   session.removeAttribute(MEMBER_SESSION+groupId);
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"Member session expired");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0212 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:287
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:287](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L287)
+
+When / guard context:
+```java
+ns.current("GROUP_MEMBER",memberId)){
+   session.removeAttribute(MEMBER_SESSION+groupId);throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"Member session expired");
+  }
+  Integer n=db.queryForObject("SELECT count(*) FROM gift_group_members WHERE id=? AND group_id=? AND status='APPROVED'",Integer.class,memberId,groupId);
+  if(n==null||n!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0213 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:292
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:292](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L292)
+
+When / guard context:
+```java
+void requireMemberContact(UUID groupId,UUID memberId){
+  UUID eventId=db.queryForObject("SELECT event_id FROM gift_groups WHERE id=?",UUID.class,groupId);
+  if(readiness.mobileEnabled()&&!Boolean.TRUE.equals(db.queryForObject("SELECT mobile_verified_at IS NOT NULL FROM gift_group_members WHERE id=? AND group_id=?",Boolean.class,memberId,groupId)))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Verify your mobile in Account before contributing");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0214 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:293
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:293](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L293)
+
+When / guard context:
+```java
+?",Boolean.class,memberId,groupId)))throw new ResponseStatusException(HttpStatus.CONFLICT,"Verify your mobile in Account before contributing");
+  if(readiness.memberEmailRequired(eventId)&&!Boolean.TRUE.equals(db.queryForObject("SELECT email_verified_at IS NOT NULL FROM gift_group_members WHERE id=? AND group_id=?",Boolean.class,memberId,groupId)))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Verify your email in Account before contributing");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0215 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:322
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:322](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L322)
+
+When / guard context:
+```java
+);
+ }
+ @PostMapping("/members/{groupId}/review") @Transactional
+ public Map<String,String> review(@PathVariable UUID token,@PathVariable UUID groupId,@RequestBody Review review,HttpServletRequest req){
+  adminGroup(token,groupId,req);
+  if(review==null||review.memberId()==null||!("APPROVE".equals(review.action())||"REJECT".equals(review.action())))
+```
+Failure / enforcement:
+```java
+throw bad("Invalid review");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0216 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:325
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:325](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L325)
+
+When / guard context:
+```java
+==null||!("APPROVE".equals(review.action())||"REJECT".equals(review.action())))throw bad("Invalid review");
+  String status="APPROVE".equals(review.action())?"APPROVED":"REJECTED";
+  int n=db.update("UPDATE gift_group_members SET status=?,reviewed_at=now() WHERE id=? AND group_id=? AND status='PENDING'",status,review.memberId(),groupId);
+  if(n!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Request already reviewed or missing");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0217 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:333
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:333](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L333)
+
+When / guard context:
+```java
+eturn Map.of("status",status);
+ }
+ @PostMapping("/publish/{groupId}") @Transactional
+ public Map<String,String> publish(@PathVariable UUID token,@PathVariable UUID groupId,HttpServletRequest req){
+  adminGroup(token,groupId,req);
+  if(commerce!=null)commerce.requireGroupFee(groupId);
+  var ready=readiness.invitation(groupId);
+  if(!ready.enabled())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,String.join("; ",ready.reasons()));
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0218 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:335
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:335](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L335)
+
+When / guard context:
+```java
+)commerce.requireGroupFee(groupId);
+  var ready=readiness.invitation(groupId);
+  if(!ready.enabled())throw new ResponseStatusException(HttpStatus.CONFLICT,String.join("; ",ready.reasons()));
+  int n=db.update("UPDATE gift_groups SET status='PUBLISHED',collection_published_at=now() WHERE id=? AND collection_published_at IS NULL",groupId);
+  if(n!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Group already published");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0219 — backend/src/main/java/com/giftplatform/group/GroupCoordinationPaymentController.java:19
+
+[backend/src/main/java/com/giftplatform/group/GroupCoordinationPaymentController.java:19](../../src/main/java/com/giftplatform/group/GroupCoordinationPaymentController.java#L19)
+
+When / guard context:
+```java
+pping("/checkout") public CommercialPurchaseService.Checkout checkout(@PathVariable UUID token,@PathVariable UUID groupId,@RequestBody CommercialPurchaseService.Request input,HttpServletRequest request){
+        var buyer=buyer(token,groupId,request);
+        if(input==null||!"GROUP_GIFT".equals(input.stream())||!groupId.equals(input.resourceId()))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0220 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:26
+
+[backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:26](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L26)
+
+When / guard context:
+```java
+ntext actor;
+ public GroupCreatorPaymentController(JdbcTemplate db,GroupContributionController groups,ObjectProvider<PaymentDataProtector> protectors,ActorContext actor){this.db=db;this.groups=groups;this.protectors=protectors;this.actor=actor;}
+ private PaymentDataProtector protector(){PaymentDataProtector p=protectors.getIfAvailable();if(p==null)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Secure payment profiles are not configured");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0221 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:36
+
+[backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:36](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L36)
+
+When / guard context:
+```java
+public record EnabledInput(boolean enabled){}
+ private Map<String,Object> destination(UUID token,UUID groupId,UUID id,HttpServletRequest req){
+  creator(token,groupId,req);
+  List<Map<String,Object>> rows=db.queryForList("SELECT * FROM gift_group_payment_destinations WHERE id=? AND group_id=? AND status<>'REVOKED'",id,groupId);
+  if(rows.isEmpty())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Payment account not found");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0222 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:45
+
+[backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:45](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L45)
+
+When / guard context:
+```java
+/api/public/groups/{token}/payments/{groupId}/destinations/{id}/enabled") @Transactional
+ public Map<String,String> setEnabled(@PathVariable UUID token,@PathVariable UUID groupId,@PathVariable UUID id,@RequestBody EnabledInput input,HttpServletRequest req){
+  UUID admin=creator(token,groupId,req);destination(token,groupId,id,req);
+  if(input==null)
+```
+Failure / enforcement:
+```java
+throw bad("Choose whether to enable the account");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0223 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:53
+
+[backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:53](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L53)
+
+When / guard context:
+```java
+LTIPART_FORM_DATA_VALUE) @Transactional
+ public Map<String,String> uploadQr(@PathVariable UUID token,@PathVariable UUID groupId,@PathVariable UUID id,@RequestParam("file") MultipartFile file,HttpServletRequest req){
+  UUID admin=creator(token,groupId,req);Map<String,Object> row=destination(token,groupId,id,req);
+  if(!"UPI".equals(row.get("kind")))
+```
+Failure / enforcement:
+```java
+throw bad("QR images are only available for UPI accounts");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0224 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:54
+
+[backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:54](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L54)
+
+When / guard context:
+```java
+UUID id,@RequestParam("file") MultipartFile file,HttpServletRequest req){
+  UUID admin=creator(token,groupId,req);Map<String,Object> row=destination(token,groupId,id,req);
+  if(!"UPI".equals(row.get("kind")))throw bad("QR images are only available for UPI accounts");
+  if(file==null||file.isEmpty()||file.getSize()>UpiQrImageCodec.MAX_UPLOAD_BYTES)
+```
+Failure / enforcement:
+```java
+throw bad("Please upload a PNG or JPG QR smaller than 2 MB");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0225 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:55
+
+[backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:55](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L55)
+
+When / guard context:
+```java
+row=destination(token,groupId,id,req);
+  if(!"UPI".equals(row.get("kind")))throw bad("QR images are only available for UPI accounts");
+  if(file==null||file.isEmpty()||file.getSize()>UpiQrImageCodec.MAX_UPLOAD_BYTES)throw bad("Please upload a PNG or JPG QR smaller than 2 MB");
+  if(!Set.of("image/png","image/jpeg").contains(file.getContentType()))
+```
+Failure / enforcement:
+```java
+throw bad("Please upload a PNG or JPG QR image");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0226 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:62
+
+[backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:62](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L62)
+
+When / guard context:
+```java
+=file.getBytes();
+   String upi=protector().decrypt(groupId,id,"upi_id",(String)row.get("upi_ciphertext"));
+   UpiQrImageCodec.validateUpload(bytes,upi);
+   // Store a normalized PNG, never an untrusted original upload.
+   byte[] png=javax.imageio.ImageIO.read(new java.io.ByteArrayInputStream(bytes))==null?null:normalizePng(bytes);
+   if(png==null)
+```
+Failure / enforcement:
+```java
+throw bad("We couldn't read this QR image");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0227 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:64
+
+[backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:64](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L64)
+
+When / guard context:
+```java
+upload.
+   byte[] png=javax.imageio.ImageIO.read(new java.io.ByteArrayInputStream(bytes))==null?null:normalizePng(bytes);
+   if(png==null)throw bad("We couldn't read this QR image");
+   db.update("UPDATE gift_group_payment_destinations SET qr_image=?,qr_source='UPLOADED' WHERE id=? AND group_id=?",png,id,groupId);
+  }catch(java.io.IOException ex){
+```
+Failure / enforcement:
+```java
+throw bad("We couldn't read this QR image");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0228 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:65
+
+[backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:65](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L65)
+
+When / guard context:
+```java
+t read this QR image");
+   db.update("UPDATE gift_group_payment_destinations SET qr_image=?,qr_source='UPLOADED' WHERE id=? AND group_id=?",png,id,groupId);
+  }catch(java.io.IOException ex){throw bad("We couldn't read this QR image");}
+  catch(IllegalArgumentException ex){String msg=ex.getMessage()==null?"":ex.getMessage().toLowerCase(Locale.ROOT);
+```
+Failure / enforcement:
+```java
+throw bad(msg.contains("match")||msg.contains("payee")?"This QR belongs to a different UPI ID. Please upload the correct QR.":"We couldn't read a matching UPI QR. Try a clearer PNG or JPG image.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0229 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:72
+
+[backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:72](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L72)
+
+When / guard context:
+```java
+Map.of("message","UPI QR saved");
+ }
+ private byte[] normalizePng(byte[] bytes)throws java.io.IOException{
+  java.awt.image.BufferedImage image=javax.imageio.ImageIO.read(new java.io.ByteArrayInputStream(bytes));
+  java.io.ByteArrayOutputStream out=new java.io.ByteArrayOutputStream();
+  if(image==null||!javax.imageio.ImageIO.write(image,"png",out))
+```
+Failure / enforcement:
+```java
+throw new java.io.IOException("Cannot normalize QR");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0230 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:78
+
+[backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:78](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L78)
+
+When / guard context:
+```java
+oups/{token}/payments/{groupId}/destinations/{id}/qr/generate") @Transactional
+ public Map<String,String> generateQr(@PathVariable UUID token,@PathVariable UUID groupId,@PathVariable UUID id,HttpServletRequest req){
+  UUID admin=creator(token,groupId,req);Map<String,Object> row=destination(token,groupId,id,req);
+  if(!"UPI".equals(row.get("kind")))
+```
+Failure / enforcement:
+```java
+throw bad("QR images are only available for UPI accounts");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0231 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:88
+
+[backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:88](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L88)
+
+When / guard context:
+```java
+c/groups/{token}/payments/{groupId}/destinations/{id}/qr",produces=MediaType.IMAGE_PNG_VALUE)
+ public ResponseEntity<byte[]> qr(@PathVariable UUID token,@PathVariable UUID groupId,@PathVariable UUID id,HttpServletRequest req){
+  Map<String,Object> row=destination(token,groupId,id,req);
+  if(!"UPI".equals(row.get("kind"))||row.get("qr_image")==null)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"No QR saved");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0232 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:92
+
+[backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:92](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L92)
+
+When / guard context:
+```java
+PI".equals(row.get("kind"))||row.get("qr_image")==null)throw new ResponseStatusException(HttpStatus.NOT_FOUND,"No QR saved");
+  return ResponseEntity.ok().header("Cache-Control","private, no-store").contentType(MediaType.IMAGE_PNG).body((byte[])row.get("qr_image"));
+ }
+
+ private String label(String s){if(s==null||s.isBlank()||s.strip().length()>80)
+```
+Failure / enforcement:
+```java
+throw bad("Enter an account label (up to 80 characters)");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0233 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:106
+
+[backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:106](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L106)
+
+When / guard context:
+```java
+ailable",false);
+ }
+ @PostMapping("/api/public/groups/{token}/payments/{groupId}/destinations") @Transactional
+ public Map<String,Object> add(@PathVariable UUID token,@PathVariable UUID groupId,@RequestBody DestinationInput input,HttpServletRequest request){UUID admin=creator(token,groupId,request);PaymentDataProtector p=protector();if(input==null)
+```
+Failure / enforcement:
+```java
+throw bad("Account details required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0234 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:109
+
+[backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:109](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L109)
+
+When / guard context:
+```java
+in=creator(token,groupId,request);PaymentDataProtector p=protector();if(input==null)throw bad("Account details required");UUID id=UUID.randomUUID();String kind=input.kind(),accountLabel=label(input.label());
+  try{
+   if("UPI".equals(kind)){
+    String upi;try{upi=PaymentDataProtector.normalizeUpi(input.upiId());}catch(IllegalArgumentException ex){
+```
+Failure / enforcement:
+```java
+throw bad("Please enter a valid UPI ID, such as name@bank");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0235 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:112
+
+[backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:112](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L112)
+
+When / guard context:
+```java
+stinations(id,group_id,kind,label,upi_ciphertext,upi_fingerprint) VALUES(?,?,'UPI',?,?,?)",id,groupId,accountLabel,p.encrypt(groupId,id,"upi_id",upi),p.fingerprint("UPI",upi));
+   }else if("BANK".equals(kind)){
+    String account,ifsc;try{account=PaymentDataProtector.normalizeAccountNumber(input.accountNumber());}catch(IllegalArgumentException ex){
+```
+Failure / enforcement:
+```java
+throw bad("Please enter a valid bank account number");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0236 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:112
+
+[backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:112](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L112)
+
+When / guard context:
+```java
+,p.fingerprint("UPI",upi));
+   }else if("BANK".equals(kind)){
+    String account,ifsc;try{account=PaymentDataProtector.normalizeAccountNumber(input.accountNumber());}catch(IllegalArgumentException ex){throw bad("Please enter a valid bank account number");}try{ifsc=PaymentDataProtector.normalizeIfsc(input.ifsc());}catch(IllegalArgumentException ex){
+```
+Failure / enforcement:
+```java
+throw bad("Please check the 11-character IFSC code");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0237 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:113
+
+[backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:113](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L113)
+
+When / guard context:
+```java
+valid bank account number");}try{ifsc=PaymentDataProtector.normalizeIfsc(input.ifsc());}catch(IllegalArgumentException ex){throw bad("Please check the 11-character IFSC code");}String holder=input.accountHolder()==null?"":input.accountHolder().strip();
+    if(holder.length()<2||holder.length()>120||holder.chars().anyMatch(Character::isISOControl))
+```
+Failure / enforcement:
+```java
+throw bad("Enter the account holder name");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0238 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:115
+
+[backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:115](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L115)
+
+When / guard context:
+```java
+ft_group_payment_destinations(id,group_id,kind,label,account_ciphertext,account_fingerprint,ifsc_ciphertext,holder_ciphertext) VALUES(?,?,'BANK',?,?,?,?,?)",id,groupId,accountLabel,p.encrypt(groupId,id,"account_number",account),p.fingerprint("BANK",account+":"+ifsc),p.encrypt(groupId,id,"ifsc",ifsc),p.encrypt(groupId,id,"holder",holder));
+   }else
+```
+Failure / enforcement:
+```java
+throw bad("Choose UPI or bank transfer");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0239 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:116
+
+[backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:116](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L116)
+
+When / guard context:
+```java
+ertext,holder_ciphertext) VALUES(?,?,'BANK',?,?,?,?,?)",id,groupId,accountLabel,p.encrypt(groupId,id,"account_number",account),p.fingerprint("BANK",account+":"+ifsc),p.encrypt(groupId,id,"ifsc",ifsc),p.encrypt(groupId,id,"holder",holder));
+   }else throw bad("Choose UPI or bank transfer");
+  }catch(org.springframework.dao.DuplicateKeyException ex){
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"This account is already registered for this group");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0240 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:122
+
+[backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:122](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L122)
+
+When / guard context:
+```java
+ations WHERE id=?",id));
+ }
+ @PostMapping("/api/public/groups/{token}/payments/{groupId}/preferred") @Transactional
+ public Map<String,String> select(@PathVariable UUID token,@PathVariable UUID groupId,@RequestBody SelectInput input,HttpServletRequest request){UUID admin=creator(token,groupId,request);
+  if(input==null||input.destinationId()==null)
+```
+Failure / enforcement:
+```java
+throw bad("Select an account");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0241 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:125
+
+[backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:125](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L125)
+
+When / guard context:
+```java
+t==null||input.destinationId()==null)throw bad("Select an account");
+  db.queryForObject("SELECT id FROM gift_groups WHERE id=? FOR UPDATE",UUID.class,groupId);
+  Boolean allowed=db.query("SELECT switching_enabled FROM gift_group_payment_permissions WHERE group_id=?",rs->rs.next()?rs.getBoolean(1):false,groupId);
+  if(!Boolean.TRUE.equals(allowed))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Account switching requires platform administrator permission");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0242 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:127
+
+[backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:127](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L127)
+
+When / guard context:
+```java
+quals(allowed))throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Account switching requires platform administrator permission");
+  Integer n=db.queryForObject("SELECT count(*) FROM gift_group_payment_destinations WHERE id=? AND group_id=? AND status='VERIFIED' AND enabled=TRUE",Integer.class,input.destinationId(),groupId);
+  if(n==null||n!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Only independently verified accounts may be selected for payment");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0243 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:134
+
+[backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:134](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L134)
+
+When / guard context:
+```java
+,?,'PREFERRED_CHANGED',?)",UUID.randomUUID(),groupId,admin,input.destinationId());
+  return Map.of("message","Preferred destination updated");
+ }
+ @PostMapping("/api/admin/group-payments/{groupId}/switching") @Transactional
+ public Map<String,Object> adminSwitch(@PathVariable UUID groupId,@RequestBody SwitchInput input){if(!actor.isPlatformAdmin())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0244 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:135
+
+[backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:135](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L135)
+
+When / guard context:
+```java
+ctional
+ public Map<String,Object> adminSwitch(@PathVariable UUID groupId,@RequestBody SwitchInput input){if(!actor.isPlatformAdmin())throw new ResponseStatusException(HttpStatus.FORBIDDEN);UUID id=actor.requireAuthenticatedUserId();
+  Integer n=db.queryForObject("SELECT count(*) FROM gift_groups WHERE id=?",Integer.class,groupId);if(n==null||n!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0245 — backend/src/main/java/com/giftplatform/group/GroupGiftCollectionController.java:32
+
+[backend/src/main/java/com/giftplatform/group/GroupGiftCollectionController.java:32](../../src/main/java/com/giftplatform/group/GroupGiftCollectionController.java#L32)
+
+When / guard context:
+```java
+roups.requireGroupCreator(token,groupId,req));}
+ @GetMapping("/api/public/groups/{token}/activity/{groupId}")
+ public List<Map<String,Object>> activity(@PathVariable UUID token,@PathVariable UUID groupId,@RequestParam(defaultValue="0") int offset,HttpServletRequest req){
+  groups.requireGroupCreator(token,groupId,req);
+  if(offset<0||offset>100000)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0246 — backend/src/main/java/com/giftplatform/group/GroupGiftCollectionController.java:35
+
+[backend/src/main/java/com/giftplatform/group/GroupGiftCollectionController.java:35](../../src/main/java/com/giftplatform/group/GroupGiftCollectionController.java#L35)
+
+When / guard context:
+```java
+ion,details::text AS details,created_at FROM gift_group_activity WHERE group_id=? ORDER BY created_at DESC,id DESC LIMIT 100 OFFSET ?",groupId,offset);
+ }
+ private void own(UUID eventId){if(!Integer.valueOf(1).equals(db.queryForObject("SELECT count(*) FROM events WHERE id=? AND owner_id=?",Integer.class,eventId,actor.requireAuthenticatedUserId())))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0247 — backend/src/main/java/com/giftplatform/group/GroupGiftCollectionController.java:53
+
+[backend/src/main/java/com/giftplatform/group/GroupGiftCollectionController.java:53](../../src/main/java/com/giftplatform/group/GroupGiftCollectionController.java#L53)
+
+When / guard context:
+```java
+DESC
+  """,eventId);}
+ @GetMapping("/api/v1/events/{eventId}/contributions/groups/{groupId}")
+ public List<Map<String,Object>> details(@PathVariable UUID eventId,@PathVariable UUID groupId){
+  own(eventId);
+  if(!Integer.valueOf(1).equals(db.queryForObject("SELECT count(*) FROM gift_groups WHERE id=? AND event_id=?",Integer.class,groupId,eventId)))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0248 — backend/src/main/java/com/giftplatform/group/GroupGiftCollectionController.java:59
+
+[backend/src/main/java/com/giftplatform/group/GroupGiftCollectionController.java:59](../../src/main/java/com/giftplatform/group/GroupGiftCollectionController.java#L59)
+
+When / guard context:
+```java
+roup_id=r.group_id WHERE r.group_id=? ORDER BY r.created_at DESC",groupId);
+ }
+ @GetMapping("/api/v1/events/{eventId}/contributions/groups/{groupId}/activity")
+ public List<Map<String,Object>> hostActivity(@PathVariable UUID eventId,@PathVariable UUID groupId,@RequestParam(defaultValue="0") int offset){
+  own(eventId);
+  if(offset<0||offset>100000)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0249 — backend/src/main/java/com/giftplatform/group/GroupGiftCollectionController.java:60
+
+[backend/src/main/java/com/giftplatform/group/GroupGiftCollectionController.java:60](../../src/main/java/com/giftplatform/group/GroupGiftCollectionController.java#L60)
+
+When / guard context:
+```java
+ity(@PathVariable UUID eventId,@PathVariable UUID groupId,@RequestParam(defaultValue="0") int offset){
+  own(eventId);
+  if(offset<0||offset>100000)throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+  if(!Integer.valueOf(1).equals(db.queryForObject("SELECT count(*) FROM gift_groups WHERE id=? AND event_id=?",Integer.class,groupId,eventId)))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0250 — backend/src/main/java/com/giftplatform/group/GroupGiftCollectionController.java:66
+
+[backend/src/main/java/com/giftplatform/group/GroupGiftCollectionController.java:66](../../src/main/java/com/giftplatform/group/GroupGiftCollectionController.java#L66)
+
+When / guard context:
+```java
+t IS NOT NULL ORDER BY n.created_at DESC",eventId);}
+ @PostMapping("/api/v1/events/{eventId}/group-notifications/{id}/read")
+ public Map<String,String> read(@PathVariable UUID eventId,@PathVariable UUID id){own(eventId);if(db.update("UPDATE group_collection_notifications SET read_at=COALESCE(read_at,now()) WHERE id=? AND event_id=?",id,eventId)!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0251 — backend/src/main/java/com/giftplatform/group/GroupGiftCompletionController.java:57
+
+[backend/src/main/java/com/giftplatform/group/GroupGiftCompletionController.java:57](../../src/main/java/com/giftplatform/group/GroupGiftCompletionController.java#L57)
+
+When / guard context:
+```java
+UPDATE",groupId);
+    }
+    private void funded(UUID groupId,Map<String,Object> gift){
+        Number target=(Number)gift.get("target_paise");
+        Long collected=db.queryForObject("SELECT collected_paise FROM group_gift_progress WHERE id=?",Long.class,groupId);
+        if(target==null||collected==null||collected<target.longValue())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"The target must be fully funded by verified or creator acknowledged receipts");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0252 — backend/src/main/java/com/giftplatform/group/GroupGiftCompletionController.java:64
+
+[backend/src/main/java/com/giftplatform/group/GroupGiftCompletionController.java:64](../../src/main/java/com/giftplatform/group/GroupGiftCompletionController.java#L64)
+
+When / guard context:
+```java
+}
+    @PostMapping("/gift-publish/{groupId}")
+    @Transactional
+    public Map<String,String> publish(@PathVariable UUID token,@PathVariable UUID groupId,HttpServletRequest request){
+        var gift=locked(token,groupId,request);funded(groupId,gift);
+        if(gift.get("gift_name")==null||gift.get("gift_name").toString().isBlank())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Gift name required before publishing");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0253 — backend/src/main/java/com/giftplatform/group/GroupGiftCompletionController.java:65
+
+[backend/src/main/java/com/giftplatform/group/GroupGiftCompletionController.java:65](../../src/main/java/com/giftplatform/group/GroupGiftCompletionController.java#L65)
+
+When / guard context:
+```java
+UUID groupId,HttpServletRequest request){
+        var gift=locked(token,groupId,request);funded(groupId,gift);
+        if(gift.get("gift_name")==null||gift.get("gift_name").toString().isBlank())
+            throw new ResponseStatusException(HttpStatus.CONFLICT,"Gift name required before publishing");
+        if(gift.get("gift_published_at")!=null)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Gift already published");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0254 — backend/src/main/java/com/giftplatform/group/GroupGiftCompletionController.java:75
+
+[backend/src/main/java/com/giftplatform/group/GroupGiftCompletionController.java:75](../../src/main/java/com/giftplatform/group/GroupGiftCompletionController.java#L75)
+
+When / guard context:
+```java
+r_received_at=COALESCE(creator_received_at,now()) WHERE id=? AND group_id=? AND state='REPORTED_UNVERIFIED'",reportId,groupId);
+        changed+=db.update("UPDATE gift_group_payment_reports SET creator_received_at=COALESCE(creator_received_at,now()) WHERE id=? AND group_id=? AND state='REPORTED_UNVERIFIED'",reportId,groupId);
+        if(changed!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Contribution report not found");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0255 — backend/src/main/java/com/giftplatform/group/GroupGiftCompletionController.java:90
+
+[backend/src/main/java/com/giftplatform/group/GroupGiftCompletionController.java:90](../../src/main/java/com/giftplatform/group/GroupGiftCompletionController.java#L90)
+
+When / guard context:
+```java
+case GIFT_PURCHASED, AMOUNT_TRANSFERRED_TO_HOST -> "PLANNED".equals(previous);
+            case TRACKING_SHARED -> "GIFT_PURCHASED".equals(previous)||"TRACKING_SHARED".equals(previous);
+            case COMPLETED -> Set.of("GIFT_PURCHASED","TRACKING_SHARED","AMOUNT_TRANSFERRED_TO_HOST").contains(previous);
+        };
+        if(!allowed)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Invalid fulfilment transition");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0256 — backend/src/main/java/com/giftplatform/group/GroupGiftCompletionController.java:92
+
+[backend/src/main/java/com/giftplatform/group/GroupGiftCompletionController.java:92](../../src/main/java/com/giftplatform/group/GroupGiftCompletionController.java#L92)
+
+When / guard context:
+```java
+ETED -> Set.of("GIFT_PURCHASED","TRACKING_SHARED","AMOUNT_TRANSFERRED_TO_HOST").contains(previous);
+        };
+        if(!allowed)throw new ResponseStatusException(HttpStatus.CONFLICT,"Invalid fulfilment transition");
+        if(input.status()==Status.TRACKING_SHARED&&(input.trackingDetails()==null||input.trackingDetails().isBlank()))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Tracking details required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0257 — backend/src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java:17
+
+[backend/src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java:17](../../src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java#L17)
+
+When / guard context:
+```java
+l JdbcTemplate db;
+ public GroupGiftLifecycleService(JdbcTemplate db){this.db=db;}
+ private Map<String,Object> group(UUID id,UUID creator){
+  var rows=db.queryForList("SELECT event_id,admin_id,selected_gift_id,reserved_gift_id,gift_published_at,independent_gift FROM gift_groups WHERE id=? AND admin_id=? FOR UPDATE",id,creator);
+  if(rows.size()!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Group not found");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0258 — backend/src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java:18
+
+[backend/src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java:18](../../src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java#L18)
+
+When / guard context:
+```java
+ID creator){
+  var rows=db.queryForList("SELECT event_id,admin_id,selected_gift_id,reserved_gift_id,gift_published_at,independent_gift FROM gift_groups WHERE id=? AND admin_id=? FOR UPDATE",id,creator);
+  if(rows.size()!=1)throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Group not found");
+  if(rows.getFirst().get("gift_published_at")!=null)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Published gift plans cannot be changed");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0259 — backend/src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java:23
+
+[backend/src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java:23](../../src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java#L23)
+
+When / guard context:
+```java
+new ResponseStatusException(HttpStatus.NOT_FOUND,"Group not found");
+  if(rows.getFirst().get("gift_published_at")!=null)throw new ResponseStatusException(HttpStatus.CONFLICT,"Published gift plans cannot be changed");
+  return rows.getFirst();
+ }
+ @Transactional
+ public Map<String,Object> select(UUID group,UUID creator,UUID gift){
+  if(gift==null)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Choose a wishlist gift");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0260 — backend/src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java:25
+
+[backend/src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java:25](../../src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java#L25)
+
+When / guard context:
+```java
+.CONFLICT,"Published gift plans cannot be changed");
+  return rows.getFirst();
+ }
+ @Transactional
+ public Map<String,Object> select(UUID group,UUID creator,UUID gift){
+  if(gift==null)throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Choose a wishlist gift");
+  var g=group(group,creator);
+  if(Boolean.TRUE.equals(g.get("independent_gift")))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"This group chooses its own gift outside the host wishlist");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0261 — backend/src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java:26
+
+[backend/src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java:26](../../src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java#L26)
+
+When / guard context:
+```java
+ResponseStatusException(HttpStatus.BAD_REQUEST,"Choose a wishlist gift");
+  var g=group(group,creator);
+  if(Boolean.TRUE.equals(g.get("independent_gift")))throw new ResponseStatusException(HttpStatus.CONFLICT,"This group chooses its own gift outside the host wishlist");
+  if(g.get("selected_gift_id")!=null&&!gift.equals(g.get("selected_gift_id")))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Release the current gift before choosing another");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0262 — backend/src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java:28
+
+[backend/src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java:28](../../src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java#L28)
+
+When / guard context:
+```java
+w ResponseStatusException(HttpStatus.CONFLICT,"Release the current gift before choosing another");
+  var gifts=db.queryForList("SELECT id,name,description,product_url,(target_amount*100)::bigint AS target_paise FROM gifts WHERE id=? AND event_id=? AND status='ACTIVE' AND visibility='PUBLIC' FOR UPDATE",gift,g.get("event_id"));
+  if(gifts.isEmpty())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"This gift is no longer available");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0263 — backend/src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java:29
+
+[backend/src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java:29](../../src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java#L29)
+
+When / guard context:
+```java
+nt_id=? AND status='ACTIVE' AND visibility='PUBLIC' FOR UPDATE",gift,g.get("event_id"));
+  if(gifts.isEmpty())throw new ResponseStatusException(HttpStatus.NOT_FOUND,"This gift is no longer available");
+  if(Boolean.TRUE.equals(db.queryForObject("SELECT EXISTS(SELECT 1 FROM gift_groups WHERE reserved_gift_id=? AND id<>?)",Boolean.class,gift,group)))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Another group is already planning a lovely surprise for this gift");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0264 — backend/src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java:42
+
+[backend/src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java:42](../../src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java#L42)
+
+When / guard context:
+```java
+D[]{rs.getObject(1,UUID.class),rs.getObject(2,UUID.class)},creator);
+  for(var row:pending){
+   // A gift may have been reserved by another verified group while email verification was pending.
+   try{select(row[0],creator,row[1]);}catch(ResponseStatusException ex){if(ex.getStatusCode()!=HttpStatus.CONFLICT&&ex.getStatusCode()!=HttpStatus.NOT_FOUND)
+```
+Failure / enforcement:
+```java
+throw ex;
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0265 — backend/src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java:48
+
+[backend/src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java:48](../../src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java#L48)
+
+When / guard context:
+```java
+ng.
+   try{select(row[0],creator,row[1]);}catch(ResponseStatusException ex){if(ex.getStatusCode()!=HttpStatus.CONFLICT&&ex.getStatusCode()!=HttpStatus.NOT_FOUND)throw ex;}
+  }
+ }
+ @Transactional
+ public Map<String,String> release(UUID id,UUID creator){
+  var g=group(id,creator);
+  if(g.get("selected_gift_id")==null&&g.get("reserved_gift_id")==null)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"This group has no wishlist gift to release");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0266 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:19
+
+[backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:19](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L19)
+
+When / guard context:
+```java
+TimeMillis();if(REPORT_ATTEMPTS.size()>10000)REPORT_ATTEMPTS.entrySet().removeIf(e->{synchronized(e.getValue()){return e.getValue().isEmpty()||now-e.getValue().peekLast()>600000;}});var q=REPORT_ATTEMPTS.computeIfAbsent(key,k->new java.util.ArrayDeque<>());synchronized(q){while(!q.isEmpty()&&now-q.peekFirst()>600000)q.removeFirst();if(q.size()>=10)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,"Too many payment reports. Try again later");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0267 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:27
+
+[backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:27](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L27)
+
+When / guard context:
+```java
+s;this.protectors=protectors;}
+ private static final Pattern REFERENCE=Pattern.compile("[A-Za-z0-9][A-Za-z0-9 /_.-]{5,119}");
+ private ResponseStatusException bad(String reason){return new ResponseStatusException(HttpStatus.BAD_REQUEST,reason);}
+ private PaymentDataProtector protector(){PaymentDataProtector p=protectors.getIfAvailable();if(p==null)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Secure payment configuration is unavailable");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0268 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:38
+
+[backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:38](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L38)
+
+When / guard context:
+```java
+ows=db.queryForList("SELECT * FROM gift_group_payment_destinations WHERE id=? AND group_id=? AND enabled=TRUE AND id IN (SELECT guest_upi_destination_id FROM gift_groups WHERE id=? UNION SELECT guest_bank_destination_id FROM gift_groups WHERE id=?) AND status IN ('REGISTERED','VERIFIED')",destinationId,groupId,groupId,groupId);
+  if(rows.isEmpty())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"This payment destination is no longer available");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0269 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:51
+
+[backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:51](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L51)
+
+When / guard context:
+```java
+sMode",accessMode(g));
+  out.put("methods",enabled?choices(groupId):List.of());return out;
+ }
+ @GetMapping("/destination/{id}")
+ public Map<String,Object> destination(@PathVariable UUID token,@PathVariable UUID groupId,@PathVariable UUID id){
+  Map<String,Object> g=group(token,groupId);if(!Boolean.TRUE.equals(g.get("manual_contributions_enabled")))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Contributions are not enabled");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0270 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:62
+
+[backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:62](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L62)
+
+When / guard context:
+```java
+receipt is not automatically verified");return out;
+ }
+ @GetMapping(value="/destination/{id}/qr",produces=MediaType.IMAGE_PNG_VALUE)
+ public ResponseEntity<byte[]> qr(@PathVariable UUID token,@PathVariable UUID groupId,@PathVariable UUID id){
+  Map<String,Object> g=group(token,groupId);if(!Boolean.TRUE.equals(g.get("manual_contributions_enabled")))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0271 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:63
+
+[backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:63](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L63)
+
+When / guard context:
+```java
+<byte[]> qr(@PathVariable UUID token,@PathVariable UUID groupId,@PathVariable UUID id){
+  Map<String,Object> g=group(token,groupId);if(!Boolean.TRUE.equals(g.get("manual_contributions_enabled")))throw new ResponseStatusException(HttpStatus.CONFLICT);
+  Map<String,Object> d=chosen(groupId,id);if(!"UPI".equals(d.get("kind"))||d.get("qr_image")==null)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0272 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:68
+
+[backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:68](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L68)
+
+When / guard context:
+```java
+d Report(UUID destinationId,String guestName,String contact,Long amountPaise,String transactionReference,UUID submissionKey){}
+ @GetMapping("/member-history")
+ public List<Map<String,Object>> memberHistory(@PathVariable UUID token,@PathVariable UUID groupId,HttpServletRequest request){Map<String,Object> g=group(token,groupId);if(!membersAllowed(g))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0273 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:70
+
+[backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:70](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L70)
+
+When / guard context:
+```java
+t_reports WHERE group_id=? AND member_id=? ORDER BY created_at DESC LIMIT 100",groupId,id);}
+ @PostMapping("/member-report") @Transactional
+ public Map<String,Object> memberReport(@PathVariable UUID token,@PathVariable UUID groupId,@RequestBody Report input,HttpServletRequest request){Map<String,Object> g=group(token,groupId);if(!membersAllowed(g))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0274 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:70
+
+[backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:70](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L70)
+
+When / guard context:
+```java
+ut,HttpServletRequest request){Map<String,Object> g=group(token,groupId);if(!membersAllowed(g))throw new ResponseStatusException(HttpStatus.FORBIDDEN);UUID id=approvedMember(groupId,request);groups.requireMemberContact(groupId,id);String name=db.queryForObject("SELECT display_name FROM gift_group_members WHERE id=?",String.class,id);if(input==null)
+```
+Failure / enforcement:
+```java
+throw bad("Complete the contribution details");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0275 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:73
+
+[backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:73](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L73)
+
+When / guard context:
+```java
+ionId(),name,null,input.amountPaise(),input.transactionReference(),input.submissionKey()),request,id);}
+ @PostMapping("/report") @Transactional
+ public Map<String,Object> report(@PathVariable UUID token,@PathVariable UUID groupId,@RequestBody Report input,HttpServletRequest request){
+  Map<String,Object> g=group(token,groupId);if(!guestsAllowed(g))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Guest contributions are disabled");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0276 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:83
+
+[backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:83](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L83)
+
+When / guard context:
+```java
+or_admin_id=? ORDER BY created_at DESC LIMIT 100",groupId,creator);
+ }
+ @PostMapping("/creator-report") @Transactional
+ public Map<String,Object> creatorReport(@PathVariable UUID token,@PathVariable UUID groupId,@RequestBody Report input,HttpServletRequest request){
+  UUID creator=groups.requireGroupCreator(token,groupId,request);
+  if(input==null)
+```
+Failure / enforcement:
+```java
+throw bad("Complete the contribution details");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0277 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:92
+
+[backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:92](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L92)
+
+When / guard context:
+```java
+recordReport(token,groupId,input,request,memberId,null);
+ }
+ private Map<String,Object> recordReport(UUID token,UUID groupId,Report input,HttpServletRequest request,UUID memberId,UUID creatorId){
+  limit(groupId+"|"+request.getRemoteAddr());
+  Map<String,Object> g=group(token,groupId);if(!Boolean.TRUE.equals(g.get("manual_contributions_enabled")))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Contributions are not enabled");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0278 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:93
+
+[backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:93](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L93)
+
+When / guard context:
+```java
+orId){
+  limit(groupId+"|"+request.getRemoteAddr());
+  Map<String,Object> g=group(token,groupId);if(!Boolean.TRUE.equals(g.get("manual_contributions_enabled")))throw new ResponseStatusException(HttpStatus.CONFLICT,"Contributions are not enabled");
+  if(input==null||input.destinationId()==null||input.submissionKey()==null||input.amountPaise()==null)
+```
+Failure / enforcement:
+```java
+throw bad("Complete the contribution details");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0279 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:95
+
+[backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:95](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L95)
+
+When / guard context:
+```java
+"Complete the contribution details");
+  String name=input.guestName()==null?"":input.guestName().strip();String contact=input.contact()==null?"":input.contact().strip();String reference=input.transactionReference()==null?"":input.transactionReference().strip();
+  if(name.length()<2||name.length()>120||name.chars().anyMatch(Character::isISOControl))
+```
+Failure / enforcement:
+```java
+throw bad("Enter your name");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0280 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:96
+
+[backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:96](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L96)
+
+When / guard context:
+```java
+ring contact=input.contact()==null?"":input.contact().strip();String reference=input.transactionReference()==null?"":input.transactionReference().strip();
+  if(name.length()<2||name.length()>120||name.chars().anyMatch(Character::isISOControl))throw bad("Enter your name");
+  if(contact.length()>120||contact.chars().anyMatch(Character::isISOControl))
+```
+Failure / enforcement:
+```java
+throw bad("Invalid contact details");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0281 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:97
+
+[backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:97](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L97)
+
+When / guard context:
+```java
+|name.length()>120||name.chars().anyMatch(Character::isISOControl))throw bad("Enter your name");
+  if(contact.length()>120||contact.chars().anyMatch(Character::isISOControl))throw bad("Invalid contact details");
+  if(memberId==null && creatorId==null && !(contact.matches("\\+?[0-9][0-9 -]{7,19}") || contact.matches("[^@\\s]+@[^@\\s]+\\.[^@\\s]+")))
+```
+Failure / enforcement:
+```java
+throw bad("Enter a valid mobile number or email address");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0282 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:98
+
+[backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:98](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L98)
+
+When / guard context:
+```java
+0||contact.chars().anyMatch(Character::isISOControl))throw bad("Invalid contact details");
+  if(memberId==null && creatorId==null && !(contact.matches("\\+?[0-9][0-9 -]{7,19}") || contact.matches("[^@\\s]+@[^@\\s]+\\.[^@\\s]+")))throw bad("Enter a valid mobile number or email address");
+  if(input.amountPaise()<100||input.amountPaise()>1000000000L)
+```
+Failure / enforcement:
+```java
+throw bad("Enter a valid amount");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0283 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:99
+
+[backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:99](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L99)
+
+When / guard context:
+```java
+details");
+  if(memberId==null && creatorId==null && !(contact.matches("\\+?[0-9][0-9 -]{7,19}") || contact.matches("[^@\\s]+@[^@\\s]+\\.[^@\\s]+")))throw bad("Enter a valid mobile number or email address");
+  if(input.amountPaise()<100||input.amountPaise()>1000000000L)throw bad("Enter a valid amount");
+  if(!REFERENCE.matcher(reference).matches())
+```
+Failure / enforcement:
+```java
+throw bad("Enter a valid transaction reference (at least six characters)");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0284 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:103
+
+[backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:103](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L103)
+
+When / guard context:
+```java
+mber_id"),memberId)||!Objects.equals(old.get("destination_id"),input.destinationId())||!Objects.equals(old.get("guest_name"),name)||!Objects.equals(old.get("guest_contact"),contact.isEmpty()?null:contact)||!Objects.equals(((Number)old.get("amount_paise")).longValue(),input.amountPaise())||!Objects.equals(old.get("transaction_reference"),reference))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Submission key was already used for different details");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0285 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:107
+
+[backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:107](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L107)
+
+When / guard context:
+```java
+name,guest_contact,amount_paise,method,transaction_reference,submission_key,member_id,creator_admin_id) VALUES(?,?,?,?,?,?,?,?,?,?,?)",id,groupId,input.destinationId(),name,contact.isEmpty()?null:contact,input.amountPaise(),d.get("kind"),reference,input.submissionKey(),memberId,creatorId);}
+  catch(org.springframework.dao.DuplicateKeyException ex){
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"This transaction reference has already been reported");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0286 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:113
+
+[backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:113](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L113)
+
+When / guard context:
+```java
+suggestedAmountPaise,boolean enabled,UUID upiDestinationId,UUID bankDestinationId,String accessMode){}
+ @PostMapping("/settings") @Transactional
+ public Map<String,Object> settings(@PathVariable UUID token,@PathVariable UUID groupId,@RequestBody Settings input,HttpServletRequest req){
+  groups.requireGroupCreator(token,groupId,req);if(input==null)
+```
+Failure / enforcement:
+```java
+throw bad("Settings required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0287 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:114
+
+[backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:114](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L114)
+
+When / guard context:
+```java
+lic Map<String,Object> settings(@PathVariable UUID token,@PathVariable UUID groupId,@RequestBody Settings input,HttpServletRequest req){
+  groups.requireGroupCreator(token,groupId,req);if(input==null)throw bad("Settings required");
+  if(input.suggestedAmountPaise()!=null&&(input.suggestedAmountPaise()<100||input.suggestedAmountPaise()>1000000000L))
+```
+Failure / enforcement:
+```java
+throw bad("Suggested amount must be between ₹1 and ₹1 crore");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0288 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:116
+
+[backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:116](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L116)
+
+When / guard context:
+```java
+,new AbstractMap.SimpleEntry<>("BANK",input.bankDestinationId()))){
+   if(choice.getValue()!=null){Integer n=db.queryForObject("SELECT count(*) FROM gift_group_payment_destinations WHERE id=? AND group_id=? AND kind=? AND enabled=TRUE AND status IN ('REGISTERED','VERIFIED')",Integer.class,choice.getValue(),groupId,choice.getKey());if(n==null||n!=1)
+```
+Failure / enforcement:
+```java
+throw bad("Choose an enabled "+choice.getKey()+" account");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0289 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:118
+
+[backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:118](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L118)
+
+When / guard context:
+```java
+D group_id=? AND kind=? AND enabled=TRUE AND status IN ('REGISTERED','VERIFIED')",Integer.class,choice.getValue(),groupId,choice.getKey());if(n==null||n!=1)throw bad("Choose an enabled "+choice.getKey()+" account");}
+  }
+  String mode=input.accessMode()==null?"BOTH":input.accessMode();if(!List.of("BOTH","GUESTS_ONLY","MEMBERS_ONLY").contains(mode))
+```
+Failure / enforcement:
+```java
+throw bad("Invalid invitation access mode");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0290 — backend/src/main/java/com/giftplatform/group/GuestGiftController.java:58
+
+[backend/src/main/java/com/giftplatform/group/GuestGiftController.java:58](../../src/main/java/com/giftplatform/group/GuestGiftController.java#L58)
+
+When / guard context:
+```java
+elect")
+    @Transactional
+    public Map<String,String> select(@PathVariable UUID token,@PathVariable UUID id,@Valid @RequestBody Selection input,HttpServletRequest request){
+        UUID event=accounts.event(token),creator=accounts.sessionAdmin(event,request);
+        if(input.contributionType()==Type.GROUP){
+            if(input.groupId()==null)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Group required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0291 — backend/src/main/java/com/giftplatform/group/GuestGiftController.java:60
+
+[backend/src/main/java/com/giftplatform/group/GuestGiftController.java:60](../../src/main/java/com/giftplatform/group/GuestGiftController.java#L60)
+
+When / guard context:
+```java
+event=accounts.event(token),creator=accounts.sessionAdmin(event,request);
+        if(input.contributionType()==Type.GROUP){
+            if(input.groupId()==null)throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Group required");
+            accounts.requireGroupCreator(token,input.groupId(),request);
+        } else if(input.groupId()!=null)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Individual gifts cannot have a group");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0292 — backend/src/main/java/com/giftplatform/group/GuestGiftController.java:62
+
+[backend/src/main/java/com/giftplatform/group/GuestGiftController.java:62](../../src/main/java/com/giftplatform/group/GuestGiftController.java#L62)
+
+When / guard context:
+```java
+upId()!=null)throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Individual gifts cannot have a group");
+        int changed=db.update("UPDATE guest_gifts SET selected_by=?,contribution_type=?,group_id=? WHERE id=? AND event_id=? AND selected_by IS NULL",creator,input.contributionType().name(),input.groupId(),id,event);
+        if(changed!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Gift unavailable or already selected");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0293 — backend/src/main/java/com/giftplatform/group/GuestGiftController.java:86
+
+[backend/src/main/java/com/giftplatform/group/GuestGiftController.java:86](../../src/main/java/com/giftplatform/group/GuestGiftController.java#L86)
+
+When / guard context:
+```java
+riable UUID id,HttpServletRequest request){
+        UUID event=accounts.event(token),creator=accounts.sessionAdmin(event,request);
+        int changed=db.update("UPDATE guest_gifts SET published_at=now() WHERE id=? AND event_id=? AND selected_by=? AND published_at IS NULL AND contribution_type='INDIVIDUAL'",id,event,creator);
+        if(changed!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Select this gift before publishing, or it is already published");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0294 — backend/src/main/java/com/giftplatform/group/GuestGiftController.java:93
+
+[backend/src/main/java/com/giftplatform/group/GuestGiftController.java:93](../../src/main/java/com/giftplatform/group/GuestGiftController.java#L93)
+
+When / guard context:
+```java
+ery(@PathVariable UUID token,@PathVariable UUID id,HttpServletRequest request){
+        UUID event=accounts.event(token),creator=accounts.sessionAdmin(event,request);
+        if(!Boolean.TRUE.equals(db.queryForObject("SELECT EXISTS(SELECT 1 FROM guest_gifts WHERE id=? AND event_id=? AND selected_by=?)",Boolean.class,id,event,creator)))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0295 — backend/src/main/java/com/giftplatform/group/GuestGiftController.java:119
+
+[backend/src/main/java/com/giftplatform/group/GuestGiftController.java:119](../../src/main/java/com/giftplatform/group/GuestGiftController.java#L119)
+
+When / guard context:
+```java
+teDelivery(@PathVariable UUID token,@PathVariable UUID id,@Valid @RequestBody Delivery input,HttpServletRequest request){
+        UUID event=accounts.event(token),creator=accounts.sessionAdmin(event,request);
+        if(input.status()==DeliveryStatus.TRACKING_SHARED && (input.trackingDetails()==null||input.trackingDetails().isBlank()))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Tracking details required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0296 — backend/src/main/java/com/giftplatform/group/GuestGiftController.java:122
+
+[backend/src/main/java/com/giftplatform/group/GuestGiftController.java:122](../../src/main/java/com/giftplatform/group/GuestGiftController.java#L122)
+
+When / guard context:
+```java
+w ResponseStatusException(HttpStatus.BAD_REQUEST,"Tracking details required");
+        int changed=db.update("UPDATE guest_gifts SET delivery_status=?,tracking_details=? WHERE id=? AND event_id=? AND selected_by=? AND contribution_type='INDIVIDUAL'",
+            input.status().name(),input.trackingDetails(),id,event,creator);
+        if(changed!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0297 — backend/src/main/java/com/giftplatform/group/GuestGiftController.java:128
+
+[backend/src/main/java/com/giftplatform/group/GuestGiftController.java:128](../../src/main/java/com/giftplatform/group/GuestGiftController.java#L128)
+
+When / guard context:
+```java
+}
+    @GetMapping("/api/v1/events/{eventId}/contributions/guest-gifts")
+    public List<Map<String,Object>> hostReport(@PathVariable UUID eventId){
+        UUID owner=actors.requireAuthenticatedUserId();
+        if(!Boolean.TRUE.equals(db.queryForObject("SELECT EXISTS(SELECT 1 FROM events WHERE id=? AND owner_id=?)",Boolean.class,eventId,owner)))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0298 — backend/src/main/java/com/giftplatform/group/IndependentGroupGiftController.java:38
+
+[backend/src/main/java/com/giftplatform/group/IndependentGroupGiftController.java:38](../../src/main/java/com/giftplatform/group/IndependentGroupGiftController.java#L38)
+
+When / guard context:
+```java
+@SuppressWarnings("unchecked") var attempts=(ArrayDeque<Long>)session.getAttribute(key);
+            if(attempts==null){attempts=new ArrayDeque<>();session.setAttribute(key,attempts);}
+            long now=System.currentTimeMillis();while(!attempts.isEmpty()&&now-attempts.peekFirst()>60000)attempts.removeFirst();
+            if(attempts.size()>=10)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,"Please wait before fetching another gift link");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0299 — backend/src/main/java/com/giftplatform/group/IndependentGroupGiftController.java:47
+
+[backend/src/main/java/com/giftplatform/group/IndependentGroupGiftController.java:47](../../src/main/java/com/giftplatform/group/IndependentGroupGiftController.java#L47)
+
+When / guard context:
+```java
+()).toString();
+            var parsed=metadata.parse(client.fetch(source),source);
+            var out=new LinkedHashMap<String,Object>();
+            for(String key:List.of("name","description","targetAmount","currency"))out.put(key,parsed.get(key));
+            out.put("productUrl",source);return out;
+        }catch(IllegalArgumentException ex){
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,ex.getMessage());
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0300 — backend/src/main/java/com/giftplatform/group/IndependentGroupGiftController.java:48
+
+[backend/src/main/java/com/giftplatform/group/IndependentGroupGiftController.java:48](../../src/main/java/com/giftplatform/group/IndependentGroupGiftController.java#L48)
+
+When / guard context:
+```java
+HashMap<String,Object>();
+            for(String key:List.of("name","description","targetAmount","currency"))out.put(key,parsed.get(key));
+            out.put("productUrl",source);return out;
+        }catch(IllegalArgumentException ex){throw new ResponseStatusException(HttpStatus.BAD_REQUEST,ex.getMessage());}
+        catch(java.io.IOException ex){
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,"Could not read this product page. You can enter the gift details manually.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0301 — backend/src/main/java/com/giftplatform/group/IndependentGroupGiftController.java:57
+
+[backend/src/main/java/com/giftplatform/group/IndependentGroupGiftController.java:57](../../src/main/java/com/giftplatform/group/IndependentGroupGiftController.java#L57)
+
+When / guard context:
+```java
+D groupId,@Valid @RequestBody Plan input,HttpServletRequest request){
+        UUID creator=groups.requireGroupCreator(token,groupId,request);
+        var row=db.queryForMap("SELECT independent_gift,gift_published_at FROM gift_groups WHERE id=? AND admin_id=? FOR UPDATE",groupId,creator);
+        if(!Boolean.TRUE.equals(row.get("independent_gift")))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"This group uses a host wishlist gift");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0302 — backend/src/main/java/com/giftplatform/group/IndependentGroupGiftController.java:58
+
+[backend/src/main/java/com/giftplatform/group/IndependentGroupGiftController.java:58](../../src/main/java/com/giftplatform/group/IndependentGroupGiftController.java#L58)
+
+When / guard context:
+```java
+var row=db.queryForMap("SELECT independent_gift,gift_published_at FROM gift_groups WHERE id=? AND admin_id=? FOR UPDATE",groupId,creator);
+        if(!Boolean.TRUE.equals(row.get("independent_gift")))throw new ResponseStatusException(HttpStatus.CONFLICT,"This group uses a host wishlist gift");
+        if(row.get("gift_published_at")!=null)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Published gift plans cannot be changed");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0303 — backend/src/main/java/com/giftplatform/group/IndependentGroupGiftController.java:60
+
+[backend/src/main/java/com/giftplatform/group/IndependentGroupGiftController.java:60](../../src/main/java/com/giftplatform/group/IndependentGroupGiftController.java#L60)
+
+When / guard context:
+```java
+group uses a host wishlist gift");
+        if(row.get("gift_published_at")!=null)throw new ResponseStatusException(HttpStatus.CONFLICT,"Published gift plans cannot be changed");
+        String name=clean(input.giftName()),description=clean(input.giftDescription()),link=clean(input.giftLink());
+        if(name==null&&(description!=null||link!=null))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Enter the gift name");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0304 — backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:30
+
+[backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:30](../../src/main/java/com/giftplatform/group/IndividualGuestGiftController.java#L30)
+
+When / guard context:
+```java
+epository events;
+    public IndividualGuestGiftController(JdbcTemplate db,GroupContributionController groups,EventRepository events){
+        this.db=db;this.groups=groups;this.events=events;
+    }
+    private UUID owner(UUID event,HttpServletRequest request,boolean create){
+        var session=request.getSession(create);
+        if(session==null)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0305 — backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:34
+
+[backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:34](../../src/main/java/com/giftplatform/group/IndividualGuestGiftController.java#L34)
+
+When / guard context:
+```java
+ServletRequest request,boolean create){
+        var session=request.getSession(create);
+        if(session==null)throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        synchronized(session){
+            String key="gift.individual.owner."+event;
+            if(session.getAttribute(key) instanceof UUID id)return id;
+            if(!create)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0306 — backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:49
+
+[backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:49](../../src/main/java/com/giftplatform/group/IndividualGuestGiftController.java#L49)
+
+When / guard context:
+```java
+ponseStatus(HttpStatus.CREATED)
+    @Transactional
+    public Map<String,UUID> save(@PathVariable UUID token,@Valid @RequestBody Entry input,HttpServletRequest request){
+        if(input.givingMethod()==Method.LINK_AND_CONTRIBUTION && (input.contributionPaise()==null||input.contributionPaise()<100||input.contributionPaise()>100000000))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Enter a contribution between ₹1 and ₹10,00,000");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0307 — backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:51
+
+[backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:51](../../src/main/java/com/giftplatform/group/IndividualGuestGiftController.java#L51)
+
+When / guard context:
+```java
+utionPaise()==null||input.contributionPaise()<100||input.contributionPaise()>100000000))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Enter a contribution between ₹1 and ₹10,00,000");
+        if((input.productUrl()==null||input.productUrl().isBlank())&&(input.description()==null||input.description().isBlank()))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Add a product link or gift details");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0308 — backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:53
+
+[backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:53](../../src/main/java/com/giftplatform/group/IndividualGuestGiftController.java#L53)
+
+When / guard context:
+```java
+put.productUrl()==null||input.productUrl().isBlank())&&(input.description()==null||input.description().isBlank()))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Add a product link or gift details");
+        if(input.givingMethod()==Method.DIRECT_DELIVERY&&(input.productUrl()==null||input.productUrl().isBlank()))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Add the product link for your purchase");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0309 — backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:59
+
+[backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:59](../../src/main/java/com/giftplatform/group/IndividualGuestGiftController.java#L59)
+
+When / guard context:
+```java
+VALUES(?,?,?,?) ON CONFLICT(id) DO NOTHING",
+            owner,event,"guest_"+owner.toString().replace("-",""),new BCryptPasswordEncoder().encode(UUID.randomUUID().toString()));
+        Integer count=db.queryForObject("SELECT count(*) FROM guest_gifts WHERE event_id=? AND selected_by=?",Integer.class,event,owner);
+        if(count!=null&&count>=20)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,"Too many gifts added in this session");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0310 — backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:75
+
+[backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:75](../../src/main/java/com/giftplatform/group/IndividualGuestGiftController.java#L75)
+
+When / guard context:
+```java
+WHERE id=? AND event_id=? AND selected_by IS NULL
+                """,owner,input.name().strip(),input.description(),input.productUrl(),input.guestName().strip(),input.email(),input.mobile(),
+                input.givingMethod()==Method.DIRECT_DELIVERY?null:input.contributionPaise(),input.givingMethod().name(),id,event);
+            if(changed!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"This gift has already been selected. Choose another gift.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0311 — backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:89
+
+[backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:89](../../src/main/java/com/giftplatform/group/IndividualGuestGiftController.java#L89)
+
+When / guard context:
+```java
+requireGift(UUID token,UUID id,HttpServletRequest request){
+        UUID event=groups.event(token),owner=owner(event,request,false);
+        if(!Boolean.TRUE.equals(db.queryForObject("SELECT EXISTS(SELECT 1 FROM guest_gifts WHERE id=? AND event_id=? AND selected_by=? AND contribution_type='INDIVIDUAL')",Boolean.class,id,event,owner)))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0312 — backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:111
+
+[backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:111](../../src/main/java/com/giftplatform/group/IndividualGuestGiftController.java#L111)
+
+When / guard context:
+```java
+UUID event=requireGift(token,id,request);
+        var gift=db.queryForMap("SELECT selected_by,giving_method,contribution_paise,guest_name,guest_email,guest_mobile FROM guest_gifts WHERE id=? AND event_id=? FOR UPDATE",id,event);
+        if(!"LINK_AND_CONTRIBUTION".equals(gift.get("giving_method"))||gift.get("contribution_paise")==null)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"This gift uses direct delivery");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0313 — backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:112
+
+[backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:112](../../src/main/java/com/giftplatform/group/IndividualGuestGiftController.java#L112)
+
+When / guard context:
+```java
+tion_paise,guest_name,guest_email,guest_mobile FROM guest_gifts WHERE id=? AND event_id=? FOR UPDATE",id,event);
+        if(!"LINK_AND_CONTRIBUTION".equals(gift.get("giving_method"))||gift.get("contribution_paise")==null)
+            throw new ResponseStatusException(HttpStatus.CONFLICT,"This gift uses direct delivery");
+        if(transfers==null)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Host contributions are unavailable");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0314 — backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:131
+
+[backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:131](../../src/main/java/com/giftplatform/group/IndividualGuestGiftController.java#L131)
+
+When / guard context:
+```java
+tracking(@PathVariable UUID token,@PathVariable UUID id,@Valid @RequestBody GuestGiftController.Delivery input,HttpServletRequest request){
+        UUID event=requireGift(token,id,request);
+        if(input.status()==GuestGiftController.DeliveryStatus.TRACKING_SHARED&&(input.trackingDetails()==null||input.trackingDetails().isBlank()))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Tracking details required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+## hostpayment
+
+### RULE-0315 — backend/src/main/java/com/giftplatform/hostpayment/controller/ReceivingAccountHealthController.java:23
+
+[backend/src/main/java/com/giftplatform/hostpayment/controller/ReceivingAccountHealthController.java:23](../../src/main/java/com/giftplatform/hostpayment/controller/ReceivingAccountHealthController.java#L23)
+
+When / guard context:
+```java
+@GetMapping("/api/v1/events/{eventId}/receiving-health")
+    public ResponseEntity<List<Health>> health(@PathVariable UUID eventId){
+        UUID host=actor.requireAuthenticatedUserId();
+        Integer owned=db.queryForObject("SELECT count(*) FROM events WHERE id=? AND owner_id=?",Integer.class,eventId,host);
+        if(owned==null||owned!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Event not found");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0316 — backend/src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java:35
+
+[backend/src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java:35](../../src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java#L35)
+
+When / guard context:
+```java
+sEnabled(){return enabled;} public boolean isPreferred(){return preferred;}
+ public Instant getHostConfirmedAt(){return hostConfirmedAt;}
+ public String getAccountLabel(){return accountLabel;}
+ public Instant getArchivedAt(){return archivedAt;}
+ public boolean isArchived(){return archivedAt!=null;}
+ public void rename(String label){if(isArchived())
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Archived account cannot be renamed");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0317 — backend/src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java:36
+
+[backend/src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java:36](../../src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java#L36)
+
+When / guard context:
+```java
+medAt;}
+ public String getAccountLabel(){return accountLabel;}
+ public Instant getArchivedAt(){return archivedAt;}
+ public boolean isArchived(){return archivedAt!=null;}
+ public void rename(String label){if(isArchived())throw new IllegalStateException("Archived account cannot be renamed");accountLabel=label;}
+ public void archive(){if(isArchived())
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Account already archived");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0318 — backend/src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java:38
+
+[backend/src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java:38](../../src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java#L38)
+
+When / guard context:
+```java
+blic void rename(String label){if(isArchived())throw new IllegalStateException("Archived account cannot be renamed");accountLabel=label;}
+ public void archive(){if(isArchived())throw new IllegalStateException("Account already archived");enabled=false;preferred=false;archivedAt=Instant.now();}
+
+ public void confirmByHost(){if(!enabled||isArchived())
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Disabled or archived destination cannot be confirmed");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0319 — backend/src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java:39
+
+[backend/src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java:39](../../src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java#L39)
+
+When / guard context:
+```java
+(){if(isArchived())throw new IllegalStateException("Account already archived");enabled=false;preferred=false;archivedAt=Instant.now();}
+
+ public void confirmByHost(){if(!enabled||isArchived())throw new IllegalStateException("Disabled or archived destination cannot be confirmed");hostConfirmedAt=Instant.now();}
+ public void enable(){if(isArchived())
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Archived account cannot be enabled");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0320 — backend/src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java:39
+
+[backend/src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java:39](../../src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java#L39)
+
+When / guard context:
+```java
+Instant.now();}
+
+ public void confirmByHost(){if(!enabled||isArchived())throw new IllegalStateException("Disabled or archived destination cannot be confirmed");hostConfirmedAt=Instant.now();}
+ public void enable(){if(isArchived())throw new IllegalStateException("Archived account cannot be enabled");if(verificationStatus==VerificationStatus.REVOKED)
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Revoked destination cannot be enabled");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0321 — backend/src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java:40
+
+[backend/src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java:40](../../src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java#L40)
+
+When / guard context:
+```java
+ficationStatus.REVOKED)throw new IllegalStateException("Revoked destination cannot be enabled");enabled=true;preferred=false;} public void disable(){enabled=false;preferred=false;} public void clearPreferred(){preferred=false;}
+ public void prefer(){if(!enabled||isArchived()||(verificationStatus!=VerificationStatus.VERIFIED&&hostConfirmedAt==null))
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Destination must be active and host-confirmed or provider-verified");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0322 — backend/src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java:41
+
+[backend/src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java:41](../../src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java#L41)
+
+When / guard context:
+```java
+void prefer(){if(!enabled||isArchived()||(verificationStatus!=VerificationStatus.VERIFIED&&hostConfirmedAt==null))throw new IllegalStateException("Destination must be active and host-confirmed or provider-verified");preferred=true;}
+ public void applyTrustedVerification(VerificationStatus result){if(result==null||result==VerificationStatus.PENDING)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Invalid verification result");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0323 — backend/src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java:41
+
+[backend/src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java:41](../../src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java#L41)
+
+When / guard context:
+```java
+us.VERIFIED&&hostConfirmedAt==null))throw new IllegalStateException("Destination must be active and host-confirmed or provider-verified");preferred=true;}
+ public void applyTrustedVerification(VerificationStatus result){if(result==null||result==VerificationStatus.PENDING)throw new IllegalArgumentException("Invalid verification result");if(!enabled)
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Disabled destination cannot be verified");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0324 — backend/src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java:41
+
+[backend/src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java:41](../../src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java#L41)
+
+When / guard context:
+```java
+r-verified");preferred=true;}
+ public void applyTrustedVerification(VerificationStatus result){if(result==null||result==VerificationStatus.PENDING)throw new IllegalArgumentException("Invalid verification result");if(!enabled)throw new IllegalStateException("Disabled destination cannot be verified");if(verificationStatus==VerificationStatus.REVOKED)
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Revoked destination cannot be reverified");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0325 — backend/src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java:32
+
+[backend/src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java:32](../../src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java#L32)
+
+When / guard context:
+```java
+sEnabled(){return enabled;} public boolean isPreferred(){return preferred;}
+ public Instant getHostConfirmedAt(){return hostConfirmedAt;}
+ public String getAccountLabel(){return accountLabel;}
+ public Instant getArchivedAt(){return archivedAt;}
+ public boolean isArchived(){return archivedAt!=null;}
+ public void rename(String label){if(isArchived())
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Archived account cannot be renamed");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0326 — backend/src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java:33
+
+[backend/src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java:33](../../src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java#L33)
+
+When / guard context:
+```java
+medAt;}
+ public String getAccountLabel(){return accountLabel;}
+ public Instant getArchivedAt(){return archivedAt;}
+ public boolean isArchived(){return archivedAt!=null;}
+ public void rename(String label){if(isArchived())throw new IllegalStateException("Archived account cannot be renamed");accountLabel=label;}
+ public void archive(){if(isArchived())
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Account already archived");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0327 — backend/src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java:35
+
+[backend/src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java:35](../../src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java#L35)
+
+When / guard context:
+```java
+blic void rename(String label){if(isArchived())throw new IllegalStateException("Archived account cannot be renamed");accountLabel=label;}
+ public void archive(){if(isArchived())throw new IllegalStateException("Account already archived");enabled=false;preferred=false;archivedAt=Instant.now();}
+
+ public void confirmByHost(){if(!enabled||isArchived())
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Disabled or archived destination cannot be confirmed");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0328 — backend/src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java:36
+
+[backend/src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java:36](../../src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java#L36)
+
+When / guard context:
+```java
+(){if(isArchived())throw new IllegalStateException("Account already archived");enabled=false;preferred=false;archivedAt=Instant.now();}
+
+ public void confirmByHost(){if(!enabled||isArchived())throw new IllegalStateException("Disabled or archived destination cannot be confirmed");hostConfirmedAt=Instant.now();}
+ public void enable(){if(isArchived())
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Archived account cannot be enabled");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0329 — backend/src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java:36
+
+[backend/src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java:36](../../src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java#L36)
+
+When / guard context:
+```java
+Instant.now();}
+
+ public void confirmByHost(){if(!enabled||isArchived())throw new IllegalStateException("Disabled or archived destination cannot be confirmed");hostConfirmedAt=Instant.now();}
+ public void enable(){if(isArchived())throw new IllegalStateException("Archived account cannot be enabled");if(verificationStatus==VerificationStatus.REVOKED)
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Revoked destination cannot be enabled");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0330 — backend/src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java:37
+
+[backend/src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java:37](../../src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java#L37)
+
+When / guard context:
+```java
+ficationStatus.REVOKED)throw new IllegalStateException("Revoked destination cannot be enabled");enabled=true;preferred=false;} public void disable(){enabled=false;preferred=false;} public void clearPreferred(){preferred=false;}
+ public void prefer(){if(!enabled||isArchived()||(verificationStatus!=VerificationStatus.VERIFIED&&hostConfirmedAt==null))
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Destination must be active and host-confirmed or provider-verified");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0331 — backend/src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java:39
+
+[backend/src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java:39](../../src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java#L39)
+
+When / guard context:
+```java
+medAt==null))throw new IllegalStateException("Destination must be active and host-confirmed or provider-verified");preferred=true;}
+ // Verification status may only be changed by a trusted provider integration, not host-facing APIs.
+ public void applyTrustedVerification(VerificationStatus result){if(result==null||result==VerificationStatus.PENDING)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Invalid verification result");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0332 — backend/src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java:39
+
+[backend/src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java:39](../../src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java#L39)
+
+When / guard context:
+```java
+ost-confirmed or provider-verified");preferred=true;}
+ // Verification status may only be changed by a trusted provider integration, not host-facing APIs.
+ public void applyTrustedVerification(VerificationStatus result){if(result==null||result==VerificationStatus.PENDING)throw new IllegalArgumentException("Invalid verification result");if(!enabled)
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Disabled destination cannot be verified");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0333 — backend/src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java:39
+
+[backend/src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java:39](../../src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java#L39)
+
+When / guard context:
+```java
+ration, not host-facing APIs.
+ public void applyTrustedVerification(VerificationStatus result){if(result==null||result==VerificationStatus.PENDING)throw new IllegalArgumentException("Invalid verification result");if(!enabled)throw new IllegalStateException("Disabled destination cannot be verified");if(verificationStatus==VerificationStatus.REVOKED)
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Revoked destination cannot be reverified");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0334 — backend/src/main/java/com/giftplatform/hostpayment/qr/HostUpiQrController.java:27
+
+[backend/src/main/java/com/giftplatform/hostpayment/qr/HostUpiQrController.java:27](../../src/main/java/com/giftplatform/hostpayment/qr/HostUpiQrController.java#L27)
+
+When / guard context:
+```java
+service=service; this.actors=actors;
+    }
+    @PostMapping(value="/upload",consumes=MediaType.MULTIPART_FORM_DATA_VALUE)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void upload(@PathVariable UUID accountId,@RequestPart("file") MultipartFile file) {
+        if(file.isEmpty() || file.getSize()>UpiQrImageCodec.MAX_UPLOAD_BYTES)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid QR image size");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0335 — backend/src/main/java/com/giftplatform/hostpayment/qr/HostUpiQrController.java:29
+
+[backend/src/main/java/com/giftplatform/hostpayment/qr/HostUpiQrController.java:29](../../src/main/java/com/giftplatform/hostpayment/qr/HostUpiQrController.java#L29)
+
+When / guard context:
+```java
+@RequestPart("file") MultipartFile file) {
+        if(file.isEmpty() || file.getSize()>UpiQrImageCodec.MAX_UPLOAD_BYTES)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid QR image size");
+        try { service.upload(actors.requireAuthenticatedUserId(),accountId,file.getBytes()); }
+        catch(java.io.IOException e) {
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Unreadable QR image");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0336 — backend/src/main/java/com/giftplatform/hostpayment/qr/HostUpiQrController.java:42
+
+[backend/src/main/java/com/giftplatform/hostpayment/qr/HostUpiQrController.java:42](../../src/main/java/com/giftplatform/hostpayment/qr/HostUpiQrController.java#L42)
+
+When / guard context:
+```java
+d UPI parameter", "Malformed UPI encoding" ->
+                    "QR contains malformed UPI payment information";
+                case "QR payee does not match registered UPI ID" ->
+                    "QR UPI ID does not match the registered UPI account";
+                default -> "Invalid or unreadable UPI QR image";
+            };
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST, safeReason);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0337 — backend/src/main/java/com/giftplatform/hostpayment/qr/HostUpiQrController.java:48
+
+[backend/src/main/java/com/giftplatform/hostpayment/qr/HostUpiQrController.java:48](../../src/main/java/com/giftplatform/hostpayment/qr/HostUpiQrController.java#L48)
+
+When / guard context:
+```java
+};
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, safeReason);
+        }
+    }
+    @PostMapping("/generate")
+    public ResponseEntity<byte[]> generate(@PathVariable UUID accountId) {
+        try { return png(service.generate(actors.requireAuthenticatedUserId(),accountId)); }
+        catch(IllegalStateException e) {
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"UPI account not verified");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0338 — backend/src/main/java/com/giftplatform/hostpayment/qr/JdbcUpiQrImageStorage.java:25
+
+[backend/src/main/java/com/giftplatform/hostpayment/qr/JdbcUpiQrImageStorage.java:25](../../src/main/java/com/giftplatform/hostpayment/qr/JdbcUpiQrImageStorage.java#L25)
+
+When / guard context:
+```java
+tId,UUID accountId,byte[] png,String digest) {
+        int inserted=jdbc.update("""
+          INSERT INTO host_upi_qr_images(host_id,upi_account_id,image_png,payload_sha256,source)
+          VALUES(?,?,?,?,'UPLOADED')
+          ON CONFLICT(host_id,upi_account_id,source) DO NOTHING
+          """,hostId,accountId,png,digest);
+        if(inserted!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"QR already uploaded for this account");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0339 — backend/src/main/java/com/giftplatform/hostpayment/qr/JdbcUpiQrImageStorage.java:41
+
+[backend/src/main/java/com/giftplatform/hostpayment/qr/JdbcUpiQrImageStorage.java:41](../../src/main/java/com/giftplatform/hostpayment/qr/JdbcUpiQrImageStorage.java#L41)
+
+When / guard context:
+```java
+""",hostId,accountId,digest);
+    }
+    @Override public byte[] getUploaded(UUID hostId,UUID accountId) {
+        var found=jdbc.query("""
+          SELECT image_png FROM host_upi_qr_images
+          WHERE host_id=? AND upi_account_id=? AND source='UPLOADED'
+          """,(rs,n)->rs.getBytes(1),hostId,accountId);
+        if(found.isEmpty())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Uploaded QR not found");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0340 — backend/src/main/java/com/giftplatform/hostpayment/qr/JpaRegisteredUpiResolver.java:20
+
+[backend/src/main/java/com/giftplatform/hostpayment/qr/JpaRegisteredUpiResolver.java:20](../../src/main/java/com/giftplatform/hostpayment/qr/JpaRegisteredUpiResolver.java#L20)
+
+When / guard context:
+```java
+lvedUpi resolve(UUID hostId, UUID accountId) {
+        var account=accounts.findByIdAndHostId(accountId,hostId)
+            .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"UPI account not found"));
+        if (!account.isEnabled() || account.isArchived() || account.getVerificationStatus()==VerificationStatus.REVOKED)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"UPI account is unavailable");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0341 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java:51
+
+[backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java:51](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java#L51)
+
+When / guard context:
+```java
+ht(), BufferedImage.TYPE_INT_RGB);
+            for (int y = 0; y < bits.getHeight(); y++)
+                for (int x = 0; x < bits.getWidth(); x++)
+                    image.setRGB(x, y, bits.get(x, y) ? 0xFF000000 : 0xFFFFFFFF);
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            if (!ImageIO.write(image, "png", out))
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("PNG writer unavailable");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0342 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java:54
+
+[backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java:54](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java#L54)
+
+When / guard context:
+```java
+GB(x, y, bits.get(x, y) ? 0xFF000000 : 0xFFFFFFFF);
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            if (!ImageIO.write(image, "png", out)) throw new IllegalStateException("PNG writer unavailable");
+            return out.toByteArray();
+        } catch (com.google.zxing.WriterException | IOException e) {
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Unable to generate QR image", e);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0343 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java:64
+
+[backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java:64](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java#L64)
+
+When / guard context:
+```java
+*
+     * Validate uploaded image bytes, decode exactly one UPI QR, and match its payee.
+     * Does not persist or publish the image.
+     */
+    public static UpiQrPayload.Parsed validateUpload(byte[] imageBytes, String registeredUpiId) {
+        if (imageBytes == null || imageBytes.length == 0 || imageBytes.length > MAX_UPLOAD_BYTES)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Invalid QR image size");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0344 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java:66
+
+[backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java:66](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java#L66)
+
+When / guard context:
+```java
+imageBytes, String registeredUpiId) {
+        if (imageBytes == null || imageBytes.length == 0 || imageBytes.length > MAX_UPLOAD_BYTES)
+            throw new IllegalArgumentException("Invalid QR image size");
+        try (ImageInputStream input = ImageIO.createImageInputStream(new ByteArrayInputStream(imageBytes))) {
+            if (input == null)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Invalid image");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0345 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java:68
+
+[backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java:68](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java#L68)
+
+When / guard context:
+```java
+ArgumentException("Invalid QR image size");
+        try (ImageInputStream input = ImageIO.createImageInputStream(new ByteArrayInputStream(imageBytes))) {
+            if (input == null) throw new IllegalArgumentException("Invalid image");
+            Iterator<ImageReader> readers = ImageIO.getImageReaders(input);
+            if (!readers.hasNext())
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Unsupported image format");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0346 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java:72
+
+[backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java:72](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java#L72)
+
+When / guard context:
+```java
+Iterator<ImageReader> readers = ImageIO.getImageReaders(input);
+            if (!readers.hasNext()) throw new IllegalArgumentException("Unsupported image format");
+            ImageReader reader = readers.next();
+            try {
+                if (!FORMATS.contains(reader.getFormatName().toLowerCase(java.util.Locale.ROOT)))
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Unsupported image format");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0347 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java:77
+
+[backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java:77](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java#L77)
+
+When / guard context:
+```java
+ception("Unsupported image format");
+                reader.setInput(input, true, true);
+                int width = reader.getWidth(0), height = reader.getHeight(0);
+                if (width < 80 || height < 80 || width > MAX_IMAGE_SIDE || height > MAX_IMAGE_SIDE ||
+                    (long)width * height > MAX_IMAGE_PIXELS)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Invalid QR image dimensions");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0348 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java:79
+
+[backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java:79](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java#L79)
+
+When / guard context:
+```java
+Height(0);
+                if (width < 80 || height < 80 || width > MAX_IMAGE_SIDE || height > MAX_IMAGE_SIDE ||
+                    (long)width * height > MAX_IMAGE_PIXELS)
+                    throw new IllegalArgumentException("Invalid QR image dimensions");
+                BufferedImage image = reader.read(0);
+                if (image == null)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Unreadable image");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0349 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java:89
+
+[backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java:89](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java#L89)
+
+When / guard context:
+```java
+);
+                String text = result.getText();
+                UpiQrPayload.requireMatchingPayee(text, registeredUpiId);
+                return UpiQrPayload.parse(text);
+            } finally { reader.dispose(); }
+        } catch (NotFoundException | IOException | RuntimeException e) {
+            if (e instanceof IllegalArgumentException iae)
+```
+Failure / enforcement:
+```java
+throw iae;
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0350 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java:90
+
+[backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java:90](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java#L90)
+
+When / guard context:
+```java
+ng text = result.getText();
+                UpiQrPayload.requireMatchingPayee(text, registeredUpiId);
+                return UpiQrPayload.parse(text);
+            } finally { reader.dispose(); }
+        } catch (NotFoundException | IOException | RuntimeException e) {
+            if (e instanceof IllegalArgumentException iae) throw iae;
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Invalid or unreadable UPI QR image");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0351 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageService.java:21
+
+[backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageService.java:21](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageService.java#L21)
+
+When / guard context:
+```java
+r accounts, UpiQrImageStorage storage) {
+        this.accounts = java.util.Objects.requireNonNull(accounts);
+        this.storage = java.util.Objects.requireNonNull(storage);
+    }
+
+    public void upload(UUID hostId, UUID accountId, byte[] image) {
+        var account = resolve(hostId, accountId);
+        if(storage.hasUploaded(hostId,accountId))
+```
+Failure / enforcement:
+```java
+throw new org.springframework.web.server.ResponseStatusException(
+            org.springframework.http.HttpStatus.CONFLICT,"QR already uploaded for this account");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0352 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageService.java:50
+
+[backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageService.java:50](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageService.java#L50)
+
+When / guard context:
+```java
+return storage.hasUploaded(hostId,accountId);
+    }
+    public byte[] uploaded(UUID hostId, UUID accountId) {
+        resolve(hostId, accountId);
+        return storage.getUploaded(hostId, accountId);
+    }
+
+    private RegisteredUpiResolver.ResolvedUpi resolve(UUID hostId, UUID accountId) {
+        if (hostId == null || accountId == null)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Host and account required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0353 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageService.java:52
+
+[backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageService.java:52](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageService.java#L52)
+
+When / guard context:
+```java
+Uploaded(hostId, accountId);
+    }
+
+    private RegisteredUpiResolver.ResolvedUpi resolve(UUID hostId, UUID accountId) {
+        if (hostId == null || accountId == null) throw new IllegalArgumentException("Host and account required");
+        var account = accounts.resolve(hostId, accountId);
+        if (account == null || account.upiId() == null)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("UPI account unavailable");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0354 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageService.java:64
+
+[backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageService.java:64](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageService.java#L64)
+
+When / guard context:
+```java
+g clean = name.strip();
+        return clean.length() > 100 ? clean.substring(0, 100) : clean;
+    }
+    private static String sha256(String s) {
+        try {
+            return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256")
+                .digest(s.getBytes(StandardCharsets.UTF_8)));
+        } catch (NoSuchAlgorithmException e) {
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException(e);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0355 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:24
+
+[backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:24](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java#L24)
+
+When / guard context:
+```java
+atic final Set<String> ALLOWED = Set.of("pa", "pn", "cu", "am", "tn", "tr", "mc", "mode", "purpose", "orgid", "sign", "aid");
+    public record Parsed(String payeeUpiId, String payeeName, String currency, boolean hasAmount) {}
+
+    public static Parsed parse(String raw) {
+        if (raw == null || raw.length() > 4096 || raw.isBlank())
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Invalid UPI QR payload");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0356 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:27
+
+[backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:27](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java#L27)
+
+When / guard context:
+```java
+piId, String payeeName, String currency, boolean hasAmount) {}
+
+    public static Parsed parse(String raw) {
+        if (raw == null || raw.length() > 4096 || raw.isBlank())
+            throw new IllegalArgumentException("Invalid UPI QR payload");
+        URI uri;
+        try { uri = URI.create(raw); }
+        catch (IllegalArgumentException ex) {
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Invalid UPI QR payload");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0357 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:33
+
+[backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:33](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java#L33)
+
+When / guard context:
+```java
+QR payload"); }
+        if (!"upi".equalsIgnoreCase(uri.getScheme()) ||
+            !"pay".equalsIgnoreCase(uri.getHost()) ||
+            (uri.getRawPath() != null && !uri.getRawPath().isEmpty()) ||
+            uri.getRawFragment() != null || uri.getRawUserInfo() != null ||
+            uri.getPort() != -1 || uri.getRawQuery() == null)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Unsupported QR destination");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0358 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:38
+
+[backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:38](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java#L38)
+
+When / guard context:
+```java
+getRawUserInfo() != null ||
+            uri.getPort() != -1 || uri.getRawQuery() == null)
+            throw new IllegalArgumentException("Unsupported QR destination");
+
+        Map<String,String> values = new HashMap<>();
+        for (String pair : uri.getRawQuery().split("&", -1)) {
+            int eq = pair.indexOf('=');
+            if (eq <= 0)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Malformed UPI parameter");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0359 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:42
+
+[backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:42](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java#L42)
+
+When / guard context:
+```java
+int eq = pair.indexOf('=');
+            if (eq <= 0) throw new IllegalArgumentException("Malformed UPI parameter");
+            String key = decode(pair.substring(0,eq)).toLowerCase(Locale.ROOT);
+            String value = decode(pair.substring(eq+1));
+            if (!ALLOWED.contains(key) || values.putIfAbsent(key,value) != null)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Unexpected or repeated UPI parameter");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0360 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:44
+
+[backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:44](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java#L44)
+
+When / guard context:
+```java
+.ROOT);
+            String value = decode(pair.substring(eq+1));
+            if (!ALLOWED.contains(key) || values.putIfAbsent(key,value) != null)
+                throw new IllegalArgumentException("Unexpected or repeated UPI parameter");
+            if (value.length() > 256 || value.chars().anyMatch(c -> Character.isISOControl(c)))
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Invalid UPI parameter");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0361 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:48
+
+[backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:48](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java#L48)
+
+When / guard context:
+```java
+ected or repeated UPI parameter");
+            if (value.length() > 256 || value.chars().anyMatch(c -> Character.isISOControl(c)))
+                throw new IllegalArgumentException("Invalid UPI parameter");
+        }
+        String pa = values.get("pa");
+        if (pa == null || !pa.matches("(?i)[a-z0-9._-]{2,128}@[a-z0-9.-]{2,64}"))
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Invalid UPI payee ID");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0362 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:51
+
+[backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:51](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java#L51)
+
+When / guard context:
+```java
+ion("Invalid UPI parameter");
+        }
+        String pa = values.get("pa");
+        if (pa == null || !pa.matches("(?i)[a-z0-9._-]{2,128}@[a-z0-9.-]{2,64}"))
+            throw new IllegalArgumentException("Invalid UPI payee ID");
+        String currency = values.getOrDefault("cu","INR");
+        if (!"INR".equalsIgnoreCase(currency))
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Unsupported currency");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0363 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:56
+
+[backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:56](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java#L56)
+
+When / guard context:
+```java
+(!"INR".equalsIgnoreCase(currency))
+            throw new IllegalArgumentException("Unsupported currency");
+        if (values.containsKey("am")) {
+            try {
+                var amount = new java.math.BigDecimal(values.get("am"));
+                if (amount.signum() <= 0 || amount.scale() > 2 || amount.precision() > 12)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Invalid amount");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0364 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:58
+
+[backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:58](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java#L58)
+
+When / guard context:
+```java
+(values.containsKey("am")) {
+            try {
+                var amount = new java.math.BigDecimal(values.get("am"));
+                if (amount.signum() <= 0 || amount.scale() > 2 || amount.precision() > 12)
+                    throw new IllegalArgumentException("Invalid amount");
+            } catch (NumberFormatException ex) {
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Invalid amount");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0365 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:67
+
+[backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:67](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java#L67)
+
+When / guard context:
+```java
+pa.toLowerCase(Locale.ROOT),values.getOrDefault("pn",""),"INR",values.containsKey("am"));
+    }
+
+    public static void requireMatchingPayee(String qrText, String registeredUpiId) {
+        Parsed parsed = parse(qrText);
+        if (registeredUpiId == null || !parsed.payeeUpiId().equals(registeredUpiId.trim().toLowerCase(Locale.ROOT)))
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("QR payee does not match registered UPI ID");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0366 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:73
+
+[backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:73](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java#L73)
+
+When / guard context:
+```java
+eption("QR payee does not match registered UPI ID");
+    }
+
+    /** Build an amount-free QR payload; never include payment success or verification claims. */
+    public static String generate(String verifiedUpiId, String payeeName) {
+        if (verifiedUpiId == null || !verifiedUpiId.matches("(?i)[a-z0-9._-]{2,128}@[a-z0-9.-]{2,64}"))
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Invalid UPI ID");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0367 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:76
+
+[backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:76](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java#L76)
+
+When / guard context:
+```java
+tring payeeName) {
+        if (verifiedUpiId == null || !verifiedUpiId.matches("(?i)[a-z0-9._-]{2,128}@[a-z0-9.-]{2,64}"))
+            throw new IllegalArgumentException("Invalid UPI ID");
+        if (payeeName == null || payeeName.isBlank() || payeeName.length() > 100 ||
+            payeeName.chars().anyMatch(Character::isISOControl))
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Invalid payee name");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0368 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:83
+
+[backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:83](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java#L83)
+
+When / guard context:
+```java
+tException("Invalid payee name");
+        return "upi://pay?pa=" + encode(verifiedUpiId.toLowerCase(Locale.ROOT)) +
+            "&pn=" + encode(payeeName.trim()) + "&cu=INR";
+    }
+
+    private static String decode(String value) {
+        try { return URLDecoder.decode(value, StandardCharsets.UTF_8); }
+        catch (IllegalArgumentException ex) {
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Malformed UPI encoding");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0369 — backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtectionConfig.java:18
+
+[backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtectionConfig.java:18](../../src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtectionConfig.java#L18)
+
+When / guard context:
+```java
+) {
+        String encryption = environment.getProperty("gift.payment.encryption-key-base64");
+        String fingerprint = environment.getProperty("gift.payment.fingerprint-key-base64");
+        if (encryption == null || fingerprint == null) {
+            // Fail closed: production should refuse to start until secrets are provisioned.
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Missing gift payment encryption/fingerprint secrets");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0370 — backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtectionConfig.java:23
+
+[backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtectionConfig.java:23](../../src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtectionConfig.java#L23)
+
+When / guard context:
+```java
+to start until secrets are provisioned.
+            throw new IllegalStateException("Missing gift payment encryption/fingerprint secrets");
+        }
+        try {
+            return new PaymentDataProtector(Base64.getDecoder().decode(encryption), Base64.getDecoder().decode(fingerprint));
+        } catch (IllegalArgumentException e) {
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Invalid payment protection key configuration", e);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0371 — backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:26
+
+[backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:26](../../src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java#L26)
+
+When / guard context:
+```java
+ureRandom RANDOM = new SecureRandom();
+    private final SecretKeySpec encryptionKey;
+    private final SecretKeySpec fingerprintKey;
+
+    public PaymentDataProtector(byte[] encryptionKey, byte[] fingerprintKey) {
+        if (encryptionKey == null || encryptionKey.length != 32 || fingerprintKey == null || fingerprintKey.length != 32) {
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Independent 256-bit encryption and fingerprint keys required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0372 — backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:29
+
+[backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:29](../../src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java#L29)
+
+When / guard context:
+```java
+intKey) {
+        if (encryptionKey == null || encryptionKey.length != 32 || fingerprintKey == null || fingerprintKey.length != 32) {
+            throw new IllegalArgumentException("Independent 256-bit encryption and fingerprint keys required");
+        }
+        if (java.security.MessageDigest.isEqual(encryptionKey, fingerprintKey)) {
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Encryption and fingerprint keys must differ");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0373 — backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:37
+
+[backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:37](../../src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java#L37)
+
+When / guard context:
+```java
+this.encryptionKey = new SecretKeySpec(encryptionKey.clone(), "AES");
+        this.fingerprintKey = new SecretKeySpec(fingerprintKey.clone(), "HmacSHA256");
+    }
+
+    public String encrypt(UUID hostId, UUID recordId, String field, String value) {
+        validateContext(hostId, recordId, field);
+        if (value == null || value.isBlank())
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Sensitive value is required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0374 — backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:47
+
+[backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:47](../../src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java#L47)
+
+When / guard context:
+```java
+cipher.updateAAD(context(hostId, recordId, field));
+            byte[] encrypted = cipher.doFinal(value.getBytes(StandardCharsets.UTF_8));
+            return "v1:" + Base64.getEncoder().encodeToString(ByteBuffer.allocate(nonce.length + encrypted.length).put(nonce).put(encrypted).array());
+        } catch (GeneralSecurityException e) {
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Sensitive data encryption failed", e);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0375 — backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:53
+
+[backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:53](../../src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java#L53)
+
+When / guard context:
+```java
+array());
+        } catch (GeneralSecurityException e) {
+            throw new IllegalStateException("Sensitive data encryption failed", e);
+        }
+    }
+
+    public String decrypt(UUID hostId, UUID recordId, String field, String stored) {
+        validateContext(hostId, recordId, field);
+        if (stored == null || !stored.startsWith("v1:"))
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Unsupported ciphertext version");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0376 — backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:56
+
+[backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:56](../../src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java#L56)
+
+When / guard context:
+```java
+, String field, String stored) {
+        validateContext(hostId, recordId, field);
+        if (stored == null || !stored.startsWith("v1:")) throw new IllegalArgumentException("Unsupported ciphertext version");
+        try {
+            byte[] packed = Base64.getDecoder().decode(stored.substring(3));
+            if (packed.length < NONCE_SIZE + 16)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Invalid ciphertext");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0377 — backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:62
+
+[backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:62](../../src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java#L62)
+
+When / guard context:
+```java
+YPT_MODE, encryptionKey, new GCMParameterSpec(TAG_BITS, packed, 0, NONCE_SIZE));
+            cipher.updateAAD(context(hostId, recordId, field));
+            return new String(cipher.doFinal(packed, NONCE_SIZE, packed.length - NONCE_SIZE), StandardCharsets.UTF_8);
+        } catch (GeneralSecurityException | IllegalArgumentException e) {
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Unable to decrypt sensitive data", e);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0378 — backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:69
+
+[backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:69](../../src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java#L69)
+
+When / guard context:
+```java
+w IllegalArgumentException("Unable to decrypt sensitive data", e);
+        }
+    }
+
+    /** Fingerprints must never be logged or returned by an API. */
+    public String fingerprint(String type, String normalizedValue) {
+        if (type == null || !type.matches("[A-Z_]{2,30}") || normalizedValue == null || normalizedValue.isBlank()) {
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Invalid fingerprint input");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0379 — backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:76
+
+[backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:76](../../src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java#L76)
+
+When / guard context:
+```java
+legalArgumentException("Invalid fingerprint input");
+        }
+        try {
+            Mac mac = Mac.getInstance("HmacSHA256");
+            mac.init(fingerprintKey);
+            return HexFormat.of().formatHex(mac.doFinal((type + ":" + normalizedValue).getBytes(StandardCharsets.UTF_8)));
+        } catch (GeneralSecurityException e) {
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Fingerprint generation failed", e);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0380 — backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:81
+
+[backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:81](../../src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java#L81)
+
+When / guard context:
+```java
+ey);
+            return HexFormat.of().formatHex(mac.doFinal((type + ":" + normalizedValue).getBytes(StandardCharsets.UTF_8)));
+        } catch (GeneralSecurityException e) {
+            throw new IllegalStateException("Fingerprint generation failed", e);
+        }
+    }
+
+    public static String normalizeUpi(String upi) {
+        if (upi == null)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("UPI ID is required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0381 — backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:84
+
+[backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:84](../../src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java#L84)
+
+When / guard context:
+```java
+ngerprint generation failed", e);
+        }
+    }
+
+    public static String normalizeUpi(String upi) {
+        if (upi == null) throw new IllegalArgumentException("UPI ID is required");
+        String value = upi.trim().toLowerCase(Locale.ROOT);
+        if (value.length() > 100 || !value.matches("[a-z0-9._-]{2,64}@[a-z0-9.-]{2,32}")) {
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Invalid UPI ID format");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0382 — backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:90
+
+[backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:90](../../src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java#L90)
+
+When / guard context:
+```java
+e(Locale.ROOT);
+        if (value.length() > 100 || !value.matches("[a-z0-9._-]{2,64}@[a-z0-9.-]{2,32}")) {
+            throw new IllegalArgumentException("Invalid UPI ID format");
+        }
+        return value;
+    }
+
+    public static String normalizeAccountNumber(String account) {
+        if (account == null || !account.matches("[0-9]{6,20}"))
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Invalid account number");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0383 — backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:95
+
+[backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:95](../../src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java#L95)
+
+When / guard context:
+```java
+rmat");
+        }
+        return value;
+    }
+
+    public static String normalizeAccountNumber(String account) {
+        if (account == null || !account.matches("[0-9]{6,20}")) throw new IllegalArgumentException("Invalid account number");
+        return account;
+    }
+
+    public static String normalizeIfsc(String ifsc) {
+        if (ifsc == null)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("IFSC required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0384 — backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:97
+
+[backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:97](../../src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java#L97)
+
+When / guard context:
+```java
+]{6,20}")) throw new IllegalArgumentException("Invalid account number");
+        return account;
+    }
+
+    public static String normalizeIfsc(String ifsc) {
+        if (ifsc == null) throw new IllegalArgumentException("IFSC required");
+        String value = ifsc.trim().toUpperCase(Locale.ROOT);
+        if (!value.matches("[A-Z]{4}0[A-Z0-9]{6}"))
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Invalid IFSC format");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0385 — backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:120
+
+[backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:120](../../src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java#L120)
+
+When / guard context:
+```java
+3, local.length() - keepStart - keepEnd))
+                + (keepEnd == 1 ? local.substring(local.length() - 1) : "") + normalized.substring(at);
+    }
+
+    private static void validateContext(UUID hostId, UUID recordId, String field) {
+        if (hostId == null || recordId == null || field == null || !field.matches("[a-z_]{2,40}")) {
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Invalid encryption context");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0386 — backend/src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java:21
+
+[backend/src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java:21](../../src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java#L21)
+
+When / guard context:
+```java
+ageStorage qr;private final AuditService audit;
+    public EventAccountLinkService(JdbcTemplate db,ActorContext actor,UpiQrImageStorage qr,AuditService audit){this.db=db;this.actor=actor;this.qr=qr;this.audit=audit;}
+    private String table(String kind){return switch(kind){case "BANK"->"host_bank_accounts";case "UPI"->"host_upi_accounts";default->
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid account kind");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0387 — backend/src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java:25
+
+[backend/src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java:25](../../src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java#L25)
+
+When / guard context:
+```java
+StatusException(HttpStatus.BAD_REQUEST,"Invalid account kind");};}
+    private UUID owned(UUID eventId,boolean lock){
+        UUID host=actor.requireAuthenticatedUserId();
+        var found=db.query("SELECT id FROM events WHERE id=? AND owner_id=?"+(lock?" FOR UPDATE":""),(rs,n)->rs.getObject(1,UUID.class),eventId,host);
+        if(found.isEmpty())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Event not found");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0388 — backend/src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java:30
+
+[backend/src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java:30](../../src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java#L30)
+
+When / guard context:
+```java
+sactional public void link(UUID eventId,String kind,UUID id){
+        UUID host=owned(eventId,true);String table=table(kind);
+        Integer count=db.queryForObject("SELECT count(*) FROM "+table+" WHERE id=? AND host_id=? AND archived_at IS NULL AND (event_id IS NULL OR event_id=?)",Integer.class,id,host,eventId);
+        if(count==null||count!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Account not found");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0389 — backend/src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java:38
+
+[backend/src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java:38](../../src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java#L38)
+
+When / guard context:
+```java
+ibility with account disable/archive/verification.
+        var rows=db.query("SELECT enabled,verification_status,host_confirmed_at,event_id FROM "+table+" WHERE id=? AND host_id=? AND archived_at IS NULL FOR UPDATE",(rs,n)->new Object[]{rs.getBoolean(1),rs.getString(2),rs.getObject(3),rs.getObject(4,UUID.class)},id,host);
+        if(rows.isEmpty())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Account not found");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0390 — backend/src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java:40
+
+[backend/src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java:40](../../src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java#L40)
+
+When / guard context:
+```java
+,host);
+        if(rows.isEmpty())throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Account not found");
+        Integer linked=db.queryForObject("SELECT count(*) FROM event_payment_account_links WHERE event_id=? AND host_id=? AND destination_kind=? AND destination_id=?",Integer.class,eventId,host,kind,id);
+        if(linked==null||linked!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Account is not linked to this event");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0391 — backend/src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java:46
+
+[backend/src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java:46](../../src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java#L46)
+
+When / guard context:
+```java
+nks WHERE event_id=? AND destination_kind=? AND destination_id=?",Boolean.class,eventId,kind,id);
+                if(!Boolean.TRUE.equals(enabled)||!Boolean.TRUE.equals(account[0])||Set.of("FAILED","REVOKED").contains(account[1])||(!"VERIFIED".equals(account[1])&&account[2]==null)
+                    ||(kind.equals("UPI")&&!qr.hasValidQr(host,id)))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Enable and confirm this linked account before selecting Preferred; UPI requires a valid QR");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0392 — backend/src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java:51
+
+[backend/src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java:51](../../src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java#L51)
+
+When / guard context:
+```java
+T preferred=FALSE WHERE event_id=? AND destination_kind=? AND preferred",eventId,kind);
+                db.update("UPDATE event_payment_account_links SET preferred=TRUE WHERE event_id=? AND destination_kind=? AND destination_id=?",eventId,kind,id);
+            }
+            case "enable" -> {
+                if("REVOKED".equals(rows.getFirst()[1]))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Revoked accounts cannot be enabled");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0393 — backend/src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java:53
+
+[backend/src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java:53](../../src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java#L53)
+
+When / guard context:
+```java
+estination_id=?",eventId,kind,id);
+            }
+            case "enable" -> {
+                if("REVOKED".equals(rows.getFirst()[1]))throw new ResponseStatusException(HttpStatus.CONFLICT,"Revoked accounts cannot be enabled");
+                if(!Boolean.TRUE.equals(rows.getFirst()[0])){
+                    if(!eventId.equals(rows.getFirst()[3]))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Enable the host account before enabling it for this event");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0394 — backend/src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java:64
+
+[backend/src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java:64](../../src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java#L64)
+
+When / guard context:
+```java
+// Event-only destinations cannot be reused elsewhere. Archive them so they can be re-added later.
+                if(eventId.equals(rows.getFirst()[3]))db.update("UPDATE "+table+" SET enabled=FALSE,preferred=FALSE,archived_at=now(),version=version+1,updated_at=now() WHERE id=? AND host_id=?",id,host);
+            }
+            default ->
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid link action");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0395 — backend/src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java:20
+
+[backend/src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java:20](../../src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java#L20)
+
+When / guard context:
+```java
+ans.factory.annotation.Autowired private com.giftplatform.event.repository.EventRepository events;
+ @org.springframework.beans.factory.annotation.Autowired private EventAccountLinkService eventLinks;
+ private void validateEvent(UUID hostId,UUID eventId){if(eventId!=null && events.findById(eventId).filter(e->hostId.equals(e.getOwnerId())).isEmpty())
+```
+Failure / enforcement:
+```java
+throw new NoSuchElementException("Event not found");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0396 — backend/src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java:26
+
+[backend/src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java:26](../../src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java#L26)
+
+When / guard context:
+```java
+ring ifscMasked,VerificationStatus verificationStatus,boolean enabled,boolean preferred,boolean hostConfirmed,String accountLabel,UUID hostId,UUID eventId) {}
+ private UUID host(){UUID id=actor.requireAuthenticatedUserId();if(!users.findById(id).filter(u -> u.isEnabled() && u.getRole() == com.giftplatform.user.entity.UserRole.CUSTOMER).isPresent())
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Authenticated host is not eligible");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0397 — backend/src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java:35
+
+[backend/src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java:35](../../src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java#L35)
+
+When / guard context:
+```java
+dUpi(input,label,null);}
+ @Transactional public UpiView addUpi(String input,String label,UUID eventId){UUID hostId=host();validateEvent(hostId,eventId);String upi=PaymentDataProtector.normalizeUpi(input);String fingerprint=protector.fingerprint("UPI",upi);if(upis.existsByHostIdAndFingerprintAndEventIdAndArchivedAtIsNull(hostId,fingerprint,eventId))
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Destination already registered");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0398 — backend/src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java:37
+
+[backend/src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java:37](../../src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java#L37)
+
+When / guard context:
+```java
+Bank(String number,String ifsc,String holder,String label,UUID eventId){UUID hostId=host();validateEvent(hostId,eventId);String account=PaymentDataProtector.normalizeAccountNumber(number);String bankIfsc=PaymentDataProtector.normalizeIfsc(ifsc);if(holder==null||holder.isBlank()||holder.length()>120||holder.chars().anyMatch(Character::isISOControl))
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Invalid account holder name");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0399 — backend/src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java:37
+
+[backend/src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java:37](../../src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java#L37)
+
+When / guard context:
+```java
+ull||holder.isBlank()||holder.length()>120||holder.chars().anyMatch(Character::isISOControl))throw new IllegalArgumentException("Invalid account holder name");String name=holder.trim();String fingerprint=protector.fingerprint("BANK",bankIfsc+":"+account);if(banks.existsByHostIdAndFingerprintAndEventIdAndArchivedAtIsNull(hostId,fingerprint,eventId))
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Destination already registered");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0400 — backend/src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java:55
+
+[backend/src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java:55](../../src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java#L55)
+
+When / guard context:
+```java
+input){return addUpi(input,null); }
+ public BankView addBank(String n,String i,String h){return addBank(n,i,h,null); }
+
+ private static String normalizeLabel(String label){
+   if(label==null||label.isEmpty())return null;
+   String cleaned=label.strip();
+   if(cleaned.isEmpty()||cleaned.length()>50||cleaned.chars().anyMatch(Character::isISOControl))
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Account name must be 1-50 visible characters");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0401 — backend/src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java:59
+
+[backend/src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java:59](../../src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java#L59)
+
+When / guard context:
+```java
+|label.isEmpty())return null;
+   String cleaned=label.strip();
+   if(cleaned.isEmpty()||cleaned.length()>50||cleaned.chars().anyMatch(Character::isISOControl))throw new IllegalArgumentException("Account name must be 1-50 visible characters");
+   return cleaned;
+ }
+ private void requireQr(UUID hostId,UUID id){
+   if(!qrStorage.hasValidQr(hostId,id))
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Upload or generate a valid UPI QR before confirming or selecting Preferred");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0402 — backend/src/main/java/com/giftplatform/hostpayment/verification/DisabledHostDestinationVerifier.java:9
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/DisabledHostDestinationVerifier.java:9](../../src/main/java/com/giftplatform/hostpayment/verification/DisabledHostDestinationVerifier.java#L9)
+
+When / guard context:
+```java
+package com.giftplatform.hostpayment.verification;
+
+import java.util.UUID;
+
+public class DisabledHostDestinationVerifier implements HostDestinationVerifier {
+
+ @Override
+ public Result verify(UUID hostId, UUID destinationId, Kind kind) {
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException(
+          "Live destination verification is disabled"
+  );
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0403 — backend/src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationInboxController.java:46
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationInboxController.java:46](../../src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationInboxController.java#L46)
+
+When / guard context:
+```java
+y = true)
+    public ResponseEntity<List<Attempt>> history(@PathVariable String kind,
+        @PathVariable UUID destinationId, @RequestParam(defaultValue="20") int limit,
+        @RequestParam(defaultValue="0") int offset) {
+        String type = requireKind(kind);
+        if (limit < 1 || limit > 100 || offset < 0 || offset > 100000)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid pagination");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0404 — backend/src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationInboxController.java:70
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationInboxController.java:70](../../src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationInboxController.java#L70)
+
+When / guard context:
+```java
+riable String kind,
+        @PathVariable UUID destinationId) {
+        String type = requireKind(kind);
+        UUID hostId = actor.requireAuthenticatedUserId();
+        // No live provider may be selected through this endpoint until the
+        // authenticated, request-bound integration has been implemented.
+        if (liveEnabled)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+                "Live verification integration is not configured");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0405 — backend/src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationInboxController.java:102
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationInboxController.java:102](../../src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationInboxController.java#L102)
+
+When / guard context:
+```java
+= "UPI".equals(kind) ? "host_upi_accounts" : "host_bank_accounts";
+        // Table name comes only from a fixed allowlist, never client input.
+        Long count = jdbc.queryForObject("SELECT COUNT(*) FROM " + table +
+            " WHERE id=? AND host_id=?", Long.class, destinationId, hostId);
+        if (count == null || count == 0)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Destination not found");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0406 — backend/src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationInboxController.java:108
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationInboxController.java:108](../../src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationInboxController.java#L108)
+
+When / guard context:
+```java
+g.class, destinationId, hostId);
+        if (count == null || count == 0)
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Destination not found");
+    }
+
+    private static String requireKind(String kind) {
+        if ("upi".equalsIgnoreCase(kind)) return "UPI";
+        if ("bank".equalsIgnoreCase(kind)) return "BANK";
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid destination kind");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0407 — backend/src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationService.java:139
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationService.java:139](../../src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationService.java#L139)
+
+When / guard context:
+```java
+stinationId,
+                AuditAction.STATUS_CHANGE,
+                null,
+                Map.of("status", "VERIFIED"),
+                null
+            );
+        }
+
+        return evidence;
+    }
+
+    private static void ensureEligible(
+            boolean enabled,
+            VerificationStatus status) {
+
+        if (!enabled) {
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException(
+                "Disabled destination cannot be verified"
+            );
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0408 — backend/src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationService.java:145
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationService.java:145](../../src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationService.java#L145)
+
+When / guard context:
+```java
+turn evidence;
+    }
+
+    private static void ensureEligible(
+            boolean enabled,
+            VerificationStatus status) {
+
+        if (!enabled) {
+            throw new IllegalStateException(
+                "Disabled destination cannot be verified"
+            );
+        }
+
+        if (status == VerificationStatus.REVOKED) {
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException(
+                "Revoked destination cannot be verified"
+            );
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0409 — backend/src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationService.java:155
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationService.java:155](../../src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationService.java#L155)
+
+When / guard context:
+```java
+);
+        }
+
+        if (status == VerificationStatus.REVOKED) {
+            throw new IllegalStateException(
+                "Revoked destination cannot be verified"
+            );
+        }
+    }
+
+    private static VerificationEvidence interpret(
+            HostDestinationVerifier.Result result) {
+
+        if (result == null) {
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException(
+                "Verification provider returned no result"
+            );
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0410 — backend/src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationService.java:172
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationService.java:172](../../src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationService.java#L172)
+
+When / guard context:
+```java
+stinguish
+            // rejection from pending or unavailable. Fail closed.
+            return new VerificationEvidence(
+                VerificationOutcome.PENDING,
+                null,
+                null
+            );
+        }
+
+        if (result.providerReference() == null ||
+            result.providerReference().isBlank()) {
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException(
+                "Verified result lacks provider evidence"
+            );
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0411 — backend/src/main/java/com/giftplatform/hostpayment/verification/ProviderVerificationEnvelope.java:15
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/ProviderVerificationEnvelope.java:15](../../src/main/java/com/giftplatform/hostpayment/verification/ProviderVerificationEnvelope.java#L15)
+
+When / guard context:
+```java
+ostDestinationVerifier.Kind kind,
+        VerificationRequestBinding requestBinding, VerificationEvidence evidence,
+        boolean authenticatedProviderResponse) {
+    public ProviderVerificationEnvelope {
+        if (hostId == null || destinationId == null || kind == null
+                || requestBinding == null || evidence == null)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Missing verification response identity");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0412 — backend/src/main/java/com/giftplatform/hostpayment/verification/ProviderVerificationEvidenceGuard.java:19
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/ProviderVerificationEvidenceGuard.java:19](../../src/main/java/com/giftplatform/hostpayment/verification/ProviderVerificationEvidenceGuard.java#L19)
+
+When / guard context:
+```java
+stDestinationVerifier.Kind expectedKind,
+            VerificationAttemptState currentState,
+            VerificationRequestBinding storedRequest,
+            ProviderVerificationEnvelope response) {
+        VerificationResultMatcher.requirePending(currentState);
+        if (response == null || !response.authenticatedProviderResponse())
+```
+Failure / enforcement:
+```java
+throw new SecurityException("Unauthenticated verification provider response");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0413 — backend/src/main/java/com/giftplatform/hostpayment/verification/ProviderVerificationEvidenceGuard.java:23
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/ProviderVerificationEvidenceGuard.java:23](../../src/main/java/com/giftplatform/hostpayment/verification/ProviderVerificationEvidenceGuard.java#L23)
+
+When / guard context:
+```java
+sponse())
+            throw new SecurityException("Unauthenticated verification provider response");
+        if (!VerificationResultMatcher.matches(expectedHostId, expectedDestinationId,
+                expectedKind, storedRequest, response.hostId(), response.destinationId(),
+                response.kind(), response.requestBinding()))
+```
+Failure / enforcement:
+```java
+throw new SecurityException("Verification request correlation mismatch");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0414 — backend/src/main/java/com/giftplatform/hostpayment/verification/ProviderVerificationEvidenceGuard.java:27
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/ProviderVerificationEvidenceGuard.java:27](../../src/main/java/com/giftplatform/hostpayment/verification/ProviderVerificationEvidenceGuard.java#L27)
+
+When / guard context:
+```java
+sponse.requestBinding()))
+            throw new SecurityException("Verification request correlation mismatch");
+        VerificationEvidence evidence = response.evidence();
+        if (evidence.outcome() == VerificationOutcome.VERIFIED) {
+            if (!evidence.verified() || !storedRequest.provider().equals(evidence.provider()))
+```
+Failure / enforcement:
+```java
+throw new SecurityException("Verified evidence provider mismatch");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0415 — backend/src/main/java/com/giftplatform/hostpayment/verification/ProviderVerificationGate.java:33
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/ProviderVerificationGate.java:33](../../src/main/java/com/giftplatform/hostpayment/verification/ProviderVerificationGate.java#L33)
+
+When / guard context:
+```java
+BLED" : provider;
+        this.keyId=keyId;
+        this.keySecret=keySecret;
+    }
+
+    public boolean liveConfigured() {
+        return enabled && ("RAZORPAYX".equals(provider) || "CASHFREE".equals(provider))
+                && nonblank(keyId) && nonblank(keySecret);
+    }
+
+    public void requireLiveConfigured() {
+        if (!liveConfigured())
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Live destination verification unavailable");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0416 — backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXAuthenticatedReader.java:28
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXAuthenticatedReader.java:28](../../src/main/java/com/giftplatform/hostpayment/verification/RazorpayXAuthenticatedReader.java#L28)
+
+When / guard context:
+```java
+der(String keyId,String keySecret) {
+  this(keyId,keySecret,HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5))
+    .followRedirects(HttpClient.Redirect.NEVER).build());
+ }
+ RazorpayXAuthenticatedReader(String keyId,String keySecret,HttpClient http) {
+  if(keyId==null||keyId.isBlank()||keySecret==null||keySecret.isBlank()||http==null)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("RazorpayX credentials and transport required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0417 — backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXAuthenticatedReader.java:30
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXAuthenticatedReader.java:30](../../src/main/java/com/giftplatform/hostpayment/verification/RazorpayXAuthenticatedReader.java#L30)
+
+When / guard context:
+```java
+t.NEVER).build());
+ }
+ RazorpayXAuthenticatedReader(String keyId,String keySecret,HttpClient http) {
+  if(keyId==null||keyId.isBlank()||keySecret==null||keySecret.isBlank()||http==null)
+   throw new IllegalArgumentException("RazorpayX credentials and transport required");
+  if(keyId.contains(":")||keyId.contains("\n")||keySecret.contains("\n"))
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Invalid credential format");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0418 — backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXAuthenticatedReader.java:35
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXAuthenticatedReader.java:35](../../src/main/java/com/giftplatform/hostpayment/verification/RazorpayXAuthenticatedReader.java#L35)
+
+When / guard context:
+```java
+ns(":")||keyId.contains("\n")||keySecret.contains("\n"))
+   throw new IllegalArgumentException("Invalid credential format");
+  this.keyId=keyId;this.keySecret=keySecret;this.http=http;
+ }
+ public String fetch(String requestReference) throws IOException, InterruptedException {
+  if(requestReference==null||!ID.matcher(requestReference).matches())
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Invalid validation reference");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0419 — backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXAuthenticatedReader.java:42
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXAuthenticatedReader.java:42](../../src/main/java/com/giftplatform/hostpayment/verification/RazorpayXAuthenticatedReader.java#L42)
+
+When / guard context:
+```java
+et).getBytes(StandardCharsets.UTF_8));
+  HttpRequest req=HttpRequest.newBuilder(uri).timeout(Duration.ofSeconds(10))
+   .header("Authorization","Basic "+basic).header("Accept","application/json").GET().build();
+  HttpResponse<String> response=http.send(req,HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+  if(response.statusCode()!=200)
+```
+Failure / enforcement:
+```java
+throw new IOException("RazorpayX validation lookup failed (HTTP "+response.statusCode()+")");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0420 — backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXAuthenticatedReader.java:44
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXAuthenticatedReader.java:44](../../src/main/java/com/giftplatform/hostpayment/verification/RazorpayXAuthenticatedReader.java#L44)
+
+When / guard context:
+```java
+ion/json").GET().build();
+  HttpResponse<String> response=http.send(req,HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+  if(response.statusCode()!=200)throw new IOException("RazorpayX validation lookup failed (HTTP "+response.statusCode()+")");
+  if(response.body()==null||response.body().isBlank()||response.body().length()>262144)
+```
+Failure / enforcement:
+```java
+throw new IOException("Invalid RazorpayX validation response");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0421 — backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXReconciliationPreview.java:1
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXReconciliationPreview.java:1](../../src/main/java/com/giftplatform/hostpayment/verification/RazorpayXReconciliationPreview.java#L1)
+
+When / guard context:
+```java
+eview(AuthenticatedLookup lookup){this.lookup=Objects.requireNonNull(lookup);} public VerificationOutcome preview(VerificationAttempt attempt,UUID hostId,UUID destinationId,                                    String expectedHolderName) {  if(attempt==null||hostId==null||destinationId==null||expectedHolderName==null||expectedHolderName.isBlank())
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Complete request context required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0422 — backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXReconciliationPreview.java:1
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXReconciliationPreview.java:1](../../src/main/java/com/giftplatform/hostpayment/verification/RazorpayXReconciliationPreview.java#L1)
+
+When / guard context:
+```java
+ionId,                                    String expectedHolderName) {  if(attempt==null||hostId==null||destinationId==null||expectedHolderName==null||expectedHolderName.isBlank())   throw new IllegalArgumentException("Complete request context required");  if(!hostId.equals(attempt.getHostId())||!destinationId.equals(attempt.getDestinationId()))
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Attempt ownership mismatch");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0423 — backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXReconciliationPreview.java:1
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXReconciliationPreview.java:1](../../src/main/java/com/giftplatform/hostpayment/verification/RazorpayXReconciliationPreview.java#L1)
+
+When / guard context:
+```java
+erName==null||expectedHolderName.isBlank())   throw new IllegalArgumentException("Complete request context required");  if(!hostId.equals(attempt.getHostId())||!destinationId.equals(attempt.getDestinationId()))   throw new IllegalArgumentException("Attempt ownership mismatch");  if(attempt.getDestinationKind()!=HostDestinationVerifier.Kind.BANK)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Bank validation only");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0424 — backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXReconciliationPreview.java:1
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXReconciliationPreview.java:1](../../src/main/java/com/giftplatform/hostpayment/verification/RazorpayXReconciliationPreview.java#L1)
+
+When / guard context:
+```java
+ttempt ownership mismatch");  if(attempt.getDestinationKind()!=HostDestinationVerifier.Kind.BANK)   throw new IllegalArgumentException("Bank validation only");  VerificationResultMatcher.requirePending(attempt.getState());  VerificationRequestBinding binding=attempt.getRequestBinding();  if(binding==null||!"RAZORPAYX".equals(binding.provider()))
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Missing trusted RazorpayX request binding");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0425 — backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXValidationResponse.java:24
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXValidationResponse.java:24](../../src/main/java/com/giftplatform/hostpayment/verification/RazorpayXValidationResponse.java#L24)
+
+When / guard context:
+```java
+String accountStatus,
+        String registeredName,
+        String fundAccountId,
+        String accountType) {
+
+    public static RazorpayXValidationResponse parse(
+            ObjectMapper mapper, String json) {
+        try {
+            JsonNode root = mapper.readTree(json);
+            if (root == null || !root.isObject()) {
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException(
+                    "Invalid validation response");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0426 — backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXValidationResponse.java:39
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXValidationResponse.java:39](../../src/main/java/com/giftplatform/hostpayment/verification/RazorpayXValidationResponse.java#L39)
+
+When / guard context:
+```java
+se(
+                text(root, "id"),
+                text(root, "entity"),
+                text(root, "status"),
+                text(results, "account_status"),
+                text(results, "registered_name"),
+                text(fund, "id"),
+                text(fund, "account_type")
+            );
+        } catch (Exception ex) {
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException(
+                "Invalid validation response");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0427 — backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXVerificationConfiguration.java:24
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXVerificationConfiguration.java:24](../../src/main/java/com/giftplatform/hostpayment/verification/RazorpayXVerificationConfiguration.java#L24)
+
+When / guard context:
+```java
+keyId,
+        String keySecret,
+        String sourceAccountNumber) {
+
+    public boolean isEnabled() {
+        return Boolean.TRUE.equals(enabled);
+    }
+
+    public void requireConfigured() {
+        if (!isEnabled()
+                || blank(keyId)
+                || blank(keySecret)
+                || blank(sourceAccountNumber)) {
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException(
+                "RazorpayX verification is unavailable");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0428 — backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java:22
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java:22](../../src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java#L22)
+
+When / guard context:
+```java
+insertable=false,updatable=false) private Instant createdAt;
+ @Column(name="updated_at",insertable=false,updatable=false) private Instant updatedAt;
+ protected VerificationAttempt() {}
+ public VerificationAttempt(UUID id,UUID hostId,UUID destinationId,HostDestinationVerifier.Kind kind) {
+  if(id==null||hostId==null||destinationId==null||kind==null)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Missing attempt identity");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0429 — backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java:30
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java:30](../../src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java#L30)
+
+When / guard context:
+```java
+this.state=VerificationAttemptState.PENDING;
+ }
+ public VerificationRequestBinding getRequestBinding(){
+  if(requestProvider==null)return null;
+  return new VerificationRequestBinding(requestProvider,requestReference,requestFundAccountId);
+ }
+ public void bindRequest(VerificationRequestBinding binding){
+  if(state!=VerificationAttemptState.PENDING)
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Attempt already finalized");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0430 — backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java:31
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java:31](../../src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java#L31)
+
+When / guard context:
+```java
+g getRequestBinding(){
+  if(requestProvider==null)return null;
+  return new VerificationRequestBinding(requestProvider,requestReference,requestFundAccountId);
+ }
+ public void bindRequest(VerificationRequestBinding binding){
+  if(state!=VerificationAttemptState.PENDING)throw new IllegalStateException("Attempt already finalized");
+  if(binding==null)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Request binding required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0431 — backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java:32
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java:32](../../src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java#L32)
+
+When / guard context:
+```java
+uestBinding(requestProvider,requestReference,requestFundAccountId);
+ }
+ public void bindRequest(VerificationRequestBinding binding){
+  if(state!=VerificationAttemptState.PENDING)throw new IllegalStateException("Attempt already finalized");
+  if(binding==null)throw new IllegalArgumentException("Request binding required");
+  if(requestProvider!=null)
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Request already bound");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0432 — backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java:44
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java:44](../../src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java#L44)
+
+When / guard context:
+```java
+D getDestinationId(){return destinationId;}
+ public HostDestinationVerifier.Kind getDestinationKind(){return destinationKind;}
+ public VerificationAttemptState getState(){return state;}
+ public String getProviderReference(){return providerReference;}
+ public void complete(VerificationEvidence evidence){
+  if(state!=VerificationAttemptState.PENDING)
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Attempt already finalized");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0433 — backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java:45
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java:45](../../src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java#L45)
+
+When / guard context:
+```java
+etDestinationKind(){return destinationKind;}
+ public VerificationAttemptState getState(){return state;}
+ public String getProviderReference(){return providerReference;}
+ public void complete(VerificationEvidence evidence){
+  if(state!=VerificationAttemptState.PENDING)throw new IllegalStateException("Attempt already finalized");
+  if(evidence==null)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Evidence required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0434 — backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java:47
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java:47](../../src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java#L47)
+
+When / guard context:
+```java
+tionEvidence evidence){
+  if(state!=VerificationAttemptState.PENDING)throw new IllegalStateException("Attempt already finalized");
+  if(evidence==null)throw new IllegalArgumentException("Evidence required");
+  switch(evidence.outcome()) {
+   case VERIFIED -> { if(!evidence.verified()||blank(evidence.provider())||blank(evidence.providerReference()))
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Missing verified evidence");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0435 — backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java:50
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java:50](../../src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java#L50)
+
+When / guard context:
+```java
+nce");state=VerificationAttemptState.VERIFIED;provider=evidence.provider();providerReference=evidence.providerReference(); }
+   case REJECTED -> {state=VerificationAttemptState.REJECTED;provider=evidence.provider();providerReference=evidence.providerReference();}
+   case UNAVAILABLE -> state=VerificationAttemptState.UNAVAILABLE;
+   case PENDING ->
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Pending is not a final result");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0436 — backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttemptCoordinator.java:20
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttemptCoordinator.java:20](../../src/main/java/com/giftplatform/hostpayment/verification/VerificationAttemptCoordinator.java#L20)
+
+When / guard context:
+```java
+public VerificationAttemptCoordinator(VerificationAttemptRepository attempts,HostBankAccountRepository banks,HostUpiAccountRepository upis){this.attempts=attempts;this.banks=banks;this.upis=upis;}
+ @Transactional
+ public UUID begin(UUID hostId,UUID destinationId,HostDestinationVerifier.Kind kind){
+  if(hostId==null||destinationId==null||kind==null)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Missing identity");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0437 — backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttemptCoordinator.java:23
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttemptCoordinator.java:23](../../src/main/java/com/giftplatform/hostpayment/verification/VerificationAttemptCoordinator.java#L23)
+
+When / guard context:
+```java
+hostId==null||destinationId==null||kind==null)throw new IllegalArgumentException("Missing identity");
+  if(kind==HostDestinationVerifier.Kind.BANK){
+   var a=banks.findByIdAndHostId(destinationId,hostId).orElseThrow(()->new NoSuchElementException("Destination not found"));
+   if(!a.isEnabled()||a.getVerificationStatus()==VerificationStatus.REVOKED)
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Destination ineligible");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0438 — backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttemptCoordinator.java:26
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttemptCoordinator.java:26](../../src/main/java/com/giftplatform/hostpayment/verification/VerificationAttemptCoordinator.java#L26)
+
+When / guard context:
+```java
+d"));
+   if(!a.isEnabled()||a.getVerificationStatus()==VerificationStatus.REVOKED)throw new IllegalStateException("Destination ineligible");
+  }else{
+   var a=upis.findByIdAndHostId(destinationId,hostId).orElseThrow(()->new NoSuchElementException("Destination not found"));
+   if(!a.isEnabled()||a.getVerificationStatus()==VerificationStatus.REVOKED)
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Destination ineligible");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0439 — backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttemptCoordinator.java:36
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttemptCoordinator.java:36](../../src/main/java/com/giftplatform/hostpayment/verification/VerificationAttemptCoordinator.java#L36)
+
+When / guard context:
+```java
+ing.get().getId();
+  var a=new VerificationAttempt(UUID.randomUUID(),hostId,destinationId,kind);
+  attempts.saveAndFlush(a); // Partial unique index rejects concurrent duplicate creation.
+  return a.getId();
+ }
+ @Transactional
+ public void finalizeAttempt(UUID hostId,UUID attemptId,VerificationEvidence evidence){
+  if(hostId==null||attemptId==null)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Missing identity");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0440 — backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationEvidence.java:18
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationEvidence.java:18](../../src/main/java/com/giftplatform/hostpayment/verification/VerificationEvidence.java#L18)
+
+When / guard context:
+```java
+providerReference
+) {
+    public VerificationEvidence {
+        Objects.requireNonNull(outcome, "outcome is required");
+
+        if (outcome == VerificationOutcome.VERIFIED) {
+            if (provider == null || provider.isBlank()
+                    || providerReference == null
+                    || providerReference.isBlank()) {
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException(
+                        "Verified outcome requires provider evidence"
+                );
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0441 — backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationRequestBinding.java:7
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationRequestBinding.java:7](../../src/main/java/com/giftplatform/hostpayment/verification/VerificationRequestBinding.java#L7)
+
+When / guard context:
+```java
+atform.hostpayment.verification;
+
+/** Non-secret provider identifiers captured when an authenticated provider request is accepted. */
+public record VerificationRequestBinding(String provider, String requestReference, String fundAccountId) {
+ public VerificationRequestBinding {
+  if(blank(provider)||blank(requestReference)||blank(fundAccountId))
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Complete request binding required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0442 — backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationRequestBinding.java:9
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationRequestBinding.java:9](../../src/main/java/com/giftplatform/hostpayment/verification/VerificationRequestBinding.java#L9)
+
+When / guard context:
+```java
+questBinding(String provider, String requestReference, String fundAccountId) {
+ public VerificationRequestBinding {
+  if(blank(provider)||blank(requestReference)||blank(fundAccountId))
+   throw new IllegalArgumentException("Complete request binding required");
+  if(provider.length()>40||requestReference.length()>120||fundAccountId.length()>120)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Request binding exceeds storage limits");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0443 — backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationResultMatcher.java:24
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationResultMatcher.java:24](../../src/main/java/com/giftplatform/hostpayment/verification/VerificationResultMatcher.java#L24)
+
+When / guard context:
+```java
+tedKind==responseKind
+   && Objects.equals(stored.provider(),response.provider())
+   && Objects.equals(stored.requestReference(),response.requestReference())
+   && Objects.equals(stored.fundAccountId(),response.fundAccountId());
+ }
+ public static void requirePending(VerificationAttemptState state) {
+  if(state!=VerificationAttemptState.PENDING)
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Verification attempt is not pending");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0444 — backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationClient.java:24
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationClient.java:24](../../src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationClient.java#L24)
+
+When / guard context:
+```java
+ean enabled,
+        @Value("${gift.payment.account-verification.environment:SANDBOX}") String environment,
+        @Value("${gift.cashfree.secureid.client-id:}") String clientId,
+        @Value("${gift.cashfree.secureid.client-secret:}") String clientSecret) {
+        if(!java.util.Set.of("SANDBOX","PRODUCTION").contains(environment))
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Invalid account verification environment");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0445 — backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationClient.java:33
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationClient.java:33](../../src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationClient.java#L33)
+
+When / guard context:
+```java
+.connectTimeout(Duration.ofSeconds(3))
+            .followRedirects(HttpClient.Redirect.NEVER).build();
+    }
+    public String environment(){return environment;}
+    public boolean available(){return enabled&&!clientId.isBlank()&&!clientSecret.isBlank();}
+    public JsonNode verify(String kind,Map<String,String> payload) {
+        if(!available())
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Account verification credentials are not configured");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0446 — backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationClient.java:34
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationClient.java:34](../../src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationClient.java#L34)
+
+When / guard context:
+```java
+vailable(){return enabled&&!clientId.isBlank()&&!clientSecret.isBlank();}
+    public JsonNode verify(String kind,Map<String,String> payload) {
+        if(!available())throw new IllegalStateException("Account verification credentials are not configured");
+        String path=switch(kind){case "BANK"->"/bank-account/sync";case "UPI"->"/upi";default->
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Invalid kind");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0447 — backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationClient.java:44
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationClient.java:44](../../src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationClient.java#L44)
+
+When / guard context:
+```java
+.POST(HttpRequest.BodyPublishers.ofString(mapper.writeValueAsString(payload))).build();
+            var response=http.send(request,HttpResponse.BodyHandlers.ofInputStream());
+            try(var stream=response.body()){
+                byte[] bytes=stream.readNBytes(65537);
+                if(response.statusCode()!=200||bytes.length>65536)
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Account verification provider unavailable");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0448 — backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationClient.java:47
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationClient.java:47](../../src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationClient.java#L47)
+
+When / guard context:
+```java
+ponse.body()){
+                byte[] bytes=stream.readNBytes(65537);
+                if(response.statusCode()!=200||bytes.length>65536)throw new IllegalStateException("Account verification provider unavailable");
+                return mapper.readTree(bytes);
+            }
+        }catch(InterruptedException ex){Thread.currentThread().interrupt();
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Account verification interrupted");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0449 — backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationClient.java:48
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationClient.java:48](../../src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationClient.java#L48)
+
+When / guard context:
+```java
+()!=200||bytes.length>65536)throw new IllegalStateException("Account verification provider unavailable");
+                return mapper.readTree(bytes);
+            }
+        }catch(InterruptedException ex){Thread.currentThread().interrupt();throw new IllegalStateException("Account verification interrupted");}
+        catch(java.io.IOException ex){
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Account verification provider unavailable");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0450 — backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java:36
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java:36](../../src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java#L36)
+
+When / guard context:
+```java
+tings("CASHFREE",provider.environment(),provider.available(),
+            provider.available()?"Account verification is ready":"Configure Cashfree Secure ID credentials to enable account verification"));
+    }
+    private static String table(String kind){return switch(kind){case "BANK"->"host_bank_accounts";case "UPI"->"host_upi_accounts";default->
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid account kind");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0451 — backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java:39
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java:39](../../src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java#L39)
+
+When / guard context:
+```java
+>"host_upi_accounts";default->throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid account kind");};}
+    private void owned(UUID host,UUID id,String table){
+        Integer count=db.queryForObject("SELECT count(*) FROM "+table+" WHERE id=? AND host_id=? AND archived_at IS NULL",Integer.class,id,host);
+        if(count==null||count!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Account not found");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0452 — backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java:53
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java:53](../../src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java#L53)
+
+When / guard context:
+```java
+hecks(host,id,type));
+    }
+    @PostMapping("/{kind}/{id}") public ResponseEntity<Check> verify(@PathVariable String kind,@PathVariable UUID id,@RequestBody Request input){
+        UUID host=actor.requireAuthenticatedUserId();String type=kind.toUpperCase(Locale.ROOT),table=table(type);owned(host,id,table);
+        if(input==null||!input.consent())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Consent is required for provider account verification");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0453 — backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java:54
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java:54](../../src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java#L54)
+
+When / guard context:
+```java
+questBody Request input){
+        UUID host=actor.requireAuthenticatedUserId();String type=kind.toUpperCase(Locale.ROOT),table=table(type);owned(host,id,table);
+        if(input==null||!input.consent())throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Consent is required for provider account verification");
+        if(!provider.available())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Account verification provider credentials are not configured");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0454 — backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java:60
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java:60](../../src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java#L60)
+
+When / guard context:
+```java
+ET outcome='UNAVAILABLE',completed_at=now() WHERE host_id=? AND outcome='PENDING' AND created_at<now()-interval '2 minutes'",host);
+            Integer recent=db.queryForObject("SELECT count(*) FROM host_account_verification_checks WHERE host_id=? AND created_at>now()-interval '1 minute'",Integer.class,host);
+            if(recent!=null&&recent>=5)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,"Wait a minute before requesting more verification checks");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0455 — backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java:62
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java:62](../../src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java#L62)
+
+When / guard context:
+```java
+eption(HttpStatus.TOO_MANY_REQUESTS,"Wait a minute before requesting more verification checks");
+            Integer pending=db.queryForObject("SELECT count(*) FROM host_account_verification_checks WHERE host_id=? AND destination_id=? AND destination_kind=? AND outcome='PENDING'",Integer.class,host,id,type);
+            if(pending!=null&&pending>0)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Account verification is already in progress");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0456 — backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java:70
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java:70](../../src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java#L70)
+
+When / guard context:
+```java
+Map.of("bank_account",protector.decrypt(host,id,"account_number",rs.getString(2)),"ifsc",protector.decrypt(host,id,"ifsc",rs.getString(3)),"name",name),null,name);
+                }
+                String name=input.accountHolderName();
+                if(name==null||name.isBlank()||name.length()>120||name.chars().anyMatch(Character::isISOControl))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Enter the account holder name for UPI verification");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0457 — backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java:74
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java:74](../../src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java#L74)
+
+When / guard context:
+```java
+HttpStatus.BAD_REQUEST,"Enter the account holder name for UPI verification");
+                String upi=protector.decrypt(host,id,"upi_id",rs.getString(2));
+                return new Destination(rs.getLong(1),Map.of("verification_id",reference,"vpa",upi,"name",name.strip()),upi,name.strip());
+            },id,host);
+            if(rows.size()!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Account is not eligible for verification");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0458 — backend/src/main/java/com/giftplatform/hostpayment/verification/cashfree/CashfreeSecureIdTransport.java:28
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/cashfree/CashfreeSecureIdTransport.java:28](../../src/main/java/com/giftplatform/hostpayment/verification/cashfree/CashfreeSecureIdTransport.java#L28)
+
+When / guard context:
+```java
+ofSeconds(3))
+        .followRedirects(HttpClient.Redirect.NEVER).build();
+  }
+  public boolean available() { return enabled && !clientId.isBlank() && !clientSecret.isBlank(); }
+  /** Caller supplies only one of the two allowlisted, operator-reviewed sandbox API paths. */
+  public int submitSandbox(String path, String json) {
+    if (!available())
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Cashfree Secure ID sandbox not configured");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0459 — backend/src/main/java/com/giftplatform/hostpayment/verification/cashfree/CashfreeSecureIdTransport.java:30
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/cashfree/CashfreeSecureIdTransport.java:30](../../src/main/java/com/giftplatform/hostpayment/verification/cashfree/CashfreeSecureIdTransport.java#L30)
+
+When / guard context:
+```java
+r supplies only one of the two allowlisted, operator-reviewed sandbox API paths. */
+  public int submitSandbox(String path, String json) {
+    if (!available()) throw new IllegalStateException("Cashfree Secure ID sandbox not configured");
+    if (!path.equals("/verification/bank-account/sync") && !path.equals("/verification/upi-penny-drop"))
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Unsupported Secure ID route");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0460 — backend/src/main/java/com/giftplatform/hostpayment/verification/cashfree/CashfreeSecureIdTransport.java:31
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/cashfree/CashfreeSecureIdTransport.java:31](../../src/main/java/com/giftplatform/hostpayment/verification/cashfree/CashfreeSecureIdTransport.java#L31)
+
+When / guard context:
+```java
+x(String path, String json) {
+    if (!available()) throw new IllegalStateException("Cashfree Secure ID sandbox not configured");
+    if (!path.equals("/verification/bank-account/sync") && !path.equals("/verification/upi-penny-drop"))
+      throw new IllegalArgumentException("Unsupported Secure ID route");
+    if (json==null || json.length()>4096)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Invalid request size");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0461 — backend/src/main/java/com/giftplatform/hostpayment/verification/cashfree/CashfreeSecureIdTransport.java:40
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/cashfree/CashfreeSecureIdTransport.java:40](../../src/main/java/com/giftplatform/hostpayment/verification/cashfree/CashfreeSecureIdTransport.java#L40)
+
+When / guard context:
+```java
+clientSecret)
+          .POST(HttpRequest.BodyPublishers.ofString(json)).build();
+      // Intentionally discard response body. Never trust unvalidated sandbox status as production proof.
+      return client.send(request,HttpResponse.BodyHandlers.discarding()).statusCode();
+    } catch (InterruptedException e) { Thread.currentThread().interrupt();
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Sandbox request interrupted");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0462 — backend/src/main/java/com/giftplatform/hostpayment/verification/cashfree/CashfreeSecureIdTransport.java:41
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/cashfree/CashfreeSecureIdTransport.java:41](../../src/main/java/com/giftplatform/hostpayment/verification/cashfree/CashfreeSecureIdTransport.java#L41)
+
+When / guard context:
+```java
+discard response body. Never trust unvalidated sandbox status as production proof.
+      return client.send(request,HttpResponse.BodyHandlers.discarding()).statusCode();
+    } catch (InterruptedException e) { Thread.currentThread().interrupt(); throw new IllegalStateException("Sandbox request interrupted"); }
+      catch (java.io.IOException e) {
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Sandbox verification unavailable");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0463 — backend/src/main/java/com/giftplatform/hostpayment/verification/cashfree/CashfreeVerificationAttemptService.java:18
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/cashfree/CashfreeVerificationAttemptService.java:18](../../src/main/java/com/giftplatform/hostpayment/verification/cashfree/CashfreeVerificationAttemptService.java#L18)
+
+When / guard context:
+```java
+b=db;this.transport=transport;}
+  @Transactional
+  public Map<String,Object> requestSandbox(UUID groupId,UUID destinationId,UUID creatorId){
+    Integer count=db.queryForObject("SELECT count(*) FROM gift_group_payment_destinations WHERE id=? AND group_id=? AND status<>'REVOKED'",Integer.class,destinationId,groupId);
+    if(count==null || count!=1)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Destination not found");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0464 — backend/src/main/java/com/giftplatform/hostpayment/verification/provider/DisabledVerificationProviderTransport.java:6
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/provider/DisabledVerificationProviderTransport.java:6](../../src/main/java/com/giftplatform/hostpayment/verification/provider/DisabledVerificationProviderTransport.java#L6)
+
+When / guard context:
+```java
+e com.giftplatform.hostpayment.verification.provider;
+
+/** Deliberately refuses all live operations, including when an endpoint is configured. */
+public final class DisabledVerificationProviderTransport implements VerificationProviderTransport {
+    @Override public ProviderVerificationResponse submit(ProviderVerificationRequest request) {
+```
+Failure / enforcement:
+```java
+throw new VerificationProviderUnavailableException("Live verification transport disabled");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0465 — backend/src/main/java/com/giftplatform/hostpayment/verification/provider/ProviderResponseCorrelation.java:13
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/provider/ProviderResponseCorrelation.java:13](../../src/main/java/com/giftplatform/hostpayment/verification/provider/ProviderResponseCorrelation.java#L13)
+
+When / guard context:
+```java
+ProviderVerificationResponse response) {
+        if (request == null || response == null || response.requestReference() == null
+                || !MessageDigest.isEqual(request.requestReference().getBytes(StandardCharsets.UTF_8),
+                                           response.requestReference().getBytes(StandardCharsets.UTF_8)))
+```
+Failure / enforcement:
+```java
+throw new SecurityException("Provider response reference mismatch");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0466 — backend/src/main/java/com/giftplatform/hostpayment/verification/provider/ProviderVerificationRequest.java:13
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/provider/ProviderVerificationRequest.java:13](../../src/main/java/com/giftplatform/hostpayment/verification/provider/ProviderVerificationRequest.java#L13)
+
+When / guard context:
+```java
+ationId, Kind kind, String requestReference) {
+    public enum Kind { UPI, BANK }
+    public ProviderVerificationRequest {
+        if (attemptId == null || hostId == null || destinationId == null || kind == null
+                || requestReference == null || requestReference.isBlank()
+                || requestReference.length() > 120)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Invalid verification request identity");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0467 — backend/src/main/java/com/giftplatform/hostpayment/verification/provider/ProviderVerificationResponse.java:8
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/provider/ProviderVerificationResponse.java:8](../../src/main/java/com/giftplatform/hostpayment/verification/provider/ProviderVerificationResponse.java#L8)
+
+When / guard context:
+```java
+NOT proof of provider authenticity or account ownership. */
+public record ProviderVerificationResponse(String requestReference, String providerReference,
+        Outcome outcome, String providerCode) {
+    public enum Outcome { PENDING, REJECTED, UNAVAILABLE, VERIFIED_CLAIMED }
+    public ProviderVerificationResponse {
+        if (outcome == null)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Outcome required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0468 — backend/src/main/java/com/giftplatform/hostpayment/verification/provider/ProviderVerificationTransportFactory.java:7
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/provider/ProviderVerificationTransportFactory.java:7](../../src/main/java/com/giftplatform/hostpayment/verification/provider/ProviderVerificationTransportFactory.java#L7)
+
+When / guard context:
+```java
+tion.provider;
+
+/** 5S does not provide a live HTTP transport. Future providers must be separately reviewed. */
+public final class ProviderVerificationTransportFactory {
+    private ProviderVerificationTransportFactory() {}
+    public static VerificationProviderTransport create(VerificationProviderSettings settings) {
+        if (settings == null)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Settings required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0469 — backend/src/main/java/com/giftplatform/hostpayment/verification/provider/VerificationProviderSettings.java:13
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/provider/VerificationProviderSettings.java:13](../../src/main/java/com/giftplatform/hostpayment/verification/provider/VerificationProviderSettings.java#L13)
+
+When / guard context:
+```java
+Configuration model only. It never opens a network connection. */
+public record VerificationProviderSettings(
+        Provider provider, boolean enabled, String keyId, String keySecret,
+        URI endpoint, Duration timeout) {
+    public enum Provider { RAZORPAYX, CASHFREE }
+    public VerificationProviderSettings {
+        if (provider == null)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Provider required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0470 — backend/src/main/java/com/giftplatform/hostpayment/verification/provider/VerificationProviderSettings.java:16
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/provider/VerificationProviderSettings.java:16](../../src/main/java/com/giftplatform/hostpayment/verification/provider/VerificationProviderSettings.java#L16)
+
+When / guard context:
+```java
+, Duration timeout) {
+    public enum Provider { RAZORPAYX, CASHFREE }
+    public VerificationProviderSettings {
+        if (provider == null) throw new IllegalArgumentException("Provider required");
+        if (timeout == null || timeout.isNegative() || timeout.isZero()
+                || timeout.compareTo(Duration.ofSeconds(15)) > 0)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Timeout must be 1ms to 15s");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0471 — backend/src/main/java/com/giftplatform/hostpayment/verification/provider/VerificationProviderSettings.java:19
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/provider/VerificationProviderSettings.java:19](../../src/main/java/com/giftplatform/hostpayment/verification/provider/VerificationProviderSettings.java#L19)
+
+When / guard context:
+```java
+legalArgumentException("Provider required");
+        if (timeout == null || timeout.isNegative() || timeout.isZero()
+                || timeout.compareTo(Duration.ofSeconds(15)) > 0)
+            throw new IllegalArgumentException("Timeout must be 1ms to 15s");
+        if (enabled) {
+            if (blank(keyId) || blank(keySecret))
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Enabled provider requires credentials");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0472 — backend/src/main/java/com/giftplatform/hostpayment/verification/provider/VerificationProviderSettings.java:23
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/provider/VerificationProviderSettings.java:23](../../src/main/java/com/giftplatform/hostpayment/verification/provider/VerificationProviderSettings.java#L23)
+
+When / guard context:
+```java
+|| blank(keySecret))
+                throw new IllegalStateException("Enabled provider requires credentials");
+            if (endpoint == null || !"https".equalsIgnoreCase(endpoint.getScheme())
+                    || endpoint.getHost() == null || endpoint.getUserInfo() != null
+                    || endpoint.getFragment() != null)
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Enabled provider requires HTTPS endpoint");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0473 — backend/src/main/java/com/giftplatform/hostpayment/verification/provider/VerificationProviderSettings.java:28
+
+[backend/src/main/java/com/giftplatform/hostpayment/verification/provider/VerificationProviderSettings.java:28](../../src/main/java/com/giftplatform/hostpayment/verification/provider/VerificationProviderSettings.java#L28)
+
+When / guard context:
+```java
+Host() == null || endpoint.getUserInfo() != null
+                    || endpoint.getFragment() != null)
+                throw new IllegalStateException("Enabled provider requires HTTPS endpoint");
+        }
+    }
+    private static boolean blank(String s) { return s == null || s.isBlank(); }
+    public void requireEnabled() {
+        if (!enabled)
+```
+Failure / enforcement:
+```java
+throw new VerificationProviderUnavailableException("Provider verification disabled");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+## monetization
+
+### RULE-0474 — backend/src/main/java/com/giftplatform/monetization/CommercialAccessService.java:32
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialAccessService.java:32](../../src/main/java/com/giftplatform/monetization/CommercialAccessService.java#L32)
+
+When / guard context:
+```java
+if(premium(host))return;
+        Integer maximum=db.queryForObject("SELECT free_active_events FROM commercial_policy WHERE id=1",Integer.class);
+        Integer active=db.queryForObject("SELECT count(*) FROM events WHERE owner_id=? AND status='PUBLISHED' AND id<>?",Integer.class,host,event);
+        if(active!=null&&maximum!=null&&active>=maximum)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.PAYMENT_REQUIRED,"Your free active-event limit is reached. Upgrade your host plan or complete an active event.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0475 — backend/src/main/java/com/giftplatform/monetization/CommercialAccessService.java:39
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialAccessService.java:39](../../src/main/java/com/giftplatform/monetization/CommercialAccessService.java#L39)
+
+When / guard context:
+```java
+public void requireGroupFee(UUID group) {
+        if(!pricing.enabled("GROUP_GIFT"))return;
+        var row=db.queryForMap("SELECT admin_id,collection_published_at FROM gift_groups WHERE id=?",group);
+        if(row.get("collection_published_at")!=null)return;
+        if(!has("GROUP_ADMIN",(UUID)row.get("admin_id"),"GROUP_GIFT",group))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.PAYMENT_REQUIRED,"Pay the group coordination fee before publishing");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0476 — backend/src/main/java/com/giftplatform/monetization/CommercialController.java:38
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialController.java:38](../../src/main/java/com/giftplatform/monetization/CommercialController.java#L38)
+
+When / guard context:
+```java
+n setup.createPlacement(input);}
+    @GetMapping("/api/v1/commerce/analytics/{eventId}") public Map<String,Object> analytics(@PathVariable UUID eventId){
+        UUID host=actors.requireAuthenticatedUserId();
+        if(!Integer.valueOf(1).equals(db.queryForObject("SELECT count(*) FROM events WHERE id=? AND owner_id=?",Integer.class,eventId,host)))
+```
+Failure / enforcement:
+```java
+throw new org.springframework.web.server.ResponseStatusException(HttpStatus.NOT_FOUND);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0477 — backend/src/main/java/com/giftplatform/monetization/CommercialController.java:39
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialController.java:39](../../src/main/java/com/giftplatform/monetization/CommercialController.java#L39)
+
+When / guard context:
+```java
+){
+        UUID host=actors.requireAuthenticatedUserId();
+        if(!Integer.valueOf(1).equals(db.queryForObject("SELECT count(*) FROM events WHERE id=? AND owner_id=?",Integer.class,eventId,host)))throw new org.springframework.web.server.ResponseStatusException(HttpStatus.NOT_FOUND);
+        if(pricing.enabled("HOST_PLAN")&&!access.premium(host))
+```
+Failure / enforcement:
+```java
+throw new org.springframework.web.server.ResponseStatusException(HttpStatus.PAYMENT_REQUIRED,"Premium host plan required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0478 — backend/src/main/java/com/giftplatform/monetization/CommercialPublicService.java:17
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialPublicService.java:17](../../src/main/java/com/giftplatform/monetization/CommercialPublicService.java#L17)
+
+When / guard context:
+```java
+Template db;private final MonetizationService pricing;
+    public CommercialPublicService(JdbcTemplate db,MonetizationService pricing){this.db=db;this.pricing=pricing;}
+    @Transactional public List<Map<String,Object>> placements(String stream,String occasion){
+        if(!Set.of("VENDOR_LISTING","SPONSORED_GIFT").contains(stream==null?"":stream))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0479 — backend/src/main/java/com/giftplatform/monetization/CommercialPublicService.java:31
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialPublicService.java:31](../../src/main/java/com/giftplatform/monetization/CommercialPublicService.java#L31)
+
+When / guard context:
+```java
+_at>now())
+            ORDER BY p.created_at DESC LIMIT 50
+            """,stream,occasion==null?"":occasion,occasion==null?"":occasion);
+    }
+    @Transactional public String visit(UUID id){
+        var rows=db.queryForList("SELECT stream,url,owner_id FROM commercial_placements WHERE id=? AND moderation='APPROVED'",id);
+        if(rows.size()!=1)
+```
+Failure / enforcement:
+```java
+throw notFound();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0480 — backend/src/main/java/com/giftplatform/monetization/CommercialPublicService.java:32
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialPublicService.java:32](../../src/main/java/com/giftplatform/monetization/CommercialPublicService.java#L32)
+
+When / guard context:
+```java
+und();var row=rows.getFirst();
+        if(!pricing.enabled((String)row.get("stream"))||!Boolean.TRUE.equals(db.queryForObject("SELECT EXISTS(SELECT 1 FROM commercial_entitlements WHERE buyer_kind='HOST' AND buyer_id=? AND stream=? AND resource_id=? AND starts_at<=now() AND expires_at>now())",Boolean.class,row.get("owner_id"),row.get("stream"),id)))
+```
+Failure / enforcement:
+```java
+throw notFound();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0481 — backend/src/main/java/com/giftplatform/monetization/CommercialPublicService.java:41
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialPublicService.java:41](../../src/main/java/com/giftplatform/monetization/CommercialPublicService.java#L41)
+
+When / guard context:
+```java
+ft){
+        var rows=db.queryForList("""
+            SELECT g.product_url,g.event_id FROM gifts g JOIN events e ON e.id=g.event_id
+            WHERE e.public_token=? AND e.status='PUBLISHED' AND g.id=? AND g.status='ACTIVE'
+              AND g.visibility='PUBLIC' AND g.product_url IS NOT NULL
+            """,token,gift);
+        if(rows.size()!=1)
+```
+Failure / enforcement:
+```java
+throw notFound();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0482 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:40
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:40](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L40)
+
+When / guard context:
+```java
+mentId,String signature) {}
+    private static final Set<String> PURCHASES=Set.of("HOST_PLAN","PREMIUM_TEMPLATE","VENDOR_LISTING","SPONSORED_GIFT","GROUP_GIFT");
+
+    @Transactional
+    public Offer offer(Buyer buyer,String code,UUID resource) {
+        if(buyer==null || buyer.id()==null || code==null || !PURCHASES.contains(code) || resource==null)
+```
+Failure / enforcement:
+```java
+throw bad("Invalid product");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0483 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:43
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:43](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L43)
+
+When / guard context:
+```java
+ng code,UUID resource) {
+        if(buyer==null || buyer.id()==null || code==null || !PURCHASES.contains(code) || resource==null)throw bad("Invalid product");
+        var config=pricing.current();
+        var stream=config.streams().stream().filter(s->s.code().equals(code)).findFirst().orElseThrow();
+        if(!config.enabled()||!stream.enabled())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"This revenue stream is switched off");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0484 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:47
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:47](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L47)
+
+When / guard context:
+```java
+nabled())throw new ResponseStatusException(HttpStatus.CONFLICT,"This revenue stream is switched off");
+        var policy=db.queryForMap("SELECT * FROM commercial_policy WHERE id=1 FOR SHARE");
+        String title;int days=0;long amount=stream.fixedPaise();
+        if("GROUP_GIFT".equals(code)) {
+            if(!"GROUP_ADMIN".equals(buyer.kind()))
+```
+Failure / enforcement:
+```java
+throw notFound();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0485 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:49
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:49](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L49)
+
+When / guard context:
+```java
+unt=stream.fixedPaise();
+        if("GROUP_GIFT".equals(code)) {
+            if(!"GROUP_ADMIN".equals(buyer.kind()))throw notFound();
+            var groups=db.queryForList("SELECT name,target_paise,reserved_gift_id FROM gift_groups WHERE id=? AND admin_id=? AND collection_published_at IS NULL",resource,buyer.id());
+            if(groups.size()!=1)
+```
+Failure / enforcement:
+```java
+throw notFound();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0486 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:52
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:52](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L52)
+
+When / guard context:
+```java
+group=groups.getFirst();
+            Number target=(Number)group.get("target_paise");
+            if(target==null && group.get("reserved_gift_id")!=null)target=db.queryForObject("SELECT (target_amount*100)::bigint FROM gifts WHERE id=?",Long.class,group.get("reserved_gift_id"));
+            if("PERCENTAGE".equals(stream.feeMode()) && target==null)
+```
+Failure / enforcement:
+```java
+throw bad("Set a group gift goal before calculating a percentage coordination fee");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0487 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:57
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:57](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L57)
+
+When / guard context:
+```java
+ltiply(java.math.BigDecimal.valueOf(stream.rateBps())).divide(java.math.BigDecimal.valueOf(10000),0,java.math.RoundingMode.HALF_UP).longValueExact();
+            if(stream.capPaise()>0)amount=Math.min(amount,stream.capPaise());
+            title="Group coordination · "+group.get("name");
+        } else {
+            if(!"HOST".equals(buyer.kind()))
+```
+Failure / enforcement:
+```java
+throw notFound();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0488 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:59
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:59](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L59)
+
+When / guard context:
+```java
+dingMode.HALF_UP).longValueExact();
+            if(stream.capPaise()>0)amount=Math.min(amount,stream.capPaise());
+            title="Group coordination · "+group.get("name");
+        } else {
+            if(!"HOST".equals(buyer.kind()))throw notFound();
+            switch(code) {
+                case "HOST_PLAN" -> {if(!resource.equals(buyer.id()))
+```
+Failure / enforcement:
+```java
+throw notFound();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0489 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:62
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:62](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L62)
+
+When / guard context:
+```java
+uals(buyer.id()))throw notFound();title="Premium host plan";days=((Number)policy.get("host_plan_days")).intValue();}
+                case "PREMIUM_TEMPLATE" -> {
+                    var assets=db.queryForList("SELECT title FROM invitation_gallery_assets WHERE id=? AND published AND tier='PREMIUM'",resource);
+                    if(assets.size()!=1)
+```
+Failure / enforcement:
+```java
+throw notFound();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0490 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:66
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:66](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L66)
+
+When / guard context:
+```java
+=1)throw notFound();title=String.valueOf(assets.getFirst().get("title"));
+                }
+                default -> {
+                    var placements=db.queryForList("SELECT title FROM commercial_placements WHERE id=? AND owner_id=? AND stream=? AND moderation='APPROVED'",resource,buyer.id(),code);
+                    if(placements.size()!=1)
+```
+Failure / enforcement:
+```java
+throw notFound();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0491 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:77
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:77](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L77)
+
+When / guard context:
+```java
+urn new Offer(code,resource,title,((Number)original.get("amount_paise")).longValue(),((Number)original.get("pricing_revision")).longValue(),((Number)original.get("duration_days")).intValue(),((Number)original.get("policy_revision")).longValue(),access.has(buyer.kind(),buyer.id(),code,resource));
+        }
+        if(amount<0 || amount>100_000_000L)
+```
+Failure / enforcement:
+```java
+throw bad("Price exceeds supported checkout amount");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0492 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:83
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:83](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L83)
+
+When / guard context:
+```java
+(),
+                access.has(buyer.kind(),buyer.id(),code,resource)||("PREMIUM_TEMPLATE".equals(code)&&access.premium(buyer.id())));
+    }
+    @Transactional
+    public Checkout create(Buyer buyer,Request request) {
+        if(request==null||request.idempotencyKey()==null||request.idempotencyKey().isBlank()||request.idempotencyKey().length()>120)
+```
+Failure / enforcement:
+```java
+throw bad("Valid checkout key required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0493 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:90
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:90](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L90)
+
+When / guard context:
+```java
+DATE",buyer.kind(),buyer.id(),request.idempotencyKey());
+        if(!prior.isEmpty()) {
+            var row=prior.getFirst();
+            if(!Objects.equals(row.get("stream"),request.stream())||!Objects.equals(row.get("resource_id"),request.resourceId())||((Number)row.get("amount_paise")).longValue()!=request.acceptedAmountPaise())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Checkout key already belongs to different purchase details");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0494 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:94
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:94](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L94)
+
+When / guard context:
+```java
+()!=request.acceptedAmountPaise())
+                throw new ResponseStatusException(HttpStatus.CONFLICT,"Checkout key already belongs to different purchase details");
+            return checkout(row);
+        }
+        Offer product=offer(buyer,request.stream(),request.resourceId());
+        if(product.amountPaise()!=request.acceptedAmountPaise())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Price changed. Review the current price before paying.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0495 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:95
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:95](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L95)
+
+When / guard context:
+```java
+Offer product=offer(buyer,request.stream(),request.resourceId());
+        if(product.amountPaise()!=request.acceptedAmountPaise())throw new ResponseStatusException(HttpStatus.CONFLICT,"Price changed. Review the current price before paying.");
+        if(product.entitled()&&Set.of("PREMIUM_TEMPLATE","GROUP_GIFT").contains(product.stream()))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"This purchase is already unlocked");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0496 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:105
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:105](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L105)
+
+When / guard context:
+```java
+if(paymentControls!=null) {
+                if("HOST".equals(buyer.kind()))paymentControls.requireHost(buyer.id(),"RAZORPAY");
+                else paymentControls.require(db.queryForObject("SELECT event_id FROM gift_groups WHERE id=?",UUID.class,product.resourceId()),"RAZORPAY");
+            }
+            if(!publicKey.startsWith("rzp_test_"))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Razorpay test checkout is not configured");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0497 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:107
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:107](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L107)
+
+When / guard context:
+```java
+tpStatus.SERVICE_UNAVAILABLE,"Razorpay test checkout is not configured");
+            var order=provider.createOrder(product.amountPaise(),id.toString());
+            if(order==null||order.id()==null||!order.id().matches("order_[A-Za-z0-9]+")||order.amount()!=product.amountPaise()||!"INR".equals(order.currency())||!"created".equals(order.status()))
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Invalid provider order response");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0498 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:120
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:120](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L120)
+
+When / guard context:
+```java
+on(),product.durationDays(),request.idempotencyKey(),providerId,status,status);
+        var row=db.queryForMap("SELECT * FROM commercial_orders WHERE id=?",id);
+        if("FREE".equals(status))grant(row);
+        return checkout(row);
+    }
+    public Checkout confirm(Buyer buyer,Confirmation input) {
+        if(input==null||input.orderId()==null)
+```
+Failure / enforcement:
+```java
+throw bad("Purchase required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0499 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:122
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:122](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L122)
+
+When / guard context:
+```java
+return checkout(row);
+    }
+    public Checkout confirm(Buyer buyer,Confirmation input) {
+        if(input==null||input.orderId()==null)throw bad("Purchase required");
+        var rows=db.queryForList("SELECT id FROM commercial_orders WHERE id=? AND buyer_kind=? AND buyer_id=?",input.orderId(),buyer.kind(),buyer.id());
+        if(rows.size()!=1)
+```
+Failure / enforcement:
+```java
+throw notFound();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0500 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:123
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:123](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L123)
+
+When / guard context:
+```java
+rderId()==null)throw bad("Purchase required");
+        var rows=db.queryForList("SELECT id FROM commercial_orders WHERE id=? AND buyer_kind=? AND buyer_id=?",input.orderId(),buyer.kind(),buyer.id());
+        if(rows.size()!=1)throw notFound();
+        if(!signatures.verifyCheckout(input.providerOrderId(),input.paymentId(),input.signature(),secret))
+```
+Failure / enforcement:
+```java
+throw bad("Invalid payment confirmation");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0501 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:127
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:127](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L127)
+
+When / guard context:
+```java
+Invalid payment confirmation");
+        return verifyCapture(input.orderId(),input.providerOrderId(),input.paymentId());
+    }
+    public Checkout verifyCapture(UUID id,String providerOrderId,String paymentId) {
+        if(providerOrderId==null||!providerOrderId.matches("order_[A-Za-z0-9]+")||paymentId==null||!paymentId.matches("pay_[A-Za-z0-9]+"))
+```
+Failure / enforcement:
+```java
+throw bad("Invalid payment identity");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0502 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:129
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:129](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L129)
+
+When / guard context:
+```java
+es("order_[A-Za-z0-9]+")||paymentId==null||!paymentId.matches("pay_[A-Za-z0-9]+"))throw bad("Invalid payment identity");
+        var payment=provider.fetchPayment(paymentId);
+        if(payment==null||!paymentId.equals(payment.id())||!providerOrderId.equals(payment.orderId())||!"captured".equals(payment.status())||!"INR".equals(payment.currency()))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Verified captured purchase required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0503 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:132
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:132](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L132)
+
+When / guard context:
+```java
+(payment.orderId())||!"captured".equals(payment.status())||!"INR".equals(payment.currency()))throw new ResponseStatusException(HttpStatus.CONFLICT,"Verified captured purchase required");
+        return tx.execute(state->{
+            var rows=db.queryForList("SELECT * FROM commercial_orders WHERE id=? FOR UPDATE",id);
+            if(rows.size()!=1)
+```
+Failure / enforcement:
+```java
+throw notFound();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0504 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:133
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:133](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L133)
+
+When / guard context:
+```java
+equired");
+        return tx.execute(state->{
+            var rows=db.queryForList("SELECT * FROM commercial_orders WHERE id=? FOR UPDATE",id);
+            if(rows.size()!=1)throw notFound();var row=rows.getFirst();
+            if(!providerOrderId.equals(row.get("provider_order_id"))||payment.amount()!=((Number)row.get("amount_paise")).longValue())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Payment does not match this purchase");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0505 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:135
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:135](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L135)
+
+When / guard context:
+```java
+if(!providerOrderId.equals(row.get("provider_order_id"))||payment.amount()!=((Number)row.get("amount_paise")).longValue())throw new ResponseStatusException(HttpStatus.CONFLICT,"Payment does not match this purchase");
+            if("CAPTURED".equals(row.get("status"))) {
+                if(!paymentId.equals(row.get("provider_payment_id")))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Purchase was already paid by another payment");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0506 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:138
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:138](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L138)
+
+When / guard context:
+```java
+h this purchase");
+            if("CAPTURED".equals(row.get("status"))) {
+                if(!paymentId.equals(row.get("provider_payment_id")))throw new ResponseStatusException(HttpStatus.CONFLICT,"Purchase was already paid by another payment");
+                return checkout(row);
+            }
+            if(!"PENDING".equals(row.get("status")))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Purchase is not awaiting payment");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0507 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:24
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:24](../../src/main/java/com/giftplatform/monetization/CommercialSetupService.java#L24)
+
+When / guard context:
+```java
+ject> policy(){return db.queryForMap("SELECT * FROM commercial_policy WHERE id=1");}
+    @Transactional public Map<String,Object> policy(Policy input){
+        pricing.requireAdmin();
+        if(input==null||input.freeActiveEvents()<0||input.freeActiveEvents()>1000||!days(input.hostPlanDays())||!days(input.vendorDays())||!days(input.sponsorDays()))
+```
+Failure / enforcement:
+```java
+throw bad("Invalid commercial policy");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0508 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:27
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:27](../../src/main/java/com/giftplatform/monetization/CommercialSetupService.java#L27)
+
+When / guard context:
+```java
+<0||input.freeActiveEvents()>1000||!days(input.hostPlanDays())||!days(input.vendorDays())||!days(input.sponsorDays()))throw bad("Invalid commercial policy");
+        reason(input.reason());
+        var old=db.queryForMap("SELECT * FROM commercial_policy WHERE id=1 FOR UPDATE");
+        if(((Number)old.get("revision")).longValue()!=input.revision())
+```
+Failure / enforcement:
+```java
+throw conflict();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0509 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:36
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:36](../../src/main/java/com/giftplatform/monetization/CommercialSetupService.java#L36)
+
+When / guard context:
+```java
+acements WHERE owner_id=? ORDER BY created_at DESC LIMIT 200",actor.requireAuthenticatedUserId());}
+    @Transactional public Map<String,Object> createPlacement(Placement input){
+        UUID owner=actor.requireAuthenticatedUserId();
+        if(input==null||!Set.of("VENDOR_LISTING","SPONSORED_GIFT").contains(input.stream()==null?"":input.stream()))
+```
+Failure / enforcement:
+```java
+throw bad("Invalid placement type");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0510 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:43
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:43](../../src/main/java/com/giftplatform/monetization/CommercialSetupService.java#L43)
+
+When / guard context:
+```java
+m(),title,description,input.url(),category,occasion);
+        return db.queryForMap("SELECT * FROM commercial_placements WHERE id=?",id);
+    }
+    @Transactional public Map<String,Object> moderate(UUID id,Moderation input){
+        pricing.requireAdmin();if(input==null||!Set.of("APPROVED","REJECTED").contains(input.state()==null?"":input.state()))
+```
+Failure / enforcement:
+```java
+throw bad("Select approval or rejection");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0511 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:44
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:44](../../src/main/java/com/giftplatform/monetization/CommercialSetupService.java#L44)
+
+When / guard context:
+```java
+bject> moderate(UUID id,Moderation input){
+        pricing.requireAdmin();if(input==null||!Set.of("APPROVED","REJECTED").contains(input.state()==null?"":input.state()))throw bad("Select approval or rejection");reason(input.reason());
+        var rows=db.queryForList("SELECT id FROM commercial_placements WHERE id=? FOR UPDATE",id);if(rows.isEmpty())
+```
+Failure / enforcement:
+```java
+throw notFound();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0512 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:52
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:52](../../src/main/java/com/giftplatform/monetization/CommercialSetupService.java#L52)
+
+When / guard context:
+```java
+.queryForList("SELECT * FROM commercial_placements ORDER BY created_at DESC LIMIT 200");}
+    public List<Map<String,Object>> partners(){pricing.requireAdmin();return db.queryForList("SELECT * FROM affiliate_partners ORDER BY name");}
+    @Transactional public Map<String,Object> partner(Partner input){
+        pricing.requireAdmin();if(input==null)
+```
+Failure / enforcement:
+```java
+throw bad("Partner setup required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0513 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:54
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:54](../../src/main/java/com/giftplatform/monetization/CommercialSetupService.java#L54)
+
+When / guard context:
+```java
+ing,Object> partner(Partner input){
+        pricing.requireAdmin();if(input==null)throw bad("Partner setup required");reason(input.reason());
+        String name=text(input.name(),100),domain=text(input.productDomain(),253).toLowerCase(Locale.ROOT);
+        if(!domain.matches("[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?\\.[a-z]{2,63}")||domain.contains(".."))
+```
+Failure / enforcement:
+```java
+throw bad("Use the retailer product domain without a scheme or path");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0514 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:55
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:55](../../src/main/java/com/giftplatform/monetization/CommercialSetupService.java#L55)
+
+When / guard context:
+```java
+.name(),100),domain=text(input.productDomain(),253).toLowerCase(Locale.ROOT);
+        if(!domain.matches("[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?\\.[a-z]{2,63}")||domain.contains(".."))throw bad("Use the retailer product domain without a scheme or path");
+        if(input.parameterName()==null||!input.parameterName().matches("[A-Za-z][A-Za-z0-9_]{0,59}"))
+```
+Failure / enforcement:
+```java
+throw bad("Invalid affiliate parameter name");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0515 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:57
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:57](../../src/main/java/com/giftplatform/monetization/CommercialSetupService.java#L57)
+
+When / guard context:
+```java
+null||!input.parameterName().matches("[A-Za-z][A-Za-z0-9_]{0,59}"))throw bad("Invalid affiliate parameter name");
+        text(input.parameterValue(),500);
+        if(input.clickParameter()!=null&&!input.clickParameter().isBlank()&&(!input.clickParameter().matches("[A-Za-z][A-Za-z0-9_]{0,59}")||input.clickParameter().equals(input.parameterName())))
+```
+Failure / enforcement:
+```java
+throw bad("Invalid or duplicate click parameter");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0516 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:59
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:59](../../src/main/java/com/giftplatform/monetization/CommercialSetupService.java#L59)
+
+When / guard context:
+```java
+null&&!input.clickParameter().isBlank()&&(!input.clickParameter().matches("[A-Za-z][A-Za-z0-9_]{0,59}")||input.clickParameter().equals(input.parameterName())))throw bad("Invalid or duplicate click parameter");
+        if(input.redirectTemplate()!=null&&!input.redirectTemplate().isBlank()){
+            if(!input.redirectTemplate().contains("{url}"))
+```
+Failure / enforcement:
+```java
+throw bad("Redirect template must include {url}");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0517 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:62
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:62](../../src/main/java/com/giftplatform/monetization/CommercialSetupService.java#L62)
+
+When / guard context:
+```java
+de {url}");
+            https(input.redirectTemplate().replace("{url}","https%3A%2F%2Fexample.com").replace("{click}",UUID.randomUUID().toString()));
+            var redirect=URI.create(input.redirectTemplate().replace("{url}","x").replace("{click}","x"));
+            if(input.redirectTemplate().indexOf('{')<input.redirectTemplate().indexOf('/',8))
+```
+Failure / enforcement:
+```java
+throw bad("Redirect placeholders must be in the path or query");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0518 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:65
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:65](../../src/main/java/com/giftplatform/monetization/CommercialSetupService.java#L65)
+
+When / guard context:
+```java
+indexOf('{')<input.redirectTemplate().indexOf('/',8))throw bad("Redirect placeholders must be in the path or query");
+        }
+        UUID id=input.id()==null?UUID.randomUUID():input.id();String before=null;
+        if(input.id()!=null){var rows=db.queryForList("SELECT revision FROM affiliate_partners WHERE id=? FOR UPDATE",id);if(rows.size()!=1)
+```
+Failure / enforcement:
+```java
+throw notFound();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0519 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:65
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:65](../../src/main/java/com/giftplatform/monetization/CommercialSetupService.java#L65)
+
+When / guard context:
+```java
+e in the path or query");
+        }
+        UUID id=input.id()==null?UUID.randomUUID():input.id();String before=null;
+        if(input.id()!=null){var rows=db.queryForList("SELECT revision FROM affiliate_partners WHERE id=? FOR UPDATE",id);if(rows.size()!=1)throw notFound();if(((Number)rows.getFirst().get("revision")).longValue()!=input.revision())
+```
+Failure / enforcement:
+```java
+throw conflict();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0520 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:75
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:75](../../src/main/java/com/giftplatform/monetization/CommercialSetupService.java#L75)
+
+When / guard context:
+```java
+p("SELECT * FROM affiliate_partners WHERE id=?",id);
+    }
+    @Transactional public Map<String,Object> commission(Commission input){
+        pricing.requireAdmin();if(input==null||input.partnerId()==null||input.amountPaise()<=0||input.amountPaise()>100_000_000L||!Set.of("CONFIRMED","PAID","REVERSED").contains(input.state()==null?"":input.state()))
+```
+Failure / enforcement:
+```java
+throw bad("Invalid commission");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0521 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:77
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:77](../../src/main/java/com/giftplatform/monetization/CommercialSetupService.java#L77)
+
+When / guard context:
+```java
+e()>100_000_000L||!Set.of("CONFIRMED","PAID","REVERSED").contains(input.state()==null?"":input.state()))throw bad("Invalid commission");
+        reason(input.reason());text(input.externalReference(),160);
+        if(!Boolean.TRUE.equals(db.queryForObject("SELECT EXISTS(SELECT 1 FROM affiliate_partners WHERE id=?)",Boolean.class,input.partnerId())))
+```
+Failure / enforcement:
+```java
+throw notFound();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0522 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:78
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:78](../../src/main/java/com/giftplatform/monetization/CommercialSetupService.java#L78)
+
+When / guard context:
+```java
+Boolean.TRUE.equals(db.queryForObject("SELECT EXISTS(SELECT 1 FROM affiliate_partners WHERE id=?)",Boolean.class,input.partnerId())))throw notFound();
+        if(input.clickId()!=null&&!Boolean.TRUE.equals(db.queryForObject("SELECT EXISTS(SELECT 1 FROM affiliate_clicks WHERE id=? AND partner_id=?)",Boolean.class,input.clickId(),input.partnerId())))
+```
+Failure / enforcement:
+```java
+throw bad("Click does not belong to this partner");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0523 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:81
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:81](../../src/main/java/com/giftplatform/monetization/CommercialSetupService.java#L81)
+
+When / guard context:
+```java
+d(),input.partnerId())))throw bad("Click does not belong to this partner");
+        UUID id=input.id()==null?UUID.randomUUID():input.id();String before=null;
+        if(input.id()!=null){var row=db.queryForMap("SELECT * FROM affiliate_commissions WHERE id=? FOR UPDATE",id);
+            if(((Number)row.get("revision")).longValue()!=input.revision())
+```
+Failure / enforcement:
+```java
+throw conflict();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0524 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:82
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:82](../../src/main/java/com/giftplatform/monetization/CommercialSetupService.java#L82)
+
+When / guard context:
+```java
+if(((Number)row.get("revision")).longValue()!=input.revision())throw conflict();
+            if(!Objects.equals(row.get("partner_id"),input.partnerId())||!Objects.equals(row.get("click_id"),input.clickId())||!Objects.equals(row.get("external_reference"),input.externalReference())||((Number)row.get("amount_paise")).longValue()!=input.amountPaise())
+```
+Failure / enforcement:
+```java
+throw bad("Statement identity and amount cannot change; reverse the entry and record a correction");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0525 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:83
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:83](../../src/main/java/com/giftplatform/monetization/CommercialSetupService.java#L83)
+
+When / guard context:
+```java
+ls(row.get("external_reference"),input.externalReference())||((Number)row.get("amount_paise")).longValue()!=input.amountPaise())throw bad("Statement identity and amount cannot change; reverse the entry and record a correction");
+            if("REVERSED".equals(row.get("state"))||("PAID".equals(row.get("state"))&&"CONFIRMED".equals(input.state())))
+```
+Failure / enforcement:
+```java
+throw bad("Invalid commission state transition");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0526 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:101
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:101](../../src/main/java/com/giftplatform/monetization/CommercialSetupService.java#L101)
+
+When / guard context:
+```java
+son,before_config,after_config) VALUES(?,?,?,?,?,?::jsonb,?::jsonb)",UUID.randomUUID(),actor.requireAuthenticatedUserId(),type,id,reason.strip(),before,after);}
+    private static void reason(String s){text(s,500);}
+    private static String text(String s,int max){if(s==null||s.isBlank()||s.length()>max||s.chars().anyMatch(Character::isISOControl))
+```
+Failure / enforcement:
+```java
+throw bad("Required field is missing or too long");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0527 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:103
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:103](../../src/main/java/com/giftplatform/monetization/CommercialSetupService.java#L103)
+
+When / guard context:
+```java
+static String text(String s,int max){if(s==null||s.isBlank()||s.length()>max||s.chars().anyMatch(Character::isISOControl))throw bad("Required field is missing or too long");return s.strip();}
+    private static String clean(String s){return s==null||s.isBlank()?null:s.strip();}
+    public static URI https(String s){try{if(s==null||s.length()>2048)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0528 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:103
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:103](../../src/main/java/com/giftplatform/monetization/CommercialSetupService.java#L103)
+
+When / guard context:
+```java
+vate static String clean(String s){return s==null||s.isBlank()?null:s.strip();}
+    public static URI https(String s){try{if(s==null||s.length()>2048)throw new IllegalArgumentException();URI uri=URI.create(s);if(!"https".equalsIgnoreCase(uri.getScheme())||uri.getHost()==null||!uri.getHost().contains(".")||uri.getUserInfo()!=null||uri.getPort()!=-1)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0529 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:103
+
+[backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:103](../../src/main/java/com/giftplatform/monetization/CommercialSetupService.java#L103)
+
+When / guard context:
+```java
+public static URI https(String s){try{if(s==null||s.length()>2048)throw new IllegalArgumentException();URI uri=URI.create(s);if(!"https".equalsIgnoreCase(uri.getScheme())||uri.getHost()==null||!uri.getHost().contains(".")||uri.getUserInfo()!=null||uri.getPort()!=-1)throw new IllegalArgumentException();return uri;}catch(IllegalArgumentException e){
+```
+Failure / enforcement:
+```java
+throw bad("Use a valid HTTPS URL without embedded credentials or a custom port");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0530 — backend/src/main/java/com/giftplatform/monetization/MonetizationService.java:38
+
+[backend/src/main/java/com/giftplatform/monetization/MonetizationService.java:38](../../src/main/java/com/giftplatform/monetization/MonetizationService.java#L38)
+
+When / guard context:
+```java
+"),rs.getLong("fixed_paise"),
+                rs.getInt("rate_bps"),rs.getLong("cap_paise"),rs.getString("fee_bearer"),READY.contains(rs.getString("code"))));
+        return new Settings(((Number)master.get("revision")).longValue(),(Boolean)master.get("enabled"),streams);
+    }
+    public void requireAdmin() {
+        if(!actors.isPlatformAdmin())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Platform admin only");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0531 — backend/src/main/java/com/giftplatform/monetization/MonetizationService.java:45
+
+[backend/src/main/java/com/giftplatform/monetization/MonetizationService.java:45](../../src/main/java/com/giftplatform/monetization/MonetizationService.java#L45)
+
+When / guard context:
+```java
+m admin only");
+    }
+    @Transactional
+    public Settings update(Update input) {
+        requireAdmin();
+        UUID who=actors.requireAuthenticatedUserId();
+        if(input==null || input.reason()==null || input.reason().isBlank() || input.reason().length()>500 ||
+                input.streams()==null || input.streams().size()!=CODES.size())
+```
+Failure / enforcement:
+```java
+throw bad("Supply all streams and a change reason (1–500 characters)");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0532 — backend/src/main/java/com/giftplatform/monetization/MonetizationService.java:52
+
+[backend/src/main/java/com/giftplatform/monetization/MonetizationService.java:52](../../src/main/java/com/giftplatform/monetization/MonetizationService.java#L52)
+
+When / guard context:
+```java
+!Set.of("FIXED","PERCENTAGE").contains(s.feeMode()==null?"":s.feeMode()) ||
+                    !Set.of("GUEST","HOST").contains(s.feeBearer()==null?"":s.feeBearer()) ||
+                    s.fixedPaise()<0 || s.fixedPaise()>100_000_000 || s.rateBps()<0 || s.rateBps()>10000 ||
+                    s.capPaise()<0 || s.capPaise()>100_000_000)
+```
+Failure / enforcement:
+```java
+throw bad("Invalid monetization stream");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0533 — backend/src/main/java/com/giftplatform/monetization/MonetizationService.java:54
+
+[backend/src/main/java/com/giftplatform/monetization/MonetizationService.java:54](../../src/main/java/com/giftplatform/monetization/MonetizationService.java#L54)
+
+When / guard context:
+```java
+s.fixedPaise()<0 || s.fixedPaise()>100_000_000 || s.rateBps()<0 || s.rateBps()>10000 ||
+                    s.capPaise()<0 || s.capPaise()>100_000_000) throw bad("Invalid monetization stream");
+            if(Set.of("HOST_PLAN","PREMIUM_TEMPLATE","VENDOR_LISTING","SPONSORED_GIFT").contains(s.code()) && !"FIXED".equals(s.feeMode()))
+```
+Failure / enforcement:
+```java
+throw bad("Purchases require a fixed price; percentage pricing is available for contributions, affiliate commissions and group coordination");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0534 — backend/src/main/java/com/giftplatform/monetization/MonetizationService.java:57
+
+[backend/src/main/java/com/giftplatform/monetization/MonetizationService.java:57](../../src/main/java/com/giftplatform/monetization/MonetizationService.java#L57)
+
+When / guard context:
+```java
+throw bad("Purchases require a fixed price; percentage pricing is available for contributions, affiliate commissions and group coordination");
+        }
+        Long version=db.queryForObject("SELECT revision FROM platform_monetization_settings WHERE id=1 FOR UPDATE",Long.class);
+        if(version==null || version!=input.revision())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Settings changed; reload before saving");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0535 — backend/src/main/java/com/giftplatform/monetization/MonetizationService.java:74
+
+[backend/src/main/java/com/giftplatform/monetization/MonetizationService.java:74](../../src/main/java/com/giftplatform/monetization/MonetizationService.java#L74)
+
+When / guard context:
+```java
+',(SELECT jsonb_agg(to_jsonb(s) ORDER BY code) FROM platform_monetization_streams s))::text FROM platform_monetization_settings WHERE id=1",String.class);
+    }
+    @Transactional(readOnly=true)
+    public List<Map<String,Object>> history(int limit, long beforeRevision) {
+        requireAdmin();
+        if(limit<1 || limit>100 || beforeRevision<0)
+```
+Failure / enforcement:
+```java
+throw bad("Invalid history page");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0536 — backend/src/main/java/com/giftplatform/monetization/MonetizationService.java:87
+
+[backend/src/main/java/com/giftplatform/monetization/MonetizationService.java:87](../../src/main/java/com/giftplatform/monetization/MonetizationService.java#L87)
+
+When / guard context:
+```java
+t);
+    }
+    @Transactional
+    public boolean enabled(String code) {
+        Settings settings=current();
+        return settings.enabled() && settings.streams().stream().anyMatch(s->s.code().equals(code)&&s.enabled());
+    }
+    public static Quote calculate(Settings config,String code,long amount) {
+        if(amount<=0 || amount>100_000_000L)
+```
+Failure / enforcement:
+```java
+throw bad("Contribution must be between 1 paise and ₹10,00,000");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0537 — backend/src/main/java/com/giftplatform/monetization/MonetizationService.java:96
+
+[backend/src/main/java/com/giftplatform/monetization/MonetizationService.java:96](../../src/main/java/com/giftplatform/monetization/MonetizationService.java#L96)
+
+When / guard context:
+```java
+eeMode())?s.fixedPaise():BigDecimal.valueOf(amount)
+                    .multiply(BigDecimal.valueOf(s.rateBps())).divide(BigDecimal.valueOf(10000),0,RoundingMode.HALF_UP).longValueExact();
+            if(s.capPaise()>0) fee=Math.min(fee,s.capPaise());
+        }
+        boolean guest="GUEST".equals(s.feeBearer());
+        if(!guest && fee>=amount)
+```
+Failure / enforcement:
+```java
+throw bad("Contribution must exceed the platform fee");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+## notification
+
+### RULE-0538 — backend/src/main/java/com/giftplatform/notification/HostInboxController.java:29
+
+[backend/src/main/java/com/giftplatform/notification/HostInboxController.java:29](../../src/main/java/com/giftplatform/notification/HostInboxController.java#L29)
+
+When / guard context:
+```java
+reatedAt,boolean read) {}
+  public record Inbox(long unread,List<Item> entries) {}
+  @GetMapping
+  @Transactional(readOnly=true)
+  public ResponseEntity<Inbox> list(@RequestParam(defaultValue="30") int limit,
+                                     @RequestParam(defaultValue="0") int offset) {
+    if(limit<1||limit>100||offset<0||offset>100000)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid pagination");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0539 — backend/src/main/java/com/giftplatform/notification/HostInboxController.java:56
+
+[backend/src/main/java/com/giftplatform/notification/HostInboxController.java:56](../../src/main/java/com/giftplatform/notification/HostInboxController.java#L56)
+
+When / guard context:
+```java
+) {
+    UUID actor=actors.requireAuthenticatedUserId();
+    int updated=jdbc.update("""
+      UPDATE notification_outbox n SET read_at=COALESCE(read_at,CURRENT_TIMESTAMP)
+      FROM events e WHERE e.id=n.event_id AND e.owner_id=? AND n.id=?
+      AND n.recipient_kind='HOST' AND n.channel='IN_APP'
+      """,actor,notificationId);
+    if(updated!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Notification not found");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0540 — backend/src/main/java/com/giftplatform/notification/HostThankYouService.java:23
+
+[backend/src/main/java/com/giftplatform/notification/HostThankYouService.java:23](../../src/main/java/com/giftplatform/notification/HostThankYouService.java#L23)
+
+When / guard context:
+```java
+lBody,String smsBody,String cardTemplate,
+    boolean autoSend,boolean emailEnabled,boolean smsEnabled,boolean whatsappEnabled){}
+  private void owner(UUID id){
+    UUID actor=actors.requireAuthenticatedUserId();
+    Integer n=jdbc.queryForObject("SELECT COUNT(*) FROM events WHERE id=? AND owner_id=?",Integer.class,id,actor);
+    if(n==null||n!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Event not found");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0541 — backend/src/main/java/com/giftplatform/notification/HostThankYouService.java:49
+
+[backend/src/main/java/com/giftplatform/notification/HostThankYouService.java:49](../../src/main/java/com/giftplatform/notification/HostThankYouService.java#L49)
+
+When / guard context:
+```java
+u_settings(event_id,host_display_name)
+      SELECT id,host_display_name FROM events WHERE id=? ON CONFLICT (event_id) DO NOTHING
+      """,id);
+    if(r==null||!valid(r.hostName(),200)||!valid(r.emailSubject(),200)||!valid(r.emailBody(),10000)
+      ||!valid(r.smsBody(),1000)||!Set.of("CLASSIC","FLORAL","MODERN").contains(r.cardTemplate()))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid thank-you configuration");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+## otp
+
+### RULE-0542 — backend/src/main/java/com/giftplatform/otp/config/OtpConfiguration.java:39
+
+[backend/src/main/java/com/giftplatform/otp/config/OtpConfiguration.java:39](../../src/main/java/com/giftplatform/otp/config/OtpConfiguration.java#L39)
+
+When / guard context:
+```java
+ion enablement requires a configured signing key.
+                secret=new byte[32];new java.security.SecureRandom().nextBytes(secret);
+                return new OtpCryptoService(secret);
+            }
+            secret = Base64.getDecoder()
+                    .decode(encodedSecret);
+        } catch (IllegalArgumentException ex) {
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException(
+                    "Invalid OTP secret configuration", ex);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0543 — backend/src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java:70
+
+[backend/src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java:70](../../src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java#L70)
+
+When / guard context:
+```java
+otpDigest,
+                createdAt,
+                expiresAt
+        );
+    }
+
+    public PhoneOtpChallenge(
+            UUID id,
+            UUID userId,
+            String phoneNumber,
+            String otpDigest,
+            Instant createdAt,
+            Instant expiresAt
+    ) {
+        if (id == null || userId == null) {
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException(
+                    "Challenge ID and user ID are required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0544 — backend/src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java:77
+
+[backend/src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java:77](../../src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java#L77)
+
+When / guard context:
+```java
+reatedAt,
+            Instant expiresAt
+    ) {
+        if (id == null || userId == null) {
+            throw new IllegalArgumentException(
+                    "Challenge ID and user ID are required");
+        }
+
+        if (phoneNumber == null ||
+                !phoneNumber.matches(
+                        "^\\+[1-9][0-9]{1,14}$")) {
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException(
+                    "Invalid phone number");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0545 — backend/src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java:82
+
+[backend/src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java:82](../../src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java#L82)
+
+When / guard context:
+```java
+"Challenge ID and user ID are required");
+        }
+
+        if (phoneNumber == null ||
+                !phoneNumber.matches(
+                        "^\\+[1-9][0-9]{1,14}$")) {
+            throw new IllegalArgumentException(
+                    "Invalid phone number");
+        }
+
+        if (otpDigest == null || otpDigest.isBlank()) {
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException(
+                    "OTP digest is required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0546 — backend/src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java:88
+
+[backend/src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java:88](../../src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java#L88)
+
+When / guard context:
+```java
+gumentException(
+                    "Invalid phone number");
+        }
+
+        if (otpDigest == null || otpDigest.isBlank()) {
+            throw new IllegalArgumentException(
+                    "OTP digest is required");
+        }
+
+        if (createdAt == null || expiresAt == null ||
+                !expiresAt.isAfter(createdAt)) {
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException(
+                    "Invalid OTP expiration");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0547 — backend/src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java:161
+
+[backend/src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java:161](../../src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java#L161)
+
+When / guard context:
+```java
+}
+
+    public boolean isExpired(Instant now) {
+        return !now.isBefore(expiresAt);
+    }
+
+    public boolean isConsumed() {
+        return consumedAt != null;
+    }
+
+    public boolean hasAttemptsRemaining() {
+        return attemptCount < 5;
+    }
+
+    public void recordFailedAttempt() {
+        if (!hasAttemptsRemaining()) {
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException(
+                    "Maximum OTP attempts reached");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0548 — backend/src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java:173
+
+[backend/src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java:173](../../src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java#L173)
+
+When / guard context:
+```java
+ing()) {
+            throw new IllegalStateException(
+                    "Maximum OTP attempts reached");
+        }
+        attemptCount++;
+    }
+
+
+    public void consume(Instant now) {
+        if (!isReadyForVerification()
+                || isConsumed()
+                || isExpired(now)
+                || !hasAttemptsRemaining()) {
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException(
+                    "OTP cannot be consumed");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0549 — backend/src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java:208
+
+[backend/src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java:208](../../src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java#L208)
+
+When / guard context:
+```java
+eliveryStatus = OtpDeliveryStatus.SENT;
+        deliveryUpdatedAt = now;
+    }
+
+    public void markFailed(Instant now) {
+        requirePending(now);
+        deliveryStatus = OtpDeliveryStatus.FAILED;
+        deliveryUpdatedAt = now;
+    }
+
+    public void invalidate(Instant now) {
+        if (now == null || now.isBefore(createdAt)) {
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException(
+                    "Invalid transition time");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0550 — backend/src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java:217
+
+[backend/src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java:217](../../src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java#L217)
+
+When / guard context:
+```java
+now;
+    }
+
+    public void invalidate(Instant now) {
+        if (now == null || now.isBefore(createdAt)) {
+            throw new IllegalArgumentException(
+                    "Invalid transition time");
+        }
+
+        if (deliveryStatus == OtpDeliveryStatus.INVALIDATED) {
+            return;
+        }
+
+        if (isConsumed()) {
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException(
+                    "Consumed challenge cannot be invalidated");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0551 — backend/src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java:227
+
+[backend/src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java:227](../../src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java#L227)
+
+When / guard context:
+```java
+if (isConsumed()) {
+            throw new IllegalStateException(
+                    "Consumed challenge cannot be invalidated");
+        }
+
+        deliveryStatus = OtpDeliveryStatus.INVALIDATED;
+        deliveryUpdatedAt = now;
+    }
+
+    private void requirePending(Instant now) {
+        if (now == null || now.isBefore(createdAt)) {
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException(
+                    "Invalid transition time");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0552 — backend/src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java:233
+
+[backend/src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java:233](../../src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java#L233)
+
+When / guard context:
+```java
+deliveryUpdatedAt = now;
+    }
+
+    private void requirePending(Instant now) {
+        if (now == null || now.isBefore(createdAt)) {
+            throw new IllegalArgumentException(
+                    "Invalid transition time");
+        }
+
+        if (deliveryStatus != OtpDeliveryStatus.PENDING
+                || isConsumed()) {
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException(
+                    "Challenge is not pending");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0553 — backend/src/main/java/com/giftplatform/otp/service/AwsSnsSmsConfiguration.java:16
+
+[backend/src/main/java/com/giftplatform/otp/service/AwsSnsSmsConfiguration.java:16](../../src/main/java/com/giftplatform/otp/service/AwsSnsSmsConfiguration.java#L16)
+
+When / guard context:
+```java
+@Configuration(proxyBeanMethods = false)
+@ConditionalOnProperty(prefix = "gift.sms", name = "provider", havingValue = "sns")
+public class AwsSnsSmsConfiguration {
+    @Bean(destroyMethod = "close")
+    SnsClient giftSnsClient(@Value("${gift.sms.aws.region:ap-south-1}") String region) {
+        if (region == null || region.isBlank()) {
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("SNS region must be configured");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0554 — backend/src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java:29
+
+[backend/src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java:29](../../src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java#L29)
+
+When / guard context:
+```java
+Sender(SnsClient sns,
+            @Value("${gift.sms.aws.sender-id:}") String senderId,
+            @Value("${gift.sms.aws.sms-type:Transactional}") String smsType) {
+        this.sns = sns;
+        this.senderId = senderId == null ? "" : senderId.trim();
+        if (!"Transactional".equals(smsType) && !"Promotional".equals(smsType)) {
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Invalid SNS SMS type");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0555 — backend/src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java:37
+
+[backend/src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java:37](../../src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java#L37)
+
+When / guard context:
+```java
+s(smsType) && !"Promotional".equals(smsType)) {
+            throw new IllegalArgumentException("Invalid SNS SMS type");
+        }
+        this.smsType = smsType;
+    }
+
+    @Override
+    public void sendVerificationCode(String phoneNumber, String otp) {
+        if (phoneNumber == null || !phoneNumber.matches("^\\+[1-9][0-9]{1,14}$")) {
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Invalid phone number");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0556 — backend/src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java:40
+
+[backend/src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java:40](../../src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java#L40)
+
+When / guard context:
+```java
+his.smsType = smsType;
+    }
+
+    @Override
+    public void sendVerificationCode(String phoneNumber, String otp) {
+        if (phoneNumber == null || !phoneNumber.matches("^\\+[1-9][0-9]{1,14}$")) {
+            throw new IllegalArgumentException("Invalid phone number");
+        }
+        if (otp == null || !otp.matches("^[0-9]{6}$")) {
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Invalid OTP format");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0557 — backend/src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java:53
+
+[backend/src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java:53](../../src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java#L53)
+
+When / guard context:
+```java
+.message("Your Gift Platform verification code is " + otp + ". Do not share this code.")
+                .messageAttributes(attrs)
+                .build();
+        try {
+            PublishResponse response = sns.publish(request);
+            if (response == null || response.messageId() == null || response.messageId().isBlank()) {
+```
+Failure / enforcement:
+```java
+throw new OtpDeliveryUncertainException("SNS acceptance could not be confirmed", null);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0558 — backend/src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java:60
+
+[backend/src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java:60](../../src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java#L60)
+
+When / guard context:
+```java
+// Only known, non-retryable validation rejections can be treated as definitely rejected.
+            String code = ex.awsErrorDetails() == null ? "" : ex.awsErrorDetails().errorCode();
+            if (ex.statusCode() == 400 && ("InvalidParameter".equals(code)
+                    || "InvalidParameterValue".equals(code))) {
+```
+Failure / enforcement:
+```java
+throw new OtpSmsRejectedException("AWS SNS rejected SMS");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0559 — backend/src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java:62
+
+[backend/src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java:62](../../src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java#L62)
+
+When / guard context:
+```java
+ely rejected.
+            String code = ex.awsErrorDetails() == null ? "" : ex.awsErrorDetails().errorCode();
+            if (ex.statusCode() == 400 && ("InvalidParameter".equals(code)
+                    || "InvalidParameterValue".equals(code))) {
+                throw new OtpSmsRejectedException("AWS SNS rejected SMS");
+            }
+```
+Failure / enforcement:
+```java
+throw new OtpDeliveryUncertainException("SNS delivery acceptance is uncertain", ex);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0560 — backend/src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java:64
+
+[backend/src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java:64](../../src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java#L64)
+
+When / guard context:
+```java
+() == 400 && ("InvalidParameter".equals(code)
+                    || "InvalidParameterValue".equals(code))) {
+                throw new OtpSmsRejectedException("AWS SNS rejected SMS");
+            }
+            throw new OtpDeliveryUncertainException("SNS delivery acceptance is uncertain", ex);
+        } catch (SdkClientException ex) {
+```
+Failure / enforcement:
+```java
+throw new OtpDeliveryUncertainException("SNS delivery acceptance is uncertain", ex);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0561 — backend/src/main/java/com/giftplatform/otp/service/DisabledSmsSender.java:27
+
+[backend/src/main/java/com/giftplatform/otp/service/DisabledSmsSender.java:27](../../src/main/java/com/giftplatform/otp/service/DisabledSmsSender.java#L27)
+
+When / guard context:
+```java
+private com.giftplatform.security.delivery.MessageDelivery delivery;
+
+    @Override
+    public void sendVerificationCode(
+            String phoneNumber,
+            String otp
+    ) {
+        if(delivery!=null&&delivery.isAvailable()&&delivery.establishesMobileOwnership()){
+            delivery.sendCode(phoneNumber,otp);return;
+        }
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException(
+                "SMS delivery is not configured"
+        );
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0562 — backend/src/main/java/com/giftplatform/otp/service/OtpCryptoService.java:19
+
+[backend/src/main/java/com/giftplatform/otp/service/OtpCryptoService.java:19](../../src/main/java/com/giftplatform/otp/service/OtpCryptoService.java#L19)
+
+When / guard context:
+```java
+urity.MessageDigest;
+import java.security.SecureRandom;
+import java.util.HexFormat;
+import java.util.UUID;
+
+public final class OtpCryptoService {
+
+    private final SecureRandom random = new SecureRandom();
+    private final byte[] secret;
+
+    public OtpCryptoService(byte[] secret) {
+        if (secret == null || secret.length < 32) {
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException(
+                    "OTP secret must be at least 32 bytes");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0563 — backend/src/main/java/com/giftplatform/otp/service/OtpCryptoService.java:37
+
+[backend/src/main/java/com/giftplatform/otp/service/OtpCryptoService.java:37](../../src/main/java/com/giftplatform/otp/service/OtpCryptoService.java#L37)
+
+When / guard context:
+```java
+secret.clone();
+    }
+
+    public String generateOtp() {
+        return "%06d".formatted(
+                random.nextInt(1_000_000));
+    }
+
+    public String digest(
+            UUID challengeId,
+            String otp
+    ) {
+        if (challengeId == null ||
+                otp == null ||
+                !otp.matches("[0-9]{6}")) {
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException(
+                    "Invalid OTP input");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0564 — backend/src/main/java/com/giftplatform/otp/service/OtpCryptoService.java:52
+
+[backend/src/main/java/com/giftplatform/otp/service/OtpCryptoService.java:52](../../src/main/java/com/giftplatform/otp/service/OtpCryptoService.java#L52)
+
+When / guard context:
+```java
+e("HmacSHA256");
+            mac.init(new SecretKeySpec(
+                    secret, "HmacSHA256"));
+
+            byte[] value = mac.doFinal(
+                    (challengeId + ":" + otp)
+                            .getBytes(StandardCharsets.UTF_8));
+
+            return HexFormat.of().formatHex(value);
+        } catch (Exception ex) {
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException(
+                    "OTP digest calculation failed", ex);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0565 — backend/src/main/java/com/giftplatform/otp/service/OtpEndpointRateLimiter.java:41
+
+[backend/src/main/java/com/giftplatform/otp/service/OtpEndpointRateLimiter.java:41](../../src/main/java/com/giftplatform/otp/service/OtpEndpointRateLimiter.java#L41)
+
+When / guard context:
+```java
+Address);
+        Instant window = clock.instant().truncatedTo(ChronoUnit.HOURS);
+        return !Boolean.TRUE.equals(transactions.execute(tx ->
+                increment("REQUEST_IP", digest(remoteAddress), window, REQUEST_IP_LIMIT)));
+    }
+
+    public boolean isVerificationBlocked(UUID userId, String remoteAddress) {
+        if (userId == null)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Missing user");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0566 — backend/src/main/java/com/giftplatform/otp/service/OtpEndpointRateLimiter.java:77
+
+[backend/src/main/java/com/giftplatform/otp/service/OtpEndpointRateLimiter.java:77](../../src/main/java/com/giftplatform/otp/service/OtpEndpointRateLimiter.java#L77)
+
+When / guard context:
+```java
+its.request_count < ?)
+                RETURNING request_count
+                """, (ResultSetExtractor<Boolean>) rs -> rs.next(),
+                scope, key, java.sql.Timestamp.from(window), limit));
+    }
+
+    private static void requireIp(String address) {
+        if (address == null || address.isBlank() || address.length() > 256) {
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Invalid remote address");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0567 — backend/src/main/java/com/giftplatform/otp/service/OtpEndpointRateLimiter.java:86
+
+[backend/src/main/java/com/giftplatform/otp/service/OtpEndpointRateLimiter.java:86](../../src/main/java/com/giftplatform/otp/service/OtpEndpointRateLimiter.java#L86)
+
+When / guard context:
+```java
+ow new IllegalArgumentException("Invalid remote address");
+        }
+    }
+
+    private static String digest(String value) {
+        try {
+            return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256")
+                    .digest(value.getBytes(StandardCharsets.UTF_8)));
+        } catch (NoSuchAlgorithmException ex) {
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException(ex);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0568 — backend/src/main/java/com/giftplatform/otp/service/OtpRequestRateLimiter.java:37
+
+[backend/src/main/java/com/giftplatform/otp/service/OtpRequestRateLimiter.java:37](../../src/main/java/com/giftplatform/otp/service/OtpRequestRateLimiter.java#L37)
+
+When / guard context:
+```java
+this.transactions = transactions;
+        this.clock = clock;
+    }
+
+    /** Atomic across both scopes; denied requests do not consume partial quotas. */
+    public Decision acquire(UUID userId, String phoneNumber) {
+        if (userId == null || phoneNumber == null ||
+                !phoneNumber.matches("^\\+[1-9][0-9]{1,14}$")) {
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Invalid rate-limit subject");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0569 — backend/src/main/java/com/giftplatform/otp/service/OtpRequestRateLimiter.java:79
+
+[backend/src/main/java/com/giftplatform/otp/service/OtpRequestRateLimiter.java:79](../../src/main/java/com/giftplatform/otp/service/OtpRequestRateLimiter.java#L79)
+
+When / guard context:
+```java
+sql.Timestamp.from(window), limit));
+    }
+
+    private static String sha256(String value) {
+        try {
+            byte[] hash = MessageDigest.getInstance("SHA-256")
+                    .digest(value.getBytes(StandardCharsets.UTF_8));
+            return HexFormat.of().formatHex(hash);
+        } catch (NoSuchAlgorithmException ex) {
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException(ex);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0570 — backend/src/main/java/com/giftplatform/otp/service/PhoneOtpIssuanceTransactionService.java:58
+
+[backend/src/main/java/com/giftplatform/otp/service/PhoneOtpIssuanceTransactionService.java:58](../../src/main/java/com/giftplatform/otp/service/PhoneOtpIssuanceTransactionService.java#L58)
+
+When / guard context:
+```java
+String phoneNumber,
+            String otp,
+            UUID challengeId
+    ) {
+        if (userId == null || challengeId == null
+                || phoneNumber == null
+                || !phoneNumber.matches(
+                "^\\+[1-9][0-9]{1,14}$")
+                || otp == null
+                || !otp.matches("[0-9]{6}")) {
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException(
+                    "Invalid OTP reservation input");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0571 — backend/src/main/java/com/giftplatform/otp/service/PhoneOtpOrchestrationService.java:62
+
+[backend/src/main/java/com/giftplatform/otp/service/PhoneOtpOrchestrationService.java:62](../../src/main/java/com/giftplatform/otp/service/PhoneOtpOrchestrationService.java#L62)
+
+When / guard context:
+```java
+OtpIssuanceResult.Status.RESERVED) {
+            return result;
+        }
+
+        try {
+            smsSender.sendVerificationCode(phoneNumber, otp);
+
+        } catch (OtpSmsRejectedException rejected) {
+            // Explicit rejection: provider did not accept the SMS.
+            if (!delivery.markFailed(userId, challengeId)) {
+```
+Failure / enforcement:
+```java
+throw new OtpDeliveryUncertainException(
+                        "OTP delivery state could not be finalized",
+                        rejected
+                );
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0572 — backend/src/main/java/com/giftplatform/otp/service/PhoneOtpOrchestrationService.java:68
+
+[backend/src/main/java/com/giftplatform/otp/service/PhoneOtpOrchestrationService.java:68](../../src/main/java/com/giftplatform/otp/service/PhoneOtpOrchestrationService.java#L68)
+
+When / guard context:
+```java
+ion rejected) {
+            // Explicit rejection: provider did not accept the SMS.
+            if (!delivery.markFailed(userId, challengeId)) {
+                throw new OtpDeliveryUncertainException(
+                        "OTP delivery state could not be finalized",
+                        rejected
+                );
+            }
+```
+Failure / enforcement:
+```java
+throw new OtpDispatchException(
+                    "OTP dispatch was rejected",
+                    rejected
+            );
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0573 — backend/src/main/java/com/giftplatform/otp/service/PhoneOtpOrchestrationService.java:76
+
+[backend/src/main/java/com/giftplatform/otp/service/PhoneOtpOrchestrationService.java:76](../../src/main/java/com/giftplatform/otp/service/PhoneOtpOrchestrationService.java#L76)
+
+When / guard context:
+```java
+}
+
+            throw new OtpDispatchException(
+                    "OTP dispatch was rejected",
+                    rejected
+            );
+
+        } catch (RuntimeException uncertain) {
+            // Timeout, network failure, or ambiguous provider outcome.
+            // Keep PENDING for bounded stale-challenge recovery.
+```
+Failure / enforcement:
+```java
+throw new OtpDeliveryUncertainException(
+                    "OTP delivery outcome is unknown",
+                    uncertain
+            );
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0574 — backend/src/main/java/com/giftplatform/otp/service/PhoneOtpOrchestrationService.java:86
+
+[backend/src/main/java/com/giftplatform/otp/service/PhoneOtpOrchestrationService.java:86](../../src/main/java/com/giftplatform/otp/service/PhoneOtpOrchestrationService.java#L86)
+
+When / guard context:
+```java
+throw new OtpDeliveryUncertainException(
+                    "OTP delivery outcome is unknown",
+                    uncertain
+            );
+        }
+
+        // Provider accepted the SMS request.
+        // This is not proof of delivery to the handset.
+        try {
+            if (!delivery.markSent(userId, challengeId)) {
+```
+Failure / enforcement:
+```java
+throw new OtpSmsRejectedException(
+                        "SMS delivery is not configured"
+                );
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0575 — backend/src/main/java/com/giftplatform/otp/service/PhoneOtpOrchestrationService.java:92
+
+[backend/src/main/java/com/giftplatform/otp/service/PhoneOtpOrchestrationService.java:92](../../src/main/java/com/giftplatform/otp/service/PhoneOtpOrchestrationService.java#L92)
+
+When / guard context:
+```java
+try {
+            if (!delivery.markSent(userId, challengeId)) {
+                throw new OtpSmsRejectedException(
+                        "SMS delivery is not configured"
+                );
+            }
+        } catch (RuntimeException finalizationFailure) {
+            // Do not mark FAILED: SMS may already have been sent.
+```
+Failure / enforcement:
+```java
+throw new OtpDeliveryUncertainException(
+                    "OTP delivery state could not be finalized",
+                    finalizationFailure
+            );
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+## payment
+
+### RULE-0576 — backend/src/main/java/com/giftplatform/payment/control/PaymentControlController.java:29
+
+[backend/src/main/java/com/giftplatform/payment/control/PaymentControlController.java:29](../../src/main/java/com/giftplatform/payment/control/PaymentControlController.java#L29)
+
+When / guard context:
+```java
+sion){return commission.history(limit,beforeRevision);}
+    @GetMapping("/api/v1/events/{eventId}/payment-breakdown")
+    public ResponseEntity<List<Map<String,Object>>> breakdown(@PathVariable UUID eventId,@RequestParam(defaultValue="50") int limit,@RequestParam(defaultValue="0") int offset){
+        if(limit<1||limit>100||offset<0||offset>100000)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0577 — backend/src/main/java/com/giftplatform/payment/control/PaymentControlController.java:30
+
+[backend/src/main/java/com/giftplatform/payment/control/PaymentControlController.java:30](../../src/main/java/com/giftplatform/payment/control/PaymentControlController.java#L30)
+
+When / guard context:
+```java
+ue="50") int limit,@RequestParam(defaultValue="0") int offset){
+        if(limit<1||limit>100||offset<0||offset>100000)throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        if(!Integer.valueOf(1).equals(db.queryForObject("SELECT count(*) FROM events WHERE id=? AND owner_id=?",Integer.class,eventId,actors.requireAuthenticatedUserId())))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0578 — backend/src/main/java/com/giftplatform/payment/control/PaymentControlController.java:46
+
+[backend/src/main/java/com/giftplatform/payment/control/PaymentControlController.java:46](../../src/main/java/com/giftplatform/payment/control/PaymentControlController.java#L46)
+
+When / guard context:
+```java
+(CacheControl.noStore()).body(rows);
+    }
+    @GetMapping("/api/public/payments/controls/{token}")
+    public ResponseEntity<Map<String,Object>> effective(@PathVariable UUID token){
+        var events=db.query("SELECT id FROM events WHERE public_token=? AND status='PUBLISHED'",(rs,n)->rs.getObject(1,UUID.class),token);
+        if(events.size()!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0579 — backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:20
+
+[backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:20](../../src/main/java/com/giftplatform/payment/control/PaymentControlService.java#L20)
+
+When / guard context:
+```java
+ntrol(String channel,Boolean configured,boolean platformEnabled,boolean hostEnabled,boolean eventEnabled,boolean effectiveEnabled) {}
+    public record View(long revision,String scope,UUID scopeId,List<Control> controls) {}
+    public record Change(long revision,Boolean enabled,String reason) {}
+    public void admin(){if(!actors.isPlatformAdmin())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Platform administrator required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0580 — backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:23
+
+[backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:23](../../src/main/java/com/giftplatform/payment/control/PaymentControlService.java#L23)
+
+When / guard context:
+```java
+revision,Boolean enabled,String reason) {}
+    public void admin(){if(!actors.isPlatformAdmin())throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Platform administrator required");}
+    public Map<String,Boolean> event(UUID eventId){
+        var rows=db.queryForList("SELECT owner_id FROM events WHERE id=?",eventId);
+        if(rows.size()!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Event not found");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0581 — backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:34
+
+[backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:34](../../src/main/java/com/giftplatform/payment/control/PaymentControlService.java#L34)
+
+When / guard context:
+```java
+("channel"))){value&=(Boolean)row.get("enabled");if("PLATFORM".equals(row.get("scope")))root=true;}result.put(code,root&&value);}
+        result.put("ROUTING",result.get("ROUTING")&&result.get("RAZORPAY"));
+        return Map.copyOf(result);
+    }
+    public void require(UUID event,String channel){if(!Boolean.TRUE.equals(event(event).get(channel)))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,channel+" payments are disabled for this event");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0582 — backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:35
+
+[backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:35](../../src/main/java/com/giftplatform/payment/control/PaymentControlService.java#L35)
+
+When / guard context:
+```java
+return Map.copyOf(result);
+    }
+    public void require(UUID event,String channel){if(!Boolean.TRUE.equals(event(event).get(channel)))throw new ResponseStatusException(HttpStatus.CONFLICT,channel+" payments are disabled for this event");}
+    public void requireHost(UUID host,String channel){if(!Boolean.TRUE.equals(host(host).get(channel)))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,channel+" payments are disabled for this host");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0583 — backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:37
+
+[backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:37](../../src/main/java/com/giftplatform/payment/control/PaymentControlService.java#L37)
+
+When / guard context:
+```java
+led for this event");}
+    public void requireHost(UUID host,String channel){if(!Boolean.TRUE.equals(host(host).get(channel)))throw new ResponseStatusException(HttpStatus.CONFLICT,channel+" payments are disabled for this host");}
+    private UUID validate(String scope,UUID id){
+        if("PLATFORM".equals(scope)){if(id!=null&&!PLATFORM.equals(id))
+```
+Failure / enforcement:
+```java
+throw bad("Invalid platform scope");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0584 — backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:38
+
+[backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:38](../../src/main/java/com/giftplatform/payment/control/PaymentControlService.java#L38)
+
+When / guard context:
+```java
+l){if(!Boolean.TRUE.equals(host(host).get(channel)))throw new ResponseStatusException(HttpStatus.CONFLICT,channel+" payments are disabled for this host");}
+    private UUID validate(String scope,UUID id){
+        if("PLATFORM".equals(scope)){if(id!=null&&!PLATFORM.equals(id))throw bad("Invalid platform scope");return PLATFORM;}
+        if(id==null)
+```
+Failure / enforcement:
+```java
+throw bad("Choose a host or event");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0585 — backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:39
+
+[backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:39](../../src/main/java/com/giftplatform/payment/control/PaymentControlService.java#L39)
+
+When / guard context:
+```java
+te(String scope,UUID id){
+        if("PLATFORM".equals(scope)){if(id!=null&&!PLATFORM.equals(id))throw bad("Invalid platform scope");return PLATFORM;}
+        if(id==null)throw bad("Choose a host or event");
+        if("HOST".equals(scope)){if(!Boolean.TRUE.equals(db.queryForObject("SELECT EXISTS(SELECT 1 FROM users WHERE id=?)",Boolean.class,id)))
+```
+Failure / enforcement:
+```java
+throw missing();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0586 — backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:40
+
+[backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:40](../../src/main/java/com/giftplatform/payment/control/PaymentControlService.java#L40)
+
+When / guard context:
+```java
+hrow bad("Choose a host or event");
+        if("HOST".equals(scope)){if(!Boolean.TRUE.equals(db.queryForObject("SELECT EXISTS(SELECT 1 FROM users WHERE id=?)",Boolean.class,id)))throw missing();return id;}
+        if("EVENT".equals(scope)){if(!Boolean.TRUE.equals(db.queryForObject("SELECT EXISTS(SELECT 1 FROM events WHERE id=?)",Boolean.class,id)))
+```
+Failure / enforcement:
+```java
+throw missing();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0587 — backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:41
+
+[backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:41](../../src/main/java/com/giftplatform/payment/control/PaymentControlService.java#L41)
+
+When / guard context:
+```java
+if("HOST".equals(scope)){if(!Boolean.TRUE.equals(db.queryForObject("SELECT EXISTS(SELECT 1 FROM users WHERE id=?)",Boolean.class,id)))throw missing();return id;}
+        if("EVENT".equals(scope)){if(!Boolean.TRUE.equals(db.queryForObject("SELECT EXISTS(SELECT 1 FROM events WHERE id=?)",Boolean.class,id)))throw missing();return id;}
+```
+Failure / enforcement:
+```java
+throw bad("Invalid payment scope");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0588 — backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:55
+
+[backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:55](../../src/main/java/com/giftplatform/payment/control/PaymentControlService.java#L55)
+
+When / guard context:
+```java
+on,scope,id,List.copyOf(controls));
+    }
+    @Transactional public View change(String scope,UUID id,String channel,Change input){
+        admin();id=validate(scope,id);
+        if(!CHANNELS.contains(channel)||input==null||input.reason()==null||input.reason().isBlank()||input.reason().length()>500||("PLATFORM".equals(scope)&&input.enabled()==null))
+```
+Failure / enforcement:
+```java
+throw bad("Choose a channel, setting and change reason");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0589 — backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:57
+
+[backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:57](../../src/main/java/com/giftplatform/payment/control/PaymentControlService.java#L57)
+
+When / guard context:
+```java
+;id=validate(scope,id);
+        if(!CHANNELS.contains(channel)||input==null||input.reason()==null||input.reason().isBlank()||input.reason().length()>500||("PLATFORM".equals(scope)&&input.enabled()==null))throw bad("Choose a channel, setting and change reason");
+        if("ROUTING".equals(channel)&&Boolean.TRUE.equals(input.enabled()))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Route/VPA activation is disabled. Normal Razorpay checkout remains available through its own controls.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0590 — backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:59
+
+[backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:59](../../src/main/java/com/giftplatform/payment/control/PaymentControlService.java#L59)
+
+When / guard context:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Route/VPA activation is disabled. Normal Razorpay checkout remains available through its own controls.");
+        Long revision=db.queryForObject("SELECT revision FROM payment_control_revision WHERE id=1 FOR UPDATE",Long.class);
+        if(revision==null||revision!=input.revision())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Payment controls changed; reload before saving");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0591 — backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:68
+
+[backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:68](../../src/main/java/com/giftplatform/payment/control/PaymentControlService.java#L68)
+
+When / guard context:
+```java
+TO payment_control_history(revision,actor_id,scope,scope_id,channel,reason,before_enabled,after_enabled) VALUES(?,?,?,?,?,?,?,?)",next,admin,scope,id,channel,input.reason().strip(),before,input.enabled());
+        return read(scope,id);
+    }
+    public List<Map<String,Object>> history(int limit,long before){admin();if(limit<1||limit>100||before<0)
+```
+Failure / enforcement:
+```java
+throw bad("Invalid history page");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0592 — backend/src/main/java/com/giftplatform/payment/control/RoutingCommissionService.java:29
+
+[backend/src/main/java/com/giftplatform/payment/control/RoutingCommissionService.java:29](../../src/main/java/com/giftplatform/payment/control/RoutingCommissionService.java#L29)
+
+When / guard context:
+```java
+tLong(1),rs.getInt(2),false,"ROUTED_HOST_PAYMENTS_ONLY"));
+    }
+    @Transactional public Settings update(Update input){
+        controls.admin();
+        if(input==null||input.revision()==null||input.rateBps()==null||input.rateBps()<0||input.rateBps()>10000||input.reason()==null||input.reason().isBlank()||input.reason().length()>500)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Supply a revision, percentage from 0% to 100%, and a change reason");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0593 — backend/src/main/java/com/giftplatform/payment/control/RoutingCommissionService.java:32
+
+[backend/src/main/java/com/giftplatform/payment/control/RoutingCommissionService.java:32](../../src/main/java/com/giftplatform/payment/control/RoutingCommissionService.java#L32)
+
+When / guard context:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Supply a revision, percentage from 0% to 100%, and a change reason");
+        var old=db.queryForMap("SELECT revision,rate_bps FROM routing_commission_settings WHERE id=1 FOR UPDATE");
+        long revision=((Number)old.get("revision")).longValue();
+        if(revision!=input.revision())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Routing commission changed; reload before saving");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0594 — backend/src/main/java/com/giftplatform/payment/control/RoutingCommissionService.java:41
+
+[backend/src/main/java/com/giftplatform/payment/control/RoutingCommissionService.java:41](../../src/main/java/com/giftplatform/payment/control/RoutingCommissionService.java#L41)
+
+When / guard context:
+```java
+reason().strip());
+        db.update("INSERT INTO platform_admin_action_audit(id,actor_id,action) VALUES(?,?,?)",UUID.randomUUID(),admin,"ROUTING_COMMISSION_UPDATED");
+        return current();
+    }
+    public List<Map<String,Object>> history(int limit,long beforeRevision){
+        controls.admin();
+        if(limit<1||limit>100||beforeRevision<0)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid history page");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0595 — backend/src/main/java/com/giftplatform/payment/controller/PublicGiftProgressController.java:21
+
+[backend/src/main/java/com/giftplatform/payment/controller/PublicGiftProgressController.java:21](../../src/main/java/com/giftplatform/payment/controller/PublicGiftProgressController.java#L21)
+
+When / guard context:
+```java
+dPaise, long contributionCount) {}
+
+    @GetMapping("/progress/{token}")
+    public List<GiftProgress> progress(@PathVariable UUID token) {
+        var eventIds = jdbc.query("SELECT id FROM events WHERE public_token = ? AND status = 'PUBLISHED'",
+                (rs, row) -> rs.getObject("id", UUID.class), token);
+        if (eventIds.size() != 1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation unavailable");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0596 — backend/src/main/java/com/giftplatform/payment/controller/PublicPaymentContextController.java:20
+
+[backend/src/main/java/com/giftplatform/payment/controller/PublicPaymentContextController.java:20](../../src/main/java/com/giftplatform/payment/controller/PublicPaymentContextController.java#L20)
+
+When / guard context:
+```java
+tController(JdbcTemplate jdbc) { this.jdbc = jdbc; }
+
+    @GetMapping("/context/{token}")
+    public Map<String, UUID> context(@PathVariable UUID token) {
+        var ids = jdbc.query("SELECT id FROM events WHERE public_token = ? AND status = 'PUBLISHED'",
+                (rs, i) -> rs.getObject(1, UUID.class), token);
+        if (ids.size() != 1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation unavailable");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0597 — backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:40
+
+[backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:40](../../src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java#L40)
+
+When / guard context:
+```java
+stPhone,String transactionReference,String idempotencyKey) {}
+ public record ClaimResult(UUID claimId,String status,String message) {}
+ public GuestDirectTransferService(JdbcTemplate jdbc,
+  boolean enabled, boolean reconciliationEnabled) {
+  
+  this.jdbc=jdbc; this.enabled=enabled; this.notifications=null;
+ }
+ private void gate() {
+  if(!enabled)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+   "Manual transfer reporting is disabled");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0598 — backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:44
+
+[backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:44](../../src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java#L44)
+
+When / guard context:
+```java
+ice(JdbcTemplate jdbc,
+  boolean enabled, boolean reconciliationEnabled) {
+  
+  this.jdbc=jdbc; this.enabled=enabled; this.notifications=null;
+ }
+ private void gate() {
+  if(!enabled) throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+   "Manual transfer reporting is disabled");
+ }
+ private UUID event(UUID token) {
+  if(token==null)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Invitation unavailable");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0599 — backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:47
+
+[backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:47](../../src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java#L47)
+
+When / guard context:
+```java
+E,
+   "Manual transfer reporting is disabled");
+ }
+ private UUID event(UUID token) {
+  if(token==null) throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Invitation unavailable");
+  List<UUID> rows=jdbc.query("SELECT id FROM events WHERE public_token=? AND status='PUBLISHED'",
+   (rs,i)->rs.getObject(1,UUID.class),token);
+  if(rows.size()!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Invitation unavailable");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0600 — backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:77
+
+[backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:77](../../src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java#L77)
+
+When / guard context:
+```java
+es("[A-Za-z0-9\\-]{8,40}") ||
+    (r.guestEmail()!=null && (r.guestEmail().length()>320 || !r.guestEmail().matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$"))) ||
+    (r.guestPhone()!=null && (r.guestPhone().length()>30 || !r.guestPhone().matches("[+0-9 ()-]{5,30}"))) ||
+    r.idempotencyKey()==null || !r.idempotencyKey().matches("[A-Za-z0-9-]{8,120}"))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid transfer confirmation");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0601 — backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:83
+
+[backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:83](../../src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java#L83)
+
+When / guard context:
+```java
+atus.BAD_REQUEST,"Invalid transfer confirmation");
+  if(controls!=null)controls.require(eventId,r.method());
+  if(r.giftId()!=null) {
+   Integer count=jdbc.queryForObject("""
+    SELECT COUNT(*) FROM gifts WHERE id=? AND event_id=? AND status='ACTIVE' AND visibility='PUBLIC'
+    """,Integer.class,r.giftId(),eventId);
+   if(count==null || count!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Gift unavailable");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0602 — backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:91
+
+[backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:91](../../src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java#L91)
+
+When / guard context:
+```java
+ication_status='VERIFIED')" +
+    ("UPI".equals(r.method()) ? " AND EXISTS (SELECT 1 FROM host_upi_qr_images q WHERE q.host_id="+table+".host_id AND q.upi_account_id="+table+".id AND q.source IN ('UPLOADED','GENERATED') AND q.payload_sha256 IS NOT NULL)" : ""),Integer.class,r.destinationId(),eventId,eventId);
+  if(eligible==null || eligible!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Eligible destination unavailable");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0603 — backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:108
+
+[backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:108](../../src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java#L108)
+
+When / guard context:
+```java
+t_name=? AND gift_id IS NOT DISTINCT FROM ?
+      AND guest_email IS NOT DISTINCT FROM ? AND guest_phone IS NOT DISTINCT FROM ?
+    """,Integer.class,prior.get(0).claimId(),r.destinationId(),r.method(),
+     r.amountPaise(),reference,r.guestName().strip(),r.giftId(),clean(r.guestEmail()),clean(r.guestPhone()));
+   if(matching==null || matching!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Idempotency conflict");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0604 — backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:119
+
+[backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:119](../../src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java#L119)
+
+When / guard context:
+```java
+nt:"+eventId);
+  // Match verified payment allocation's gift-row lock before reading gift progress.
+  if(r.giftId()!=null) {
+   var locked=jdbc.query("""
+     SELECT id FROM gifts WHERE id=? AND event_id=? AND status='ACTIVE' AND visibility='PUBLIC' FOR UPDATE
+     """,(rs,i)->rs.getObject(1,UUID.class),r.giftId(),eventId);
+   if(locked.size()!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Gift unavailable");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0605 — backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:120
+
+[backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:120](../../src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java#L120)
+
+When / guard context:
+```java
+'ACTIVE' AND visibility='PUBLIC' FOR UPDATE
+     """,(rs,i)->rs.getObject(1,UUID.class),r.giftId(),eventId);
+   if(locked.size()!=1) throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Gift unavailable");
+   if(Boolean.TRUE.equals(jdbc.queryForObject("SELECT EXISTS(SELECT 1 FROM gift_groups WHERE reserved_gift_id=?)",Boolean.class,r.giftId())))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"A surprise is waiting for this gift");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0606 — backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:131
+
+[backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:131](../../src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java#L131)
+
+When / guard context:
+```java
+se,guest_name,reference_hash,client_key,guest_email,guest_phone)
+    VALUES(?,?,?,?,?,?,?,?,?,?,?)
+    """,id,eventId,r.giftId(),r.destinationId(),r.method(),r.amountPaise(),
+    r.guestName().strip(),reference,r.idempotencyKey(),clean(r.guestEmail()),clean(r.guestPhone()));
+  } catch(org.springframework.dao.DataIntegrityViolationException e) {
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Reference already submitted");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0607 — backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:137
+
+[backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:137](../../src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java#L137)
+
+When / guard context:
+```java
+on(HttpStatus.CONFLICT,"Reference already submitted");
+  }
+  // Display-only allocation: not a verified contribution or financial posting.
+  long giftPart=0L;
+  if(r.giftId()!=null) {
+   Long target=jdbc.queryForObject("SELECT ROUND(target_amount*100)::bigint FROM gifts WHERE id=? AND event_id=?",Long.class,r.giftId(),eventId);
+   if(target==null)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Gift unavailable");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0608 — backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:164
+
+[backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:164](../../src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java#L164)
+
+When / guard context:
+```java
+ayment is not verified");
+ }
+ private static String clean(String value) { return value==null || value.isBlank()?null:value.strip(); }
+ private static String sha256(String value) {
+  try { return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256")
+     .digest(value.getBytes(StandardCharsets.UTF_8))); }
+  catch(NoSuchAlgorithmException e){
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException(e);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0609 — backend/src/main/java/com/giftplatform/payment/direct/GuestVerifiedDestinationService.java:36
+
+[backend/src/main/java/com/giftplatform/payment/direct/GuestVerifiedDestinationService.java:36](../../src/main/java/com/giftplatform/payment/direct/GuestVerifiedDestinationService.java#L36)
+
+When / guard context:
+```java
+c record Destination(UUID id,String method,boolean preferred,String label,
+                            String upiId,String qrPngBase64,String beneficiaryName,
+                            String accountNumber,String ifsc) {}
+ @Transactional(readOnly=true)
+ public List<Destination> list(UUID token) {
+  if(!active) return List.of();
+  if(token==null)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Invitation unavailable");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0610 — backend/src/main/java/com/giftplatform/payment/direct/GuestVerifiedDestinationService.java:39
+
+[backend/src/main/java/com/giftplatform/payment/direct/GuestVerifiedDestinationService.java:39](../../src/main/java/com/giftplatform/payment/direct/GuestVerifiedDestinationService.java#L39)
+
+When / guard context:
+```java
+if(!active) return List.of();
+  if(token==null) throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Invitation unavailable");
+  List<UUID[]> owners=jdbc.query("SELECT id,owner_id FROM events WHERE public_token=? AND status='PUBLISHED'",
+   (rs,i)->new UUID[]{rs.getObject(1,UUID.class),rs.getObject(2,UUID.class)},token);
+  if(owners.size()!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Invitation unavailable");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0611 — backend/src/main/java/com/giftplatform/payment/entity/PaymentOrder.java:68
+
+[backend/src/main/java/com/giftplatform/payment/entity/PaymentOrder.java:68](../../src/main/java/com/giftplatform/payment/entity/PaymentOrder.java#L68)
+
+When / guard context:
+```java
+Instant updatedAt;
+
+    protected PaymentOrder() {}
+
+    public PaymentOrder(
+            UUID eventId,
+            UUID giftId,
+            String contributionType,
+            long amountPaise,
+            String idempotencyKey
+    ) {
+        this.eventId = java.util.Objects.requireNonNull(eventId);
+
+        if (amountPaise <= 0) {
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException(
+                    "Payment amount must be positive");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0612 — backend/src/main/java/com/giftplatform/payment/entity/PaymentOrder.java:75
+
+[backend/src/main/java/com/giftplatform/payment/entity/PaymentOrder.java:75](../../src/main/java/com/giftplatform/payment/entity/PaymentOrder.java#L75)
+
+When / guard context:
+```java
+this.eventId = java.util.Objects.requireNonNull(eventId);
+
+        if (amountPaise <= 0) {
+            throw new IllegalArgumentException(
+                    "Payment amount must be positive");
+        }
+
+        if (idempotencyKey == null ||
+                idempotencyKey.isBlank() ||
+                idempotencyKey.length() > 120) {
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException(
+                    "Invalid idempotency key");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0613 — backend/src/main/java/com/giftplatform/payment/entity/PaymentOrder.java:84
+
+[backend/src/main/java/com/giftplatform/payment/entity/PaymentOrder.java:84](../../src/main/java/com/giftplatform/payment/entity/PaymentOrder.java#L84)
+
+When / guard context:
+```java
+cyKey.isBlank() ||
+                idempotencyKey.length() > 120) {
+            throw new IllegalArgumentException(
+                    "Invalid idempotency key");
+        }
+
+        if (!java.util.Set.of(
+                "GIFT_PARTIAL",
+                "GIFT_FULL",
+                "EVENT_WALLET"
+        ).contains(contributionType)) {
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException(
+                    "Invalid contribution type");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0614 — backend/src/main/java/com/giftplatform/payment/entity/PaymentOrder.java:90
+
+[backend/src/main/java/com/giftplatform/payment/entity/PaymentOrder.java:90](../../src/main/java/com/giftplatform/payment/entity/PaymentOrder.java#L90)
+
+When / guard context:
+```java
+Set.of(
+                "GIFT_PARTIAL",
+                "GIFT_FULL",
+                "EVENT_WALLET"
+        ).contains(contributionType)) {
+            throw new IllegalArgumentException(
+                    "Invalid contribution type");
+        }
+
+        if ("EVENT_WALLET".equals(contributionType)
+                && giftId != null) {
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException(
+                    "Wallet contribution cannot reference a gift");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0615 — backend/src/main/java/com/giftplatform/payment/entity/PaymentOrder.java:96
+
+[backend/src/main/java/com/giftplatform/payment/entity/PaymentOrder.java:96](../../src/main/java/com/giftplatform/payment/entity/PaymentOrder.java#L96)
+
+When / guard context:
+```java
+contribution type");
+        }
+
+        if ("EVENT_WALLET".equals(contributionType)
+                && giftId != null) {
+            throw new IllegalArgumentException(
+                    "Wallet contribution cannot reference a gift");
+        }
+
+        if (!"EVENT_WALLET".equals(contributionType)
+                && giftId == null) {
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException(
+                    "Gift contribution requires a gift");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0616 — backend/src/main/java/com/giftplatform/payment/entity/PaymentOrder.java:114
+
+[backend/src/main/java/com/giftplatform/payment/entity/PaymentOrder.java:114](../../src/main/java/com/giftplatform/payment/entity/PaymentOrder.java#L114)
+
+When / guard context:
+```java
+this.idempotencyKey = idempotencyKey;
+        this.provider = "RAZORPAY";
+        this.currency = "INR";
+        this.status = "CREATED";
+    }
+
+
+    public void applyPricing(com.giftplatform.monetization.MonetizationService.Quote quote) {
+        if (quote.contributionPaise() != requestedAmountPaise || monetizationRevision != null)
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Invalid pricing snapshot");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0617 — backend/src/main/java/com/giftplatform/payment/hybrid/HybridCheckoutQuoteController.java:14
+
+[backend/src/main/java/com/giftplatform/payment/hybrid/HybridCheckoutQuoteController.java:14](../../src/main/java/com/giftplatform/payment/hybrid/HybridCheckoutQuoteController.java#L14)
+
+When / guard context:
+```java
+heckoutQuoteService service;
+    public HybridCheckoutQuoteController(HybridCheckoutQuoteService service) { this.service=service; }
+    public record Request(UUID eventId, UUID giftId, long contributionPaise) {}
+    @PostMapping("/quote")
+    public HybridCheckoutQuoteService.Quote quote(@RequestBody Request request) {
+        if (request == null)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Request required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0618 — backend/src/main/java/com/giftplatform/payment/hybrid/HybridCheckoutQuoteService.java:32
+
+[backend/src/main/java/com/giftplatform/payment/hybrid/HybridCheckoutQuoteService.java:32](../../src/main/java/com/giftplatform/payment/hybrid/HybridCheckoutQuoteService.java#L32)
+
+When / guard context:
+```java
+totalPaise, String method,
+                        String notice, long platformFeePaise, long hostReceivesPaise, String feeBearer, long revision) {}
+
+    @Transactional
+    public Quote quote(UUID eventId, UUID giftId, long contributionPaise) {
+        if (eventId == null || contributionPaise <= 0 || contributionPaise > 100_000_000L) {
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid contribution");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0619 — backend/src/main/java/com/giftplatform/payment/hybrid/HybridCheckoutQuoteService.java:42
+
+[backend/src/main/java/com/giftplatform/payment/hybrid/HybridCheckoutQuoteService.java:42](../../src/main/java/com/giftplatform/payment/hybrid/HybridCheckoutQuoteService.java#L42)
+
+When / guard context:
+```java
+HERE e.id = ? AND e.status = 'PUBLISHED'
+              AND (?::uuid IS NULL OR EXISTS (
+                  SELECT 1 FROM gifts g WHERE g.id = ? AND g.event_id = e.id
+                    AND g.status = 'ACTIVE' AND g.visibility = 'PUBLIC'))
+            """, Integer.class, eventId, giftId, giftId);
+        if (valid == null || valid != 1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation unavailable");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0620 — backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java:42
+
+[backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java:42](../../src/main/java/com/giftplatform/payment/provider/RazorpayClient.java#L42)
+
+When / guard context:
+```java
+lient = RestClient.builder()
+                .baseUrl("https://api.razorpay.com/v1")
+                .build();
+
+        this.mapper = mapper;
+        this.keyId = keyId;
+        this.keySecret = keySecret;
+    }
+
+    private void requireCredentials() {
+        if (!keyId.startsWith("rzp_test_")
+                || keySecret.isBlank()) {
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException(
+                    "Only Razorpay Test Mode credentials are permitted");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0621 — backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java:86
+
+[backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java:86](../../src/main/java/com/giftplatform/payment/provider/RazorpayClient.java#L86)
+
+When / guard context:
+```java
+erId, amount, currency, status, null, null, null, null, null);
+        }
+    }
+
+    private <T> T providerCall(java.util.function.Supplier<T> operation) {
+        try { return operation.get(); }
+        catch (RestClientResponseException ex) {
+            if (ex.getStatusCode().value() == 401 || ex.getStatusCode().value() == 403) {
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+                    "Razorpay test credentials were rejected. Check backend test key ID and secret.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0622 — backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java:89
+
+[backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java:89](../../src/main/java/com/giftplatform/payment/provider/RazorpayClient.java#L89)
+
+When / guard context:
+```java
+catch (RestClientResponseException ex) {
+            if (ex.getStatusCode().value() == 401 || ex.getStatusCode().value() == 403) {
+                throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+                    "Razorpay test credentials were rejected. Check backend test key ID and secret.");
+            }
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
+                "Razorpay is temporarily unavailable. No payment has been confirmed.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0623 — backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java:102
+
+[backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java:102](../../src/main/java/com/giftplatform/payment/provider/RazorpayClient.java#L102)
+
+When / guard context:
+```java
+"Razorpay is temporarily unavailable. No payment has been confirmed.");
+        }
+    }
+
+    public ProviderOrder createOrder(
+            long amountPaise,
+            String receipt) {
+
+        requireCredentials();
+
+        if (amountPaise <= 0 || receipt == null
+                || receipt.isBlank() || receipt.length() > 40) {
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException(
+                    "Invalid Razorpay order request");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0624 — backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java:118
+
+[backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java:118](../../src/main/java/com/giftplatform/payment/provider/RazorpayClient.java#L118)
+
+When / guard context:
+```java
+ion())
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(java.util.Map.of(
+                        "amount", amountPaise,
+                        "currency", "INR",
+                        "receipt", receipt))
+                .retrieve()
+                .body(JsonNode.class));
+
+        if (result == null) {
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException(
+                    "Empty Razorpay order response");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0625 — backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java:130
+
+[backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java:130](../../src/main/java/com/giftplatform/payment/provider/RazorpayClient.java#L130)
+
+When / guard context:
+```java
+sult.path("id").asText();
+        long amount = result.path("amount").asLong();
+        String currency = result.path("currency").asText();
+        String status = result.path("status").asText();
+
+        if (id.isBlank() || amount != amountPaise
+                || !"INR".equals(currency)
+                || !"created".equals(status)) {
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException(
+                    "Invalid Razorpay order response");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0626 — backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java:143
+
+[backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java:143](../../src/main/java/com/giftplatform/payment/provider/RazorpayClient.java#L143)
+
+When / guard context:
+```java
+}
+
+    private static String optionalText(JsonNode value) {
+        return value.isMissingNode() || value.isNull() ? null : value.asText();
+    }
+
+    private static Long optionalAmount(JsonNode value) {
+        if(value.isMissingNode()||value.isNull())return null;
+        if(!value.isIntegralNumber()||!value.canConvertToLong()||value.asLong()<0)
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Invalid provider charge amount");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0627 — backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java:151
+
+[backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java:151](../../src/main/java/com/giftplatform/payment/provider/RazorpayClient.java#L151)
+
+When / guard context:
+```java
+mber()||!value.canConvertToLong()||value.asLong()<0)throw new IllegalStateException("Invalid provider charge amount");
+        return value.asLong();
+    }
+    public ProviderPayment fetchPayment(String paymentId) {
+        requireCredentials();
+
+        if (paymentId == null ||
+                !paymentId.matches("pay_[A-Za-z0-9]+")) {
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException(
+                    "Invalid Razorpay payment ID");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0628 — backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java:162
+
+[backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java:162](../../src/main/java/com/giftplatform/payment/provider/RazorpayClient.java#L162)
+
+When / guard context:
+```java
+"Invalid Razorpay payment ID");
+        }
+
+        JsonNode result = providerCall(() -> client.get()
+                .uri("/payments/{id}", paymentId)
+                .header(HttpHeaders.AUTHORIZATION, authorization())
+                .retrieve()
+                .body(JsonNode.class));
+
+        if (result == null) {
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException(
+                    "Empty Razorpay payment response");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0629 — backend/src/main/java/com/giftplatform/payment/report/HostContributionReportService.java:68
+
+[backend/src/main/java/com/giftplatform/payment/report/HostContributionReportService.java:68](../../src/main/java/com/giftplatform/payment/report/HostContributionReportService.java#L68)
+
+When / guard context:
+```java
+ate (UTC),Guest,Gift,Method,Payment amount (INR),Gift portion (INR),Wallet portion (INR),Status,Source,Record ID\n");
+    int offset=0;
+    while(true) {
+      Report r=search==null||search.isBlank()?report(eventId,100,offset,type,status,giftId,from,to):report(eventId,100,offset,type,status,giftId,from,to,search);
+      if(r.matchingCount()>10000)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Export limited to 10000 records; narrow filters");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0630 — backend/src/main/java/com/giftplatform/payment/report/HostContributionReportService.java:99
+
+[backend/src/main/java/com/giftplatform/payment/report/HostContributionReportService.java:99](../../src/main/java/com/giftplatform/payment/report/HostContributionReportService.java#L99)
+
+When / guard context:
+```java
+om,to,null);
+  }
+  @Transactional(readOnly=true, isolation=org.springframework.transaction.annotation.Isolation.REPEATABLE_READ)
+  public Report report(UUID eventId, int limit, int offset, String type, String status,
+                       UUID giftId, LocalDate from, LocalDate to, String search) {
+    if(search!=null && search.length()>120)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Search must be at most 120 characters");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0631 — backend/src/main/java/com/giftplatform/payment/report/HostContributionReportService.java:103
+
+[backend/src/main/java/com/giftplatform/payment/report/HostContributionReportService.java:103](../../src/main/java/com/giftplatform/payment/report/HostContributionReportService.java#L103)
+
+When / guard context:
+```java
+ength()>120)
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Search must be at most 120 characters");
+    if(eventId==null || limit<1 || limit>100 || offset<0 || offset>100000 ||
+      !Set.of("ALL","GIFT","WALLET").contains(type) ||
+      !Set.of("ALL","VERIFICATION_PENDING","VERIFIED","FAILED","CANCELLED").contains(status))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid report filters");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0632 — backend/src/main/java/com/giftplatform/payment/report/HostContributionReportService.java:105
+
+[backend/src/main/java/com/giftplatform/payment/report/HostContributionReportService.java:105](../../src/main/java/com/giftplatform/payment/report/HostContributionReportService.java#L105)
+
+When / guard context:
+```java
+limit<1 || limit>100 || offset<0 || offset>100000 ||
+      !Set.of("ALL","GIFT","WALLET").contains(type) ||
+      !Set.of("ALL","VERIFICATION_PENDING","VERIFIED","FAILED","CANCELLED").contains(status))
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid report filters");
+    if(from!=null && to!=null && from.isAfter(to))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid date range");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0633 — backend/src/main/java/com/giftplatform/payment/report/HostContributionReportService.java:108
+
+[backend/src/main/java/com/giftplatform/payment/report/HostContributionReportService.java:108](../../src/main/java/com/giftplatform/payment/report/HostContributionReportService.java#L108)
+
+When / guard context:
+```java
+ters");
+    if(from!=null && to!=null && from.isAfter(to))
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid date range");
+    UUID actor=actors.requireAuthenticatedUserId();
+    Integer owns=jdbc.queryForObject("SELECT COUNT(*) FROM events WHERE id=? AND owner_id=?",Integer.class,eventId,actor);
+    if(owns==null || owns!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Event not found");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0634 — backend/src/main/java/com/giftplatform/payment/report/HostContributionReportService.java:114
+
+[backend/src/main/java/com/giftplatform/payment/report/HostContributionReportService.java:114](../../src/main/java/com/giftplatform/payment/report/HostContributionReportService.java#L114)
+
+When / guard context:
+```java
+List<GiftOption> gifts=jdbc.query("""
+      SELECT id,name,target_amount FROM gifts WHERE event_id=? ORDER BY name,id
+      """,(rs,i)->new GiftOption(rs.getObject(1,UUID.class),rs.getString(2),
+      rs.getBigDecimal(3).movePointRight(2).longValueExact()),eventId);
+    if(giftId!=null && gifts.stream().noneMatch(g->g.id().equals(giftId)))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Gift not found for event");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0635 — backend/src/main/java/com/giftplatform/payment/service/ContributionAllocationService.java:40
+
+[backend/src/main/java/com/giftplatform/payment/service/ContributionAllocationService.java:40](../../src/main/java/com/giftplatform/payment/service/ContributionAllocationService.java#L40)
+
+When / guard context:
+```java
+oolean alreadyProcessed
+    ) {}
+
+    private record ContributionData(
+            UUID eventId,
+            UUID giftId,
+            UUID paymentOrderId,
+            long amountPaise,
+            String status
+    ) {}
+
+    @Transactional
+    public AllocationResult allocate(UUID contributionId) {
+        if (contributionId == null) {
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Contribution required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0636 — backend/src/main/java/com/giftplatform/payment/service/ContributionAllocationService.java:61
+
+[backend/src/main/java/com/giftplatform/payment/service/ContributionAllocationService.java:61](../../src/main/java/com/giftplatform/payment/service/ContributionAllocationService.java#L61)
+
+When / guard context:
+```java
+rs.getObject("event_id", UUID.class),
+                    rs.getObject("gift_id", UUID.class),
+                    rs.getObject("payment_order_id", UUID.class),
+                    rs.getLong("amount_paise"),
+                    rs.getString("allocation_status")),
+            contributionId);
+
+        if (rows.isEmpty()) {
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Contribution not found");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0637 — backend/src/main/java/com/giftplatform/payment/service/ContributionAllocationService.java:85
+
+[backend/src/main/java/com/giftplatform/payment/service/ContributionAllocationService.java:85](../../src/main/java/com/giftplatform/payment/service/ContributionAllocationService.java#L85)
+
+When / guard context:
+```java
+vious.isEmpty()) {
+            long gift = allocated(contributionId, "GIFT");
+            long wallet = allocated(contributionId, "EVENT_WALLET");
+            return new AllocationResult(
+                    contributionId, previous.get(0),
+                    gift, wallet, true);
+        }
+
+        if (!"PENDING".equals(c.status())) {
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Contribution already handled outside allocation service");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0638 — backend/src/main/java/com/giftplatform/payment/service/ContributionAllocationService.java:112
+
+[backend/src/main/java/com/giftplatform/payment/service/ContributionAllocationService.java:112](../../src/main/java/com/giftplatform/payment/service/ContributionAllocationService.java#L112)
+
+When / guard context:
+```java
+us = 'CAPTURED'
+              AND pt.verified_at IS NOT NULL
+              AND pt.amount_paise = po.amount_paise
+              AND pt.currency = po.currency
+            """,
+            Integer.class,
+            c.paymentOrderId(), c.eventId(),
+            c.giftId(), c.amountPaise());
+
+        if (verified == null || verified != 1) {
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Verified captured payment required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0639 — backend/src/main/java/com/giftplatform/payment/service/ContributionAllocationService.java:119
+
+[backend/src/main/java/com/giftplatform/payment/service/ContributionAllocationService.java:119](../../src/main/java/com/giftplatform/payment/service/ContributionAllocationService.java#L119)
+
+When / guard context:
+```java
+xception(
+                    HttpStatus.CONFLICT,
+                    "Verified captured payment required");
+        }
+
+        Long feeSnapshot=jdbc.queryForObject("SELECT platform_fee_paise FROM payment_orders WHERE id=?",Long.class,c.paymentOrderId());
+        long fee=feeSnapshot==null?0L:feeSnapshot;
+        if(fee<0 || fee>=c.amountPaise())
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Invalid fee snapshot");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0640 — backend/src/main/java/com/giftplatform/payment/service/ContributionAllocationService.java:136
+
+[backend/src/main/java/com/giftplatform/payment/service/ContributionAllocationService.java:136](../../src/main/java/com/giftplatform/payment/service/ContributionAllocationService.java#L136)
+
+When / guard context:
+```java
+SELECT target_amount
+                FROM gifts
+                WHERE id = ? AND event_id = ?
+                FOR UPDATE
+                """,
+                (rs, n) -> rs.getBigDecimal(1)
+                        .movePointRight(2).longValueExact(),
+                c.giftId(), c.eventId());
+
+            if (targets.isEmpty()) {
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(
+                        HttpStatus.CONFLICT, "Gift not found");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0641 — backend/src/main/java/com/giftplatform/payment/service/GiftFundingService.java:35
+
+[backend/src/main/java/com/giftplatform/payment/service/GiftFundingService.java:35](../../src/main/java/com/giftplatform/payment/service/GiftFundingService.java#L35)
+
+When / guard context:
+```java
+y = true)
+    public FundingSummary getSummary(UUID eventId, UUID giftId) {
+        Gift gift = gifts.findById(giftId)
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND, "Gift not found"));
+
+        if (!gift.getEvent().getId().equals(eventId)) {
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Gift not found");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0642 — backend/src/main/java/com/giftplatform/payment/service/GiftFundingService.java:45
+
+[backend/src/main/java/com/giftplatform/payment/service/GiftFundingService.java:45](../../src/main/java/com/giftplatform/payment/service/GiftFundingService.java#L45)
+
+When / guard context:
+```java
+ntId)) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Gift not found");
+        }
+
+        long targetPaise;
+        try {
+            targetPaise = gift.getTargetAmount()
+                    .movePointRight(2)
+                    .longValueExact();
+        } catch (ArithmeticException ex) {
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException(
+                    "Invalid gift target amount", ex);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0643 — backend/src/main/java/com/giftplatform/payment/service/GuestCheckoutService.java:47
+
+[backend/src/main/java/com/giftplatform/payment/service/GuestCheckoutService.java:47](../../src/main/java/com/giftplatform/payment/service/GuestCheckoutService.java#L47)
+
+When / guard context:
+```java
+request) {
+        if (request == null || request.guestName() == null ||
+                request.guestName().isBlank() || request.guestName().length() > 200 ||
+                (request.guestEmail() != null && request.guestEmail().length() > 320) ||
+                (request.guestPhone() != null && request.guestPhone().length() > 30)) {
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid guest details");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0644 — backend/src/main/java/com/giftplatform/payment/service/GuestCheckoutService.java:50
+
+[backend/src/main/java/com/giftplatform/payment/service/GuestCheckoutService.java:50](../../src/main/java/com/giftplatform/payment/service/GuestCheckoutService.java#L50)
+
+When / guard context:
+```java
+0 ||
+                (request.guestEmail() != null && request.guestEmail().length() > 320) ||
+                (request.guestPhone() != null && request.guestPhone().length() > 30)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid guest details");
+        }
+        if (!publicKey.startsWith("rzp_test_")) {
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Razorpay Test Mode key required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0645 — backend/src/main/java/com/giftplatform/payment/service/GuestCheckoutService.java:79
+
+[backend/src/main/java/com/giftplatform/payment/service/GuestCheckoutService.java:79](../../src/main/java/com/giftplatform/payment/service/GuestCheckoutService.java#L79)
+
+When / guard context:
+```java
+, email, phone, order.amountPaise());
+        } else if (previous.size() != 1 ||
+                !previous.get(0).name().equals(name) ||
+                !Objects.equals(previous.get(0).email(), email) ||
+                !Objects.equals(previous.get(0).phone(), phone) ||
+                previous.get(0).amount() != order.amountPaise()) {
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Idempotency key belongs to different guest details");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0646 — backend/src/main/java/com/giftplatform/payment/service/PaymentNotificationService.java:26
+
+[backend/src/main/java/com/giftplatform/payment/service/PaymentNotificationService.java:26](../../src/main/java/com/giftplatform/payment/service/PaymentNotificationService.java#L26)
+
+When / guard context:
+```java
+t_paise-po.platform_fee_paise
+            FROM contributions c
+            JOIN payment_orders po ON po.id = c.payment_order_id AND po.status = 'CAPTURED'
+            WHERE c.id = ?
+            """, (rs, i) -> new Detail(rs.getObject(1, UUID.class), rs.getString(2),
+                    rs.getLong(3)), contributionId);
+        if (rows.size() != 1)
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Verified contribution not found");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0647 — backend/src/main/java/com/giftplatform/payment/service/PaymentNotificationService.java:30
+
+[backend/src/main/java/com/giftplatform/payment/service/PaymentNotificationService.java:30](../../src/main/java/com/giftplatform/payment/service/PaymentNotificationService.java#L30)
+
+When / guard context:
+```java
+ring(2),
+                    rs.getLong(3)), contributionId);
+        if (rows.size() != 1) throw new IllegalStateException("Verified contribution not found");
+        Detail d = rows.get(0);
+        if (result.giftPaise() < 0 || result.walletPaise() < 0 ||
+                result.giftPaise() + result.walletPaise() != d.amountPaise()) {
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Contribution allocation mismatch");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0648 — backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:54
+
+[backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:54](../../src/main/java/com/giftplatform/payment/service/PaymentOrderService.java#L54)
+
+When / guard context:
+```java
+UUID giftId,
+            String contributionType,
+            long amountPaise,
+            String idempotencyKey) {
+
+        if (eventId == null || idempotencyKey == null ||
+                idempotencyKey.isBlank() ||
+                idempotencyKey.length() > 120 ||
+                amountPaise <= 0 || amountPaise > 100_000_000L) {
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Invalid payment request");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0649 — backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:74
+
+[backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:74](../../src/main/java/com/giftplatform/payment/service/PaymentOrderService.java#L74)
+
+When / guard context:
+```java
+()) {
+            PaymentOrder order = existing.get();
+
+            if (!order.getEventId().equals(eventId) ||
+                    !java.util.Objects.equals(order.getGiftId(), giftId) ||
+                    !order.getContributionType().equals(contributionType) ||
+                    order.getRequestedAmountPaise() != amountPaise) {
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(
+                        HttpStatus.CONFLICT,
+                        "Idempotency key belongs to another request");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0650 — backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:86
+
+[backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:86](../../src/main/java/com/giftplatform/payment/service/PaymentOrderService.java#L86)
+
+When / guard context:
+```java
+"Idempotency key belongs to another request");
+            }
+            return order;
+        }
+
+        Event event = events.findById(eventId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Event not found"));
+
+        if (event.getStatus() != EventStatus.PUBLISHED) {
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Event is not accepting contributions");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0651 — backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:93
+
+[backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:93](../../src/main/java/com/giftplatform/payment/service/PaymentOrderService.java#L93)
+
+When / guard context:
+```java
+UND, "Event not found"));
+
+        if (event.getStatus() != EventStatus.PUBLISHED) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Event is not accepting contributions");
+        }
+
+        if ("EVENT_WALLET".equals(contributionType)) {
+            if (giftId != null) {
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Wallet contribution cannot reference a gift");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0652 — backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:101
+
+[backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:101](../../src/main/java/com/giftplatform/payment/service/PaymentOrderService.java#L101)
+
+When / guard context:
+```java
+throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Wallet contribution cannot reference a gift");
+            }
+        } else if ("GIFT_PARTIAL".equals(contributionType) ||
+                   "GIFT_FULL".equals(contributionType)) {
+
+            if (giftId == null) {
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Gift is required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0653 — backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:111
+
+[backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:111](../../src/main/java/com/giftplatform/payment/service/PaymentOrderService.java#L111)
+
+When / guard context:
+```java
+HttpStatus.BAD_REQUEST,
+                        "Gift is required");
+            }
+
+            Gift gift = gifts.findById(giftId)
+                    .orElseThrow(() -> new ResponseStatusException(
+                            HttpStatus.NOT_FOUND, "Gift not found"));
+
+            if (!gift.getEvent().getId().equals(eventId)) {
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Gift not found");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0654 — backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:117
+
+[backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:117](../../src/main/java/com/giftplatform/payment/service/PaymentOrderService.java#L117)
+
+When / guard context:
+```java
+xception(
+                        HttpStatus.NOT_FOUND, "Gift not found");
+            }
+
+            jdbc.queryForObject("SELECT id FROM gifts WHERE id=? FOR UPDATE",UUID.class,giftId);
+            if(Boolean.TRUE.equals(jdbc.queryForObject("SELECT EXISTS(SELECT 1 FROM gift_groups WHERE reserved_gift_id=?)",Boolean.class,giftId)))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"A surprise is waiting for this gift");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0655 — backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:120
+
+[backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:120](../../src/main/java/com/giftplatform/payment/service/PaymentOrderService.java#L120)
+
+When / guard context:
+```java
+bject("SELECT EXISTS(SELECT 1 FROM gift_groups WHERE reserved_gift_id=?)",Boolean.class,giftId)))
+                throw new ResponseStatusException(HttpStatus.CONFLICT,"A surprise is waiting for this gift");
+            if (gift.getStatus() != GiftStatus.ACTIVE ||
+                    gift.getVisibility() != GiftVisibility.PUBLIC) {
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(
+                        HttpStatus.CONFLICT,
+                        "Gift is not accepting contributions");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0656 — backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:126
+
+[backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:126](../../src/main/java/com/giftplatform/payment/service/PaymentOrderService.java#L126)
+
+When / guard context:
+```java
+ng for this gift");
+            if (gift.getStatus() != GiftStatus.ACTIVE ||
+                    gift.getVisibility() != GiftVisibility.PUBLIC) {
+                throw new ResponseStatusException(
+                        HttpStatus.CONFLICT,
+                        "Gift is not accepting contributions");
+            }
+
+        } else {
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Invalid contribution type");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0657 — backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:132
+
+[backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:132](../../src/main/java/com/giftplatform/payment/service/PaymentOrderService.java#L132)
+
+When / guard context:
+```java
+"Gift is not accepting contributions");
+            }
+
+        } else {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Invalid contribution type");
+        }
+
+        if(controls!=null) {
+            controls.require(eventId,"RAZORPAY");
+            if(controls.event(eventId).get("ROUTING"))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Routing is selected but linked-account onboarding, provider fee allocation and settlement integration must be completed before collection");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0658 — backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:75
+
+[backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:75](../../src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java#L75)
+
+When / guard context:
+```java
+!providerOrderId.matches("order_[A-Za-z0-9]+")
+                || paymentId == null
+                || !paymentId.matches("pay_[A-Za-z0-9]+")
+                || !signatures.verifyCheckout(
+                        providerOrderId,
+                        paymentId,
+                        signature,
+                        keySecret)) {
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Invalid payment confirmation");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0659 — backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:113
+
+[backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:113](../../src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java#L113)
+
+When / guard context:
+```java
+UUID localOrderId,
+            String providerOrderId,
+            String paymentId) {
+
+        if (localOrderId == null
+                || providerOrderId == null
+                || !providerOrderId.matches("order_[A-Za-z0-9]+")
+                || paymentId == null
+                || !paymentId.matches("pay_[A-Za-z0-9]+")) {
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Invalid provider payment identity");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0660 — backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:127
+
+[backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:127](../../src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java#L127)
+
+When / guard context:
+```java
+ayment = razorpay.fetchPayment(paymentId);
+
+        if (payment == null
+                || !paymentId.equals(payment.id())
+                || !providerOrderId.equals(payment.orderId())
+                || !"captured".equals(payment.status())
+                || !"INR".equals(payment.currency())
+                || payment.amount() <= 0) {
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Verified captured payment required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0661 — backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:151
+
+[backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:151](../../src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java#L151)
+
+When / guard context:
+```java
+(
+                        rs.getObject("id", UUID.class),
+                        rs.getString("provider_order_id"),
+                        rs.getLong("amount_paise"),
+                        rs.getString("currency"),
+                        rs.getString("status")),
+                localOrderId);
+
+            if (rows.isEmpty()) {
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Payment order not found");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0662 — backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:161
+
+[backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:161](../../src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java#L161)
+
+When / guard context:
+```java
+HttpStatus.NOT_FOUND,
+                        "Payment order not found");
+            }
+
+            OrderData order = rows.get(0);
+
+            if (!providerOrderId.equals(order.providerOrderId())
+                    || payment.amount() != order.amountPaise()
+                    || !payment.currency().equals(order.currency())) {
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(
+                        HttpStatus.CONFLICT,
+                        "Payment does not match local order");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0663 — backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:177
+
+[backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:177](../../src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java#L177)
+
+When / guard context:
+```java
+SELECT id
+                FROM contributions
+                WHERE payment_order_id = ?
+                  AND amount_paise = ?
+                FOR UPDATE
+                """,
+                (rs, n) -> rs.getObject(1, UUID.class),
+                localOrderId, order.amountPaise());
+
+            if (contributionIds.size() != 1) {
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(
+                        HttpStatus.CONFLICT,
+                        "Matching contribution required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0664 — backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:197
+
+[backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:197](../../src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java#L197)
+
+When / guard context:
+```java
+AND status = 'CAPTURED'
+                FOR UPDATE
+                """,
+                (rs, n) -> rs.getString(1),
+                localOrderId);
+
+            if (!previousPayments.isEmpty()
+                    && (previousPayments.size() != 1
+                    || !paymentId.equals(previousPayments.get(0)))) {
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(
+                        HttpStatus.CONFLICT,
+                        "Order already captured by another payment");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0665 — backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:211
+
+[backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:211](../../src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java#L211)
+
+When / guard context:
+```java
+herOwner = jdbc.queryForObject("""
+                SELECT COUNT(*)
+                FROM payment_transactions
+                WHERE provider_payment_id = ?
+                  AND payment_order_id <> ?
+                """,
+                Integer.class, paymentId, localOrderId);
+
+            if (otherOwner != null && otherOwner > 0) {
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(
+                        HttpStatus.CONFLICT,
+                        "Provider payment already belongs to another order");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0666 — backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:220
+
+[backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:220](../../src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java#L220)
+
+When / guard context:
+```java
+tatusException(
+                        HttpStatus.CONFLICT,
+                        "Provider payment already belongs to another order");
+            }
+
+            if (!"CAPTURED".equals(order.status())) {
+
+                if (!"PENDING".equals(order.status())
+                        && !"AUTHORIZED".equals(order.status())) {
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(
+                            HttpStatus.CONFLICT,
+                            "Payment order is not capturable");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0667 — backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:239
+
+[backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:239](../../src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java#L239)
+
+When / guard context:
+```java
+, verified_at)
+                    VALUES (?, ?, ?, ?, 'INR',
+                            'CAPTURED', CURRENT_TIMESTAMP)
+                    """,
+                    UUID.randomUUID(),
+                    localOrderId,
+                    paymentId,
+                    order.amountPaise());
+
+                if (inserted != 1) {
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException(
+                            "Could not record captured payment");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0668 — backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:252
+
+[backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:252](../../src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java#L252)
+
+When / guard context:
+```java
+jdbc.update("""
+                    UPDATE payment_orders
+                    SET status = 'CAPTURED',
+                        updated_at = CURRENT_TIMESTAMP
+                    WHERE id = ?
+                      AND status IN ('PENDING', 'AUTHORIZED')
+                    """, localOrderId);
+
+                if (updated != 1) {
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException(
+                            "Could not capture local payment order");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0669 — backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:257
+
+[backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:257](../../src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java#L257)
+
+When / guard context:
+```java
+AND status IN ('PENDING', 'AUTHORIZED')
+                    """, localOrderId);
+
+                if (updated != 1) {
+                    throw new IllegalStateException(
+                            "Could not capture local payment order");
+                }
+
+            } else if (previousPayments.size() != 1) {
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(
+                        HttpStatus.CONFLICT,
+                        "Captured order has inconsistent transaction");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0670 — backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:272
+
+[backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:272](../../src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java#L272)
+
+When / guard context:
+```java
+), payment.bankTransactionId(), payment.rrn(),
+                    payment.upiTransactionId(), localOrderId, paymentId);
+
+            if((payment.feePaise()!=null&&payment.feePaise()<0)||(payment.taxPaise()!=null&&payment.taxPaise()<0)||
+                    (payment.feePaise()!=null&&payment.taxPaise()!=null&&payment.taxPaise()>payment.feePaise()))
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Invalid provider fee/tax breakdown");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0671 — backend/src/main/java/com/giftplatform/payment/service/RazorpayOrderCreationService.java:69
+
+[backend/src/main/java/com/giftplatform/payment/service/RazorpayOrderCreationService.java:69](../../src/main/java/com/giftplatform/payment/service/RazorpayOrderCreationService.java#L69)
+
+When / guard context:
+```java
+ReceivesPaise==null)) ||
+                (acceptedFeePaise!=null && acceptedFeePaise!=order.getPlatformFeePaise()) ||
+                (acceptedTotalPaise!=null && !acceptedTotalPaise.equals(order.getAmountPaise())) ||
+                (acceptedHostReceivesPaise!=null && !acceptedHostReceivesPaise.equals(order.getHostReceivesPaise()))) {
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Platform fee changed. Review the fee and try again.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0672 — backend/src/main/java/com/giftplatform/payment/service/RazorpayOrderCreationService.java:87
+
+[backend/src/main/java/com/giftplatform/payment/service/RazorpayOrderCreationService.java:87](../../src/main/java/com/giftplatform/payment/service/RazorpayOrderCreationService.java#L87)
+
+When / guard context:
+```java
+order.getId(),
+                rs.getString("provider_order_id"),
+                rs.getLong("amount_paise"),
+                rs.getString("currency"),
+                rs.getString("status"),rs.getLong("platform_fee_paise"),rs.getLong("host_receives_paise")
+            ), order.getId());
+
+        if (existing.size() != 1) {
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Payment order missing");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0673 — backend/src/main/java/com/giftplatform/payment/service/RazorpayOrderCreationService.java:97
+
+[backend/src/main/java/com/giftplatform/payment/service/RazorpayOrderCreationService.java:97](../../src/main/java/com/giftplatform/payment/service/RazorpayOrderCreationService.java#L97)
+
+When / guard context:
+```java
+), order.getId());
+
+        if (existing.size() != 1) {
+            throw new IllegalStateException("Payment order missing");
+        }
+
+        CheckoutOrder current = existing.get(0);
+
+        if (current.razorpayOrderId() != null) {
+            return current;
+        }
+
+        if (!"CREATED".equals(current.status())) {
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Payment order is not eligible for provider creation");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0674 — backend/src/main/java/com/giftplatform/payment/service/RazorpayOrderCreationService.java:104
+
+[backend/src/main/java/com/giftplatform/payment/service/RazorpayOrderCreationService.java:104](../../src/main/java/com/giftplatform/payment/service/RazorpayOrderCreationService.java#L104)
+
+When / guard context:
+```java
+f (!"CREATED".equals(current.status())) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Payment order is not eligible for provider creation");
+        }
+
+        if(controls!=null) {
+            controls.require(eventId,"RAZORPAY");
+            if(controls.event(eventId).get("ROUTING"))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Complete Route account, fee and settlement setup before routed collection");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0675 — backend/src/main/java/com/giftplatform/payment/service/RazorpayOrderCreationService.java:117
+
+[backend/src/main/java/com/giftplatform/payment/service/RazorpayOrderCreationService.java:117](../../src/main/java/com/giftplatform/payment/service/RazorpayOrderCreationService.java#L117)
+
+When / guard context:
+```java
+order.getId().toString());
+
+        if (provider == null
+                || provider.id() == null
+                || !provider.id().matches("order_[A-Za-z0-9]+")
+                || provider.amount() != order.getAmountPaise()
+                || !"INR".equals(provider.currency())
+                || !"created".equals(provider.status())) {
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException(
+                    "Invalid provider order response");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0676 — backend/src/main/java/com/giftplatform/payment/service/RazorpayOrderCreationService.java:132
+
+[backend/src/main/java/com/giftplatform/payment/service/RazorpayOrderCreationService.java:132](../../src/main/java/com/giftplatform/payment/service/RazorpayOrderCreationService.java#L132)
+
+When / guard context:
+```java
+UPDATE payment_orders
+            SET provider_order_id = ?,
+                status = 'PENDING',
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+              AND provider_order_id IS NULL
+              AND status = 'CREATED'
+            """, provider.id(), order.getId());
+
+        if (updated != 1) {
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException(
+                    "Could not persist Razorpay order");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0677 — backend/src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java:44
+
+[backend/src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java:44](../../src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java#L44)
+
+When / guard context:
+```java
+this.jdbc = jdbc;
+        this.tx = tx;
+        this.mapper = mapper;
+        this.secret = secret;
+    }
+
+    public void receive(byte[] bytes, String signature, String eventId) {
+        if (bytes == null || bytes.length == 0 || bytes.length > 262144 ||
+                eventId == null || !eventId.matches("[A-Za-z0-9_:-]{1,150}")) {
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid webhook request");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0678 — backend/src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java:48
+
+[backend/src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java:48](../../src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java#L48)
+
+When / guard context:
+```java
+s.length > 262144 ||
+                eventId == null || !eventId.matches("[A-Za-z0-9_:-]{1,150}")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid webhook request");
+        }
+        String raw = new String(bytes, StandardCharsets.UTF_8);
+        if (!signatures.verifyWebhook(raw, signature, secret)) {
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid webhook signature");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0679 — backend/src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java:54
+
+[backend/src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java:54](../../src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java#L54)
+
+When / guard context:
+```java
+ng raw = new String(bytes, StandardCharsets.UTF_8);
+        if (!signatures.verifyWebhook(raw, signature, secret)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid webhook signature");
+        }
+        JsonNode root;
+        try {
+            root = mapper.readTree(raw);
+        } catch (Exception e) {
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid webhook JSON");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0680 — backend/src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java:58
+
+[backend/src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java:58](../../src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java#L58)
+
+When / guard context:
+```java
+ure");
+        }
+        JsonNode root;
+        try {
+            root = mapper.readTree(raw);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid webhook JSON");
+        }
+        String type = root.path("event").asText("");
+        if (type.isBlank() || type.length() > 100) {
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid webhook type");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0681 — backend/src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java:68
+
+[backend/src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java:68](../../src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java#L68)
+
+When / guard context:
+```java
+d".equals(type)) {
+            JsonNode entity = root.path("payload").path("payment").path("entity");
+            paymentId = entity.path("id").asText("");
+            orderId = entity.path("order_id").asText("");
+            if (!paymentId.matches("pay_[A-Za-z0-9]+") ||
+                    !orderId.matches("order_[A-Za-z0-9]+")) {
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid payment identity");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0682 — backend/src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java:89
+
+[backend/src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java:89](../../src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java#L89)
+
+When / guard context:
+```java
+ry("""
+                    SELECT event_type, status, raw_payload
+                    FROM payment_webhook_events
+                    WHERE provider = 'RAZORPAY' AND provider_event_id = ? FOR UPDATE
+                    """, (rs, i) -> new EventRow(rs.getString(1), rs.getString(2), rs.getString(3)), eventId);
+                if (events.size() != 1)
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Webhook event missing");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0683 — backend/src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java:92
+
+[backend/src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java:92](../../src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java#L92)
+
+When / guard context:
+```java
+""", (rs, i) -> new EventRow(rs.getString(1), rs.getString(2), rs.getString(3)), eventId);
+                if (events.size() != 1) throw new IllegalStateException("Webhook event missing");
+                EventRow prior = events.get(0);
+                if (!prior.type.equals(type) || !prior.payload.equals(raw)) {
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT, "Webhook event ID reused");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0684 — backend/src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java:108
+
+[backend/src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java:108](../../src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java#L108)
+
+When / guard context:
+```java
+= ?
+                        """, (rs, i) -> rs.getObject(1, UUID.class), finalOrderId);
+                    if (localIds.isEmpty()) {
+                        var commercialIds=jdbc.query("SELECT id FROM commercial_orders WHERE provider_order_id=?",(rs,n)->rs.getObject(1,UUID.class),finalOrderId);
+                        if(commercialIds.size()!=1)
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Local payment order not found");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0685 — backend/src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java:113
+
+[backend/src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java:113](../../src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java#L113)
+
+When / guard context:
+```java
+commerce.verifyCapture(commercialIds.getFirst(),finalOrderId,finalPaymentId);
+                    } else {
+                    // Independently fetches the provider payment, verifies amount/order/currency,
+                    // and uses existing transaction and allocation idempotency protections.
+                    if(localIds.size()!=1)
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Ambiguous payment order");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0686 — backend/src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java:132
+
+[backend/src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java:132](../../src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java#L132)
+
+When / guard context:
+```java
+webhook_events
+                SET status = 'FAILED', last_error = ?, last_attempt_at = CURRENT_TIMESTAMP,
+                    attempt_count = attempt_count + 1
+                WHERE provider = 'RAZORPAY' AND provider_event_id = ?
+                  AND status <> 'PROCESSED'
+                """, ex.getClass().getSimpleName(), eventId));
+```
+Failure / enforcement:
+```java
+throw ex;
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0687 — backend/src/main/java/com/giftplatform/payment/settlement/HostPayoutRequestService.java:27
+
+[backend/src/main/java/com/giftplatform/payment/settlement/HostPayoutRequestService.java:27](../../src/main/java/com/giftplatform/payment/settlement/HostPayoutRequestService.java#L27)
+
+When / guard context:
+```java
+tional
+    public Result request(UUID hostId, UUID eventId, UUID bankId,
+                          long amountPaise, String idempotencyKey) {
+        if (hostId == null || eventId == null || bankId == null ||
+            amountPaise <= 0 || idempotencyKey == null ||
+            idempotencyKey.isBlank() || idempotencyKey.length() > 120)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid payout request");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0688 — backend/src/main/java/com/giftplatform/payment/settlement/HostPayoutRequestService.java:42
+
+[backend/src/main/java/com/giftplatform/payment/settlement/HostPayoutRequestService.java:42](../../src/main/java/com/giftplatform/payment/settlement/HostPayoutRequestService.java#L42)
+
+When / guard context:
+```java
+rs.getObject(3,UUID.class),rs.getLong(4)},
+                                      hostId,idempotencyKey);
+        if (!existing.isEmpty()) {
+            Object[] row=existing.get(0);
+            if (!eventId.equals(row[1]) || !bankId.equals(row[2]) ||
+                amountPaise != (Long)row[3])
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Idempotency conflict");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0689 — backend/src/main/java/com/giftplatform/payment/settlement/HostPayoutRequestService.java:52
+
+[backend/src/main/java/com/giftplatform/payment/settlement/HostPayoutRequestService.java:52](../../src/main/java/com/giftplatform/payment/settlement/HostPayoutRequestService.java#L52)
+
+When / guard context:
+```java
+_payment_account_links l WHERE l.event_id=e.id AND l.bank_account_id=b.id AND l.host_id=e.owner_id AND l.enabled)
+            WHERE e.id=? AND e.owner_id=? AND b.id=?
+              AND b.enabled=TRUE AND b.verification_status='VERIFIED'
+            """,Integer.class,eventId,hostId,bankId);
+        if (eligible == null || eligible != 1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Eligible destination not found");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0690 — backend/src/main/java/com/giftplatform/payment/settlement/HostSettlementUiService.java:42
+
+[backend/src/main/java/com/giftplatform/payment/settlement/HostSettlementUiService.java:42](../../src/main/java/com/giftplatform/payment/settlement/HostSettlementUiService.java#L42)
+
+When / guard context:
+```java
+,
+                         String state, String reason, boolean cancelled) {}
+
+    private UUID owner(UUID eventId) {
+        UUID host=actors.requireAuthenticatedUserId();
+        Integer count=jdbc.queryForObject(
+            "SELECT COUNT(*) FROM events WHERE id=? AND owner_id=?",Integer.class,eventId,host);
+        if (count==null || count!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Event not found");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0691 — backend/src/main/java/com/giftplatform/payment/settlement/HostSettlementUiService.java:96
+
+[backend/src/main/java/com/giftplatform/payment/settlement/HostSettlementUiService.java:96](../../src/main/java/com/giftplatform/payment/settlement/HostSettlementUiService.java#L96)
+
+When / guard context:
+```java
+rvice.Cancellation cancel(UUID eventId,UUID requestId) {
+        UUID host=owner(eventId);
+        Integer linked=jdbc.queryForObject("""
+            SELECT COUNT(*) FROM host_payout_requests
+            WHERE id=? AND host_id=? AND event_id=?
+            """,Integer.class,requestId,host,eventId);
+        if (linked==null || linked!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Payout request not found");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0692 — backend/src/main/java/com/giftplatform/payment/settlement/PayoutReservationService.java:24
+
+[backend/src/main/java/com/giftplatform/payment/settlement/PayoutReservationService.java:24](../../src/main/java/com/giftplatform/payment/settlement/PayoutReservationService.java#L24)
+
+When / guard context:
+```java
+lances) {
+        this.jdbc = jdbc; this.balances = balances;
+    }
+    public record Reservation(UUID id, UUID requestId, long amountPaise, boolean existing) {}
+    private record Request(UUID eventId, long amountPaise, String state) {}
+
+    @Transactional
+    public Reservation reserve(UUID payoutRequestId) {
+        if (payoutRequestId == null)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("request required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0693 — backend/src/main/java/com/giftplatform/payment/settlement/PayoutReservationService.java:28
+
+[backend/src/main/java/com/giftplatform/payment/settlement/PayoutReservationService.java:28](../../src/main/java/com/giftplatform/payment/settlement/PayoutReservationService.java#L28)
+
+When / guard context:
+```java
+gumentException("request required");
+        List<Request> requests = jdbc.query("""
+            SELECT event_id,amount_paise,state FROM host_payout_requests WHERE id=? AND cancelled_at IS NULL FOR UPDATE
+            """, (rs,i)->new Request(rs.getObject(1,UUID.class),rs.getLong(2),rs.getString(3)),payoutRequestId);
+        if (requests.size()!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Payout request not found");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0694 — backend/src/main/java/com/giftplatform/payment/settlement/PayoutReservationService.java:31
+
+[backend/src/main/java/com/giftplatform/payment/settlement/PayoutReservationService.java:31](../../src/main/java/com/giftplatform/payment/settlement/PayoutReservationService.java#L31)
+
+When / guard context:
+```java
+S NULL FOR UPDATE
+            """, (rs,i)->new Request(rs.getObject(1,UUID.class),rs.getLong(2),rs.getString(3)),payoutRequestId);
+        if (requests.size()!=1) throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Payout request not found");
+        Request request = requests.get(0);
+        if (!"BLOCKED".equals(request.state()))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Payout request state invalid");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0695 — backend/src/main/java/com/giftplatform/payment/settlement/PayoutReservationService.java:41
+
+[backend/src/main/java/com/giftplatform/payment/settlement/PayoutReservationService.java:41](../../src/main/java/com/giftplatform/payment/settlement/PayoutReservationService.java#L41)
+
+When / guard context:
+```java
+paise FROM payout_reservations
+            WHERE payout_request_id=? AND state='HELD'
+            """,(rs,i)->new Reservation(rs.getObject(1,UUID.class),payoutRequestId,rs.getLong(2),true),payoutRequestId);
+        if (!previous.isEmpty()) {
+            if (previous.size()!=1 || previous.get(0).amountPaise()!=request.amountPaise())
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Inconsistent payout reservation");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0696 — backend/src/main/java/com/giftplatform/payment/settlement/PayoutReservationService.java:49
+
+[backend/src/main/java/com/giftplatform/payment/settlement/PayoutReservationService.java:49](../../src/main/java/com/giftplatform/payment/settlement/PayoutReservationService.java#L49)
+
+When / guard context:
+```java
+rn previous.get(0);
+        }
+        // Released reservations cannot be recreated for the same request.
+        Integer previousCount=jdbc.queryForObject(
+            "SELECT COUNT(*) FROM payout_reservations WHERE payout_request_id=?",
+            Integer.class,payoutRequestId);
+        if (previousCount != null && previousCount > 0)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Reservation already released");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0697 — backend/src/main/java/com/giftplatform/payment/settlement/PayoutReservationService.java:52
+
+[backend/src/main/java/com/giftplatform/payment/settlement/PayoutReservationService.java:52](../../src/main/java/com/giftplatform/payment/settlement/PayoutReservationService.java#L52)
+
+When / guard context:
+```java
+Integer.class,payoutRequestId);
+        if (previousCount != null && previousCount > 0)
+            throw new ResponseStatusException(HttpStatus.CONFLICT,"Reservation already released");
+        var balance=balances.read(request.eventId());
+        if (request.amountPaise()<=0 || balance.withdrawablePaise()<request.amountPaise())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Insufficient settled balance");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0698 — backend/src/main/java/com/giftplatform/payment/settlement/PayoutSafetyFinalizationService.java:21
+
+[backend/src/main/java/com/giftplatform/payment/settlement/PayoutSafetyFinalizationService.java:21](../../src/main/java/com/giftplatform/payment/settlement/PayoutSafetyFinalizationService.java#L21)
+
+When / guard context:
+```java
+te jdbc) { this.jdbc=jdbc; }
+    public record Cancellation(UUID requestId, boolean alreadyCancelled, int releasedHolds) {}
+    public record Observation(UUID id, UUID requestId, String source, String observedState) {}
+
+    @Transactional
+    public Cancellation cancel(UUID hostId, UUID requestId) {
+        if (hostId == null || requestId == null)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Host and request required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0699 — backend/src/main/java/com/giftplatform/payment/settlement/PayoutSafetyFinalizationService.java:30
+
+[backend/src/main/java/com/giftplatform/payment/settlement/PayoutSafetyFinalizationService.java:30](../../src/main/java/com/giftplatform/payment/settlement/PayoutSafetyFinalizationService.java#L30)
+
+When / guard context:
+```java
+("""
+            SELECT host_id,event_id,state,cancelled_at FROM host_payout_requests
+            WHERE id=? FOR UPDATE
+            """,(rs,i)->new Object[]{rs.getObject(1,UUID.class),rs.getObject(2,UUID.class),
+                rs.getString(3),rs.getTimestamp(4)},requestId);
+        if (rows.size()!=1 || !hostId.equals(rows.get(0)[0]))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Payout request not found");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0700 — backend/src/main/java/com/giftplatform/payment/settlement/PayoutSafetyFinalizationService.java:33
+
+[backend/src/main/java/com/giftplatform/payment/settlement/PayoutSafetyFinalizationService.java:33](../../src/main/java/com/giftplatform/payment/settlement/PayoutSafetyFinalizationService.java#L33)
+
+When / guard context:
+```java
+rs.getString(3),rs.getTimestamp(4)},requestId);
+        if (rows.size()!=1 || !hostId.equals(rows.get(0)[0]))
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Payout request not found");
+        if (rows.get(0)[3]!=null) return new Cancellation(requestId,true,0);
+        if (!"BLOCKED".equals(rows.get(0)[2]))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Request not cancellable");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0701 — backend/src/main/java/com/giftplatform/payment/settlement/PayoutSafetyFinalizationService.java:45
+
+[backend/src/main/java/com/giftplatform/payment/settlement/PayoutSafetyFinalizationService.java:45](../../src/main/java/com/giftplatform/payment/settlement/PayoutSafetyFinalizationService.java#L45)
+
+When / guard context:
+```java
+WHERE payout_request_id=? AND event_id=? AND state='HELD'
+            """,requestId,eventId);
+        int changed=jdbc.update("""
+            UPDATE host_payout_requests SET cancelled_at=CURRENT_TIMESTAMP,
+            cancellation_reason='HOST_CANCELLED' WHERE id=? AND cancelled_at IS NULL
+            """,requestId);
+        if (changed!=1)
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Cancellation race");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0702 — backend/src/main/java/com/giftplatform/payment/settlement/PayoutSafetyFinalizationService.java:52
+
+[backend/src/main/java/com/giftplatform/payment/settlement/PayoutSafetyFinalizationService.java:52](../../src/main/java/com/giftplatform/payment/settlement/PayoutSafetyFinalizationService.java#L52)
+
+When / guard context:
+```java
+hanged!=1) throw new IllegalStateException("Cancellation race");
+        return new Cancellation(requestId,false,released);
+    }
+
+    @Transactional
+    public Observation recordInternalObservation(UUID requestId,String state) {
+        if (requestId==null || !java.util.Set.of("UNKNOWN","PENDING","FAILED","SUCCEEDED").contains(state))
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Invalid observation");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0703 — backend/src/main/java/com/giftplatform/payment/settlement/PayoutSafetyFinalizationService.java:55
+
+[backend/src/main/java/com/giftplatform/payment/settlement/PayoutSafetyFinalizationService.java:55](../../src/main/java/com/giftplatform/payment/settlement/PayoutSafetyFinalizationService.java#L55)
+
+When / guard context:
+```java
+if (requestId==null || !java.util.Set.of("UNKNOWN","PENDING","FAILED","SUCCEEDED").contains(state))
+            throw new IllegalArgumentException("Invalid observation");
+        Integer count=jdbc.queryForObject("SELECT COUNT(*) FROM host_payout_requests WHERE id=?",
+            Integer.class,requestId);
+        if (count==null || count!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Request not found");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0704 — backend/src/main/java/com/giftplatform/payment/settlement/SettlementBalanceService.java:15
+
+[backend/src/main/java/com/giftplatform/payment/settlement/SettlementBalanceService.java:15](../../src/main/java/com/giftplatform/payment/settlement/SettlementBalanceService.java#L15)
+
+When / guard context:
+```java
+ENDING as withdrawable. */
+@Service
+public class SettlementBalanceService {
+    private final JdbcTemplate jdbc;
+    public SettlementBalanceService(JdbcTemplate jdbc) { this.jdbc = jdbc; }
+    public record Balance(long availablePaise, long heldPaise, long withdrawablePaise) {}
+
+    public Balance read(UUID eventId) {
+        if (eventId == null)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("eventId required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0705 — backend/src/main/java/com/giftplatform/payment/settlement/SettlementBalanceService.java:27
+
+[backend/src/main/java/com/giftplatform/payment/settlement/SettlementBalanceService.java:27](../../src/main/java/com/giftplatform/payment/settlement/SettlementBalanceService.java#L27)
+
+When / guard context:
+```java
+", Long.class, eventId);
+        Long held = jdbc.queryForObject("""
+            SELECT COALESCE(SUM(amount_paise),0)
+            FROM payout_reservations WHERE event_id=? AND state='HELD'
+            """, Long.class, eventId);
+        long a = available == null ? 0 : available;
+        long h = held == null ? 0 : held;
+        if (a < 0 || h < 0)
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Inconsistent settlement balance");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0706 — backend/src/main/java/com/giftplatform/payment/settlement/VerifiedBankFallbackService.java:15
+
+[backend/src/main/java/com/giftplatform/payment/settlement/VerifiedBankFallbackService.java:15](../../src/main/java/com/giftplatform/payment/settlement/VerifiedBankFallbackService.java#L15)
+
+When / guard context:
+```java
+initiates payment or changes preference. */
+@Service
+public class VerifiedBankFallbackService {
+    private final JdbcTemplate jdbc;
+    public VerifiedBankFallbackService(JdbcTemplate jdbc) { this.jdbc=jdbc; }
+    public record Candidate(UUID bankId,boolean preferred) {}
+    public List<Candidate> eligible(UUID hostId) {
+        if(hostId==null)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Host required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0707 — backend/src/main/java/com/giftplatform/payment/verification/HostTransactionVerificationController.java:19
+
+[backend/src/main/java/com/giftplatform/payment/verification/HostTransactionVerificationController.java:19](../../src/main/java/com/giftplatform/payment/verification/HostTransactionVerificationController.java#L19)
+
+When / guard context:
+```java
+oller(JdbcTemplate db,ActorContext actor,RazorpayCaptureService capture){this.db=db;this.actor=actor;this.capture=capture;}
+    private void owned(UUID eventId){
+        Integer count=db.queryForObject("SELECT count(*) FROM events WHERE id=? AND owner_id=?",Integer.class,eventId,actor.requireAuthenticatedUserId());
+        if(count==null||count!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Event not found");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0708 — backend/src/main/java/com/giftplatform/payment/verification/HostTransactionVerificationController.java:26
+
+[backend/src/main/java/com/giftplatform/payment/verification/HostTransactionVerificationController.java:26](../../src/main/java/com/giftplatform/payment/verification/HostTransactionVerificationController.java#L26)
+
+When / guard context:
+```java
+ation,String bankCode,String bankTransactionId,String rrn,String upiTransactionId){}
+    @GetMapping public ResponseEntity<List<Transaction>> list(@PathVariable UUID eventId,
+        @RequestParam(defaultValue="20") int limit,@RequestParam(defaultValue="0") int offset){
+        owned(eventId);
+        if(limit<1||limit>100||offset<0||offset>100000)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid pagination");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0709 — backend/src/main/java/com/giftplatform/payment/verification/HostTransactionVerificationController.java:49
+
+[backend/src/main/java/com/giftplatform/payment/verification/HostTransactionVerificationController.java:49](../../src/main/java/com/giftplatform/payment/verification/HostTransactionVerificationController.java#L49)
+
+When / guard context:
+```java
+rovider_order_id,t.provider_payment_id FROM payment_orders po
+            JOIN payment_transactions t ON t.payment_order_id=po.id
+            WHERE po.event_id=? AND po.id=? AND po.provider='RAZORPAY' ORDER BY t.created_at DESC LIMIT 1
+            """,(rs,n)->new String[]{rs.getString(1),rs.getString(2)},eventId,orderId);
+        if(rows.isEmpty())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"No provider payment is recorded yet. Await the signed checkout confirmation or webhook.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+## qr
+
+### RULE-0710 — backend/src/main/java/com/giftplatform/qr/EventQrService.java:29
+
+[backend/src/main/java/com/giftplatform/qr/EventQrService.java:29](../../src/main/java/com/giftplatform/qr/EventQrService.java#L29)
+
+When / guard context:
+```java
+text actors, AuditService audit,
+                          QrRenderer renderer, @Value("${gift.guest-base-url:http://localhost:3000}") String guestBaseUrl) {
+        this.events = events; this.actors = actors; this.audit = audit; this.renderer = renderer;
+        if (!guestBaseUrl.matches("https?://[^/\\s]+(?::[0-9]+)?(?:/[^?\\s]*)?"))
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Invalid guest base URL");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0711 — backend/src/main/java/com/giftplatform/qr/EventQrService.java:41
+
+[backend/src/main/java/com/giftplatform/qr/EventQrService.java:41](../../src/main/java/com/giftplatform/qr/EventQrService.java#L41)
+
+When / guard context:
+```java
+adOnly = true)
+    public QrDetails details(UUID eventId) { return detailsFor(ownedEvent(eventId)); }
+
+    @Transactional(readOnly = true)
+    public byte[] png(UUID eventId) { return renderer.png(detailsFor(ownedEvent(eventId)).url()); }
+
+    @Transactional
+    public QrDetails changeTheme(UUID eventId, QrTheme theme) {
+        if (theme == null)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "QR theme required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0712 — backend/src/main/java/com/giftplatform/qr/EventQrService.java:45
+
+[backend/src/main/java/com/giftplatform/qr/EventQrService.java:45](../../src/main/java/com/giftplatform/qr/EventQrService.java#L45)
+
+When / guard context:
+```java
+heme theme) {
+        if (theme == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "QR theme required");
+        Event event = ownedEvent(eventId);
+        if (event.getStatus() == com.giftplatform.event.entity.EventStatus.COMPLETED ||
+            event.getStatus() == com.giftplatform.event.entity.EventStatus.CANCELLED)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT, "Event cannot be edited");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0713 — backend/src/main/java/com/giftplatform/qr/EventQrService.java:60
+
+[backend/src/main/java/com/giftplatform/qr/EventQrService.java:60](../../src/main/java/com/giftplatform/qr/EventQrService.java#L60)
+
+When / guard context:
+```java
+qrTheme", theme.name()), null);
+        }
+        return detailsFor(event);
+    }
+
+    private Event ownedEvent(UUID eventId) {
+        UUID actor = actors.requireAuthenticatedUserId();
+        Event event = events.findById(eventId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        if (!actor.equals(event.getOwnerId()))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0714 — backend/src/main/java/com/giftplatform/qr/QrRenderer.java:26
+
+[backend/src/main/java/com/giftplatform/qr/QrRenderer.java:26](../../src/main/java/com/giftplatform/qr/QrRenderer.java#L26)
+
+When / guard context:
+```java
+o.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.EnumMap;
+import org.springframework.stereotype.Component;
+
+@Component
+public class QrRenderer {
+    public byte[] png(String url) {
+        return png(url, 512);
+    }
+
+    public byte[] png(String url, int size) {
+        if (url == null || url.isBlank() || url.length() > 2048)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Invalid QR URL");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0715 — backend/src/main/java/com/giftplatform/qr/QrRenderer.java:48
+
+[backend/src/main/java/com/giftplatform/qr/QrRenderer.java:48](../../src/main/java/com/giftplatform/qr/QrRenderer.java#L48)
+
+When / guard context:
+```java
+;
+                    if (!url.equals(decoded.getText())) continue;
+                } catch (ReaderException ex) {
+                    continue;
+                }
+                var out = new ByteArrayOutputStream();
+                javax.imageio.ImageIO.write(image, "PNG", out);
+                return out.toByteArray();
+            }
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Could not produce scannable QR");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0716 — backend/src/main/java/com/giftplatform/qr/QrRenderer.java:50
+
+[backend/src/main/java/com/giftplatform/qr/QrRenderer.java:50](../../src/main/java/com/giftplatform/qr/QrRenderer.java#L50)
+
+When / guard context:
+```java
+continue;
+                }
+                var out = new ByteArrayOutputStream();
+                javax.imageio.ImageIO.write(image, "PNG", out);
+                return out.toByteArray();
+            }
+            throw new IllegalStateException("Could not produce scannable QR");
+        } catch (WriterException | IOException ex) {
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Could not render QR", ex);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0717 — backend/src/main/java/com/giftplatform/qr/design/InvitationComposer.java:40
+
+[backend/src/main/java/com/giftplatform/qr/design/InvitationComposer.java:40](../../src/main/java/com/giftplatform/qr/design/InvitationComposer.java#L40)
+
+When / guard context:
+```java
+Serif",Font.PLAIN,22));
+    drawCentered(g,"Scan to celebrate & explore gifts",450,1040);
+   }finally{g.dispose();}
+   // Decode the final composition, not merely the underlying QR bytes.
+   var decoded=new MultiFormatReader().decode(new BinaryBitmap(new HybridBinarizer(new BufferedImageLuminanceSource(out))));
+   if(!url.equals(decoded.getText()))
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Composed invitation failed QR validation");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0718 — backend/src/main/java/com/giftplatform/qr/design/InvitationComposer.java:42
+
+[backend/src/main/java/com/giftplatform/qr/design/InvitationComposer.java:42](../../src/main/java/com/giftplatform/qr/design/InvitationComposer.java#L42)
+
+When / guard context:
+```java
+Reader().decode(new BinaryBitmap(new HybridBinarizer(new BufferedImageLuminanceSource(out))));
+   if(!url.equals(decoded.getText()))throw new IllegalStateException("Composed invitation failed QR validation");
+   ByteArrayOutputStream bytes=new ByteArrayOutputStream();ImageIO.write(out,"png",bytes);return bytes.toByteArray();
+  }catch(Exception ex){
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Could not produce scannable invitation",ex);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0719 — backend/src/main/java/com/giftplatform/qr/design/InvitationDesignController.java:21
+
+[backend/src/main/java/com/giftplatform/qr/design/InvitationDesignController.java:21](../../src/main/java/com/giftplatform/qr/design/InvitationDesignController.java#L21)
+
+When / guard context:
+```java
+onseEntity<InvitationDesignService.DesignResponse> create(
+  @PathVariable UUID eventId,@RequestParam String name,@RequestParam InvitationStyle style,
+  @RequestParam(required=false) String greeting,@RequestPart(required=false) MultipartFile image) throws IOException {
+  if(image!=null&&image.getSize()>InvitationImageProcessor.MAX_UPLOAD_BYTES)
+```
+Failure / enforcement:
+```java
+throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.PAYLOAD_TOO_LARGE,"Image too large");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0720 — backend/src/main/java/com/giftplatform/qr/design/InvitationDesignService.java:34
+
+[backend/src/main/java/com/giftplatform/qr/design/InvitationDesignService.java:34](../../src/main/java/com/giftplatform/qr/design/InvitationDesignService.java#L34)
+
+When / guard context:
+```java
+;this.audit=audit;
+  this.images=images;this.composer=composer;this.base=base.replaceAll("/+$","");
+ }
+ @Transactional
+ public DesignResponse create(UUID eventId,String name,InvitationStyle style,String greeting,byte[] upload){
+  Event event=owned(eventId);
+  if(event.getStatus()==EventStatus.COMPLETED||event.getStatus()==EventStatus.CANCELLED)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Event cannot be edited");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0721 — backend/src/main/java/com/giftplatform/qr/design/InvitationDesignService.java:36
+
+[backend/src/main/java/com/giftplatform/qr/design/InvitationDesignService.java:36](../../src/main/java/com/giftplatform/qr/design/InvitationDesignService.java#L36)
+
+When / guard context:
+```java
+e style,String greeting,byte[] upload){
+  Event event=owned(eventId);
+  if(event.getStatus()==EventStatus.COMPLETED||event.getStatus()==EventStatus.CANCELLED)
+   throw new ResponseStatusException(HttpStatus.CONFLICT,"Event cannot be edited");
+  if(name==null||name.isBlank()||name.length()>100||style==null||greeting!=null&&greeting.length()>180)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid invitation details");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0722 — backend/src/main/java/com/giftplatform/qr/design/InvitationDesignService.java:48
+
+[backend/src/main/java/com/giftplatform/qr/design/InvitationDesignService.java:48](../../src/main/java/com/giftplatform/qr/design/InvitationDesignService.java#L48)
+
+When / guard context:
+```java
+urn designs.findByEventIdOrderByIdAsc(eventId).stream().map(this::response).toList();}
+ @Transactional(readOnly=true)
+ public byte[] png(UUID eventId,UUID designId){
+  Event e=owned(eventId);InvitationDesign d=designs.findById(designId).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
+  if(!d.getEvent().getId().equals(e.getId()))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0723 — backend/src/main/java/com/giftplatform/qr/design/InvitationDesignService.java:53
+
+[backend/src/main/java/com/giftplatform/qr/design/InvitationDesignService.java:53](../../src/main/java/com/giftplatform/qr/design/InvitationDesignService.java#L53)
+
+When / guard context:
+```java
+tpStatus.NOT_FOUND);
+  return composer.render(base+"/e/"+e.getPublicToken(),e.getTitle(),d.getGreeting(),d.getStyle(),d.getImagePng());
+ }
+ private Event owned(UUID id){
+  UUID actor=actors.requireAuthenticatedUserId();Event e=events.findById(id).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
+  if(!actor.equals(e.getOwnerId()))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0724 — backend/src/main/java/com/giftplatform/qr/design/InvitationImageProcessor.java:19
+
+[backend/src/main/java/com/giftplatform/qr/design/InvitationImageProcessor.java:19](../../src/main/java/com/giftplatform/qr/design/InvitationImageProcessor.java#L19)
+
+When / guard context:
+```java
+rt org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
+
+@Component
+public class InvitationImageProcessor {
+ public static final int MAX_UPLOAD_BYTES=2_000_000;
+ public byte[] sanitize(byte[] uploaded){
+  if(uploaded==null || uploaded.length==0) return null;
+  if(uploaded.length>MAX_UPLOAD_BYTES)
+```
+Failure / enforcement:
+```java
+throw invalid();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0725 — backend/src/main/java/com/giftplatform/qr/design/InvitationImageProcessor.java:22
+
+[backend/src/main/java/com/giftplatform/qr/design/InvitationImageProcessor.java:22](../../src/main/java/com/giftplatform/qr/design/InvitationImageProcessor.java#L22)
+
+When / guard context:
+```java
+oaded==null || uploaded.length==0) return null;
+  if(uploaded.length>MAX_UPLOAD_BYTES) throw invalid();
+  boolean png=uploaded.length>8 && (uploaded[0]&255)==137 && uploaded[1]==80 && uploaded[2]==78 && uploaded[3]==71;
+  boolean jpeg=uploaded.length>3 && (uploaded[0]&255)==255 && (uploaded[1]&255)==216 && (uploaded[2]&255)==255;
+  if(!png&&!jpeg)
+```
+Failure / enforcement:
+```java
+throw invalid();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0726 — backend/src/main/java/com/giftplatform/qr/design/InvitationImageProcessor.java:25
+
+[backend/src/main/java/com/giftplatform/qr/design/InvitationImageProcessor.java:25](../../src/main/java/com/giftplatform/qr/design/InvitationImageProcessor.java#L25)
+
+When / guard context:
+```java
+ploaded.length>8 && (uploaded[0]&255)==137 && uploaded[1]==80 && uploaded[2]==78 && uploaded[3]==71;
+  boolean jpeg=uploaded.length>3 && (uploaded[0]&255)==255 && (uploaded[1]&255)==216 && (uploaded[2]&255)==255;
+  if(!png&&!jpeg) throw invalid();
+  try {
+   var reader=ImageIO.getImageReadersByFormatName(png?"png":"jpeg");
+   if(!reader.hasNext())
+```
+Failure / enforcement:
+```java
+throw invalid();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0727 — backend/src/main/java/com/giftplatform/qr/design/InvitationImageProcessor.java:30
+
+[backend/src/main/java/com/giftplatform/qr/design/InvitationImageProcessor.java:30](../../src/main/java/com/giftplatform/qr/design/InvitationImageProcessor.java#L30)
+
+When / guard context:
+```java
+eader=ImageIO.getImageReadersByFormatName(png?"png":"jpeg");
+   if(!reader.hasNext()) throw invalid();
+   var r=reader.next();
+   try(var stream=ImageIO.createImageInputStream(new ByteArrayInputStream(uploaded))){
+    r.setInput(stream,true,true);
+    int w=r.getWidth(0),h=r.getHeight(0);
+    if(w<32||h<32||w>4096||h>4096||((long)w*h)>12_000_000L)
+```
+Failure / enforcement:
+```java
+throw invalid();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0728 — backend/src/main/java/com/giftplatform/qr/design/InvitationImageProcessor.java:44
+
+[backend/src/main/java/com/giftplatform/qr/design/InvitationImageProcessor.java:44](../../src/main/java/com/giftplatform/qr/design/InvitationImageProcessor.java#L44)
+
+When / guard context:
+```java
+e),dh=(int)Math.ceil(h*scale);
+     g.drawImage(src,(900-dw)/2,(1200-dh)/2,dw,dh,null);
+    }finally{g.dispose();}
+    ByteArrayOutputStream out=new ByteArrayOutputStream();ImageIO.write(dest,"png",out);
+    return out.toByteArray();
+   }finally{r.dispose();}
+  }catch(IOException|RuntimeException ex){
+   if(ex instanceof ResponseStatusException e)
+```
+Failure / enforcement:
+```java
+throw e;
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0729 — backend/src/main/java/com/giftplatform/qr/design/InvitationImageProcessor.java:45
+
+[backend/src/main/java/com/giftplatform/qr/design/InvitationImageProcessor.java:45](../../src/main/java/com/giftplatform/qr/design/InvitationImageProcessor.java#L45)
+
+When / guard context:
+```java
+ath.ceil(h*scale);
+     g.drawImage(src,(900-dw)/2,(1200-dh)/2,dw,dh,null);
+    }finally{g.dispose();}
+    ByteArrayOutputStream out=new ByteArrayOutputStream();ImageIO.write(dest,"png",out);
+    return out.toByteArray();
+   }finally{r.dispose();}
+  }catch(IOException|RuntimeException ex){
+   if(ex instanceof ResponseStatusException e) throw e;
+```
+Failure / enforcement:
+```java
+throw invalid();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0730 — backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java:35
+
+[backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java:35](../../src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java#L35)
+
+When / guard context:
+```java
+Redirect.NEVER).build());
+        factory.setReadTimeout(Duration.ofSeconds(45));return RestClient.builder().baseUrl("https://api.openai.com/v1").requestFactory(factory).build();
+    }
+    public boolean available(){return enabled&&!key.isBlank()&&!model.isBlank();}
+    public Blueprint generate(Map<String,Object> details){
+        if(!available())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"AI design is not configured. Set OPENAI_API_KEY in the backend environment.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0731 — backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java:55
+
+[backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java:55](../../src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java#L55)
+
+When / guard context:
+```java
+tation_design","strict",true,"schema",schema())));
+            JsonNode result=http.post().uri("/responses").header("Authorization","Bearer "+key)
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON).body(body).retrieve().body(JsonNode.class);
+            return parse(result);
+        }catch(ResponseStatusException ex){
+```
+Failure / enforcement:
+```java
+throw ex;
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0732 — backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java:56
+
+[backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java:56](../../src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java#L56)
+
+When / guard context:
+```java
+JsonNode result=http.post().uri("/responses").header("Authorization","Bearer "+key)
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON).body(body).retrieve().body(JsonNode.class);
+            return parse(result);
+        }catch(ResponseStatusException ex){throw ex;}
+        catch(RestClientResponseException ex){
+```
+Failure / enforcement:
+```java
+throw providerFailure(ex);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0733 — backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java:57
+
+[backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java:57](../../src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java#L57)
+
+When / guard context:
+```java
+ion","Bearer "+key)
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON).body(body).retrieve().body(JsonNode.class);
+            return parse(result);
+        }catch(ResponseStatusException ex){throw ex;}
+        catch(RestClientResponseException ex){throw providerFailure(ex);}
+        catch(ResourceAccessException ex){
+```
+Failure / enforcement:
+```java
+throw new AiInvitationFailure(HttpStatus.GATEWAY_TIMEOUT,"AI_PROVIDER_CONNECTION","The AI provider could not be reached. Your invitation has not changed. Please try again later.",ex);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0734 — backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java:58
+
+[backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java:58](../../src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java#L58)
+
+When / guard context:
+```java
+x){throw ex;}
+        catch(RestClientResponseException ex){throw providerFailure(ex);}
+        catch(ResourceAccessException ex){throw new AiInvitationFailure(HttpStatus.GATEWAY_TIMEOUT,"AI_PROVIDER_CONNECTION","The AI provider could not be reached. Your invitation has not changed. Please try again later.",ex);}
+        catch(RuntimeException ex){
+```
+Failure / enforcement:
+```java
+throw new AiInvitationFailure(HttpStatus.BAD_GATEWAY,"AI_INVALID_RESPONSE","AI returned a design that could not be safely used. Your invitation has not changed. Please try again.",ex);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0735 — backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java:80
+
+[backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java:80](../../src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java#L80)
+
+When / guard context:
+```java
+operties.put("font",Map.of("type","string","enum",List.of("SERIF","SANS","SCRIPT")));
+        return Map.of("type","object","properties",properties,"required",List.copyOf(properties.keySet()),"additionalProperties",false);
+    }
+    Blueprint parse(JsonNode response){
+        if(response==null||!"completed".equals(response.path("status").asText()))
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Incomplete AI response");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0736 — backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java:83
+
+[backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java:83](../../src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java#L83)
+
+When / guard context:
+```java
+{
+        if(response==null||!"completed".equals(response.path("status").asText()))throw new IllegalArgumentException("Incomplete AI response");
+        StringBuilder text=new StringBuilder();
+        for(JsonNode item:response.path("output"))for(JsonNode content:item.path("content")){
+            if("refusal".equals(content.path("type").asText()))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,"AI could not design this invitation. Please revise your message.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0737 — backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java:86
+
+[backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java:86](../../src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java#L86)
+
+When / guard context:
+```java
+refusal".equals(content.path("type").asText()))throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,"AI could not design this invitation. Please revise your message.");
+            if("output_text".equals(content.path("type").asText()))text.append(content.path("text").asText());
+        }
+        if(text.isEmpty()||text.length()>12000)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Invalid AI output");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0738 — backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java:90
+
+[backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java:90](../../src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java#L90)
+
+When / guard context:
+```java
+on,"message",140),closing=field(json,"closing",100);
+        String palette=field(json,"palette",20),layout=field(json,"layout",20),font=field(json,"font",20);
+        if(!Set.of("BLUSH","SAGE","GOLD","LAVENDER","OCEAN","MIDNIGHT").contains(palette)||!Set.of("CLASSIC","AIRY","BOLD").contains(layout)||!Set.of("SERIF","SANS","SCRIPT").contains(font))
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Invalid design choice");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0739 — backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java:95
+
+[backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java:95](../../src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java#L95)
+
+When / guard context:
+```java
+ivate static String field(JsonNode json,String name,int max){
+        JsonNode node=json.path(name);String value=node.asText("").strip();
+        if(!node.isString()||value.isBlank()||value.length()>max||value.codePoints().anyMatch(c->Character.isISOControl(c)&&c!='\n')||value.contains("<")||value.contains(">")||value.matches("(?is).*https?://.*"))
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Invalid generated field");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0740 — backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationService.java:54
+
+[backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationService.java:54](../../src/main/java/com/giftplatform/qr/design/ai/AiInvitationService.java#L54)
+
+When / guard context:
+```java
+gn with AI is not enabled for this host and event.":client.available()?"Ready to design":"AI design is not configured. Ask the administrator to set OPENAI_API_KEY.");}
+    public Suggestion generate(UUID id,Preferences preferences){
+        Event event=owned(id);permissions.requireAiInvitation(event.getOwnerId(),id);
+        if(!client.available())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"AI design is not configured. Set OPENAI_API_KEY in the backend environment.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0741 — backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationService.java:59
+
+[backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationService.java:59](../../src/main/java/com/giftplatform/qr/design/ai/AiInvitationService.java#L59)
+
+When / guard context:
+```java
+D.randomUUID();
+        tx.executeWithoutResult(s->{
+            db.queryForObject("SELECT id FROM users WHERE id=? FOR UPDATE",UUID.class,host);
+            Integer count=db.queryForObject("SELECT count(*) FROM invitation_ai_requests WHERE host_id=? AND created_at>now()-interval '1 hour'",Integer.class,host);
+            if(count!=null&&count>=10)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,"You have reached the hourly AI design limit. Please try again later.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0742 — backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationService.java:70
+
+[backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationService.java:70](../../src/main/java/com/giftplatform/qr/design/ai/AiInvitationService.java#L70)
+
+When / guard context:
+```java
+ET status='COMPLETED' WHERE id=?",request);
+            return new Suggestion(id,event.getTitle(),event.getOccasionType().name(),names,event.getEventDate(),clean(preferences.publicVenue()),clean(preferences.startTime()),blueprint);
+        }catch(RuntimeException ex){db.update("UPDATE invitation_ai_requests SET status='FAILED' WHERE id=?",request);
+```
+Failure / enforcement:
+```java
+throw ex;
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+## security
+
+### RULE-0743 — backend/src/main/java/com/giftplatform/security/GiftUserDetailsService.java:30
+
+[backend/src/main/java/com/giftplatform/security/GiftUserDetailsService.java:30](../../src/main/java/com/giftplatform/security/GiftUserDetailsService.java#L30)
+
+When / guard context:
+```java
+y userRepository;
+
+    public GiftUserDetailsService(
+            UserRepository userRepository
+    ) {
+        this.userRepository = userRepository;
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String identifier)
+            throws UsernameNotFoundException {
+
+        if (identifier == null || identifier.isBlank()) {
+```
+Failure / enforcement:
+```java
+throw new UsernameNotFoundException(
+                    "Invalid credentials"
+            );
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0744 — backend/src/main/java/com/giftplatform/security/SpringSecurityActorContext.java:26
+
+[backend/src/main/java/com/giftplatform/security/SpringSecurityActorContext.java:26](../../src/main/java/com/giftplatform/security/SpringSecurityActorContext.java#L26)
+
+When / guard context:
+```java
+Authentication authentication =
+                SecurityContextHolder.getContext()
+                        .getAuthentication();
+
+        if (authentication == null
+                || !authentication.isAuthenticated()
+                || !(authentication.getPrincipal()
+                instanceof GiftUserPrincipal principal)) {
+```
+Failure / enforcement:
+```java
+throw new AccessDeniedException(
+                    "Authentication required"
+            );
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0745 — backend/src/main/java/com/giftplatform/security/delivery/EmailDeliveryConfiguration.java:31
+
+[backend/src/main/java/com/giftplatform/security/delivery/EmailDeliveryConfiguration.java:31](../../src/main/java/com/giftplatform/security/delivery/EmailDeliveryConfiguration.java#L31)
+
+When / guard context:
+```java
+eDelivery transport(String provider,String apiKey,String from,String subject) {
+        if ("disabled".equals(provider)||("resend".equals(provider)&&(apiKey.isBlank()||from.isBlank()))) return new MessageDelivery() {
+            @Override public boolean isAvailable() { return false; }
+            @Override public void send(String to,String body) {
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Email OTP delivery is not configured");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0746 — backend/src/main/java/com/giftplatform/security/delivery/EmailDeliveryConfiguration.java:33
+
+[backend/src/main/java/com/giftplatform/security/delivery/EmailDeliveryConfiguration.java:33](../../src/main/java/com/giftplatform/security/delivery/EmailDeliveryConfiguration.java#L33)
+
+When / guard context:
+```java
+end".equals(provider)&&(apiKey.isBlank()||from.isBlank()))) return new MessageDelivery() {
+            @Override public boolean isAvailable() { return false; }
+            @Override public void send(String to,String body) { throw new IllegalStateException("Email OTP delivery is not configured"); }
+        };
+        if (!"resend".equals(provider))
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Unsupported email OTP provider");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0747 — backend/src/main/java/com/giftplatform/security/delivery/EmailDeliveryConfiguration.java:36
+
+[backend/src/main/java/com/giftplatform/security/delivery/EmailDeliveryConfiguration.java:36](../../src/main/java/com/giftplatform/security/delivery/EmailDeliveryConfiguration.java#L36)
+
+When / guard context:
+```java
+y is not configured"); }
+        };
+        if (!"resend".equals(provider)) throw new IllegalStateException("Unsupported email OTP provider");
+        HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build();
+        return (to, body) -> {
+            if (to == null || !to.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$"))
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Invalid recipient");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0748 — backend/src/main/java/com/giftplatform/security/delivery/EmailDeliveryConfiguration.java:46
+
+[backend/src/main/java/com/giftplatform/security/delivery/EmailDeliveryConfiguration.java:46](../../src/main/java/com/giftplatform/security/delivery/EmailDeliveryConfiguration.java#L46)
+
+When / guard context:
+```java
+.header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(json)).build();
+            try {
+                HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+                if (response.statusCode() < 200 || response.statusCode() >= 300)
+```
+Failure / enforcement:
+```java
+throw EmailDeliveryException.rejected(response.statusCode(),response.body());
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0749 — backend/src/main/java/com/giftplatform/security/delivery/EmailDeliveryConfiguration.java:49
+
+[backend/src/main/java/com/giftplatform/security/delivery/EmailDeliveryConfiguration.java:49](../../src/main/java/com/giftplatform/security/delivery/EmailDeliveryConfiguration.java#L49)
+
+When / guard context:
+```java
+nt.send(request, HttpResponse.BodyHandlers.ofString());
+                if (response.statusCode() < 200 || response.statusCode() >= 300)
+                    throw EmailDeliveryException.rejected(response.statusCode(),response.body());
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+```
+Failure / enforcement:
+```java
+throw new EmailDeliveryException("Email delivery was interrupted. Please try again.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0750 — backend/src/main/java/com/giftplatform/security/delivery/EmailDeliveryConfiguration.java:51
+
+[backend/src/main/java/com/giftplatform/security/delivery/EmailDeliveryConfiguration.java:51](../../src/main/java/com/giftplatform/security/delivery/EmailDeliveryConfiguration.java#L51)
+
+When / guard context:
+```java
+throw EmailDeliveryException.rejected(response.statusCode(),response.body());
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new EmailDeliveryException("Email delivery was interrupted. Please try again.");
+            } catch (java.io.IOException e) {
+```
+Failure / enforcement:
+```java
+throw new EmailDeliveryException("Could not connect to the email provider. Please try again later.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0751 — backend/src/main/java/com/giftplatform/security/delivery/MessageDelivery.java:7
+
+[backend/src/main/java/com/giftplatform/security/delivery/MessageDelivery.java:7](../../src/main/java/com/giftplatform/security/delivery/MessageDelivery.java#L7)
+
+When / guard context:
+```java
+package com.giftplatform.security.delivery;
+
+/** Delivery transport only; it must never decide whether an OTP is valid. */
+public interface MessageDelivery {
+    void send(String destination, String message);
+    default void sendCode(String destination,String code) {
+        if(code==null||!code.matches("[0-9]{6}"))
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Invalid OTP");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0752 — backend/src/main/java/com/giftplatform/security/delivery/Msg91SmsDelivery.java:18
+
+[backend/src/main/java/com/giftplatform/security/delivery/Msg91SmsDelivery.java:18](../../src/main/java/com/giftplatform/security/delivery/Msg91SmsDelivery.java#L18)
+
+When / guard context:
+```java
+tring templateId,int expiryMinutes){
+  this(HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build(),authKey,templateId,expiryMinutes);
+ }
+ Msg91SmsDelivery(HttpClient client,String authKey,String templateId,int expiryMinutes){
+  this.client=client;this.authKey=authKey;this.templateId=templateId;
+  if(expiryMinutes<1||expiryMinutes>10)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("SMS OTP expiry must be 1–10 minutes");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0753 — backend/src/main/java/com/giftplatform/security/delivery/Msg91SmsDelivery.java:25
+
+[backend/src/main/java/com/giftplatform/security/delivery/Msg91SmsDelivery.java:25](../../src/main/java/com/giftplatform/security/delivery/Msg91SmsDelivery.java#L25)
+
+When / guard context:
+```java
+()&&!authKey.chars().anyMatch(Character::isISOControl)&&templateId!=null&&!templateId.isBlank();}
+ @Override public boolean establishesMobileOwnership(){return isAvailable();}
+ @Override public void send(String destination,String code){sendCode(destination,code);}
+ @Override public void sendCode(String destination,String code){
+  if(!isAvailable())
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("MSG91 is not configured");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0754 — backend/src/main/java/com/giftplatform/security/delivery/Msg91SmsDelivery.java:26
+
+[backend/src/main/java/com/giftplatform/security/delivery/Msg91SmsDelivery.java:26](../../src/main/java/com/giftplatform/security/delivery/Msg91SmsDelivery.java#L26)
+
+When / guard context:
+```java
+able();}
+ @Override public void send(String destination,String code){sendCode(destination,code);}
+ @Override public void sendCode(String destination,String code){
+  if(!isAvailable())throw new IllegalStateException("MSG91 is not configured");
+  if(destination==null||!destination.matches("\\+[1-9][0-9]{7,14}")||code==null||!code.matches("[0-9]{6}"))
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Invalid mobile or OTP");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0755 — backend/src/main/java/com/giftplatform/security/delivery/Msg91SmsDelivery.java:33
+
+[backend/src/main/java/com/giftplatform/security/delivery/Msg91SmsDelivery.java:33](../../src/main/java/com/giftplatform/security/delivery/Msg91SmsDelivery.java#L33)
+
+When / guard context:
+```java
+tp?"+query))
+    .timeout(Duration.ofSeconds(10)).header("authkey",authKey).header("Content-Type","application/json")
+    .POST(HttpRequest.BodyPublishers.ofString("{}")).build();
+  try{
+   var response=client.send(request,HttpResponse.BodyHandlers.ofString());
+   if(response.statusCode()<200||response.statusCode()>=300||!accepted(response.body()))
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("MSG91 did not accept the verification request");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0756 — backend/src/main/java/com/giftplatform/security/delivery/Msg91SmsDelivery.java:34
+
+[backend/src/main/java/com/giftplatform/security/delivery/Msg91SmsDelivery.java:34](../../src/main/java/com/giftplatform/security/delivery/Msg91SmsDelivery.java#L34)
+
+When / guard context:
+```java
+ers.ofString("{}")).build();
+  try{
+   var response=client.send(request,HttpResponse.BodyHandlers.ofString());
+   if(response.statusCode()<200||response.statusCode()>=300||!accepted(response.body()))throw new IllegalStateException("MSG91 did not accept the verification request");
+  }catch(InterruptedException ex){Thread.currentThread().interrupt();
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Mobile delivery interrupted");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0757 — backend/src/main/java/com/giftplatform/security/delivery/Msg91SmsDelivery.java:35
+
+[backend/src/main/java/com/giftplatform/security/delivery/Msg91SmsDelivery.java:35](../../src/main/java/com/giftplatform/security/delivery/Msg91SmsDelivery.java#L35)
+
+When / guard context:
+```java
+.ofString());
+   if(response.statusCode()<200||response.statusCode()>=300||!accepted(response.body()))throw new IllegalStateException("MSG91 did not accept the verification request");
+  }catch(InterruptedException ex){Thread.currentThread().interrupt();throw new IllegalStateException("Mobile delivery interrupted");}
+  catch(java.io.IOException ex){
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Mobile delivery unavailable");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0758 — backend/src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java:25
+
+[backend/src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java:25](../../src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java#L25)
+
+When / guard context:
+```java
+p.sms.provider:disabled}") String provider,
+            @Value("${gift.otp.sms.simulator.enabled:false}") boolean simulatorEnabled,
+            Environment environment) {
+        if ("disabled".equals(provider)) return new MessageDelivery(){
+            public boolean isAvailable(){return false;}
+            public void send(String to,String body){
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("SMS OTP delivery is not configured");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0759 — backend/src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java:33
+
+[backend/src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java:33](../../src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java#L33)
+
+When / guard context:
+```java
+vironment.getProperty("gift.otp.sms.msg91.template-id",""),
+            environment.getProperty("gift.otp.sms.expiry-minutes",Integer.class,5));
+        if ("simulator".equals(provider)) {
+            boolean localProfile = Arrays.stream(environment.getActiveProfiles()).anyMatch("local"::equals);
+            if (!localProfile || !simulatorEnabled)
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("SMS simulator requires explicit local profile and opt-in");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0760 — backend/src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java:37
+
+[backend/src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java:37](../../src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java#L37)
+
+When / guard context:
+```java
+ateException("SMS simulator requires explicit local profile and opt-in");
+            // Development only. Messages go to a private local inbox, never to logs or an HTTP endpoint.
+            return (to, body) -> {
+                String folder = environment.getProperty("gift.otp.sms.simulator.inbox-dir", "");
+                if (folder.isBlank())
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Local SMS inbox directory is not configured");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0761 — backend/src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java:41
+
+[backend/src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java:41](../../src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java#L41)
+
+When / guard context:
+```java
+");
+                if (folder.isBlank()) throw new IllegalStateException("Local SMS inbox directory is not configured");
+                try {
+                    Path dir = Path.of(folder).toAbsolutePath().normalize();
+                    if (!Files.isDirectory(dir, LinkOption.NOFOLLOW_LINKS) || Files.isSymbolicLink(dir))
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("SMS inbox must be an existing non-symlink directory");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0762 — backend/src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java:45
+
+[backend/src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java:45](../../src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java#L45)
+
+When / guard context:
+```java
+("SMS inbox must be an existing non-symlink directory");
+                    // Directory must be private; fail closed on filesystems without POSIX permissions.
+                    var permissions = Files.getPosixFilePermissions(dir);
+                    if (!permissions.equals(PosixFilePermissions.fromString("rwx------")))
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("SMS inbox directory permissions must be 0700");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0763 — backend/src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java:50
+
+[backend/src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java:50](../../src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java#L50)
+
+When / guard context:
+```java
+Files.writeString(file, "TO: " + to + "\n" + body + "\n", StandardCharsets.UTF_8,
+                        java.nio.file.StandardOpenOption.CREATE_NEW, java.nio.file.StandardOpenOption.WRITE);
+                    Files.setPosixFilePermissions(file, PosixFilePermissions.fromString("rw-------"));
+                } catch (IOException ex) {
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Local SMS inbox write failed", ex);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0764 — backend/src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java:54
+
+[backend/src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java:54](../../src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java#L54)
+
+When / guard context:
+```java
+Files.setPosixFilePermissions(file, PosixFilePermissions.fromString("rw-------"));
+                } catch (IOException ex) { throw new IllegalStateException("Local SMS inbox write failed", ex); }
+            };
+        }
+        // An MSG91 adapter can be selected when implemented and tested; never pretend delivery succeeded.
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Unsupported SMS OTP provider: " + provider);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0765 — backend/src/main/java/com/giftplatform/security/recovery/CredentialSessionVersionStore.java:16
+
+[backend/src/main/java/com/giftplatform/security/recovery/CredentialSessionVersionStore.java:16](../../src/main/java/com/giftplatform/security/recovery/CredentialSessionVersionStore.java#L16)
+
+When / guard context:
+```java
+ionVersionStore {
+    private static final Set<String> KINDS = Set.of("PLATFORM_ADMIN", "HOST", "GROUP_ADMIN", "GROUP_MEMBER");
+    private final JdbcTemplate jdbc;
+    public CredentialSessionVersionStore(JdbcTemplate jdbc) { this.jdbc = jdbc; }
+    private static void check(String kind, UUID id) {
+        if (!KINDS.contains(kind) || id == null)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Invalid account");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0766 — backend/src/main/java/com/giftplatform/security/recovery/CredentialSessionVersionStore.java:30
+
+[backend/src/main/java/com/giftplatform/security/recovery/CredentialSessionVersionStore.java:30](../../src/main/java/com/giftplatform/security/recovery/CredentialSessionVersionStore.java#L30)
+
+When / guard context:
+```java
+Long version = jdbc.queryForObject("INSERT INTO credential_session_versions (account_kind,account_id,version) VALUES (?,?,1) " +
+                "ON CONFLICT (account_kind,account_id) DO UPDATE SET version=credential_session_versions.version+1,updated_at=now() RETURNING version",
+                Long.class, kind, id);
+        if (version == null)
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Could not revoke sessions");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0767 — backend/src/main/java/com/giftplatform/security/recovery/EffectiveRecoveryPolicyService.java:25
+
+[backend/src/main/java/com/giftplatform/security/recovery/EffectiveRecoveryPolicyService.java:25](../../src/main/java/com/giftplatform/security/recovery/EffectiveRecoveryPolicyService.java#L25)
+
+When / guard context:
+```java
+ctive(UUID hostId, UUID eventId) {
+        Policy result=read("PLATFORM",new UUID(0,0)).orElseThrow(() -> new IllegalStateException("Platform account policy missing"));
+        if(eventId!=null) {
+            List<UUID> owners=db.query("SELECT owner_id FROM events WHERE id=?",(rs,n)->(UUID)rs.getObject(1),eventId);
+            if(owners.size()!=1)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Unknown event policy target");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0768 — backend/src/main/java/com/giftplatform/security/recovery/EffectiveRecoveryPolicyService.java:26
+
+[backend/src/main/java/com/giftplatform/security/recovery/EffectiveRecoveryPolicyService.java:26](../../src/main/java/com/giftplatform/security/recovery/EffectiveRecoveryPolicyService.java#L26)
+
+When / guard context:
+```java
+tion("Platform account policy missing"));
+        if(eventId!=null) {
+            List<UUID> owners=db.query("SELECT owner_id FROM events WHERE id=?",(rs,n)->(UUID)rs.getObject(1),eventId);
+            if(owners.size()!=1) throw new IllegalArgumentException("Unknown event policy target");
+            if(hostId!=null&&!hostId.equals(owners.get(0)))
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Event does not belong to host");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0769 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:46
+
+[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:46](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L46)
+
+When / guard context:
+```java
+@Value("${gift.otp.hmac-key-base64:}") String encodedKey) {
+        this.db=db; this.challenges=challenges; this.versions=versions; this.passwords=passwords; this.email=email;
+        byte[] decoded;
+        try { decoded=encodedKey.isBlank()?new byte[0]:Base64.getDecoder().decode(encodedKey); }
+        catch(IllegalArgumentException ex) {
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Invalid OTP HMAC key",ex);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0770 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:49
+
+[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:49](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L49)
+
+When / guard context:
+```java
+this.passwords=passwords; this.email=email;
+        byte[] decoded;
+        try { decoded=encodedKey.isBlank()?new byte[0]:Base64.getDecoder().decode(encodedKey); }
+        catch(IllegalArgumentException ex) { throw new IllegalStateException("Invalid OTP HMAC key",ex); }
+        this.key=decoded;
+    }
+    private void ready() { if(key.length<32)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Recovery not configured");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0771 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:53
+
+[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:53](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L53)
+
+When / guard context:
+```java
+AVAILABLE,"Recovery not configured"); }
+    private static String normalized(String s) { return s==null?"":s.strip().toLowerCase(Locale.ROOT); }
+    private static String digest(String s) {
+        try { return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(s.getBytes(StandardCharsets.UTF_8))); }
+        catch(Exception ex) {
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException(ex);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0772 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:76
+
+[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:76](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L76)
+
+When / guard context:
+```java
+LATFORM_ADMIN")?new Object[]{value,kind.equals("HOST")?"CUSTOMER":"PLATFORM_ADMIN"}:new Object[]{value});
+        // Ambiguous email cannot safely identify a group account; fail closed.
+        return accounts.size()==1?accounts.get(0):null;
+    }
+    private static String purpose(String p) { if(!"RESET_PIN".equals(p)&&!"RESET_PASSWORD".equals(p))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid recovery purpose");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0773 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:89
+
+[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:89](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L89)
+
+When / guard context:
+```java
+ant.now().plusSeconds(600));
+        email.send(a.email,"Your Gift Platform security code is "+code+". It expires in 10 minutes. Never share it.");
+        return id;
+    }
+    @PostMapping("/request")
+    public CodeIssued request(@RequestBody RequestCode body, jakarta.servlet.http.HttpServletRequest req) {
+        ready();
+        if(body==null)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0774 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:93
+
+[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:93](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L93)
+
+When / guard context:
+```java
+e body, jakarta.servlet.http.HttpServletRequest req) {
+        ready();
+        if(body==null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        String action=purpose(body.purpose());
+        UUID opaque=UUID.randomUUID();
+        String remote=req.getRemoteAddr()==null?"unknown":req.getRemoteAddr();
+        if(!permitted(remote))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,"Please try again later");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0775 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:105
+
+[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:105](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L105)
+
+When / guard context:
+```java
+* Avoid leaking whether account exists or transport is enabled. */ }
+            }
+        }
+        return new CodeIssued(opaque,"If an eligible verified account exists, a security code will be sent.");
+    }
+    private static void validateNew(String purpose,String value,String confirmation) {
+        if(value==null||!value.equals(confirmation))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Credentials do not match");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0776 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:107
+
+[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:107](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L107)
+
+When / guard context:
+```java
+a security code will be sent.");
+    }
+    private static void validateNew(String purpose,String value,String confirmation) {
+        if(value==null||!value.equals(confirmation)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Credentials do not match");
+        if("RESET_PIN".equals(purpose)) {
+            if(!value.matches("[0-9]{6}"))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"PIN must be six digits");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0777 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:109
+
+[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:109](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L109)
+
+When / guard context:
+```java
+ch");
+        if("RESET_PIN".equals(purpose)) {
+            if(!value.matches("[0-9]{6}")) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"PIN must be six digits");
+        } else if(value.length()<8||value.length()>128||!value.matches("(?s).*\\p{L}.*")||!value.matches("(?s).*\\d.*")||!value.matches("(?s).*[\\p{Punct}].*")) {
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Password must have 8–128 characters including a letter, number and symbol");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0778 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:115
+
+[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:115](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L115)
+
+When / guard context:
+```java
+tatusException(HttpStatus.BAD_REQUEST,"Password must have 8–128 characters including a letter, number and symbol");
+        }
+    }
+    @PostMapping("/complete") @Transactional
+    public Result complete(@RequestBody Reset body) {
+        ready();
+        if(body==null||body.challengeId()==null||body.code()==null||!body.code().matches("[0-9]{6}"))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid or expired code");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0779 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:119
+
+[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:119](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L119)
+
+When / guard context:
+```java
+ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid or expired code");
+        String action=purpose(body.purpose());
+        validateNew(action,body.newCredential(),body.confirmCredential());
+        Account a=find(body.accountKind(),body.identifier());
+        if(a==null||!a.verified||action.equals("RESET_PIN")&&!a.kind.startsWith("GROUP_"))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid or expired code");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0780 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:121
+
+[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:121](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L121)
+
+When / guard context:
+```java
+f(a==null||!a.verified||action.equals("RESET_PIN")&&!a.kind.startsWith("GROUP_")) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid or expired code");
+        boolean valid=challenges.verifyAndConsume(body.challengeId(),a.kind,a.id,action,digest(normalized(a.email)),sign(body.challengeId(),a,action,body.code()));
+        if(!valid)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid or expired code");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0781 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:129
+
+[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:129](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L129)
+
+When / guard context:
+```java
+FOR UPDATE",UUID.class,scope);
+            for(Map<String,Object> other:db.queryForList("SELECT id,pin_hash FROM "+table+" WHERE "+scopeColumn+"=? AND username=(SELECT username FROM "+table+" WHERE id=?) AND id<>? AND pin_hash IS NOT NULL",scope,a.id,a.id)) {
+                if(passwords.matches(body.newCredential(),(String)other.get("pin_hash")))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"PIN already taken for this group. Choose a different PIN");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0782 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:133
+
+[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:133](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L133)
+
+When / guard context:
+```java
+.get("pin_hash"))) throw new ResponseStatusException(HttpStatus.CONFLICT,"PIN already taken for this group. Choose a different PIN");
+            }
+        }
+        String field=action.equals("RESET_PIN")?"pin_hash":"password_hash";
+        if(db.update("UPDATE "+table+" SET "+field+"=? WHERE id=?",passwords.encode(body.newCredential()),a.id)!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Account unavailable");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0783 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:140
+
+[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:140](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L140)
+
+When / guard context:
+```java
+ions.revokeAll(a.kind,a.id);
+        return new Result("Credential updated. Sign in again.");
+    }
+    public record EmailStatus(String email,boolean verified){}
+    public record UpdateEmail(String email){}
+    private Account authenticatedAccount(Authentication auth) {
+        if(auth==null||!(auth.getPrincipal() instanceof GiftUserPrincipal p))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0784 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:145
+
+[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:145](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L145)
+
+When / guard context:
+```java
+rows=db.query("SELECT id,email,email_verified_at FROM users WHERE id=? AND role=? AND enabled=true",
+                (rs,n)->new Account(kind,rs.getObject("id",UUID.class),rs.getString("email"),rs.getTimestamp("email_verified_at")!=null,null),
+                p.getUserId(),kind.equals("HOST")?"CUSTOMER":"PLATFORM_ADMIN");
+        if(rows.size()!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0785 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:151
+
+[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:151](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L151)
+
+When / guard context:
+```java
+TOMER":"PLATFORM_ADMIN");
+        if(rows.size()!=1)throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+        return rows.getFirst();
+    }
+    @PostMapping("/update-email") @Transactional
+    public Result updateEmail(@RequestBody UpdateEmail body,Authentication auth) {
+        Account a=authenticatedAccount(auth);
+        if(a.verified)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Verified email addresses cannot be changed.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0786 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:154
+
+[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:154](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L154)
+
+When / guard context:
+```java
+auth) {
+        Account a=authenticatedAccount(auth);
+        if(a.verified)throw new ResponseStatusException(HttpStatus.CONFLICT,"Verified email addresses cannot be changed.");
+        String destination=normalized(body==null?null:body.email());
+        if(destination.length()>254||!destination.matches("[^@\\s]+@[^@\\s]+\\.[^@\\s]+"))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Enter a valid email address");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0787 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:157
+
+[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:157](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L157)
+
+When / guard context:
+```java
+dy.email());
+        if(destination.length()>254||!destination.matches("[^@\\s]+@[^@\\s]+\\.[^@\\s]+"))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Enter a valid email address");
+        try {
+            if(db.update("UPDATE users SET email=? WHERE id=? AND email_verified_at IS NULL",destination,a.id)!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"The email is already verified or the account is unavailable.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0788 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:159
+
+[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:159](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L159)
+
+When / guard context:
+```java
+ss");
+        try {
+            if(db.update("UPDATE users SET email=? WHERE id=? AND email_verified_at IS NULL",destination,a.id)!=1)
+                throw new ResponseStatusException(HttpStatus.CONFLICT,"The email is already verified or the account is unavailable.");
+        } catch(org.springframework.dao.DuplicateKeyException ex) {
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"This email address is already in use.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0789 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:173
+
+[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:173](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L173)
+
+When / guard context:
+```java
+uth);
+        return new EmailStatus(account.email,account.verified);
+    }
+    @PostMapping("/enroll-email")
+    public CodeIssued enroll(Authentication auth, jakarta.servlet.http.HttpServletRequest req) {
+        ready();
+        Account a=authenticatedAccount(auth);
+        if(!permitted(req.getRemoteAddr()==null?"unknown":req.getRemoteAddr()))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0790 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:176
+
+[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:176](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L176)
+
+When / guard context:
+```java
+throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS);
+        String kind=a.kind;
+        Integer count=db.queryForObject("SELECT count(*) FROM account_contact_challenges WHERE account_kind=? AND account_id=? AND purpose='VERIFY_CONTACT' AND created_at>now()-interval '1 hour'",Integer.class,kind,a.id);
+        if(count!=null&&count>=3)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0791 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:177
+
+[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:177](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L177)
+
+When / guard context:
+```java
+Integer count=db.queryForObject("SELECT count(*) FROM account_contact_challenges WHERE account_kind=? AND account_id=? AND purpose='VERIFY_CONTACT' AND created_at>now()-interval '1 hour'",Integer.class,kind,a.id);
+        if(count!=null&&count>=3) throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS);
+        if(!email.isAvailable())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Email verification delivery is not configured. Please contact support.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0792 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:180
+
+[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:180](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L180)
+
+When / guard context:
+```java
+ponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Email verification delivery is not configured. Please contact support.");
+        try{return new CodeIssued(issue(a,"VERIFY_CONTACT"),com.giftplatform.security.delivery.EmailVerificationFeedback.REQUESTED);}
+        catch(com.giftplatform.security.delivery.EmailDeliveryException ex){
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,ex.getMessage());
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0793 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:186
+
+[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:186](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L186)
+
+When / guard context:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,ex.getMessage());
+        }
+    }
+    @PostMapping("/verify-email") @Transactional
+    public Result verifyEmail(@RequestBody VerifyEmail body,Authentication auth) {
+        ready();
+        if(body==null||body.challengeId()==null||body.code()==null||!body.code().matches("[0-9]{6}"))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0794 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:188
+
+[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:188](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L188)
+
+When / guard context:
+```java
+llengeId()==null||body.code()==null||!body.code().matches("[0-9]{6}")) throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        Account a=authenticatedAccount(auth);
+        if(!challenges.verifyAndConsume(body.challengeId(),a.kind,a.id,"VERIFY_CONTACT",digest(normalized(a.email)),sign(body.challengeId(),a,"VERIFY_CONTACT",body.code())))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid or expired code");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0795 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:190
+
+[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:190](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L190)
+
+When / guard context:
+```java
+challengeId(),a.kind,a.id,"VERIFY_CONTACT",digest(normalized(a.email)),sign(body.challengeId(),a,"VERIFY_CONTACT",body.code()))) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid or expired code");
+        if(db.update("UPDATE users SET email_verified_at=now() WHERE id=? AND lower(email)=?",a.id,normalized(a.email))!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Email changed. Send a new verification code.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0796 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:39
+
+[backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:39](../../src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java#L39)
+
+When / guard context:
+```java
+lifier("otpEmailDelivery") MessageDelivery email,
+            @Value("${gift.otp.hmac-key-base64:}") String encodedKey) {
+        this.db=db; this.challenges=challenges; this.versions=versions; this.email=email;
+        try { key=encodedKey.isBlank()?new byte[0]:Base64.getDecoder().decode(encodedKey); }
+        catch(IllegalArgumentException ex) {
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Invalid OTP HMAC key",ex);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0797 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:42
+
+[backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:42](../../src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java#L42)
+
+When / guard context:
+```java
+this.db=db; this.challenges=challenges; this.versions=versions; this.email=email;
+        try { key=encodedKey.isBlank()?new byte[0]:Base64.getDecoder().decode(encodedKey); }
+        catch(IllegalArgumentException ex) { throw new IllegalStateException("Invalid OTP HMAC key",ex); }
+    }
+    private void ready() {
+        if(key.length<32)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Email verification is not configured");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0798 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:47
+
+[backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:47](../../src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java#L47)
+
+When / guard context:
+```java
+nseStatusException denied() { return new ResponseStatusException(HttpStatus.UNAUTHORIZED,"Sign in again to verify your contact"); }
+    private static String fingerprint(String value) {
+        try { return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(value.getBytes(StandardCharsets.UTF_8))); }
+        catch(Exception ex) {
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException(ex);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0799 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:51
+
+[backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:51](../../src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java#L51)
+
+When / guard context:
+```java
+getInstance("SHA-256").digest(value.getBytes(StandardCharsets.UTF_8))); }
+        catch(Exception ex) { throw new IllegalStateException(ex); }
+    }
+    private UUID event(UUID token) {
+        List<UUID> ids=db.query("SELECT id FROM events WHERE public_token=? AND status='PUBLISHED'",(rs,n)->(UUID)rs.getObject(1),token);
+        if(ids.size()!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0800 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:57
+
+[backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:57](../../src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java#L57)
+
+When / guard context:
+```java
+D'",(rs,n)->(UUID)rs.getObject(1),token);
+        if(ids.size()!=1) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        return ids.get(0);
+    }
+    private Account account(UUID token, UUID groupId, HttpServletRequest req) {
+        UUID eventId=event(token);
+        HttpSession session=req.getSession(false);
+        if(session==null)
+```
+Failure / enforcement:
+```java
+throw denied();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0801 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:64
+
+[backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:64](../../src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java#L64)
+
+When / guard context:
+```java
+activity=session.getAttribute("gift.group.activity."+eventId);
+            if(!(raw instanceof UUID id) || !(page instanceof String pageId)
+                    || !pageId.equals(req.getHeader("X-Group-Page-Id")) || !(activity instanceof Long last)
+                    || System.currentTimeMillis()-last<0 || System.currentTimeMillis()-last>=600000L)
+```
+Failure / enforcement:
+```java
+throw denied();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0802 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:66
+
+[backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:66](../../src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java#L66)
+
+When / guard context:
+```java
+Id")) || !(activity instanceof Long last)
+                    || System.currentTimeMillis()-last<0 || System.currentTimeMillis()-last>=600000L) throw denied();
+            Object epoch=session.getAttribute("gift.group.admin.epoch."+eventId);
+            if(!(epoch instanceof Long version) || version.longValue()!=versions.current("GROUP_ADMIN",id))
+```
+Failure / enforcement:
+```java
+throw denied();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0803 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:68
+
+[backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:68](../../src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java#L68)
+
+When / guard context:
+```java
+etAttribute("gift.group.admin.epoch."+eventId);
+            if(!(epoch instanceof Long version) || version.longValue()!=versions.current("GROUP_ADMIN",id)) throw denied();
+            Integer count=db.queryForObject("SELECT count(*) FROM gift_group_accounts WHERE id=? AND event_id=?",Integer.class,id,eventId);
+            if(count==null||count!=1)
+```
+Failure / enforcement:
+```java
+throw denied();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0804 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:73
+
+[backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:73](../../src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java#L73)
+
+When / guard context:
+```java
+|count!=1) throw denied();
+            session.setAttribute("gift.group.activity."+eventId,System.currentTimeMillis());
+            return new Account("GROUP_ADMIN",id);
+        }
+        Integer exists=db.queryForObject("SELECT count(*) FROM gift_groups WHERE id=? AND event_id=?",Integer.class,groupId,eventId);
+        if(exists==null||exists!=1)
+```
+Failure / enforcement:
+```java
+throw denied();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0805 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:75
+
+[backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:75](../../src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java#L75)
+
+When / guard context:
+```java
+return new Account("GROUP_ADMIN",id);
+        }
+        Integer exists=db.queryForObject("SELECT count(*) FROM gift_groups WHERE id=? AND event_id=?",Integer.class,groupId,eventId);
+        if(exists==null||exists!=1) throw denied();
+        Object raw=session.getAttribute("gift.group.member."+groupId);
+        if(!(raw instanceof UUID id))
+```
+Failure / enforcement:
+```java
+throw denied();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0806 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:77
+
+[backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:77](../../src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java#L77)
+
+When / guard context:
+```java
+f(exists==null||exists!=1) throw denied();
+        Object raw=session.getAttribute("gift.group.member."+groupId);
+        if(!(raw instanceof UUID id)) throw denied();
+        Object epoch=session.getAttribute("gift.group.member.epoch."+groupId);
+        if(!(epoch instanceof Long version)||version.longValue()!=versions.current("GROUP_MEMBER",id))
+```
+Failure / enforcement:
+```java
+throw denied();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0807 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:79
+
+[backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:79](../../src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java#L79)
+
+When / guard context:
+```java
+"gift.group.member.epoch."+groupId);
+        if(!(epoch instanceof Long version)||version.longValue()!=versions.current("GROUP_MEMBER",id)) throw denied();
+        Integer active=db.queryForObject("SELECT count(*) FROM gift_group_members WHERE id=? AND group_id=? AND status='APPROVED'",Integer.class,id,groupId);
+        if(active==null||active!=1)
+```
+Failure / enforcement:
+```java
+throw denied();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0808 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:96
+
+[backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:96](../../src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java#L96)
+
+When / guard context:
+```java
+t("SELECT email,email_verified_at IS NOT NULL FROM "+table+" WHERE id=?",(rs,n)->new EmailStatus(rs.getString(1),rs.getBoolean(2)),a.id);
+    }
+    @PostMapping("/start")
+    @Transactional
+    public Started start(@PathVariable UUID token,@RequestBody Start body,HttpServletRequest req) {
+        ready();
+        if(body==null||body.email()==null)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Email required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0809 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:100
+
+[backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:100](../../src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java#L100)
+
+When / guard context:
+```java
+ST,"Email required");
+        Account a=account(token,body.groupId(),req);
+        String table=a.kind.equals("GROUP_ADMIN")?"gift_group_accounts":"gift_group_members";
+        Boolean verified=db.queryForObject("SELECT email_verified_at IS NOT NULL FROM "+table+" WHERE id=? FOR UPDATE",Boolean.class,a.id);
+        if(Boolean.TRUE.equals(verified))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Verified email addresses cannot be changed.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0810 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:103
+
+[backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:103](../../src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java#L103)
+
+When / guard context:
+```java
+PDATE",Boolean.class,a.id);
+        if(Boolean.TRUE.equals(verified))throw new ResponseStatusException(HttpStatus.CONFLICT,"Verified email addresses cannot be changed.");
+        String destination=body.email().strip().toLowerCase(Locale.ROOT);
+        if(destination.length()>254||!destination.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$"))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Enter a valid email address");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0811 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:105
+
+[backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:105](../../src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java#L105)
+
+When / guard context:
+```java
+new ResponseStatusException(HttpStatus.BAD_REQUEST,"Enter a valid email address");
+        Integer attempts=db.queryForObject("SELECT count(*) FROM account_contact_challenges WHERE account_kind=? AND account_id=? AND purpose='VERIFY_CONTACT' AND created_at>now()-interval '1 hour'",Integer.class,a.kind,a.id);
+        if(attempts!=null&&attempts>=3)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,"Try again later");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0812 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:110
+
+[backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:110](../../src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java#L110)
+
+When / guard context:
+```java
+erifications(challenge_id,account_kind,account_id,email,expires_at) VALUES(?,?,?,?,?)",id,a.kind,a.id,destination,java.sql.Timestamp.from(Instant.now().plusSeconds(600)));
+        try { email.send(destination,"Your Gift Platform email verification code is "+code+". It expires in 10 minutes. Never share it."); }
+        catch(RuntimeException ex) {
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Email delivery unavailable");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0813 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:118
+
+[backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:118](../../src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java#L118)
+
+When / guard context:
+```java
+rm.security.delivery.EmailVerificationFeedback.REQUESTED);
+    }
+    @PostMapping("/complete")
+    @Transactional
+    public Result complete(@PathVariable UUID token,@RequestBody Complete body,HttpServletRequest req) {
+        ready();
+        if(body==null||body.challengeId()==null||body.code()==null||!body.code().matches("[0-9]{6}"))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid or expired code");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0814 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:121
+
+[backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:121](../../src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java#L121)
+
+When / guard context:
+```java
+Invalid or expired code");
+        Account a=account(token,body.groupId(),req);
+        List<String> pending=db.query("SELECT email FROM account_pending_email_verifications WHERE challenge_id=? AND account_kind=? AND account_id=? AND expires_at>now() FOR UPDATE",(rs,n)->rs.getString(1),body.challengeId(),a.kind,a.id);
+        if(pending.size()!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid or expired code");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0815 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:124
+
+[backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:124](../../src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java#L124)
+
+When / guard context:
+```java
+a.kind,a.id);
+        if(pending.size()!=1) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid or expired code");
+        String destination=pending.get(0);
+        if(!challenges.verifyAndConsume(body.challengeId(),a.kind,a.id,"VERIFY_CONTACT",fingerprint(destination),hash(body.challengeId(),a,destination,body.code())))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid or expired code");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0816 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:127
+
+[backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:127](../../src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java#L127)
+
+When / guard context:
+```java
+de())))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid or expired code");
+        String table=a.kind.equals("GROUP_ADMIN")?"gift_group_accounts":"gift_group_members";
+        if(db.update("UPDATE "+table+" SET email=?,email_verified_at=now() WHERE id=? AND email_verified_at IS NULL",destination,a.id)!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"The email is already verified or the account is unavailable.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0817 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:50
+
+[backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:50](../../src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java#L50)
+
+When / guard context:
+```java
+es.active:}") String profile) {
+        this.db=db;this.challenges=challenges;this.versions=versions;this.sms=sms;
+        this.realSmsEnabled=realSmsEnabled;this.simulatorEnabled=simulatorEnabled;this.profile=profile;
+        try { this.key=key64.isBlank()?new byte[0]:Base64.getDecoder().decode(key64); }
+        catch(IllegalArgumentException ex){
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Invalid HMAC key",ex);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0818 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:53
+
+[backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:53](../../src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java#L53)
+
+When / guard context:
+```java
+this.realSmsEnabled=realSmsEnabled;this.simulatorEnabled=simulatorEnabled;this.profile=profile;
+        try { this.key=key64.isBlank()?new byte[0]:Base64.getDecoder().decode(key64); }
+        catch(IllegalArgumentException ex){throw new IllegalStateException("Invalid HMAC key",ex);}
+    }
+    private void ready() {
+        if(key.length<32)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Mobile OTP not configured");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0819 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:55
+
+[backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:55](../../src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java#L55)
+
+When / guard context:
+```java
+catch(IllegalArgumentException ex){throw new IllegalStateException("Invalid HMAC key",ex);}
+    }
+    private void ready() {
+        if(key.length<32) throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Mobile OTP not configured");
+        if(!simulatorEnabled || !Arrays.asList(profile.split(",")).contains("local"))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Mobile OTP development testing only");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0820 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:56
+
+[backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:56](../../src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java#L56)
+
+When / guard context:
+```java
+if(key.length<32) throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Mobile OTP not configured");
+        if(!simulatorEnabled || !Arrays.asList(profile.split(",")).contains("local"))
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Mobile OTP development testing only");
+        if(realSmsEnabled)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Real SMS provider not implemented");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0821 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:61
+
+[backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:61](../../src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java#L61)
+
+When / guard context:
+```java
+plemented");
+    }
+    private static ResponseStatusException denied() {return new ResponseStatusException(HttpStatus.UNAUTHORIZED,"Sign in again");}
+    private UUID event(UUID token) {
+        List<UUID> ids=db.query("SELECT id FROM events WHERE public_token=? AND status='PUBLISHED'",(rs,n)->(UUID)rs.getObject(1),token);
+        if(ids.size()!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0822 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:66
+
+[backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:66](../../src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java#L66)
+
+When / guard context:
+```java
+='PUBLISHED'",(rs,n)->(UUID)rs.getObject(1),token);
+        if(ids.size()!=1)throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        return ids.get(0);
+    }
+    private Account account(UUID token, UUID groupId, HttpServletRequest req) {
+        UUID eventId=event(token); HttpSession session=req.getSession(false);
+        if(session==null)
+```
+Failure / enforcement:
+```java
+throw denied();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0823 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:72
+
+[backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:72](../../src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java#L72)
+
+When / guard context:
+```java
+("gift.group.page."+eventId);
+            Object last=session.getAttribute("gift.group.activity."+eventId);
+            if(!(raw instanceof UUID id)||!(page instanceof String pid)||!pid.equals(req.getHeader("X-Group-Page-Id"))
+                ||!(last instanceof Long when)||System.currentTimeMillis()-when<0||System.currentTimeMillis()-when>=600000)
+```
+Failure / enforcement:
+```java
+throw denied();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0824 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:74
+
+[backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:74](../../src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java#L74)
+
+When / guard context:
+```java
+q.getHeader("X-Group-Page-Id"))
+                ||!(last instanceof Long when)||System.currentTimeMillis()-when<0||System.currentTimeMillis()-when>=600000)throw denied();
+            Object epoch=session.getAttribute("gift.group.admin.epoch."+eventId);
+            if(!(epoch instanceof Long ver)||ver.longValue()!=versions.current("GROUP_ADMIN",id))
+```
+Failure / enforcement:
+```java
+throw denied();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0825 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:76
+
+[backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:76](../../src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java#L76)
+
+When / guard context:
+```java
+session.getAttribute("gift.group.admin.epoch."+eventId);
+            if(!(epoch instanceof Long ver)||ver.longValue()!=versions.current("GROUP_ADMIN",id))throw denied();
+            Integer exists=db.queryForObject("SELECT count(*) FROM gift_group_accounts WHERE id=? AND event_id=?",Integer.class,id,eventId);
+            if(exists==null||exists!=1)
+```
+Failure / enforcement:
+```java
+throw denied();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0826 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:81
+
+[backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:81](../../src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java#L81)
+
+When / guard context:
+```java
+ull||exists!=1)throw denied();
+            session.setAttribute("gift.group.activity."+eventId,System.currentTimeMillis());
+            return new Account("GROUP_ADMIN",id);
+        }
+        Integer group=db.queryForObject("SELECT count(*) FROM gift_groups WHERE id=? AND event_id=?",Integer.class,groupId,eventId);
+        if(group==null||group!=1)
+```
+Failure / enforcement:
+```java
+throw denied();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0827 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:83
+
+[backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:83](../../src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java#L83)
+
+When / guard context:
+```java
+return new Account("GROUP_ADMIN",id);
+        }
+        Integer group=db.queryForObject("SELECT count(*) FROM gift_groups WHERE id=? AND event_id=?",Integer.class,groupId,eventId);
+        if(group==null||group!=1)throw denied();
+        Object raw=session.getAttribute("gift.group.member."+groupId);
+        if(!(raw instanceof UUID id))
+```
+Failure / enforcement:
+```java
+throw denied();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0828 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:85
+
+[backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:85](../../src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java#L85)
+
+When / guard context:
+```java
+d);
+        if(group==null||group!=1)throw denied();
+        Object raw=session.getAttribute("gift.group.member."+groupId);
+        if(!(raw instanceof UUID id))throw denied();
+        Object epoch=session.getAttribute("gift.group.member.epoch."+groupId);
+        if(!(epoch instanceof Long ver)||ver.longValue()!=versions.current("GROUP_MEMBER",id))
+```
+Failure / enforcement:
+```java
+throw denied();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0829 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:87
+
+[backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:87](../../src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java#L87)
+
+When / guard context:
+```java
+ute("gift.group.member.epoch."+groupId);
+        if(!(epoch instanceof Long ver)||ver.longValue()!=versions.current("GROUP_MEMBER",id))throw denied();
+        Integer approved=db.queryForObject("SELECT count(*) FROM gift_group_members WHERE id=? AND group_id=? AND status='APPROVED'",Integer.class,id,groupId);
+        if(approved==null||approved!=1)
+```
+Failure / enforcement:
+```java
+throw denied();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0830 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:92
+
+[backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:92](../../src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java#L92)
+
+When / guard context:
+```java
+if(approved==null||approved!=1)throw denied();
+        return new Account("GROUP_MEMBER",id);
+    }
+    @GetMapping("/status")
+    public com.giftplatform.security.verification.MobileVerificationService.Status status(@PathVariable UUID token,@RequestParam(required=false) UUID groupId,HttpServletRequest request){
+        if(mobileService==null)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0831 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:97
+
+[backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:97](../../src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java#L97)
+
+When / guard context:
+```java
+atusException(HttpStatus.SERVICE_UNAVAILABLE);
+        Account a=account(token,groupId,request);return mobileService.status(a.kind,a.id);
+    }
+    private String fingerprint(String value) {
+        try{return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(value.getBytes(StandardCharsets.UTF_8)));}
+        catch(Exception ex){
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException(ex);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0832 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:106
+
+[backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:106](../../src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java#L106)
+
+When / guard context:
+```java
+t a,String destination,String code) {
+        return RecoveryOtp.fingerprint(key,challenge,a.kind,a.id,"VERIFY_CONTACT",destination,code);
+    }
+    @PostMapping("/start")
+    @Transactional
+    public Started start(@PathVariable UUID token,@RequestBody Start body,HttpServletRequest req) {
+        if(mobileService!=null){
+            if(body==null)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0833 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:113
+
+[backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:113](../../src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java#L113)
+
+When / guard context:
+```java
+Status.BAD_REQUEST);
+            Account a=account(token,body.groupId(),req);
+            var result=mobileService.start(a.kind,a.id,body.mobile());
+            return new Started(result.challengeId(),result.message());
+        }
+        ready();
+        if(body==null||body.mobile()==null||!body.mobile().matches("\\+[1-9][0-9]{7,14}"))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Use international mobile format, e.g. +919876543210");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0834 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:116
+
+[backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:116](../../src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java#L116)
+
+When / guard context:
+```java
+international mobile format, e.g. +919876543210");
+        Account a=account(token,body.groupId(),req);
+        Integer count=db.queryForObject("SELECT count(*) FROM account_contact_challenges WHERE account_kind=? AND account_id=? AND channel='SMS' AND created_at>now()-interval '1 hour'",Integer.class,a.kind,a.id);
+        if(count!=null&&count>=3)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,"Try again later");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0835 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:122
+
+[backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:122](../../src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java#L122)
+
+When / guard context:
+```java
+b.update("INSERT INTO account_pending_mobile_verifications(challenge_id,account_kind,account_id,mobile,expires_at) VALUES(?,?,?,?,?)",
+            id,a.kind,a.id,body.mobile(),java.sql.Timestamp.from(Instant.now().plusSeconds(600)));
+        try{sms.send(body.mobile(),"Gift Platform LOCAL TEST ONLY OTP: "+code);}
+        catch(RuntimeException ex){
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"SMS simulator unavailable");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0836 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:129
+
+[backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:129](../../src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java#L129)
+
+When / guard context:
+```java
+ailable");}
+        return new Started(id,"Local test code sent to development SMS inbox. This is not real mobile verification.");
+    }
+    @PostMapping("/complete")
+    @Transactional
+    public Result complete(@PathVariable UUID token,@RequestBody Complete body,HttpServletRequest req) {
+        if(mobileService!=null){
+            if(body==null)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0837 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:136
+
+[backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:136](../../src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java#L136)
+
+When / guard context:
+```java
+.BAD_REQUEST);
+            Account a=account(token,body.groupId(),req);
+            mobileService.complete(a.kind,a.id,body.challengeId(),body.code());
+            return new Result("Mobile number verified");
+        }
+        ready();
+        if(body==null||body.challengeId()==null||body.code()==null||!body.code().matches("[0-9]{6}"))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid code");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0838 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:140
+
+[backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:140](../../src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java#L140)
+
+When / guard context:
+```java
+alid code");
+        Account a=account(token,body.groupId(),req);
+        List<String> mobiles=db.query("SELECT mobile FROM account_pending_mobile_verifications WHERE challenge_id=? AND account_kind=? AND account_id=? AND expires_at>now() FOR UPDATE",
+            (rs,n)->rs.getString(1),body.challengeId(),a.kind,a.id);
+        if(mobiles.size()!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid or expired code");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0839 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:143
+
+[backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:143](../../src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java#L143)
+
+When / guard context:
+```java
+challengeId(),a.kind,a.id);
+        if(mobiles.size()!=1)throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid or expired code");
+        String mobile=mobiles.get(0);
+        if(!challenges.verifyAndConsume(body.challengeId(),a.kind,a.id,"VERIFY_CONTACT",fingerprint(mobile),signed(body.challengeId(),a,mobile,body.code())))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid or expired code");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0840 — backend/src/main/java/com/giftplatform/security/recovery/RecoveryChallengeStore.java:17
+
+[backend/src/main/java/com/giftplatform/security/recovery/RecoveryChallengeStore.java:17](../../src/main/java/com/giftplatform/security/recovery/RecoveryChallengeStore.java#L17)
+
+When / guard context:
+```java
+jdbc) { this.jdbc = jdbc; }
+
+    public void create(UUID id, String kind, UUID accountId, String channel, String purpose,
+                       String destinationFingerprint, String secretHash, Instant expiry) {
+        if (id == null || accountId == null || expiry == null || secretHash == null || !secretHash.matches("[0-9a-f]{64}"))
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Invalid challenge");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0841 — backend/src/main/java/com/giftplatform/security/recovery/RecoveryChallengeStore.java:22
+
+[backend/src/main/java/com/giftplatform/security/recovery/RecoveryChallengeStore.java:22](../../src/main/java/com/giftplatform/security/recovery/RecoveryChallengeStore.java#L22)
+
+When / guard context:
+```java
+DMIN", "HOST", "GROUP_ADMIN", "GROUP_MEMBER").contains(kind)
+                || !java.util.Set.of("EMAIL", "SMS").contains(channel)
+                || !java.util.Set.of("VERIFY_CONTACT", "RESET_PASSWORD", "RESET_PIN").contains(purpose)
+                || destinationFingerprint == null || !destinationFingerprint.matches("[0-9a-f]{64}"))
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Invalid challenge binding");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0842 — backend/src/main/java/com/giftplatform/security/recovery/RecoveryOtp.java:21
+
+[backend/src/main/java/com/giftplatform/security/recovery/RecoveryOtp.java:21](../../src/main/java/com/giftplatform/security/recovery/RecoveryOtp.java#L21)
+
+When / guard context:
+```java
+ublic static String generate() { return String.format(java.util.Locale.ROOT, "%06d", RANDOM.nextInt(1_000_000)); }
+    public static String fingerprint(byte[] key, UUID challengeId, String accountKind, UUID accountId,
+                                     String purpose, String destination, String code) {
+        if (key == null || key.length < 32)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("OTP HMAC key must be at least 32 bytes");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0843 — backend/src/main/java/com/giftplatform/security/recovery/RecoveryOtp.java:23
+
+[backend/src/main/java/com/giftplatform/security/recovery/RecoveryOtp.java:23](../../src/main/java/com/giftplatform/security/recovery/RecoveryOtp.java#L23)
+
+When / guard context:
+```java
+String purpose, String destination, String code) {
+        if (key == null || key.length < 32) throw new IllegalArgumentException("OTP HMAC key must be at least 32 bytes");
+        if (challengeId == null || accountId == null || accountKind == null || purpose == null || destination == null || code == null)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Missing challenge binding");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0844 — backend/src/main/java/com/giftplatform/security/recovery/RecoveryOtp.java:29
+
+[backend/src/main/java/com/giftplatform/security/recovery/RecoveryOtp.java:29](../../src/main/java/com/giftplatform/security/recovery/RecoveryOtp.java#L29)
+
+When / guard context:
+```java
+ew SecretKeySpec(key, "HmacSHA256"));
+            String value = challengeId + "\u0000" + accountKind + "\u0000" + accountId + "\u0000" + purpose + "\u0000" + destination + "\u0000" + code;
+            return HexFormat.of().formatHex(mac.doFinal(value.getBytes(StandardCharsets.UTF_8)));
+        } catch (java.security.GeneralSecurityException ex) {
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("HMAC unavailable", ex);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0845 — backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationController.java:15
+
+[backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationController.java:15](../../src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationController.java#L15)
+
+When / guard context:
+```java
+erificationService service){this.service=service;}
+    public record Start(String accountKind,String email,UUID eventToken,UUID groupId){}
+    public record Verify(UUID challengeId,String code){}
+    @PostMapping("/start") public SignupEmailVerificationService.Started start(@RequestBody Start body,HttpServletRequest request){
+        if(body==null)
+```
+Failure / enforcement:
+```java
+throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST,"Email required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0846 — backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationController.java:18
+
+[backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationController.java:18](../../src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationController.java#L18)
+
+When / guard context:
+```java
+web.server.ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST,"Email required");
+        return service.start(body.accountKind(),body.email(),body.eventToken(),body.groupId(),request.getRemoteAddr());
+    }
+    @PostMapping("/verify") public SignupEmailVerificationService.Verified verify(@RequestBody Verify body){if(body==null)
+```
+Failure / enforcement:
+```java
+throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST,"Code required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0847 — backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:30
+
+[backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:30](../../src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java#L30)
+
+When / guard context:
+```java
+ivery delivery,EffectiveModulePermissionService permissions,
+            @Value("${gift.otp.hmac-key-base64:${gift.otp.secret-base64:}}") String key64){
+        this.db=db;this.tx=tx;this.delivery=delivery;this.permissions=permissions;
+        try{key=key64.isBlank()?new byte[0]:Base64.getDecoder().decode(key64);}catch(IllegalArgumentException ex){
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Invalid email verification key");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0848 — backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:33
+
+[backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:33](../../src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java#L33)
+
+When / guard context:
+```java
+tatusException bad(){return new ResponseStatusException(HttpStatus.BAD_REQUEST,"The code or verification has expired. Verify your email again before signing up.");}
+    private static String address(String email){String value=email==null?"":email.strip().toLowerCase(Locale.ROOT);if(value.length()>254||!value.matches("[^@\\s]+@[^@\\s]+\\.[^@\\s]+"))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Enter a valid email address");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0849 — backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:34
+
+[backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:34](../../src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java#L34)
+
+When / guard context:
+```java
+ue.matches("[^@\\s]+@[^@\\s]+\\.[^@\\s]+"))throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Enter a valid email address");return value;}
+    private static String digest(String value){try{return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(value.getBytes(StandardCharsets.UTF_8)));}catch(NoSuchAlgorithmException ex){
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException(ex);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0850 — backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:38
+
+[backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:38](../../src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java#L38)
+
+When / guard context:
+```java
+private String hash(UUID id,String kind,UUID scope,String email,String code){return RecoveryOtp.fingerprint(key,id,kind,scope,"VERIFY_SIGNUP_EMAIL",email,code);}
+    private UUID scope(String kind,UUID token,UUID group){
+        if("HOST".equals(kind))return HOST_SCOPE;
+        if(!Set.of("GROUP_ADMIN","GROUP_MEMBER").contains(kind)||token==null)
+```
+Failure / enforcement:
+```java
+throw bad();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0851 — backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:40
+
+[backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:40](../../src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java#L40)
+
+When / guard context:
+```java
+if("HOST".equals(kind))return HOST_SCOPE;
+        if(!Set.of("GROUP_ADMIN","GROUP_MEMBER").contains(kind)||token==null)throw bad();
+        var events=db.query("SELECT id,owner_id FROM events WHERE public_token=? AND status='PUBLISHED'",(rs,n)->new UUID[]{rs.getObject(1,UUID.class),rs.getObject(2,UUID.class)},token);
+        if(events.size()!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Invitation unavailable");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0852 — backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:44
+
+[backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:44](../../src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java#L44)
+
+When / guard context:
+```java
+etFirst()[1],"GROUP_GIFTING");
+        if(kind.equals("GROUP_ADMIN"))return events.getFirst()[0];
+        Integer count=db.queryForObject("SELECT count(*) FROM gift_groups WHERE id=? AND event_id=? AND contribution_access_mode<>'GUESTS_ONLY' AND join_policy<>'INVITE_ONLY'",Integer.class,group,events.getFirst()[0]);
+        if(count==null||count!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Group registration unavailable");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0853 — backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:48
+
+[backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:48](../../src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java#L48)
+
+When / guard context:
+```java
+ss,group,events.getFirst()[0]);
+        if(count==null||count!=1)throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Group registration unavailable");
+        return group;
+    }
+    public Started start(String kind,String email,UUID token,UUID group,String ip){
+        if(kind==null||!Set.of("HOST","GROUP_ADMIN","GROUP_MEMBER").contains(kind))
+```
+Failure / enforcement:
+```java
+throw bad();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0854 — backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:49
+
+[backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:49](../../src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java#L49)
+
+When / guard context:
+```java
+1)throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Group registration unavailable");
+        return group;
+    }
+    public Started start(String kind,String email,UUID token,UUID group,String ip){
+        if(kind==null||!Set.of("HOST","GROUP_ADMIN","GROUP_MEMBER").contains(kind))throw bad();
+        if(key.length<32||!delivery.isAvailable())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Email verification is temporarily unavailable. Please try again later.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0855 — backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:56
+
+[backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:56](../../src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java#L56)
+
+When / guard context:
+```java
+bject("SELECT count(*) FROM signup_email_verifications WHERE ip_fingerprint=? AND created_at>now()-interval '1 hour'",Integer.class,ipHash);
+            int byEmail=db.queryForObject("SELECT count(*) FROM signup_email_verifications WHERE email=? AND created_at>now()-interval '1 hour'",Integer.class,destination);
+            if(byIp>=12||byEmail>=3)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,"Too many verification requests. Please try again later.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0856 — backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:60
+
+[backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:60](../../src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java#L60)
+
+When / guard context:
+```java
+destination,ipHash,hash(id,kind,scope,destination,code),java.sql.Timestamp.from(Instant.now().plusSeconds(600)));
+        });
+        try{delivery.send(destination,"Your Gift Platform signup email verification code is "+code+". It expires in 10 minutes. Never share it.");}
+        catch(com.giftplatform.security.delivery.EmailDeliveryException ex){
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,ex.getMessage());
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0857 — backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:64
+
+[backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:64](../../src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java#L64)
+
+When / guard context:
+```java
+share it.");}
+        catch(com.giftplatform.security.delivery.EmailDeliveryException ex){throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,ex.getMessage());}
+        return new Started(id,com.giftplatform.security.delivery.EmailVerificationFeedback.REQUESTED);
+    }
+    public Verified verify(UUID id,String code){
+        if(key.length<32)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Email verification is not configured");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0858 — backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:65
+
+[backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:65](../../src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java#L65)
+
+When / guard context:
+```java
+}
+        return new Started(id,com.giftplatform.security.delivery.EmailVerificationFeedback.REQUESTED);
+    }
+    public Verified verify(UUID id,String code){
+        if(key.length<32)throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Email verification is not configured");
+        if(id==null||code==null||!code.matches("[0-9]{6}"))
+```
+Failure / enforcement:
+```java
+throw bad();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0859 — backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:75
+
+[backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:75](../../src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java#L75)
+
+When / guard context:
+```java
+UrlEncoder().withoutPadding().encodeToString(bytes);
+            db.update("UPDATE signup_email_verifications SET verified_at=now(),proof_hash=? WHERE id=?",digest(value),id);return new Verified(value,"Email verified. You can finish creating your account.",((java.sql.Timestamp)row.get("expires_at")).toInstant());
+        });
+        if(proof==null)
+```
+Failure / enforcement:
+```java
+throw bad();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0860 — backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:82
+
+[backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:82](../../src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java#L82)
+
+When / guard context:
+```java
+failed signup does not spend the proof. */
+    @Transactional(propagation=Propagation.MANDATORY)
+    public boolean consume(String token,String kind,UUID scope,String email){
+        if(verification!=null&&!verification.emailEnabled())return false;
+        if(token==null||token.isBlank())return false;
+        if(!token.matches("[A-Za-z0-9_-]{43}"))
+```
+Failure / enforcement:
+```java
+throw bad();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0861 — backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:84
+
+[backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:84](../../src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java#L84)
+
+When / guard context:
+```java
+es("[A-Za-z0-9_-]{43}"))throw bad();
+        int changed=db.update("UPDATE signup_email_verifications SET consumed_at=now() WHERE proof_hash=? AND account_kind=? AND scope_id=? AND email=? AND verified_at IS NOT NULL AND consumed_at IS NULL AND expires_at>now()",digest(token),kind,scope==null?HOST_SCOPE:scope,address(email));
+        if(changed!=1)
+```
+Failure / enforcement:
+```java
+throw bad();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0862 — backend/src/main/java/com/giftplatform/security/recovery/UsernameRecoveryController.java:63
+
+[backend/src/main/java/com/giftplatform/security/recovery/UsernameRecoveryController.java:63](../../src/main/java/com/giftplatform/security/recovery/UsernameRecoveryController.java#L63)
+
+When / guard context:
+```java
+ken(),input.groupId(),input.groupId());
+        }
+        return rows.size()==1?rows.getFirst():null;
+    }
+    private static String fingerprint(String value) {
+        try{return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(value.getBytes(StandardCharsets.UTF_8)));}
+        catch(java.security.NoSuchAlgorithmException ex){
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException(ex);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0863 — backend/src/main/java/com/giftplatform/security/recovery/UsernameRecoveryController.java:69
+
+[backend/src/main/java/com/giftplatform/security/recovery/UsernameRecoveryController.java:69](../../src/main/java/com/giftplatform/security/recovery/UsernameRecoveryController.java#L69)
+
+When / guard context:
+```java
+s.execute(status->{
+            db.queryForObject("SELECT pg_advisory_xact_lock(hashtextextended(?,0))",Object.class,"username-recovery-ip:"+ip);
+            int attempts=db.queryForObject("SELECT count(*) FROM username_recovery_attempts WHERE ip_fingerprint=? AND requested_at>now()-interval '1 hour'",Integer.class,ip);
+            if(attempts>=12)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,"Please try again later");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0864 — backend/src/main/java/com/giftplatform/security/recovery/UsernameRecoveryController.java:83
+
+[backend/src/main/java/com/giftplatform/security/recovery/UsernameRecoveryController.java:83](../../src/main/java/com/giftplatform/security/recovery/UsernameRecoveryController.java#L83)
+
+When / guard context:
+```java
+l?null:account.id());
+            return send;
+        }));
+    }
+    @PostMapping("/request")
+    public ResponseEntity<Result> request(@RequestBody Request input,HttpServletRequest request) {
+        if(input==null||input.accountKind()==null||!Set.of("HOST","PLATFORM_ADMIN","GROUP_ADMIN","GROUP_MEMBER").contains(input.accountKind()))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Choose a valid account type");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0865 — backend/src/main/java/com/giftplatform/security/recovery/UsernameRecoveryController.java:86
+
+[backend/src/main/java/com/giftplatform/security/recovery/UsernameRecoveryController.java:86](../../src/main/java/com/giftplatform/security/recovery/UsernameRecoveryController.java#L86)
+
+When / guard context:
+```java
+N","GROUP_MEMBER").contains(input.accountKind()))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Choose a valid account type");
+        String address=input.identifier()==null?"":input.identifier().strip().toLowerCase(Locale.ROOT);
+        if(address.length()>254||!address.matches("[^@\\s]+@[^@\\s]+\\.[^@\\s]+"))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Enter your verified email address");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0866 — backend/src/main/java/com/giftplatform/security/recovery/UsernameRecoveryController.java:87
+
+[backend/src/main/java/com/giftplatform/security/recovery/UsernameRecoveryController.java:87](../../src/main/java/com/giftplatform/security/recovery/UsernameRecoveryController.java#L87)
+
+When / guard context:
+```java
+a valid account type");
+        String address=input.identifier()==null?"":input.identifier().strip().toLowerCase(Locale.ROOT);
+        if(address.length()>254||!address.matches("[^@\\s]+@[^@\\s]+\\.[^@\\s]+"))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Enter your verified email address");
+        if(!email.isAvailable())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Username reminder delivery is not configured. Please contact support.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0867 — backend/src/main/java/com/giftplatform/security/verification/AccountMobileVerificationController.java:18
+
+[backend/src/main/java/com/giftplatform/security/verification/AccountMobileVerificationController.java:18](../../src/main/java/com/giftplatform/security/verification/AccountMobileVerificationController.java#L18)
+
+When / guard context:
+```java
+Id,String code){}
+ private String kind(){return actor.isPlatformAdmin()?"PLATFORM_ADMIN":"HOST";}
+ @GetMapping("/status") public MobileVerificationService.Status status(){return service.status(kind(),actor.requireAuthenticatedUserId());}
+ @PostMapping("/start") public MobileVerificationService.Started start(@RequestBody Start input){if(input==null)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0868 — backend/src/main/java/com/giftplatform/security/verification/AccountMobileVerificationController.java:19
+
+[backend/src/main/java/com/giftplatform/security/verification/AccountMobileVerificationController.java:19](../../src/main/java/com/giftplatform/security/verification/AccountMobileVerificationController.java#L19)
+
+When / guard context:
+```java
+apping("/start") public MobileVerificationService.Started start(@RequestBody Start input){if(input==null)throw new ResponseStatusException(HttpStatus.BAD_REQUEST);return service.start(kind(),actor.requireAuthenticatedUserId(),input.mobile());}
+ @PostMapping("/complete") public Map<String,String> complete(@RequestBody Complete input){if(input==null)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0869 — backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:27
+
+[backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:27](../../src/main/java/com/giftplatform/security/verification/MobileVerificationService.java#L27)
+
+When / guard context:
+```java
+er("otpSmsDelivery") MessageDelivery sms,@Value("${gift.otp.hmac-key-base64:${gift.otp.secret-base64:}}") String encoded,
+     @Value("${gift.otp.sms.expiry-minutes:5}") int expiryMinutes){
+  this.db=db;this.tx=tx;this.challenges=challenges;this.settings=settings;this.sms=sms;this.expiryMinutes=expiryMinutes;
+  if(expiryMinutes<1||expiryMinutes>10)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("SMS OTP expiry must be 1–10 minutes");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0870 — backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:28
+
+[backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:28](../../src/main/java/com/giftplatform/security/verification/MobileVerificationService.java#L28)
+
+When / guard context:
+```java
+){
+  this.db=db;this.tx=tx;this.challenges=challenges;this.settings=settings;this.sms=sms;this.expiryMinutes=expiryMinutes;
+  if(expiryMinutes<1||expiryMinutes>10)throw new IllegalArgumentException("SMS OTP expiry must be 1–10 minutes");
+  try{key=encoded.isBlank()?new byte[0]:Base64.getDecoder().decode(encoded);}catch(IllegalArgumentException ex){
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Invalid OTP signing key");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0871 — backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:30
+
+[backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:30](../../src/main/java/com/giftplatform/security/verification/MobileVerificationService.java#L30)
+
+When / guard context:
+```java
+umentException("SMS OTP expiry must be 1–10 minutes");
+  try{key=encoded.isBlank()?new byte[0]:Base64.getDecoder().decode(encoded);}catch(IllegalArgumentException ex){throw new IllegalStateException("Invalid OTP signing key");}
+ }
+ private void ready(){settings.requireMobile();if(key.length<32||!sms.isAvailable()||!sms.establishesMobileOwnership())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Mobile verification is not configured");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0872 — backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:31
+
+[backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:31](../../src/main/java/com/giftplatform/security/verification/MobileVerificationService.java#L31)
+
+When / guard context:
+```java
+isAvailable()||!sms.establishesMobileOwnership())throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Mobile verification is not configured");}
+ private static String table(String kind){return switch(kind){case "HOST","PLATFORM_ADMIN"->"users";case "GROUP_ADMIN"->"gift_group_accounts";case "GROUP_MEMBER"->"gift_group_members";default->
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Invalid account kind");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0873 — backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:32
+
+[backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:32](../../src/main/java/com/giftplatform/security/verification/MobileVerificationService.java#L32)
+
+When / guard context:
+```java
+ROUP_ADMIN"->"gift_group_accounts";case "GROUP_MEMBER"->"gift_group_members";default->throw new IllegalArgumentException("Invalid account kind");};}
+ private static String digest(String value){try{return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(value.getBytes(StandardCharsets.UTF_8)));}catch(NoSuchAlgorithmException ex){
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException(ex);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0874 — backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:38
+
+[backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:38](../../src/main/java/com/giftplatform/security/verification/MobileVerificationService.java#L38)
+
+When / guard context:
+```java
+" IS NOT NULL FROM "+table(kind)+" WHERE id=?",(rs,n)->new Status(rs.getString(1),rs.getBoolean(2)),id);}
+ @Transactional(propagation=org.springframework.transaction.annotation.Propagation.NOT_SUPPORTED)
+ public Started start(String kind,UUID accountId,String mobile){
+  ready();table(kind);
+  if(mobile==null||!mobile.matches("\\+[1-9][0-9]{7,14}"))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Enter a mobile number with country code");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0875 — backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:47
+
+[backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:47](../../src/main/java/com/giftplatform/security/verification/MobileVerificationService.java#L47)
+
+When / guard context:
+```java
+olean.class,kind,accountId);
+   Integer destinationCount=db.queryForObject("SELECT count(*) FROM account_contact_challenges WHERE destination_fingerprint=? AND channel='SMS' AND created_at>now()-interval '1 hour'",Integer.class,fingerprint);
+   if((count!=null&&count>=3)||Boolean.TRUE.equals(cooldown)||(destinationCount!=null&&destinationCount>=5))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,"Please wait before requesting another code");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0876 — backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:53
+
+[backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:53](../../src/main/java/com/giftplatform/security/verification/MobileVerificationService.java#L53)
+
+When / guard context:
+```java
+ile,expires_at) VALUES(?,?,?,?,?)",id,kind,accountId,mobile,java.sql.Timestamp.from(expiry));
+  });
+  try{sms.sendCode(mobile,code);db.update("UPDATE account_pending_mobile_verifications SET delivered_at=now() WHERE challenge_id=?",id);}
+  catch(RuntimeException ex){db.update("UPDATE account_contact_challenges SET consumed_at=now() WHERE id=?",id);
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Could not send the mobile verification code. Try again later.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0877 — backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:58
+
+[backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:58](../../src/main/java/com/giftplatform/security/verification/MobileVerificationService.java#L58)
+
+When / guard context:
+```java
+s.SERVICE_UNAVAILABLE,"Could not send the mobile verification code. Try again later.");}
+  return new Started(id,"A verification code has been sent to your mobile.");
+ }
+ @Transactional public void complete(String kind,UUID accountId,UUID challengeId,String code){
+  ready();table(kind);
+  if(challengeId==null||code==null||!code.matches("[0-9]{6}"))
+```
+Failure / enforcement:
+```java
+throw invalid();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0878 — backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:60
+
+[backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:60](../../src/main/java/com/giftplatform/security/verification/MobileVerificationService.java#L60)
+
+When / guard context:
+```java
+;
+  if(challengeId==null||code==null||!code.matches("[0-9]{6}"))throw invalid();
+  var rows=db.query("SELECT mobile FROM account_pending_mobile_verifications WHERE challenge_id=? AND account_kind=? AND account_id=? AND expires_at>now() AND delivered_at IS NOT NULL FOR UPDATE",(rs,n)->rs.getString(1),challengeId,kind,accountId);
+  if(rows.size()!=1)
+```
+Failure / enforcement:
+```java
+throw invalid();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0879 — backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:61
+
+[backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:61](../../src/main/java/com/giftplatform/security/verification/MobileVerificationService.java#L61)
+
+When / guard context:
+```java
+nt_kind=? AND account_id=? AND expires_at>now() AND delivered_at IS NOT NULL FOR UPDATE",(rs,n)->rs.getString(1),challengeId,kind,accountId);
+  if(rows.size()!=1)throw invalid();String mobile=rows.getFirst();
+  if(!challenges.verifyAndConsume(challengeId,kind,accountId,"VERIFY_CONTACT",digest(mobile),signed(challengeId,kind,accountId,mobile,code)))
+```
+Failure / enforcement:
+```java
+throw invalid();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0880 — backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:63
+
+[backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:63](../../src/main/java/com/giftplatform/security/verification/MobileVerificationService.java#L63)
+
+When / guard context:
+```java
+AndConsume(challengeId,kind,accountId,"VERIFY_CONTACT",digest(mobile),signed(challengeId,kind,accountId,mobile,code)))throw invalid();
+  String columns=table(kind).equals("users")?"phone_number=?,phone_verified_at=now()":"mobile=?,mobile_verified_at=now()";
+  try{if(db.update("UPDATE "+table(kind)+" SET "+columns+" WHERE id=?",mobile,accountId)!=1)
+```
+Failure / enforcement:
+```java
+throw invalid();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0881 — backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:64
+
+[backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:64](../../src/main/java/com/giftplatform/security/verification/MobileVerificationService.java#L64)
+
+When / guard context:
+```java
+(challengeId,kind,accountId,mobile,code)))throw invalid();
+  String columns=table(kind).equals("users")?"phone_number=?,phone_verified_at=now()":"mobile=?,mobile_verified_at=now()";
+  try{if(db.update("UPDATE "+table(kind)+" SET "+columns+" WHERE id=?",mobile,accountId)!=1)throw invalid();}
+  catch(org.springframework.dao.DuplicateKeyException ex){
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"This mobile number cannot be added to this account");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0882 — backend/src/main/java/com/giftplatform/security/verification/VerificationSettings.java:24
+
+[backend/src/main/java/com/giftplatform/security/verification/VerificationSettings.java:24](../../src/main/java/com/giftplatform/security/verification/VerificationSettings.java#L24)
+
+When / guard context:
+```java
+WHERE id=1",(rs,n)->new Settings(rs.getBoolean(1),rs.getBoolean(2)));
+  return rows.isEmpty()?new Settings(mobileDefault,emailDefault):rows.getFirst();
+ }
+ public boolean emailEnabled(){return current().emailVerificationEnabled();}
+ public boolean mobileEnabled(){return current().mobileOtpEnabled();}
+ public void requireEmail(){if(!emailEnabled())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Email verification is disabled by the platform administrator");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0883 — backend/src/main/java/com/giftplatform/security/verification/VerificationSettings.java:25
+
+[backend/src/main/java/com/giftplatform/security/verification/VerificationSettings.java:25](../../src/main/java/com/giftplatform/security/verification/VerificationSettings.java#L25)
+
+When / guard context:
+```java
+an emailEnabled(){return current().emailVerificationEnabled();}
+ public boolean mobileEnabled(){return current().mobileOtpEnabled();}
+ public void requireEmail(){if(!emailEnabled())throw new ResponseStatusException(HttpStatus.CONFLICT,"Email verification is disabled by the platform administrator");}
+ public void requireMobile(){if(!mobileEnabled())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Mobile verification is disabled by the platform administrator");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0884 — backend/src/main/java/com/giftplatform/security/verification/VerificationSettingsController.java:23
+
+[backend/src/main/java/com/giftplatform/security/verification/VerificationSettingsController.java:23](../../src/main/java/com/giftplatform/security/verification/VerificationSettingsController.java#L23)
+
+When / guard context:
+```java
+"${gift.otp.hmac-key-base64:${gift.otp.secret-base64:}}") String encoded){
+  this.settings=settings;this.db=db;this.actor=actor;this.sms=sms;this.email=email;
+  boolean valid;try{valid=Base64.getDecoder().decode(encoded).length>=32;}catch(IllegalArgumentException ex){valid=false;}keyReady=valid;
+ }
+ private void admin(){if(!actor.isPlatformAdmin())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0885 — backend/src/main/java/com/giftplatform/security/verification/VerificationSettingsController.java:36
+
+[backend/src/main/java/com/giftplatform/security/verification/VerificationSettingsController.java:36](../../src/main/java/com/giftplatform/security/verification/VerificationSettingsController.java#L36)
+
+When / guard context:
+```java
+return Map.of("settings",settings.current(),"mobileConfigured",keyReady&&sms.isAvailable()&&sms.establishesMobileOwnership(),"emailConfigured",keyReady&&email.isAvailable());}
+ @PutMapping("/api/admin/verification-settings") @Transactional
+ public Map<String,Object> update(@RequestBody VerificationSettings.Settings input){
+  admin();if(input==null)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0886 — backend/src/main/java/com/giftplatform/security/verification/VerificationSettingsController.java:38
+
+[backend/src/main/java/com/giftplatform/security/verification/VerificationSettingsController.java:38](../../src/main/java/com/giftplatform/security/verification/VerificationSettingsController.java#L38)
+
+When / guard context:
+```java
+") @Transactional
+ public Map<String,Object> update(@RequestBody VerificationSettings.Settings input){
+  admin();if(input==null)throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+  var previous=settings.current();
+  if(input.mobileOtpEnabled()&&!previous.mobileOtpEnabled()&&(!keyReady||!sms.isAvailable()||!sms.establishesMobileOwnership()))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Configure MSG91 credentials, template and OTP signing key before enabling mobile verification");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0887 — backend/src/main/java/com/giftplatform/security/verification/VerificationSettingsController.java:39
+
+[backend/src/main/java/com/giftplatform/security/verification/VerificationSettingsController.java:39](../../src/main/java/com/giftplatform/security/verification/VerificationSettingsController.java#L39)
+
+When / guard context:
+```java
+mobileOtpEnabled()&&(!keyReady||!sms.isAvailable()||!sms.establishesMobileOwnership()))throw new ResponseStatusException(HttpStatus.CONFLICT,"Configure MSG91 credentials, template and OTP signing key before enabling mobile verification");
+  if(input.emailVerificationEnabled()&&!previous.emailVerificationEnabled()&&(!keyReady||!email.isAvailable()))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Configure the email provider, sender and OTP signing key before enabling email verification");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+## user
+
+### RULE-0888 — backend/src/main/java/com/giftplatform/user/controller/ProfileNameController.java:19
+
+[backend/src/main/java/com/giftplatform/user/controller/ProfileNameController.java:19](../../src/main/java/com/giftplatform/user/controller/ProfileNameController.java#L19)
+
+When / guard context:
+```java
+h/profile-name")
+public class ProfileNameController {
+ private final JdbcTemplate db;
+ public ProfileNameController(JdbcTemplate db){this.db=db;}
+ public record NameInput(String fullName){}
+ private String name(String value){
+  if(value==null||value.strip().length()<2||value.strip().length()>120||value.chars().anyMatch(Character::isISOControl))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Enter your full name (2–120 characters)");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0889 — backend/src/main/java/com/giftplatform/user/entity/User.java:50
+
+[backend/src/main/java/com/giftplatform/user/entity/User.java:50](../../src/main/java/com/giftplatform/user/entity/User.java#L50)
+
+When / guard context:
+```java
+ength = 50)
+    private String username;
+
+
+    @Column(name = "full_name", length = 120)
+    private String fullName;
+    public String getFullName(){return fullName;}
+    public void setFullName(String value){
+        if(value==null||value.strip().length()<2||value.strip().length()>120||value.chars().anyMatch(Character::isISOControl))
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Full name must be 2–120 characters");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0890 — backend/src/main/java/com/giftplatform/user/entity/User.java:66
+
+[backend/src/main/java/com/giftplatform/user/entity/User.java:66](../../src/main/java/com/giftplatform/user/entity/User.java#L66)
+
+When / guard context:
+```java
+st be 2–120 characters");
+        fullName=value.strip();
+    }
+    protected User() {
+    }
+
+
+    public User(
+            String username,
+            String email,
+            String passwordHash
+    ) {
+        this(email, passwordHash);
+
+        if (username == null ||
+                !username.matches("^[a-z][a-z0-9_]{3,29}$")) {
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException(
+                    "Invalid username"
+            );
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0891 — backend/src/main/java/com/giftplatform/user/entity/User.java:76
+
+[backend/src/main/java/com/giftplatform/user/entity/User.java:76](../../src/main/java/com/giftplatform/user/entity/User.java#L76)
+
+When / guard context:
+```java
+username == null ||
+                !username.matches("^[a-z][a-z0-9_]{3,29}$")) {
+            throw new IllegalArgumentException(
+                    "Invalid username"
+            );
+        }
+
+        this.username = username;
+    }
+
+    public User(String email, String passwordHash) {
+        if (email == null || email.isBlank()) {
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException(
+                    "Email is required"
+            );
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0892 — backend/src/main/java/com/giftplatform/user/entity/User.java:82
+
+[backend/src/main/java/com/giftplatform/user/entity/User.java:82](../../src/main/java/com/giftplatform/user/entity/User.java#L82)
+
+When / guard context:
+```java
+);
+        }
+
+        this.username = username;
+    }
+
+    public User(String email, String passwordHash) {
+        if (email == null || email.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Email is required"
+            );
+        }
+
+        if (passwordHash == null || passwordHash.isBlank()) {
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException(
+                    "Password hash is required"
+            );
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0893 — backend/src/main/java/com/giftplatform/user/entity/User.java:113
+
+[backend/src/main/java/com/giftplatform/user/entity/User.java:113](../../src/main/java/com/giftplatform/user/entity/User.java#L113)
+
+When / guard context:
+```java
+= "phone_number", length = 16)
+    private String phoneNumber;
+
+    @Column(name = "phone_verified_at")
+    private Instant phoneVerifiedAt;
+
+
+    public UUID getId() {
+        return id;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setPasswordHash(String value) {
+        if (value == null || value.isBlank())
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Password hash required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0894 — backend/src/main/java/com/giftplatform/user/entity/User.java:124
+
+[backend/src/main/java/com/giftplatform/user/entity/User.java:124](../../src/main/java/com/giftplatform/user/entity/User.java#L124)
+
+When / guard context:
+```java
+hrow new IllegalArgumentException("Password hash required");
+        this.passwordHash = value;
+    }
+
+    public String getPasswordHash() {
+        return passwordHash;
+    }
+
+    /** Only the offline provisioning runner may call this method. */
+    public void provisionAsPlatformAdmin() {
+        if (this.role != UserRole.CUSTOMER) {
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Unexpected existing role");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0895 — backend/src/main/java/com/giftplatform/user/entity/User.java:162
+
+[backend/src/main/java/com/giftplatform/user/entity/User.java:162](../../src/main/java/com/giftplatform/user/entity/User.java#L162)
+
+When / guard context:
+```java
+getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public Instant getPhoneVerifiedAt() {
+        return phoneVerifiedAt;
+    }
+
+    /** Store a claimed mobile number without claiming OTP ownership. */
+    public void setUnverifiedPhoneNumber(String mobile) {
+        if (mobile == null || !mobile.matches("^\\+[1-9][0-9]{7,14}$"))
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Mobile must use international format");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0896 — backend/src/main/java/com/giftplatform/user/entity/User.java:174
+
+[backend/src/main/java/com/giftplatform/user/entity/User.java:174](../../src/main/java/com/giftplatform/user/entity/User.java#L174)
+
+When / guard context:
+```java
+use international format");
+        this.phoneNumber = mobile;
+        this.phoneVerifiedAt = null;
+    }
+
+    public void verifyPhoneNumber(
+            String phoneNumber,
+            Instant verifiedAt
+    ) {
+        if (phoneNumber == null ||
+                !phoneNumber.matches(
+                        "^\\+[1-9][0-9]{1,14}$")) {
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException(
+                    "Invalid phone number");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0897 — backend/src/main/java/com/giftplatform/user/entity/User.java:179
+
+[backend/src/main/java/com/giftplatform/user/entity/User.java:179](../../src/main/java/com/giftplatform/user/entity/User.java#L179)
+
+When / guard context:
+```java
+er(
+            String phoneNumber,
+            Instant verifiedAt
+    ) {
+        if (phoneNumber == null ||
+                !phoneNumber.matches(
+                        "^\\+[1-9][0-9]{1,14}$")) {
+            throw new IllegalArgumentException(
+                    "Invalid phone number");
+        }
+
+        if (verifiedAt == null) {
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException(
+                    "Verification time is required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0898 — backend/src/main/java/com/giftplatform/user/entity/User.java:184
+
+[backend/src/main/java/com/giftplatform/user/entity/User.java:184](../../src/main/java/com/giftplatform/user/entity/User.java#L184)
+
+When / guard context:
+```java
+r.matches(
+                        "^\\+[1-9][0-9]{1,14}$")) {
+            throw new IllegalArgumentException(
+                    "Invalid phone number");
+        }
+
+        if (verifiedAt == null) {
+            throw new IllegalArgumentException(
+                    "Verification time is required");
+        }
+
+        if (!enabled) {
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException(
+                    "Disabled user cannot verify phone");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0899 — backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:45
+
+[backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:45](../../src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java#L45)
+
+When / guard context:
+```java
+sswordEncoder) {
+        this.repository=repository; this.passwordEncoder=passwordEncoder; this.policies=null;
+    }
+    @Override
+    @Transactional
+    public RegistrationResponse register(RegisterRequest request) {
+        if (request == null
+                || request.email() == null
+                || request.password() == null) {
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException(
+                    "Email and password are required"
+            );
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0900 — backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:50
+
+[backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:50](../../src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java#L50)
+
+When / guard context:
+```java
+nal
+    public RegistrationResponse register(RegisterRequest request) {
+        if (request == null
+                || request.email() == null
+                || request.password() == null) {
+            throw new IllegalArgumentException(
+                    "Email and password are required"
+            );
+        }
+
+        if (policies == null)
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Registration policy service is required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0901 — backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:61
+
+[backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:61](../../src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java#L61)
+
+When / guard context:
+```java
+l); // Policy must exist; contact collection is not verification.
+        String email = request.email()
+                .trim()
+                .toLowerCase(Locale.ROOT);
+
+        if (email.isBlank()
+                || email.length() > 254
+                || !email.matches(
+                "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$"
+        )) {
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Invalid email");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0902 — backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:74
+
+[backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:74](../../src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java#L74)
+
+When / guard context:
+```java
+throw new IllegalArgumentException("Invalid email");
+        }
+
+        String password = request.password();
+
+        int passwordBytes = password
+                .getBytes(StandardCharsets.UTF_8)
+                .length;
+
+        if (password.isBlank()
+                || passwordBytes < 12
+                || passwordBytes > 72) {
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException(
+                    "Password must be between 12 and 72 UTF-8 bytes"
+            );
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0903 — backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:80
+
+[backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:80](../../src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java#L80)
+
+When / guard context:
+```java
+.length;
+
+        if (password.isBlank()
+                || passwordBytes < 12
+                || passwordBytes > 72) {
+
+            throw new IllegalArgumentException(
+                    "Password must be between 12 and 72 UTF-8 bytes"
+            );
+        }
+
+        if (repository.existsByEmailIgnoreCase(email)) {
+```
+Failure / enforcement:
+```java
+throw new DuplicateEmailException();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0904 — backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:90
+
+[backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:90](../../src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java#L90)
+
+When / guard context:
+```java
+ilException();
+        }
+
+        User user = new User(
+                request.username(),
+                email,
+                passwordEncoder.encode(password)
+        );
+        if(request.fullName()!=null)user.setFullName(request.fullName());
+        if(request.mobile()==null || !request.mobile().matches("^\\+[1-9][0-9]{7,14}$"))
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Mobile number is required in international format");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0905 — backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:96
+
+[backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:96](../../src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java#L96)
+
+When / guard context:
+```java
+e().matches("^\\+[1-9][0-9]{7,14}$"))
+            throw new IllegalArgumentException("Mobile number is required in international format");
+        user.setUnverifiedPhoneNumber(request.mobile());
+        String username = request.username();
+
+        if (username == null ||
+                !username.matches("^[a-z][a-z0-9_]{3,29}$")) {
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Invalid username");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0906 — backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:100
+
+[backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:100](../../src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java#L100)
+
+When / guard context:
+```java
+user.setUnverifiedPhoneNumber(request.mobile());
+        String username = request.username();
+
+        if (username == null ||
+                !username.matches("^[a-z][a-z0-9_]{3,29}$")) {
+            throw new IllegalArgumentException("Invalid username");
+        }
+
+        if (repository.existsByUsernameIgnoreCase(username)) {
+```
+Failure / enforcement:
+```java
+throw new DuplicateUsernameException();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0907 — backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:106
+
+[backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:106](../../src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java#L106)
+
+When / guard context:
+```java
+");
+        }
+
+        if (repository.existsByUsernameIgnoreCase(username)) {
+            throw new DuplicateUsernameException();
+        }
+
+        try {
+            User saved = repository.saveAndFlush(user);
+            if(request.emailVerificationToken()!=null&&!request.emailVerificationToken().isBlank()){
+                if(signupEmails==null)
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Signup verification service unavailable");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0908 — backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:120
+
+[backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:120](../../src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java#L120)
+
+When / guard context:
+```java
+saved.getId(),
+                    saved.getUsername(),
+                    saved.getEmail(),
+                    saved.getRole().name()
+            );
+        } catch (DataIntegrityViolationException ex) {
+            // The database unique index also protects
+            // against concurrent duplicate registrations.
+```
+Failure / enforcement:
+```java
+throw new DuplicateEmailException();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+# Declarative Java validations
+
+| Source | Line | Annotation |
+| --- | --- | --- |
+| backend/src/main/java/com/giftplatform/event/dto/EventRequest.java | 10 | `@NotBlank` |
+| backend/src/main/java/com/giftplatform/event/dto/EventRequest.java | 10 | `@Size(max=200)` |
+| backend/src/main/java/com/giftplatform/event/dto/EventRequest.java | 11 | `@Size(max=10000)` |
+| backend/src/main/java/com/giftplatform/event/dto/EventRequest.java | 12 | `@NotNull` |
+| backend/src/main/java/com/giftplatform/event/dto/EventRequest.java | 14 | `@Size(max=200)` |
+| backend/src/main/java/com/giftplatform/event/dto/EventRequest.java | 15 | `@Size(max=120)` |
+| backend/src/main/java/com/giftplatform/event/dto/EventRequest.java | 16 | `@Size(max=120)` |
+| backend/src/main/java/com/giftplatform/event/dto/EventRequest.java | 17 | `@Size(max=20)` |
+| backend/src/main/java/com/giftplatform/event/dto/EventRequest.java | 18 | `@Size(max=80)` |
+| backend/src/main/java/com/giftplatform/event/dto/EventRequest.java | 19 | `@Size(max=150)` |
+| backend/src/main/java/com/giftplatform/event/dto/EventRequest.java | 20 | `@Size(max=30)` |
+| backend/src/main/java/com/giftplatform/event/dto/EventRequest.java | 21 | `@Size(max=254)` |
+| backend/src/main/java/com/giftplatform/event/dto/EventRequest.java | 22 | `@NotBlank` |
+| backend/src/main/java/com/giftplatform/event/dto/EventRequest.java | 22 | `@Size(max=200)` |
+| backend/src/main/java/com/giftplatform/event/entity/DeliveryAddress.java | 9 | `@NotBlank` |
+| backend/src/main/java/com/giftplatform/event/entity/DeliveryAddress.java | 9 | `@Size(max=200)` |
+| backend/src/main/java/com/giftplatform/event/entity/DeliveryAddress.java | 10 | `@NotBlank` |
+| backend/src/main/java/com/giftplatform/event/entity/DeliveryAddress.java | 10 | `@Size(max=120)` |
+| backend/src/main/java/com/giftplatform/event/entity/DeliveryAddress.java | 11 | `@NotBlank` |
+| backend/src/main/java/com/giftplatform/event/entity/DeliveryAddress.java | 11 | `@Size(max=120)` |
+| backend/src/main/java/com/giftplatform/event/entity/DeliveryAddress.java | 12 | `@NotBlank` |
+| backend/src/main/java/com/giftplatform/event/entity/DeliveryAddress.java | 12 | `@Size(max=20)` |
+| backend/src/main/java/com/giftplatform/event/entity/DeliveryAddress.java | 13 | `@NotBlank` |
+| backend/src/main/java/com/giftplatform/event/entity/DeliveryAddress.java | 13 | `@Size(max=80)` |
+| backend/src/main/java/com/giftplatform/gift/controller/GiftController.java | 34 | `@Size(max = 2048)` |
+| backend/src/main/java/com/giftplatform/gift/dto/GiftRequest.java | 9 | `@NotBlank` |
+| backend/src/main/java/com/giftplatform/gift/dto/GiftRequest.java | 9 | `@Size(max = 200)` |
+| backend/src/main/java/com/giftplatform/gift/dto/GiftRequest.java | 10 | `@Size(max = 10000)` |
+| backend/src/main/java/com/giftplatform/gift/dto/GiftRequest.java | 11 | `@Size(max = 512)` |
+| backend/src/main/java/com/giftplatform/gift/dto/GiftRequest.java | 12 | `@NotNull` |
+| backend/src/main/java/com/giftplatform/gift/dto/GiftRequest.java | 12 | `@DecimalMin("0.01")` |
+| backend/src/main/java/com/giftplatform/gift/dto/GiftRequest.java | 15 | `@Size(max = 2048)` |
+| backend/src/main/java/com/giftplatform/gift/retailer/RetailerMetadataController.java | 16 | `@NotBlank` |
+| backend/src/main/java/com/giftplatform/gift/retailer/RetailerMetadataController.java | 16 | `@Size(max=2048)` |
+| backend/src/main/java/com/giftplatform/group/GroupGiftCompletionController.java | 79 | `@NotNull` |
+| backend/src/main/java/com/giftplatform/group/GroupGiftCompletionController.java | 79 | `@Size(max=1000)` |
+| backend/src/main/java/com/giftplatform/group/GuestGiftController.java | 25 | `@NotBlank` |
+| backend/src/main/java/com/giftplatform/group/GuestGiftController.java | 25 | `@Size(max=160)` |
+| backend/src/main/java/com/giftplatform/group/GuestGiftController.java | 25 | `@Size(max=500)` |
+| backend/src/main/java/com/giftplatform/group/GuestGiftController.java | 26 | `@Size(max=1000)` |
+| backend/src/main/java/com/giftplatform/group/GuestGiftController.java | 26 | `@Pattern(regexp="https://[^\\s]+")` |
+| backend/src/main/java/com/giftplatform/group/GuestGiftController.java | 27 | `@NotNull` |
+| backend/src/main/java/com/giftplatform/group/GuestGiftController.java | 96 | `@NotBlank` |
+| backend/src/main/java/com/giftplatform/group/GuestGiftController.java | 96 | `@Size(max=160)` |
+| backend/src/main/java/com/giftplatform/group/GuestGiftController.java | 97 | `@Size(max=500)` |
+| backend/src/main/java/com/giftplatform/group/GuestGiftController.java | 97 | `@Size(max=1000)` |
+| backend/src/main/java/com/giftplatform/group/GuestGiftController.java | 97 | `@Pattern(regexp="https://[^\\s]+")` |
+| backend/src/main/java/com/giftplatform/group/GuestGiftController.java | 98 | `@NotBlank` |
+| backend/src/main/java/com/giftplatform/group/GuestGiftController.java | 98 | `@Size(max=120)` |
+| backend/src/main/java/com/giftplatform/group/GuestGiftController.java | 98 | `@NotBlank` |
+| backend/src/main/java/com/giftplatform/group/GuestGiftController.java | 98 | `@Email` |
+| backend/src/main/java/com/giftplatform/group/GuestGiftController.java | 98 | `@Size(max=254)` |
+| backend/src/main/java/com/giftplatform/group/GuestGiftController.java | 99 | `@NotBlank` |
+| backend/src/main/java/com/giftplatform/group/GuestGiftController.java | 99 | `@Pattern(regexp="\\+?[0-9][0-9 -]{7,23}")` |
+| backend/src/main/java/com/giftplatform/group/GuestGiftController.java | 100 | `@Positive` |
+| backend/src/main/java/com/giftplatform/group/GuestGiftController.java | 100 | `@Max(100000000000L)` |
+| backend/src/main/java/com/giftplatform/group/GuestGiftController.java | 114 | `@NotNull` |
+| backend/src/main/java/com/giftplatform/group/GuestGiftController.java | 114 | `@Size(max=1000)` |
+| backend/src/main/java/com/giftplatform/group/IndependentGroupGiftController.java | 28 | `@NotBlank` |
+| backend/src/main/java/com/giftplatform/group/IndependentGroupGiftController.java | 28 | `@Size(max=1000)` |
+| backend/src/main/java/com/giftplatform/group/IndependentGroupGiftController.java | 50 | `@Size(max=160)` |
+| backend/src/main/java/com/giftplatform/group/IndependentGroupGiftController.java | 50 | `@Size(max=500)` |
+| backend/src/main/java/com/giftplatform/group/IndependentGroupGiftController.java | 51 | `@Size(max=1000)` |
+| backend/src/main/java/com/giftplatform/group/IndependentGroupGiftController.java | 51 | `@Pattern(regexp="https://[^\\s]+")` |
+| backend/src/main/java/com/giftplatform/group/IndependentGroupGiftController.java | 51 | `@Positive` |
+| backend/src/main/java/com/giftplatform/group/IndependentGroupGiftController.java | 51 | `@Max(100000000000L)` |
+| backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java | 39 | `@NotBlank` |
+| backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java | 39 | `@Size(max=160)` |
+| backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java | 40 | `@Size(max=500)` |
+| backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java | 40 | `@Size(max=1000)` |
+| backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java | 40 | `@Pattern(regexp="https://[^\\s]+")` |
+| backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java | 41 | `@NotBlank` |
+| backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java | 41 | `@Size(max=120)` |
+| backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java | 41 | `@NotBlank` |
+| backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java | 41 | `@Email` |
+| backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java | 41 | `@Size(max=254)` |
+| backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java | 42 | `@NotBlank` |
+| backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java | 42 | `@Pattern(regexp="\\+?[0-9][0-9 -]{7,23}")` |
+| backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java | 43 | `@NotNull` |
+| backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java | 43 | `@Positive` |
+| backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java | 43 | `@Max(100000000000L)` |
+| backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java | 102 | `@NotNull` |
+| backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java | 102 | `@NotBlank` |
+| backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java | 102 | `@Pattern(regexp="UPI\|BANK")` |
+| backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java | 103 | `@NotBlank` |
+| backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java | 103 | `@Pattern(regexp="[A-Za-z0-9-]{8,40}")` |
+| backend/src/main/java/com/giftplatform/otp/controller/dto/PhoneOtpRequest.java | 7 | `@NotBlank` |
+| backend/src/main/java/com/giftplatform/otp/controller/dto/PhoneOtpRequest.java | 8 | `@Pattern(regexp = "^\\+[1-9][0-9]{1,14}$")` |
+| backend/src/main/java/com/giftplatform/otp/controller/dto/PhoneOtpVerifyRequest.java | 7 | `@NotNull` |
+| backend/src/main/java/com/giftplatform/otp/controller/dto/PhoneOtpVerifyRequest.java | 8 | `@Pattern(regexp = "^[0-9]{6}$")` |
+| backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationService.java | 20 | `@NotBlank` |
+| backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationService.java | 20 | `@Pattern(regexp="ELEGANT\|FLORAL\|PLAYFUL\|MINIMAL\|TRADITIONAL")` |
+| backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationService.java | 21 | `@NotBlank` |
+| backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationService.java | 21 | `@Pattern(regexp="WARM\|FORMAL\|JOYFUL")` |
+| backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationService.java | 21 | `@NotBlank` |
+| backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationService.java | 21 | `@Size(max=40)` |
+| backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationService.java | 22 | `@Size(max=200)` |
+| backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationService.java | 22 | `@Size(max=160)` |
+| backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationService.java | 22 | `@Size(max=40)` |
+| backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationService.java | 22 | `@Size(max=400)` |
+| backend/src/main/java/com/giftplatform/security/dto/LoginRequest.java | 7 | `@NotBlank` |
+| backend/src/main/java/com/giftplatform/security/dto/LoginRequest.java | 8 | `@NotBlank` |
+| backend/src/main/java/com/giftplatform/user/dto/RegisterRequest.java | 10 | `@NotBlank` |
+| backend/src/main/java/com/giftplatform/user/dto/RegisterRequest.java | 10 | `@Size(min = 2, max = 120)` |
+| backend/src/main/java/com/giftplatform/user/dto/RegisterRequest.java | 12 | `@NotBlank` |
+| backend/src/main/java/com/giftplatform/user/dto/RegisterRequest.java | 13 | `@Pattern` |
+| backend/src/main/java/com/giftplatform/user/dto/RegisterRequest.java | 19 | `@NotBlank` |
+| backend/src/main/java/com/giftplatform/user/dto/RegisterRequest.java | 20 | `@Email` |
+| backend/src/main/java/com/giftplatform/user/dto/RegisterRequest.java | 21 | `@Size(max = 254)` |
+| backend/src/main/java/com/giftplatform/user/dto/RegisterRequest.java | 24 | `@NotBlank` |
+| backend/src/main/java/com/giftplatform/user/dto/RegisterRequest.java | 24 | `@Pattern(regexp = "^\\+[1-9][0-9]{7,14}$", message = "Mobile must use international format")` |
+| backend/src/main/java/com/giftplatform/user/dto/RegisterRequest.java | 26 | `@NotBlank` |
+| backend/src/main/java/com/giftplatform/user/dto/RegisterRequest.java | 27 | `@Size(min = 12)` |
+
+
+# Database-enforced rules
+
+All primary/foreign keys, checks, unique constraints and immutable-history triggers are enumerated in [Database catalogue](DATABASE_CATALOGUE.md); those are additional business/data-integrity enforcement points, not replacements for request validation.

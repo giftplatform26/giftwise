@@ -122,4 +122,8 @@ public class GuestbookPhotoController {
  public ResponseEntity<byte[]> publicPhoto(@PathVariable UUID token,@PathVariable UUID wishId){Event e=published(token);permissions.require(e.getOwnerId(),"GUESTBOOK");return photo(wishId,e.getId(),true);}
  @GetMapping("/api/v1/events/{id}/wishes/{wishId}/photo")
  public ResponseEntity<byte[]> hostPhoto(@PathVariable UUID id,@PathVariable UUID wishId){Event e=owned(id);permissions.require(e.getOwnerId(),"GUESTBOOK");return photo(wishId,id,false);}
+ @GetMapping("/api/v1/events/{id}/album/{wishId}/photo")
+ public ResponseEntity<byte[]> albumPhoto(@PathVariable UUID id,@PathVariable UUID wishId){
+  Event e=owned(id);permissions.requireAlbum(e.getOwnerId(),id);return photo(wishId,id,false);
+ }
 }

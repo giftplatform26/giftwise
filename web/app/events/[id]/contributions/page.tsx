@@ -2,6 +2,7 @@
 import {useCallback,useEffect,useRef,useState} from 'react';
 import {useParams} from 'next/navigation';
 import GroupCollectionReport from '../../../../components/GroupCollectionReport';
+import PublishedGuestGifts from '../../../../components/PublishedGuestGifts';
 import Link from 'next/link';
 import {useExperience} from '../../../../components/ExperienceProvider';
 import './contributions.css';
@@ -10,7 +11,7 @@ type Entry={id:string;source:string;guestName:string;giftId:string|null;giftName
 type Gift={id:string;name:string;targetPaise:number};
 type Report={eventId:string;pendingPaise:number;verifiedPaise:number;verifiedGiftPaise:number;verifiedWalletPaise:number;entries:Entry[];gifts:Gift[];selectedGiftId:string|null;selectedGiftTargetPaise:number;matchingCount:number;reportedGiftPaise:number;reportedWalletPaise:number;selectedGiftVerifiedPaise:number;selectedGiftReportedPaise:number};
 const money=(n:number)=>'₹'+(n/100).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
-const labelStatus=(e:Entry)=>e.verificationStatus==='VERIFICATION_PENDING'?(e.source==='MANUAL'?'Payment reported by guest — automatic verification pending':'Payment verification pending'):e.verificationStatus==='VERIFIED'?'Payment verified':e.verificationStatus==='FAILED'?'Verification failed':e.verificationStatus==='CANCELLED'?'Payment cancelled':e.verificationStatus;
+const labelStatus=(e:Entry)=>e.verificationStatus==='VERIFICATION_PENDING'?(e.source==='GROUP'?'Group collection transfer — receipt not independently verified':e.source==='MANUAL'?'Payment reported by guest — automatic verification pending':'Payment verification pending'):e.verificationStatus==='VERIFIED'?'Payment verified':e.verificationStatus==='FAILED'?'Verification failed':e.verificationStatus==='CANCELLED'?'Payment cancelled':e.verificationStatus;
 export default function ContributionsPage(){
  const {mode}=useExperience();const focused=mode==='FOCUSED';const [filterOpen,setFilterOpen]=useState(true);
  const {id}=useParams();const eventId=String(id??'');
@@ -36,8 +37,8 @@ export default function ContributionsPage(){
   const blob=await r.blob();const url=URL.createObjectURL(blob);const a=document.createElement('a');
   a.href=url;a.download=`contributions-${eventId}.csv`;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
  }catch(e){setError(e instanceof Error?e.message:'Export unavailable');}finally{setExporting(false);}};
- return <main className="contributionReport" aria-busy={loading}><GroupCollectionReport eventId={eventId}/>{!focused&&<p><Link href="/events">← My events</Link> · <Link href={`/events/${encodeURIComponent(eventId)}/notifications`}>Notifications</Link></p>}
- <h1>Contribution report</h1><p>Gift and celebration-wallet activity. Guest-reported transfers are not confirmed money.</p>
+ return <main className="contributionReport" aria-busy={loading}><GroupCollectionReport eventId={eventId}/><PublishedGuestGifts eventId={eventId}/>{!focused&&<p><Link href="/events">← My events</Link> · <Link href={`/events/${encodeURIComponent(eventId)}/notifications`}>Notifications</Link></p>}
+ <h1>Contribution report</h1><p>Gift and celebration-wallet activity. Guest-reported transfers are not confirmed money. Group transfers appear after the creator publishes the collection; they do not confirm money received by the host.</p>
  <label className="reportSearch">Search contributions<input type="search" placeholder="Search guest, gift, or payment method" value={search} maxLength={120} onChange={e=>setSearch(e.target.value)}/></label>
  {focused&&<button type="button" aria-expanded={filterOpen} onClick={()=>setFilterOpen(v=>!v)}>Filter contributions</button>}
  <div className="reportFilters" hidden={focused&&!filterOpen} style={{display:focused&&!filterOpen?'none':'flex',gap:12,marginBottom:16,flexWrap:'wrap'}}>

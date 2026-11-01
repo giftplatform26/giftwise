@@ -1,6 +1,7 @@
 package com.giftplatform.qr.design.ai;
 
 import com.giftplatform.event.entity.Event;
+import com.giftplatform.admin.EffectiveModulePermissionService;
 import com.giftplatform.event.repository.EventRepository;
 import com.giftplatform.security.ActorContext;
 import jakarta.validation.constraints.*;
@@ -14,16 +15,18 @@ import java.util.*;
 
 @Service
 public class AiInvitationService {
-    private final EventRepository events;private final ActorContext actor;private final AiInvitationClient client;private final JdbcTemplate db;private final TransactionTemplate tx;
-    public AiInvitationService(EventRepository events,ActorContext actor,AiInvitationClient client,JdbcTemplate db,TransactionTemplate tx){this.events=events;this.actor=actor;this.client=client;this.db=db;this.tx=tx;}
+    private final EventRepository events;private final ActorContext actor;private final AiInvitationClient client;private final JdbcTemplate db;private final TransactionTemplate tx;private final EffectiveModulePermissionService permissions;
+    public AiInvitationService(EventRepository events,ActorContext actor,AiInvitationClient client,JdbcTemplate db,TransactionTemplate tx,EffectiveModulePermissionService permissions){this.events=events;this.actor=actor;this.client=client;this.db=db;this.tx=tx;this.permissions=permissions;}
     public record Preferences(@NotBlank @Pattern(regexp="ELEGANT|FLORAL|PLAYFUL|MINIMAL|TRADITIONAL") String visualStyle,
         @NotBlank @Pattern(regexp="WARM|FORMAL|JOYFUL") String tone,@NotBlank @Size(max=40) String language,
         @Size(max=200) String displayNames,@Size(max=160) String publicVenue,@Size(max=40) String startTime,@Size(max=400) String specialMessage){}
-    public record Settings(boolean available,String message){}
+    public record Settings(boolean enabled,boolean available,String message){}
+    public record Option(UUID id,String title){}
+    public List<Option> options(){UUID host=actor.requireAuthenticatedUserId();if(!permissions.enabled(host,"AI_INVITATION"))return List.of();return db.query("SELECT e.id,e.title FROM events e JOIN platform_event_ai_design_settings a ON a.event_id=e.id AND a.enabled WHERE e.owner_id=? ORDER BY e.created_at DESC,e.id",(rs,n)->new Option(rs.getObject("id",UUID.class),rs.getString("title")),host);}
     public record EventContext(UUID eventId,String title,String occasionType,LocalDate eventDate,String hostName,
         String description,String venue,String visualStyle){}
     public EventContext context(UUID id){
-        Event event=owned(id);
+        Event event=owned(id);permissions.requireAiInvitation(event.getOwnerId(),id);
         String style=switch(event.getOccasionType()){
             case BIRTHDAY -> "PLAYFUL";
             case BABY_SHOWER -> "FLORAL";
@@ -45,9 +48,9 @@ public class AiInvitationService {
     private Event owned(UUID id){
         UUID host=actor.requireAuthenticatedUserId();return events.findById(id).filter(e->host.equals(e.getOwnerId())).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"Event not found"));
     }
-    public Settings settings(UUID id){owned(id);return new Settings(client.available(),client.available()?"Ready to design":"AI design is not configured. Ask the administrator to set OPENAI_API_KEY.");}
+    public Settings settings(UUID id){var event=owned(id);boolean enabled=permissions.aiInvitationEnabled(event.getOwnerId(),id);return new Settings(enabled,enabled&&client.available(),!enabled?"Design with AI is not enabled for this host and event.":client.available()?"Ready to design":"AI design is not configured. Ask the administrator to set OPENAI_API_KEY.");}
     public Suggestion generate(UUID id,Preferences preferences){
-        Event event=owned(id);
+        Event event=owned(id);permissions.requireAiInvitation(event.getOwnerId(),id);
         if(!client.available())throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"AI design is not configured. Set OPENAI_API_KEY in the backend environment.");
         UUID host=event.getOwnerId(),request=UUID.randomUUID();
         tx.executeWithoutResult(s->{

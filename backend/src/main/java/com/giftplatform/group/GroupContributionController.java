@@ -1,6 +1,7 @@
 package com.giftplatform.group;
 
 import com.giftplatform.event.entity.EventStatus;
+import com.giftplatform.event.entity.Event;
 import com.giftplatform.event.repository.EventRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -16,6 +17,7 @@ import java.util.regex.Pattern;
 @RestController
 @RequestMapping("/api/public/groups/{token}")
 public class GroupContributionController {
+ @org.springframework.beans.factory.annotation.Autowired(required=false) private GroupGiftLifecycleService giftLifecycle;
  private final JdbcTemplate db;
  private final GroupReadinessService readiness;
  @org.springframework.beans.factory.annotation.Autowired private com.giftplatform.security.recovery.SignupEmailVerificationService signupEmails;
@@ -31,6 +33,8 @@ public class GroupContributionController {
  private static final String PAGE_KEY="gift.group.page.";
  private static final String PAGE_HEADER="X-Group-Page-Id";
  private static final long GROUP_IDLE_TIMEOUT_MS=10L*60L*1000L;
+ @ExceptionHandler(ResponseStatusException.class)
+ public org.springframework.http.ResponseEntity<org.springframework.http.ProblemDetail> failure(ResponseStatusException ex){return org.springframework.http.ResponseEntity.status(ex.getStatusCode()).body(org.springframework.http.ProblemDetail.forStatusAndDetail(ex.getStatusCode(),ex.getReason()==null?"Unable to complete this group request":ex.getReason()));}
  private static final GroupLoginRateLimiter LOGIN_LIMITER = new GroupLoginRateLimiter();
  @org.springframework.beans.factory.annotation.Autowired
  public GroupContributionController(JdbcTemplate db,EventRepository events,PasswordEncoder passwords,com.giftplatform.security.recovery.CredentialSessionVersionStore versions,com.giftplatform.security.recovery.EffectiveRecoveryPolicyService policies,GroupReadinessService readiness){this.db=db;this.readiness=readiness;this.events=events;this.passwords=passwords;this.versions=versions;this.policies=policies;}
@@ -43,9 +47,13 @@ public class GroupContributionController {
  public Credentials(String username,String password,String pin,String confirmPin){this(username,password,pin,confirmPin,null,null,null);}
  public Credentials(String username,String password,String pin,String confirmPin,String fullName){this(username,password,pin,confirmPin,fullName,null,null);}
 }
- public record Setup(String name,String creatorName,String creatorMobile,String description,String giftName,String giftDescription,String giftLink,Long targetPaise){}
- public record GroupView(UUID id,String name,String creatorName,String description,String giftName,String giftDescription,String giftLink,Long targetPaise,String status){}
- private UUID event(UUID token){return events.findByPublicToken(token).filter(e->e.getStatus()==EventStatus.PUBLISHED).map(e->e.getId()).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));}
+ public record Setup(String name,String creatorName,String creatorMobile,String description,String giftName,String giftDescription,String giftLink,Long targetPaise,UUID giftId,Boolean independentGift){
+  public Setup {independentGift=Boolean.TRUE.equals(independentGift);}
+  public Setup(String name,String creatorName,String creatorMobile,String description,String giftName,String giftDescription,String giftLink,Long targetPaise,UUID giftId){this(name,creatorName,creatorMobile,description,giftName,giftDescription,giftLink,targetPaise,giftId,false);}
+  public Setup(String name,String creatorName,String creatorMobile,String description,String giftName,String giftDescription,String giftLink,Long targetPaise){this(name,creatorName,creatorMobile,description,giftName,giftDescription,giftLink,targetPaise,null);}
+ }
+ public record GroupView(UUID id,String name,String creatorName,String description,String giftName,String giftDescription,String giftLink,Long targetPaise,String status,boolean independentGift){}
+ UUID event(UUID token){return events.findByPublicToken(token).filter(e->e.getStatus()==EventStatus.PUBLISHED).map(e->e.getId()).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));}
  private String username(String v){if(v==null||!USER.matcher(v.toLowerCase(Locale.ROOT)).matches())throw bad("Username must have 3–40 letters, digits or underscores");return v.toLowerCase(Locale.ROOT);}
  private String text(String v,int max,boolean required){if(v==null||v.isBlank()){if(required)throw bad("Required field missing");return null;}v=v.strip();if(v.length()>max||v.chars().anyMatch(Character::isISOControl))throw bad("Invalid field");return v;}
  private ResponseStatusException bad(String msg){return new ResponseStatusException(HttpStatus.BAD_REQUEST,msg);}
@@ -66,21 +74,21 @@ public class GroupContributionController {
   if(pin!=null&&!pin.isBlank())return pin.matches("[0-9]{6}")&&pinHash!=null&&passwords.matches(pin,pinHash);
   return password!=null&&passwords.matches(password,pwHash);
  }
- private void ensureUniqueMemberPin(UUID groupId,String pin,UUID exclude){
+ private void ensureUniqueMemberPin(UUID groupId,String username,String pin,UUID exclude){
   db.queryForObject("SELECT id FROM gift_groups WHERE id=? FOR UPDATE",UUID.class,groupId);
-  for(Map<String,Object> row:db.queryForList("SELECT id,pin_hash FROM gift_group_members WHERE group_id=? AND pin_hash IS NOT NULL",groupId)){
-   if(!row.get("id").equals(exclude)&&passwords.matches(pin,(String)row.get("pin_hash")))
-    throw new ResponseStatusException(HttpStatus.CONFLICT,"PIN already taken in this group. Choose a different PIN");
-  }
- }
- private void ensureUniqueAdminPin(UUID eventId,String pin,UUID exclude){
-  db.queryForObject("SELECT id FROM events WHERE id=? FOR UPDATE",UUID.class,eventId);
-  for(Map<String,Object> row:db.queryForList("SELECT id,pin_hash FROM gift_group_accounts WHERE event_id=? AND pin_hash IS NOT NULL",eventId)){
+  for(Map<String,Object> row:db.queryForList("SELECT id,pin_hash FROM gift_group_members WHERE group_id=? AND username=? AND pin_hash IS NOT NULL",groupId,username)){
    if(!row.get("id").equals(exclude)&&passwords.matches(pin,(String)row.get("pin_hash")))
     throw new ResponseStatusException(HttpStatus.CONFLICT,"PIN already taken for this group. Choose a different PIN");
   }
  }
- private UUID sessionAdmin(UUID eventId,HttpServletRequest req){HttpSession s=req.getSession(false);Object o=s==null?null:s.getAttribute(SESSION_KEY+eventId);if(!(o instanceof UUID id))throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+ private void ensureUniqueAdminPin(UUID eventId,String username,String pin,UUID exclude){
+  db.queryForObject("SELECT id FROM events WHERE id=? FOR UPDATE",UUID.class,eventId);
+  for(Map<String,Object> row:db.queryForList("SELECT id,pin_hash FROM gift_group_accounts WHERE event_id=? AND username=? AND pin_hash IS NOT NULL",eventId,username)){
+   if(!row.get("id").equals(exclude)&&passwords.matches(pin,(String)row.get("pin_hash")))
+    throw new ResponseStatusException(HttpStatus.CONFLICT,"PIN already taken for this group. Choose a different PIN");
+  }
+ }
+ UUID sessionAdmin(UUID eventId,HttpServletRequest req){HttpSession s=req.getSession(false);Object o=s==null?null:s.getAttribute(SESSION_KEY+eventId);if(!(o instanceof UUID id))throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
   Object bound=s.getAttribute(PAGE_KEY+eventId);
   String presented=req.getHeader(PAGE_HEADER);
   if(!(bound instanceof String pageId)||presented==null||!pageId.equals(presented))
@@ -103,7 +111,7 @@ public class GroupContributionController {
  String phone=mobile(c.mobile());
  // Mandatory contact collection does not imply verified ownership.
  // Contact-verification timestamps remain NULL until real independent verification.
- UUID accountId=UUID.randomUUID();if(pin!=null)ensureUniqueAdminPin(e,pin,null);try{db.update("INSERT INTO gift_group_accounts(id,event_id,username,password_hash,pin_hash,full_name,email,mobile,email_verified_at,mobile_verified_at) VALUES(?,?,?,?,?,?,?,?,NULL,NULL)",accountId,e,u,passwords.encode(pw),pin==null?null:passwords.encode(pin),fullName,email,phone);}catch(org.springframework.dao.DuplicateKeyException ex){throw new ResponseStatusException(HttpStatus.CONFLICT,"Username already exists");}if(readiness.emailEnabled()&&c.emailVerificationToken()!=null&&!c.emailVerificationToken().isBlank()&&signupEmails.consume(c.emailVerificationToken(),"GROUP_ADMIN",e,email))db.update("UPDATE gift_group_accounts SET email_verified_at=now() WHERE id=?",accountId);return Map.of("username",u);}
+ UUID accountId=UUID.randomUUID();if(pin!=null)ensureUniqueAdminPin(e,u,pin,null);try{db.update("INSERT INTO gift_group_accounts(id,event_id,username,password_hash,pin_hash,full_name,email,mobile,email_verified_at,mobile_verified_at) VALUES(?,?,?,?,?,?,?,?,NULL,NULL)",accountId,e,u,passwords.encode(pw),pin==null?null:passwords.encode(pin),fullName,email,phone);}catch(org.springframework.dao.DuplicateKeyException ex){throw new ResponseStatusException(HttpStatus.CONFLICT,"Username already exists");}if(readiness.emailEnabled()&&c.emailVerificationToken()!=null&&!c.emailVerificationToken().isBlank()&&signupEmails.consume(c.emailVerificationToken(),"GROUP_ADMIN",e,email))db.update("UPDATE gift_group_accounts SET email_verified_at=now() WHERE id=?",accountId);return Map.of("username",u);}
  @PostMapping("/login")
  public Map<String,String> login(@PathVariable UUID token,@RequestBody Credentials c,HttpServletRequest req){UUID e=event(token);if(c==null)throw bad("Credentials required");if(c.pin()!=null&&!c.pin().isBlank())requirePinAllowed(e);boolean pinLogin=c.pin()!=null&&!c.pin().isBlank();
   if(pinLogin&&!c.pin().matches("[0-9]{6}"))throw bad("PIN must be six digits");
@@ -121,7 +129,7 @@ public class GroupContributionController {
   String pin=validatedPin(input.pin(),input.confirmPin());
   String hash=db.queryForObject("SELECT password_hash FROM gift_group_accounts WHERE id=? AND event_id=?",String.class,id,e);
   if(!passwords.matches(input.password()==null?"":input.password(),hash))throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Current password is incorrect");
-  ensureUniqueAdminPin(e,pin,id);db.update("UPDATE gift_group_accounts SET pin_hash=? WHERE id=?",passwords.encode(pin),id);
+  ensureUniqueAdminPin(e,db.queryForObject("SELECT username FROM gift_group_accounts WHERE id=? AND event_id=?",String.class,id,e),pin,id);db.update("UPDATE gift_group_accounts SET pin_hash=? WHERE id=?",passwords.encode(pin),id);
   return Map.of("message","PIN saved");
  }
  @PostMapping("/member-pin/setup/{groupId}") @Transactional
@@ -131,7 +139,7 @@ public class GroupContributionController {
   String pin=validatedPin(input.pin(),input.confirmPin());
   String hash=db.queryForObject("SELECT password_hash FROM gift_group_members WHERE id=? AND group_id=?",String.class,id,groupId);
   if(!passwords.matches(input.password()==null?"":input.password(),hash))throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Current password is incorrect");
-  ensureUniqueMemberPin(groupId,pin,id);db.update("UPDATE gift_group_members SET pin_hash=? WHERE id=?",passwords.encode(pin),id);
+  ensureUniqueMemberPin(groupId,db.queryForObject("SELECT username FROM gift_group_members WHERE id=? AND group_id=?",String.class,id,groupId),pin,id);db.update("UPDATE gift_group_members SET pin_hash=? WHERE id=?",passwords.encode(pin),id);
   return Map.of("message","PIN saved");
  }
  @PostMapping("/logout") public void logout(@PathVariable UUID token,HttpServletRequest req){UUID e=event(token);HttpSession s=req.getSession(false);if(s!=null){Object bound=s.getAttribute(PAGE_KEY+e);
@@ -148,11 +156,14 @@ public class GroupContributionController {
  @GetMapping("/dashboard") public Map<String,Object> dashboard(@PathVariable UUID token,HttpServletRequest req){UUID e=event(token),id=sessionAdmin(e,req);List<GroupView> g=groups(id);Map<String,Object> out=new LinkedHashMap<>();out.put("fullName",db.queryForObject("SELECT full_name FROM gift_group_accounts WHERE id=?",String.class,id));out.put("setupRequired",g.isEmpty());out.put("group",g.isEmpty()?null:g.get(0));
   if(!g.isEmpty()){
    UUID groupId=g.get(0).id();
+   out.put("creatorEmailVerified",Boolean.TRUE.equals(db.queryForObject("SELECT email_verified_at IS NOT NULL FROM gift_group_accounts WHERE id=?",Boolean.class,id)));
+   out.put("selectedGiftId",db.queryForObject("SELECT selected_gift_id FROM gift_groups WHERE id=?",UUID.class,groupId));
    out.put("reservedGiftId",db.queryForObject("SELECT reserved_gift_id FROM gift_groups WHERE id=?",UUID.class,groupId));
    out.put("invitationReadiness",readiness.invitation(groupId));
    out.put("publishReadiness",readiness.invitation(groupId));
+   out.put("giftProgress",db.queryForMap("SELECT p.collected_paise,p.reported_paise,p.completion_percentage,g.gift_published_at,g.fulfilment_status,g.tracking_details FROM group_gift_progress p JOIN gift_groups g ON g.id=p.id WHERE g.id=?",groupId));
    out.put("collectionPublished",Boolean.TRUE.equals(db.queryForObject("SELECT collection_published_at IS NOT NULL FROM gift_groups WHERE id=?",Boolean.class,groupId)));
-   out.put("summary",db.queryForMap("SELECT (SELECT count(*) FROM gift_group_members WHERE group_id=? AND status='APPROVED') AS member_count, (SELECT count(*) FROM gift_group_members WHERE group_id=? AND status='PENDING') AS pending_member_count, COALESCE(SUM(amount_paise) FILTER (WHERE state='REPORTED_UNVERIFIED'),0) AS reported_paise, count(*) FILTER (WHERE state='REPORTED_UNVERIFIED') AS report_count FROM gift_group_guest_reports WHERE group_id=?",groupId,groupId,groupId));
+   out.put("summary",db.queryForMap("SELECT (SELECT count(*) FROM gift_group_members WHERE group_id=? AND status='APPROVED') AS member_count, (SELECT count(*) FROM gift_group_members WHERE group_id=? AND status='PENDING') AS pending_member_count, COALESCE(SUM(amount_paise) FILTER (WHERE state='REPORTED_UNVERIFIED'),0) AS reported_paise, count(*) FILTER (WHERE state='REPORTED_UNVERIFIED') AS report_count FROM group_collection_transactions WHERE group_id=?",groupId,groupId,groupId));
    out.put("privacy",db.queryForMap("SELECT join_policy,member_visibility,amount_visibility,creator_direct_payments_enabled FROM gift_groups WHERE id=?",groupId));
   }
   return out;}
@@ -162,9 +173,9 @@ public class GroupContributionController {
  @PostMapping("/privacy") @Transactional public Map<String,Object> privacyUpdate(@PathVariable UUID token,@RequestBody PrivacySettings p,HttpServletRequest req){UUID e=event(token),id=sessionAdmin(e,req);if(p==null)throw bad("Privacy settings required");String join=choice(p.joinPolicy(),"APPROVAL,AUTO_JOIN,INVITE_ONLY","join policy"),members=choice(p.memberVisibility(),"ADMIN_ONLY,MEMBERS","member visibility"),amounts=choice(p.amountVisibility(),"ADMIN_ONLY,OWN_ONLY","amount visibility");// Direct payments cannot be enabled until encrypted creator destinations are implemented and validated.
   if(Boolean.TRUE.equals(p.creatorDirectPaymentsEnabled()))throw new ResponseStatusException(HttpStatus.CONFLICT,"Creator payment destinations are not configured; direct payments remain disabled");
   int n=db.update("UPDATE gift_groups SET join_policy=?,member_visibility=?,amount_visibility=?,creator_direct_payments_enabled=FALSE WHERE admin_id=? AND event_id=? AND status IN ('DRAFT','PUBLISHED')",join,members,amounts,id,e);if(n!=1)throw new ResponseStatusException(HttpStatus.CONFLICT,"Group not found or not editable");return privacy(token,req);}
- private List<GroupView> groups(UUID id){return db.query("SELECT id,name,creator_name,creator_mobile,description,gift_name,gift_description,gift_link,target_paise,status FROM gift_groups WHERE admin_id=?",(rs,i)->new GroupView((UUID)rs.getObject("id"),rs.getString("name"),rs.getString("creator_name"),rs.getString("description"),rs.getString("gift_name"),rs.getString("gift_description"),rs.getString("gift_link"),rs.getObject("target_paise")==null?null:rs.getLong("target_paise"),rs.getString("status")),id);}
+ private List<GroupView> groups(UUID id){return db.query("SELECT id,name,creator_name,creator_mobile,description,gift_name,gift_description,gift_link,target_paise,status,independent_gift FROM gift_groups WHERE admin_id=?",(rs,i)->new GroupView((UUID)rs.getObject("id"),rs.getString("name"),rs.getString("creator_name"),rs.getString("description"),rs.getString("gift_name"),rs.getString("gift_description"),rs.getString("gift_link"),rs.getObject("target_paise")==null?null:rs.getLong("target_paise"),rs.getString("status"),rs.getBoolean("independent_gift")),id);}
  @PostMapping("/setup") @ResponseStatus(HttpStatus.CREATED) @Transactional
- public GroupView setup(@PathVariable UUID token,@RequestBody Setup s,HttpServletRequest req){UUID e=event(token),id=sessionAdmin(e,req);if(s==null)throw bad("Setup required");String name=text(s.name(),120,true),creator=text(s.creatorName(),120,true),mobile=text(s.creatorMobile(),20,true);if(!mobile.matches("\\+?[0-9 ]{8,20}"))throw bad("Invalid mobile number");String gift=text(s.giftName(),160,false),desc=text(s.giftDescription(),500,false),link=text(s.giftLink(),1000,false);if(link!=null&&!link.matches("https://[^\\s]+"))throw bad("Gift link must use HTTPS");if(s.targetPaise()!=null&&(s.targetPaise()<=0||s.targetPaise()>100000000000L))throw bad("Invalid target amount");if((s.targetPaise()!=null||desc!=null||link!=null)&&gift==null)throw bad("Gift name required for gift details");if(!groups(id).isEmpty())throw new ResponseStatusException(HttpStatus.CONFLICT,"Group already created");try{db.update("INSERT INTO gift_groups(id,event_id,admin_id,name,creator_name,creator_mobile,description,gift_name,gift_description,gift_link,target_paise) VALUES(?,?,?,?,?,?,?,?,?,?,?)",UUID.randomUUID(),e,id,name,creator,mobile,text(s.description(),500,false),gift,desc,link,s.targetPaise());}catch(org.springframework.dao.DuplicateKeyException ex){throw new ResponseStatusException(HttpStatus.CONFLICT,"Group already created");}return groups(id).get(0);}
+ public GroupView setup(@PathVariable UUID token,@RequestBody Setup s,HttpServletRequest req){UUID e=event(token),id=sessionAdmin(e,req);if(s==null)throw bad("Setup required");String name=text(s.name(),120,true),creator=text(s.creatorName(),120,true),mobile=text(s.creatorMobile(),20,true);if(!mobile.matches("\\+?[0-9 ]{8,20}"))throw bad("Invalid mobile number");if(s.independentGift()&&s.giftId()!=null)throw bad("Independent groups choose their own gift, outside the host wishlist");boolean fromWishlist=s.giftId()!=null;String gift=fromWishlist?null:text(s.giftName(),160,false),desc=fromWishlist?null:text(s.giftDescription(),500,false),link=fromWishlist?null:text(s.giftLink(),1000,false);if(link!=null&&!link.matches("https://[^\\s]+"))throw bad("Gift link must use HTTPS");if(!fromWishlist&&s.targetPaise()!=null&&(s.targetPaise()<=0||s.targetPaise()>100000000000L))throw bad("Invalid target amount");if(!fromWishlist&&(desc!=null||link!=null)&&gift==null)throw bad("Gift name required for gift details");if(!groups(id).isEmpty())throw new ResponseStatusException(HttpStatus.CONFLICT,"Group already created");UUID createdGroup=UUID.randomUUID();try{db.update("INSERT INTO gift_groups(id,event_id,admin_id,name,creator_name,creator_mobile,description,gift_name,gift_description,gift_link,target_paise,independent_gift) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",createdGroup,e,id,name,creator,mobile,text(s.description(),500,false),gift,desc,link,fromWishlist?null:s.targetPaise(),s.independentGift());}catch(org.springframework.dao.DuplicateKeyException ex){throw new ResponseStatusException(HttpStatus.CONFLICT,"Group already created");}if(s.giftId()!=null){if(giftLifecycle==null)throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Gift selection is unavailable");giftLifecycle.select(createdGroup,id,s.giftId());}return groups(id).get(0);}
 
  // Batch 7C.3: Membership is isolated from the creator/admin login.
  public record JoinRequest(String displayName,String mobile,String password,String confirmPassword,String pin,String confirmPin,String email,String emailVerificationToken){
@@ -214,7 +225,7 @@ public class GroupContributionController {
  }
  public Map<String,Object> publicGroup(@PathVariable UUID token,@PathVariable UUID groupId){
   UUID e=event(token);groupId(e,groupId);
-  List<Map<String,Object>> rows=db.queryForList("SELECT name,description,gift_name,gift_description,gift_link,target_paise,join_policy,status FROM gift_groups WHERE id=? AND event_id=?",groupId,e);
+  List<Map<String,Object>> rows=db.queryForList("SELECT name,description,    CASE WHEN gift_published_at IS NOT NULL THEN gift_name END AS gift_name,    CASE WHEN gift_published_at IS NOT NULL THEN gift_description END AS gift_description,    CASE WHEN gift_published_at IS NOT NULL THEN gift_link END AS gift_link,    CASE WHEN gift_published_at IS NULL THEN 'Something is Cooking 🍳' ELSE '100% Contributed ✅' END AS display_status,    join_policy,status FROM gift_groups WHERE id=? AND event_id=?",groupId,e);
   if(rows.isEmpty())throw new ResponseStatusException(HttpStatus.NOT_FOUND);
   Map<String,Object> r=new LinkedHashMap<>(rows.get(0));
   if(commerce!=null)commerce.requireGroupFee(groupId);
@@ -228,7 +239,7 @@ public class GroupContributionController {
   if(request==null)throw bad("Member details required");
   String name=memberName(request.displayName()),phone=mobile(request.mobile()),password=memberPassword(request.password());
   if(!password.equals(request.confirmPassword()))throw bad("Password confirmation does not match");
-  String pin=registrationPin(event(token),request.pin(),request.confirmPin());if(pin!=null)ensureUniqueMemberPin(groupId,pin,null);
+  String pin=registrationPin(event(token),request.pin(),request.confirmPin());if(pin!=null)ensureUniqueMemberPin(groupId,name.toLowerCase(Locale.ROOT),pin,null);
   if("INVITE_ONLY".equals(group.get("join_policy")))throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Invitation-only membership requires an individual invitation credential");
   UUID memberId=UUID.randomUUID();
   String signupEmail=request.email()==null||request.email().isBlank()?null:request.email().strip().toLowerCase(Locale.ROOT);
@@ -283,7 +294,8 @@ public class GroupContributionController {
  }
  @PostMapping("/member-logout/{groupId}")
  public Map<String,String> memberLogout(@PathVariable UUID token,@PathVariable UUID groupId,HttpServletRequest req){
-  publicGroup(token,groupId);HttpSession session=req.getSession(false);
+  UUID eventId=events.findByPublicToken(token).map(Event::getId).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
+  groupId(eventId,groupId);HttpSession session=req.getSession(false);
   if(session!=null){session.removeAttribute(MEMBER_SESSION+groupId);session.removeAttribute("gift.group.member.epoch."+groupId);}
   return Map.of("message","Signed out");
  }
@@ -292,8 +304,9 @@ public class GroupContributionController {
   Map<String,Object> g=publicGroup(token,groupId);requireMemberAccess(groupId);UUID id=member(groupId,req);
   Map<String,Object> out=new LinkedHashMap<>();out.put("group",g);
   out.put("me",db.queryForMap("SELECT id,display_name FROM gift_group_members WHERE id=?",id));
-  out.put("confirmedPaise",0L); // No trusted reconciliation integration yet.
-  out.put("progressPercent",0); // Never count self-reported transfers.
+  var progress=db.queryForMap("SELECT collected_paise,completion_percentage FROM group_gift_progress WHERE id=?",groupId);
+  out.put("confirmedPaise",progress.get("collected_paise"));
+  out.put("progressPercent",progress.get("completion_percentage"));
   if("MEMBERS".equals(db.queryForObject("SELECT member_visibility FROM gift_groups WHERE id=?",String.class,groupId)))
    out.put("members",db.queryForList("SELECT display_name FROM gift_group_members WHERE group_id=? AND status='APPROVED' ORDER BY created_at",groupId));
   return out;

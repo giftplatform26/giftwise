@@ -25,7 +25,7 @@ public class GroupGuestContributionController {
  private static final Pattern REFERENCE=Pattern.compile("[A-Za-z0-9][A-Za-z0-9 /_.-]{5,119}");
  private ResponseStatusException bad(String reason){return new ResponseStatusException(HttpStatus.BAD_REQUEST,reason);}
  private PaymentDataProtector protector(){PaymentDataProtector p=protectors.getIfAvailable();if(p==null)throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Secure payment configuration is unavailable");return p;}
- private Map<String,Object> group(UUID token,UUID id){groups.publicGroup(token,id);return db.queryForMap("SELECT g.id,g.event_id,g.name,g.creator_name,g.description,g.gift_name,g.suggested_contribution_paise,g.manual_contributions_enabled,g.creator_direct_payments_enabled,g.contribution_access_mode,e.title AS event_title,e.event_date FROM gift_groups g JOIN events e ON e.id=g.event_id WHERE g.id=?",id);}
+ private Map<String,Object> group(UUID token,UUID id){groups.publicGroup(token,id);return db.queryForMap("SELECT g.id,g.event_id,g.name,g.creator_name,g.description,CASE WHEN g.gift_published_at IS NOT NULL THEN g.gift_name END AS gift_name,g.suggested_contribution_paise,g.manual_contributions_enabled,g.creator_direct_payments_enabled,g.contribution_access_mode,e.title AS event_title,e.event_date FROM gift_groups g JOIN events e ON e.id=g.event_id WHERE g.id=?",id);}
  private String accessMode(Map<String,Object> g){return (String)g.get("contribution_access_mode");}
  private boolean guestsAllowed(Map<String,Object> g){return !"MEMBERS_ONLY".equals(accessMode(g));}
  private boolean membersAllowed(Map<String,Object> g){return !"GUESTS_ONLY".equals(accessMode(g));}

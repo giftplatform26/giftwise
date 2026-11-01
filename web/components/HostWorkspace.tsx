@@ -2,7 +2,7 @@
 import {createContext,useContext,useEffect,useId,useState,type ReactNode} from 'react';
 import {usePathname,useRouter,useSearchParams} from 'next/navigation';
 import Link from 'next/link';
-import {ShieldCheck,Activity,CalendarDays,CheckSquare,Eye,Gift,Heart,Landmark,LayoutDashboard,LogOut,Mail,PanelLeftClose,PanelLeftOpen,Plus,QrCode,Sparkles,UserRound,Users,type LucideIcon} from 'lucide-react';
+import {ShieldCheck,Activity,CalendarDays,CheckSquare,Eye,Gift,Heart,Images,Landmark,LayoutDashboard,LogOut,Mail,PanelLeftClose,PanelLeftOpen,Plus,QrCode,Sparkles,UserRound,Users,type LucideIcon} from 'lucide-react';
 import {hostApi} from '../lib/host-api.mjs';
 import {eventIdForRoute} from '../lib/focused.mjs';
 import './host-sidebar.css';
@@ -30,6 +30,7 @@ export default function HostWorkspace({children}:{children:ReactNode}){
   {href:base+'/receiving-accounts',label:'Receiving accounts',Icon:Landmark},
   {href:`/gifts?eventId=${eventId}`,label:'Gift wishlist',Icon:Gift,active:path==='/gifts'},
   ...((features.RSVP||features.GUESTBOOK)?[{href:base+'/celebration',label:'Guests & responses',Icon:Users}]:[]),
+  ...(features.MEMORY_ALBUM?[{href:base+'/album',label:'Memory album',Icon:Images}]:[]),
   {href:base+'/contributions',label:'Contribution report',Icon:Activity},
   {href:base+'/transactions',label:'Payment verification',Icon:ShieldCheck},
   {href:base+'/qr',label:'Invitation design & QR',Icon:QrCode},

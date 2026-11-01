@@ -115,7 +115,7 @@ public class HostContributionReportService {
     // Keep the established payment verification rules in one relation shared by all queries.
     String rows = "WITH report_rows AS (" + REPORT_ROWS + ") ";
     StringBuilder filter = new StringBuilder(" WHERE 1=1");
-    List<Object> args = new ArrayList<>(List.of(eventId,eventId));
+    List<Object> args = new ArrayList<>(List.of(eventId,eventId,eventId));
     if(search!=null && !search.isBlank()) {
       filter.append(" AND strpos(lower(concat_ws(' ',guest_name,gift_name,method)),lower(?))>0");
       args.add(search.trim());
@@ -136,8 +136,8 @@ public class HostContributionReportService {
       "COALESCE(SUM("+included+") FILTER (WHERE verification_status='VERIFIED'),0) AS verified, "+
       "COALESCE(SUM("+gp+") FILTER (WHERE verification_status='VERIFIED'),0) AS gift, "+
       "COALESCE(SUM("+wp+") FILTER (WHERE verification_status='VERIFIED'),0) AS wallet, "+
-      "COALESCE(SUM("+gp+") FILTER (WHERE verification_status='VERIFICATION_PENDING' AND source='MANUAL'),0) AS reported_gift, "+
-      "COALESCE(SUM("+wp+") FILTER (WHERE verification_status='VERIFICATION_PENDING' AND source='MANUAL'),0) AS reported_wallet FROM report_rows";
+      "COALESCE(SUM("+gp+") FILTER (WHERE verification_status='VERIFICATION_PENDING' AND source IN ('MANUAL','GROUP')),0) AS reported_gift, "+
+      "COALESCE(SUM("+wp+") FILTER (WHERE verification_status='VERIFICATION_PENDING' AND source IN ('MANUAL','GROUP')),0) AS reported_wallet FROM report_rows";
     long[] totals=jdbc.queryForObject(rows+aggregate+filter,(rs,i)->new long[]{rs.getLong("matching_count"),rs.getLong("pending"),rs.getLong("verified"),rs.getLong("gift"),rs.getLong("wallet"),rs.getLong("reported_gift"),rs.getLong("reported_wallet")},args.toArray());
     List<Object> pageArgs=new ArrayList<>(args);pageArgs.add(limit);pageArgs.add(offset);
     List<Entry> entries=jdbc.query(rows+"SELECT * FROM report_rows"+filter+" ORDER BY created_at DESC,id DESC LIMIT ? OFFSET ?",
@@ -149,8 +149,8 @@ public class HostContributionReportService {
     // Selected gift progress remains independent of report filters and pagination.
     long[] selected=giftId==null?new long[]{0,0}:jdbc.queryForObject(rows+
       "SELECT COALESCE(SUM(gift_paise) FILTER (WHERE verification_status='VERIFIED'),0), "+
-      "COALESCE(SUM(gift_paise) FILTER (WHERE verification_status='VERIFICATION_PENDING' AND source='MANUAL'),0) FROM report_rows WHERE gift_id=?",
-      (rs,i)->new long[]{rs.getLong(1),rs.getLong(2)},eventId,eventId,giftId);
+      "COALESCE(SUM(gift_paise) FILTER (WHERE verification_status='VERIFICATION_PENDING' AND source IN ('MANUAL','GROUP')),0) FROM report_rows WHERE gift_id=?",
+      (rs,i)->new long[]{rs.getLong(1),rs.getLong(2)},eventId,eventId,eventId,giftId);
     return new Report(eventId,totals[1],totals[2],totals[3],totals[4],entries,gifts,giftId,target,
       totals[0],totals[5],totals[6],selected[0],selected[1]);
   }
@@ -195,5 +195,16 @@ public class HostContributionReportService {
         LEFT JOIN guest_manual_display_allocations a ON a.claim_id=cl.id
         LEFT JOIN gifts g ON g.id=cl.gift_id AND g.event_id=cl.event_id
         WHERE cl.event_id=?
+        UNION ALL
+        SELECT r.id,'GROUP'::text,concat(g.name,' · ',r.guest_name),r.gift_id_snapshot,gift.name,
+               CASE WHEN r.gift_id_snapshot IS NULL THEN 'WALLET' ELSE 'GIFT' END,
+               r.method,r.amount_paise,
+               CASE WHEN r.gift_id_snapshot IS NOT NULL THEN r.amount_paise ELSE 0 END,
+               CASE WHEN r.gift_id_snapshot IS NULL THEN r.amount_paise ELSE 0 END,
+               CASE WHEN r.state='REJECTED' THEN 'FAILED' ELSE 'VERIFICATION_PENDING' END,
+               r.created_at
+        FROM group_collection_transactions r JOIN gift_groups g ON g.id=r.group_id
+        LEFT JOIN gifts gift ON gift.id=r.gift_id_snapshot AND gift.event_id=g.event_id
+        WHERE g.event_id=? AND g.collection_published_at IS NOT NULL
       """;
 }

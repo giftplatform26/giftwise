@@ -18,7 +18,8 @@ import static org.mockito.ArgumentMatchers.*;
 class AiInvitationServiceTest {
     private final EventRepository events=mock(EventRepository.class);private final ActorContext actor=mock(ActorContext.class);
     private final AiInvitationClient client=mock(AiInvitationClient.class);private final JdbcTemplate db=mock(JdbcTemplate.class);private final TransactionTemplate tx=mock(TransactionTemplate.class);
-    private final AiInvitationService service=new AiInvitationService(events,actor,client,db,tx);
+    private final com.giftplatform.admin.EffectiveModulePermissionService permissions=mock(com.giftplatform.admin.EffectiveModulePermissionService.class);
+    private final AiInvitationService service=new AiInvitationService(events,actor,client,db,tx,permissions);
     private final UUID host=UUID.randomUUID();
     private Event event(UUID owner){var e=new Event("Garden party",OccasionType.BIRTHDAY);e.assignOwner(owner);e.setHostDisplayName("Jane");e.setEventContact("PRIVATE STREET","CITY","STATE","123456","India","Private Person","PRIVATE PHONE","private@example.test");when(events.findById(e.getId())).thenReturn(Optional.of(e));when(actor.requireAuthenticatedUserId()).thenReturn(host);return e;}
     private AiInvitationService.Preferences input(){return new AiInvitationService.Preferences("FLORAL","WARM","English","","Public Garden","6 PM","Soft pastel colours");}
@@ -46,5 +47,12 @@ class AiInvitationServiceTest {
     @Test void contextRejectsOtherHostsEvent() {
         var e=event(UUID.randomUUID());assertEquals(404,assertThrows(ResponseStatusException.class,()->service.context(e.getId())).getStatusCode().value());
         verifyNoInteractions(client,db,tx);
+    }
+
+    @Test void revokedAccessBlocksProviderAndDetailsBeforeQuotaIsUsed(){
+        var e=event(host);doThrow(new ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND)).when(permissions).requireAiInvitation(host,e.getId());
+        assertThrows(ResponseStatusException.class,()->service.generate(e.getId(),input()));
+        assertThrows(ResponseStatusException.class,()->service.context(e.getId()));
+        assertFalse(service.settings(e.getId()).enabled());verifyNoInteractions(client,db,tx);
     }
 }

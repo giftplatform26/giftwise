@@ -1,0 +1,2 @@
+ALTER TABLE guest_gifts ADD COLUMN giving_method VARCHAR(30)
+ CHECK(giving_method IN ('LINK_AND_CONTRIBUTION','DIRECT_DELIVERY'));

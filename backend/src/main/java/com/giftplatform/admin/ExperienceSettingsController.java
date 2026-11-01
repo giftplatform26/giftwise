@@ -20,6 +20,6 @@ public class ExperienceSettingsController {
  @GetMapping("/api/v1/events/{id}/features")
  public ResponseEntity<Map<String,Boolean>> features(@PathVariable UUID id){
   var event=events.get(id); // Existing ownership check also covers draft previews.
-  return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(permissions.modules(event.ownerId()));
+  return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(permissions.eventModules(event.ownerId(),id));
  }
 }
