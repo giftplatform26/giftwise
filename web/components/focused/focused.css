@@ -32,3 +32,35 @@
 .ux-focused .gc-dialog .gc-nav{flex-wrap:wrap;overflow:visible}.ux-focused .gc-dialog .gc-panel h3{font-family:inherit;font-size:1.1rem;line-height:1.4;letter-spacing:normal;margin:0 0 12px}.ux-focused .gc-dialog .gc-guest-checkout h3{font-size:1rem}
 
 .ux-focused .focusGiftComplete,.focusGiftComplete{margin:10px 0 0;padding:10px 14px;border-radius:12px;background:#eef7ef;color:#2f6b3a;font-weight:650}
+
+/* ---- Guest invitation: compact, de-duplicated cards (works from 320px phones to desktop) ---- */
+.focusInvitation .focusGiftGrid{grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr));gap:16px;align-items:stretch}
+.focusInvitation .focusGiftCard{display:flex;flex-direction:column}
+.focusInvitation .focusGiftCard>.focusGiftBody{padding:18px 18px 16px;display:flex;flex-direction:column;gap:8px;flex:1}
+.focusInvitation .focusGiftCard h3{font-size:19px;margin:0;line-height:1.25;overflow-wrap:anywhere}
+.focusInvitation .focusGiftIllustration{height:140px;overflow:hidden}
+.focusInvitation .focusGiftIllustration img{width:100%;height:100%;object-fit:cover}
+.focusInvitation .focusGiftCard--noImage{border-top:4px solid #e9dcef}
+.focusInvitation .focusGiftAmount{margin:0}
+.focusInvitation .focusGiftProgress p{margin:6px 0 0;font-size:13px;color:#6f657b}
+.focusInvitation .focusGiftProduct{font-size:13px;color:#6336b5;align-self:flex-start}
+.focusInvitation .focusGiftProduct small{color:#8a7f93;font-size:11px}
+.focusInvitation .focusGiftActions{margin-top:auto;padding-top:8px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.focusInvitation .focusGiftContribute{flex:1 1 140px;min-height:44px;justify-content:center}
+.focusInvitation .focusGiftActions .gc-entry{all:unset;display:contents}
+.focusInvitation .focusGiftActions .gc-launch{flex:1 1 140px;min-height:44px;padding:10px 14px;border-radius:12px;border:1px solid #d9cce3;background:#fff;color:#4a3466;font-weight:650;cursor:pointer}
+.focusInvitation .focusGiftActions .gc-launch:hover{background:#f6f0fb}
+.focusInvitation .focusGiftActions .focusGiftComplete{flex:1 1 100%;margin:0;text-align:center}
+.focusInvitation .guest-actions{flex-wrap:wrap;gap:8px}
+.focusInvitation .guest-actions>*{min-height:44px}
+/* RSVP / wishes: one clear label per card instead of a toggle plus a repeated heading */
+.ce-card>summary{cursor:pointer;font-weight:700;display:flex;align-items:center;gap:8px;min-height:44px;list-style:none}
+.ce-card>summary::-webkit-details-marker{display:none}
+.ce-card>summary small{margin-left:auto;font-weight:600;color:#6336b5}
+@media(max-width:600px){
+  .focusInvitation .focusGiftIllustration{height:120px}
+  .focusInvitation .focusGiftActions{flex-direction:column;align-items:stretch}
+  .focusInvitation .focusGiftContribute,.focusInvitation .focusGiftActions .gc-launch{flex:none;width:100%}
+  .focusInvitation .guest-actions>*{flex:1 1 calc(50% - 8px)}
+}
+@media(prefers-reduced-motion:reduce){.focusInvitation *{scroll-behavior:auto;transition:none!important}}
