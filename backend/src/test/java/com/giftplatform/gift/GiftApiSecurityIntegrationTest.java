@@ -42,9 +42,10 @@ class GiftApiSecurityIntegrationTest {
   mvc.perform(multipart(BASE+"/photos").file("photo",new byte[]{1,2,3}).with(user("host"))).andExpect(status().isForbidden());verifyNoInteractions(photos);
  }
  @Test void publicPhotoRouteIsReachableWithoutHostLogin() throws Exception {
-  when(photos.publicPhoto(EVENT,GIFT)).thenReturn(new byte[]{(byte)255,(byte)216,(byte)255});
+  // The route now serves full images by default and thumbnails with ?thumbnail=true.
+  when(photos.publicPhoto(EVENT,GIFT,false)).thenReturn(new byte[]{(byte)255,(byte)216,(byte)255});
   mvc.perform(get("/api/public/events/"+EVENT+"/gifts/"+GIFT+"/photo")).andExpect(status().isOk()).andExpect(content().contentType("image/jpeg"));
-  verify(photos).publicPhoto(EVENT,GIFT);
+  verify(photos).publicPhoto(EVENT,GIFT,false);
  }
  @Test void privatePhotoRouteRequiresLogin() throws Exception {
   mvc.perform(get(BASE+"/photos/"+GIFT)).andExpect(status().isUnauthorized());verifyNoInteractions(photos);

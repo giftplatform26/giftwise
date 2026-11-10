@@ -28,7 +28,8 @@ public record RegisterRequest(
         @Size(min = 8, message = "Password must contain at least 8 characters.")
         String password,
         String emailVerificationToken,
-        @AssertTrue(message = "Please agree to the Terms & Conditions and Privacy Policy.") boolean termsAccepted
+        @jakarta.validation.constraints.NotNull(message = "Please agree to the Terms & Conditions and Privacy Policy.")
+        @AssertTrue(message = "Please agree to the Terms & Conditions and Privacy Policy.") Boolean termsAccepted
 
  ) {
     public RegisterRequest(String fullName,String username,String email,String mobile,String password,String token){this(fullName,username,email,mobile,password,token,false);}

@@ -265,12 +265,12 @@ class ModulePrivilegesIntegrationTest {
  @ParameterizedTest @org.junit.jupiter.params.provider.ValueSource(strings={"HOST","GROUP_ADMIN","GROUP_MEMBER"})
  void signupVerifiesEmailWithoutExistingLoginSession(String kind) throws Exception {
   String address=UUID.randomUUID()+"@example.test",proof=signupProof(kind,address),username="newuser_"+UUID.randomUUID().toString().replace("-","").substring(0,8);
-  var input=new java.util.LinkedHashMap<String,Object>();input.put("email",address);input.put("emailVerificationToken",proof);
+  var input=new java.util.LinkedHashMap<String,Object>();input.put("email",address);input.put("emailVerificationToken",proof);input.put("termsAccepted",true);
   input.put("password","StrongPassword123!");input.put("mobile","+91"+java.util.concurrent.ThreadLocalRandom.current().nextLong(6000000000L,9999999999L));
   String route,table;
   if(kind.equals("HOST")){input.put("fullName","New Host");input.put("username",username);route="/api/auth/register";table="users";}
   else if(kind.equals("GROUP_ADMIN")){input.put("fullName","New Creator");input.put("username",username);input.put("pin","468291");input.put("confirmPin","468291");route=groups()+"/register";table="gift_group_accounts";}
-  else{input.put("displayName","New Member");input.put("confirmPassword","StrongPassword123!");input.put("pin","468291");input.put("confirmPin","468291");route=groups()+"/join/"+group;table="gift_group_members";}
+  else{input.put("displayName","new_member_"+UUID.randomUUID().toString().substring(0,6));input.put("confirmPassword","StrongPassword123!");input.put("pin","468291");input.put("confirmPin","468291");route=groups()+"/join/"+group;table="gift_group_members";}
   mvc.perform(post(route).with(csrf()).contentType(MediaType.APPLICATION_JSON).content(new tools.jackson.databind.ObjectMapper().writeValueAsString(input)))
    .andExpect(status().is(kind.equals("GROUP_MEMBER")?200:201));
   org.junit.jupiter.api.Assertions.assertNotNull(db.queryForObject("SELECT email_verified_at FROM "+table+" WHERE email=?",java.sql.Timestamp.class,address));
@@ -288,8 +288,8 @@ class ModulePrivilegesIntegrationTest {
  @ParameterizedTest @org.junit.jupiter.params.provider.ValueSource(strings={"HOST","GROUP_ADMIN","GROUP_MEMBER"})
  void signupAllowsFormatValidEmailWithoutProofButRejectsForgedProof(String kind) throws Exception {
   String address=UUID.randomUUID()+"@example.test";var input=new java.util.LinkedHashMap<String,Object>();
-  input.put("email",address);input.put("fullName","Unverified User");input.put("username","unverified_"+UUID.randomUUID().toString().replace("-","").substring(0,8));
-  input.put("displayName","Unverified Member");input.put("password","StrongPassword123!");input.put("confirmPassword","StrongPassword123!");
+  input.put("email",address);input.put("termsAccepted",true);input.put("fullName","Unverified User");input.put("username","unverified_"+UUID.randomUUID().toString().replace("-","").substring(0,8));
+  input.put("displayName","unverified_member");input.put("password","StrongPassword123!");input.put("confirmPassword","StrongPassword123!");
   input.put("mobile","+91"+java.util.concurrent.ThreadLocalRandom.current().nextLong(6000000000L,9999999999L));input.put("pin","468291");input.put("confirmPin","468291");
   String route=kind.equals("HOST")?"/api/auth/register":kind.equals("GROUP_ADMIN")?groups()+"/register":groups()+"/join/"+group;
   String table=kind.equals("HOST")?"users":kind.equals("GROUP_ADMIN")?"gift_group_accounts":"gift_group_members";

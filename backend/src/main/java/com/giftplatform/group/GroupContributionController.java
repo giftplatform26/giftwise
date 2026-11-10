@@ -41,7 +41,7 @@ public class GroupContributionController {
  public GroupContributionController(JdbcTemplate db,EventRepository events,PasswordEncoder passwords,com.giftplatform.security.recovery.CredentialSessionVersionStore versions,com.giftplatform.security.recovery.EffectiveRecoveryPolicyService policies){this(db,events,passwords,versions,policies,new GroupReadinessService(db));}
  public GroupContributionController(JdbcTemplate db,EventRepository events,PasswordEncoder passwords,com.giftplatform.security.recovery.CredentialSessionVersionStore versions){this(db,events,passwords,versions,null);}
  @org.springframework.beans.factory.annotation.Autowired private com.giftplatform.monetization.CommercialAccessService commerce;
- public record Credentials(String username,String password,String pin,String confirmPin,String fullName,String email,String mobile,String emailVerificationToken,boolean termsAccepted){
+ public record Credentials(String username,String password,String pin,String confirmPin,String fullName,String email,String mobile,String emailVerificationToken,Boolean termsAccepted){
  public Credentials(String username,String password,String pin,String confirmPin,String fullName,String email,String mobile,String token){this(username,password,pin,confirmPin,fullName,email,mobile,token,false);}
  public Credentials(String username,String password,String pin,String confirmPin,String fullName,String email,String mobile){this(username,password,pin,confirmPin,fullName,email,mobile,null);}
  public Credentials(String username,String password){this(username,password,null,null,null,null,null);}
@@ -179,7 +179,7 @@ public class GroupContributionController {
  public GroupView setup(@PathVariable UUID token,@RequestBody Setup s,HttpServletRequest req){UUID e=event(token),id=sessionAdmin(e,req);if(s==null)throw bad("Setup required");String name=text(s.name(),120,true),creator=text(s.creatorName(),120,true),mobile=text(s.creatorMobile(),20,true);if(!mobile.matches("\\+?[0-9 ]{8,20}"))throw bad("Invalid mobile number");if(s.independentGift()&&s.giftId()!=null)throw bad("Independent groups choose their own gift, outside the host wishlist");boolean fromWishlist=s.giftId()!=null;String gift=fromWishlist?null:text(s.giftName(),160,false),desc=fromWishlist?null:text(s.giftDescription(),500,false),link=fromWishlist?null:text(s.giftLink(),1000,false);if(link!=null&&!link.matches("https://[^\\s]+"))throw bad("Gift link must use HTTPS");if(!fromWishlist&&s.targetPaise()!=null&&(s.targetPaise()<=0||s.targetPaise()>100000000000L))throw bad("Invalid target amount");if(!fromWishlist&&(desc!=null||link!=null)&&gift==null)throw bad("Gift name required for gift details");if(!groups(id).isEmpty())throw new ResponseStatusException(HttpStatus.CONFLICT,"Group already created");UUID createdGroup=UUID.randomUUID();try{db.update("INSERT INTO gift_groups(id,event_id,admin_id,name,creator_name,creator_mobile,description,gift_name,gift_description,gift_link,target_paise,independent_gift) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",createdGroup,e,id,name,creator,mobile,text(s.description(),500,false),gift,desc,link,fromWishlist?null:s.targetPaise(),s.independentGift());}catch(org.springframework.dao.DuplicateKeyException ex){throw new ResponseStatusException(HttpStatus.CONFLICT,"Group already created");}if(s.giftId()!=null){if(giftLifecycle==null)throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Gift selection is unavailable");giftLifecycle.select(createdGroup,id,s.giftId());}return groups(id).get(0);}
 
  // Batch 7C.3: Membership is isolated from the creator/admin login.
- public record JoinRequest(String displayName,String mobile,String password,String confirmPassword,String pin,String confirmPin,String email,String emailVerificationToken,boolean termsAccepted){
+ public record JoinRequest(String displayName,String mobile,String password,String confirmPassword,String pin,String confirmPin,String email,String emailVerificationToken,Boolean termsAccepted){
  public JoinRequest(String displayName,String mobile,String password,String confirmPassword,String pin,String confirmPin,String email,String token){this(displayName,mobile,password,confirmPassword,pin,confirmPin,email,token,false);}
  public JoinRequest(String displayName,String mobile,String password,String confirmPassword,String pin,String confirmPin){this(displayName,mobile,password,confirmPassword,pin,confirmPin,null,null);}
  }
@@ -216,7 +216,7 @@ public class GroupContributionController {
   return m;
  }
  private void validateNewPassword(String value){try{com.giftplatform.security.CredentialPolicy.validatePassword(value);}catch(IllegalArgumentException ex){throw bad(ex.getMessage());}}
- private void requireConsent(boolean accepted){if(!accepted)throw bad("Please agree to the Terms & Conditions and Privacy Policy.");}
+ private void requireConsent(Boolean accepted){if(!Boolean.TRUE.equals(accepted))throw bad("Please agree to the Terms & Conditions and Privacy Policy.");}
  private void consent(String kind,UUID id){db.update("INSERT INTO account_legal_consents(id,account_kind,account_id,terms_version,privacy_version) VALUES(?,?,?,?,?)",UUID.randomUUID(),kind,id,"2026-11-05","2026-11-05");}
  private String memberPassword(String value){
   validateNewPassword(value);

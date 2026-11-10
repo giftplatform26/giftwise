@@ -147,9 +147,15 @@ class UsernameMigrationIntegrationTest {
     }
 
     @Test
-    void shouldRejectUsernameStartingWithNumber() {
+    void shouldAllowUsernameStartingWithNumber() {
+        // V106 credential policy: usernames may start with a letter or a number.
+        assertThatCode(() -> insertUser("1username")).doesNotThrowAnyException();
+    }
+
+    @Test
+    void shouldRejectUsernameStartingWithUnderscore() {
         assertThatThrownBy(() ->
-                insertUser("1username"))
+                insertUser("_username"))
                 .isInstanceOf(
                         DataIntegrityViolationException.class
                 );

@@ -65,7 +65,7 @@ public class RegistrationServiceImpl implements RegistrationService {
         String password = request.password();
 
         com.giftplatform.security.CredentialPolicy.validatePassword(password);
-        if (!request.termsAccepted()) throw new IllegalArgumentException("Please agree to the Terms & Conditions and Privacy Policy.");
+        if (!Boolean.TRUE.equals(request.termsAccepted())) throw new IllegalArgumentException("Please agree to the Terms & Conditions and Privacy Policy.");
 
         if (repository.existsByEmailIgnoreCase(email)) {
             throw new DuplicateEmailException();
