@@ -1,5 +1,6 @@
 // batch-3d4d2d-compact
 'use client';
+import {notify} from '../../../../lib/confirm-dialog.mjs';
 import SharePreviewControl from '../../../../components/SharePreviewControl';
 import {beginAction,completeAction,trackedCopy} from '../../../../lib/interaction-analytics.mjs';
 /* localization:instrumented */
@@ -116,7 +117,7 @@ export default function EventQrPage() {useLocalizationRender();
 
     try {
       await trackedCopy(details.url);
-      alert('Invitation link copied!');
+      void notify('Invitation link copied!');
     } catch {
       setError('Could not copy invitation link');
     }

@@ -66,11 +66,13 @@ export async function hostRequest(fetcher,route,{method='GET',payload,cookie='',
  }
 
  redirectIfSessionExpired(r,`${base}${route}`);
- if(!r.ok){const message=({400:'Check the submitted details',401: route === '/auth/login'
+ if(!r.ok){const detail=[400,402,409].includes(r.status)?await serverReason(r):'';if(detail)throw Error(detail);const message=({402:'This needs an upgraded plan',400:'Check the submitted details',401: route === '/auth/login'
  ? 'Invalid username/email or password. Please try again.'
  : 'Your session is not authenticated. Please sign in again.',403:'Access denied or CSRF verification failed',404:'Event not found',409:'Conflicting or duplicate details'})[r.status]||`Request failed (HTTP ${r.status})`;throw Error(message);}
  return r.status===204?null:r.json();
 }
+/** Host-facing reason supplied by the API ({error}) for validation/conflict responses, if any. */
+async function serverReason(response){try{const body=await response.json();const value=typeof body?.error==='string'?body.error:'';return value.length>0&&value.length<=500?value:''}catch{return ''}}
 export const hostApi={
  me:f=>hostRequest(f,'/auth/me'),
  profileName:f=>hostRequest(f,'/auth/profile-name'),
@@ -78,9 +80,13 @@ export const hostApi={
  register:(f,input)=>hostRequest(f,'/auth/register',{method:'POST',payload:validateRegistration(input)}),
  login:(f,identifier,password)=>hostRequest(f,'/auth/login',{method:'POST',payload:{identifier,password}}),
  logout:f=>hostRequest(f,'/auth/logout',{method:'POST'}),
+ deleteAccount:(f,password)=>{if(typeof password!=='string'||!password)throw Error('Enter your password to confirm.');return hostRequest(f,'/auth/profile/delete-account',{method:'POST',payload:{password,confirmation:'DELETE'}});},
  events:f=>hostRequest(f,'/v1/events'),
  createEvent:(f,event)=>hostRequest(f,'/v1/events',{method:'POST',payload:validateEvent(event)}),
  getEvent:(f,id)=>{if(!/^[0-9a-f-]{36}$/i.test(id))throw Error('Invalid event identifier');return hostRequest(f,`/v1/events/${id}`);},
+ updateEvent:(f,id,event)=>{if(!/^[0-9a-f-]{36}$/i.test(id))throw Error('Invalid event identifier');return hostRequest(f,`/v1/events/${id}`,{method:'PUT',payload:validateEvent(event)});},
+ completeEvent:(f,id)=>hostRequest(f,`/v1/events/${encodeURIComponent(id)}/complete`,{method:'POST'}),
+ cancelEvent:(f,id)=>hostRequest(f,`/v1/events/${encodeURIComponent(id)}/cancel`,{method:'POST'}),
  publishEvent: (f, id) =>
   hostRequest(f, `/v1/events/${encodeURIComponent(id)}/publish`, {
     method: 'POST'

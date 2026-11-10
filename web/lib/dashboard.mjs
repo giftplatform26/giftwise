@@ -20,6 +20,7 @@ export function eventActions(event) {
   if (!event || typeof event.id !== 'string' || !/^[0-9a-f-]{36}$/i.test(event.id)) return [];
   const id = encodeURIComponent(event.id);
   return [
+    {label:'Open celebration',href:`/events/${id}`},
     {label:'Manage gifts',href:`/gifts?eventId=${id}`},
     {label:'Design invitation',href:`/events/${id}/qr`},
     {label:'Preview',href:`/events/${id}/preview`},

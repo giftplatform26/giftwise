@@ -7,7 +7,7 @@ import {HostLanguageSwitcher,useLocalizationRender} from './LocalizationProvider
 import {createContext,useContext,useEffect,useId,useState,type ReactNode} from 'react';
 import {usePathname,useRouter,useSearchParams} from 'next/navigation';
 import Link from 'next/link';
-import {ShieldCheck,Activity,CalendarDays,CheckSquare,Eye,Gift,Heart,Images,Landmark,LayoutDashboard,LogOut,Mail,PanelLeftClose,PanelLeftOpen,Plus,QrCode,Sparkles,UserRound,Users,type LucideIcon} from 'lucide-react';
+import {ShieldCheck,Activity,CalendarDays,CheckSquare,Eye,Pencil,Gift,Heart,Images,Landmark,LayoutDashboard,LogOut,Mail,PanelLeftClose,PanelLeftOpen,Plus,QrCode,Sparkles,UserRound,Users,type LucideIcon} from 'lucide-react';
 import {hostApi} from '../lib/host-api.mjs';
 import {eventIdForRoute} from '../lib/focused.mjs';
 import './host-sidebar.css';
@@ -32,6 +32,7 @@ export default function HostWorkspace({children}:{children:ReactNode}){useLocali
  const base=eventId?`/events/${eventId}`:'';
  const eventLinks:Item[]=eventId?[
   {href:base,label:'Celebration overview',Icon:CheckSquare},
+  {href:base+'/edit',label:'Event details',Icon:Pencil},
   ...((features.CELEBRATION_PLANNING||features.EVENT_REUSE)?[{href:base+'/planning',label:'Celebration settings',Icon:Sparkles}]:[]),
   {href:base+'/receiving-accounts',label:'Receiving accounts',Icon:Landmark},
   {href:`/gifts?eventId=${eventId}`,label:'Gift wishlist',Icon:Gift,active:path==='/gifts'},

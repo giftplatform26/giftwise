@@ -14,4 +14,4 @@ test('login supports a safe post-authentication redirect',()=>{
  assert.match(source,/'\/events'/);
 });
 test('shared navigation includes dashboard and sign out',()=>{const shell=readFileSync('app/components/HostGlobalNav.tsx','utf8');assert.match(shell,/HostWorkspace/);const s=readFileSync('components/HostWorkspace.tsx','utf8');assert.match(s,/href:'\/dashboard'/);assert.match(s,/hostApi.logout/)});
-test('preview has back to events',()=>assert.match(readFileSync('app/events/[id]/preview/page.tsx','utf8'),/Back to Events/));
+test('preview has back to overview',()=>assert.match(readFileSync('components/focused/Preview.tsx','utf8'),/Back to overview/));

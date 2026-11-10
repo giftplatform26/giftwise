@@ -1,4 +1,5 @@
 'use client';
+import {isNativeAppUserAgent,NATIVE_ADMIN_MESSAGE} from '../../lib/native-app.mjs';
 import {BrandLogo} from '../../components/BrandingProvider';
 /* localization:instrumented */
 import {localize,localizeText} from '../../lib/localization.mjs';
@@ -11,7 +12,7 @@ import {useRouter} from 'next/navigation';
 import {hostApi} from '../../lib/host-api.mjs';
 import '../host.css';import {saveFlash} from '../../lib/flash.mjs';import HostToast from '../components/HostToast';
 export default function Login(){useLocalizationRender();const {emailVerificationEnabled}=useVerification();const router=useRouter();const [identifier,setIdentifier]=useState('');const [password,setPassword]=useState('');const [error,setError]=useState('');const [busy,setBusy]=useState(false);const [expired,setExpired]=useState(false);useEffect(()=>{const query=new URLSearchParams(window.location.search);setExpired(query.get('reason')==='session-expired');try{const saved=window.sessionStorage.getItem('gift.registration.identifier');if(saved)setIdentifier(saved);window.sessionStorage.removeItem('gift.registration.identifier')}catch{}},[]);
-async function submit(e:React.FormEvent){e.preventDefault();setBusy(true);setError('');try{const signedIn=await hostApi.login(fetch,identifier,password);const role=signedIn?.role;const isAdmin=role==='PLATFORM_ADMIN';if(!isAdmin && role!=='CUSTOMER'){throw new Error('Unsupported account role');}saveFlash(window.sessionStorage,'success',isAdmin?'Welcome to platform administration.':'Welcome back! Your celebrations are ready.');const params=new URLSearchParams(window.location.search);
+async function submit(e:React.FormEvent){e.preventDefault();setBusy(true);setError('');try{const signedIn=await hostApi.login(fetch,identifier,password);const role=signedIn?.role;const isAdmin=role==='PLATFORM_ADMIN';if(!isAdmin && role!=='CUSTOMER'){throw new Error('Unsupported account role');}if(isAdmin&&isNativeAppUserAgent(navigator.userAgent)){await hostApi.logout(fetch).catch(()=>{});throw new Error(NATIVE_ADMIN_MESSAGE);}saveFlash(window.sessionStorage,'success',isAdmin?'Welcome to platform administration.':'Welcome back! Your celebrations are ready.');const params=new URLSearchParams(window.location.search);
  const next=params.get('next');
  const destination=next==='/verify-email'?'/verify-email':isAdmin?'/admin':(next&&next.startsWith('/')&&!next.startsWith('//')&&!next.includes('\\')&&!/[\r\n]/.test(next)&&!next.startsWith('/login')&&!next.startsWith('/admin')?next:'/events');
  router.replace(destination);router.refresh();}catch(e){setError(e instanceof Error?e.message:'Unable to sign in');}finally{setBusy(false);}}

@@ -7,12 +7,12 @@ Use Node 22.13+ within 22.x or 24.3+ within 24.x, Java 21, and the installed And
 Keep the existing backend running on port 8080. Build and start the isolated mobile portal:
 
 ```sh
-npm --prefix web ci
+npm --prefix ../../web ci
 npm run web:build
 npm run web:start
 ```
 
-Configure `web/.env.local` if the real backend origin differs. Native customer/guest requests use the same `/backend` proxy as the web. Platform-admin pages and APIs return 404 in this mobile portal.
+Set `GIFTWISE_BACKEND_ORIGIN` in `gift-platform/web/.env.local` if the backend origin differs (see `web/.env.example`). The app loads the main web application, so requests use the same `/backend` proxy as the website. Platform-admin pages and APIs return 404 to the app.
 
 ## Build
 

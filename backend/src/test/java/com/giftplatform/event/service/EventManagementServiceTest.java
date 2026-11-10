@@ -89,10 +89,23 @@ class EventManagementServiceTest {
                 argThat(m -> "Wedding".equals(m.get("title"))), isNull());
     }
 
-    @Test void updatePublishedEventRejectedWithoutSaveOrAudit() {
+    @Test void updatePublishedEventKeepsItPublishedAndAudits() {
         Event e = owned(); e.transition(EventStatus.PUBLISHED);
-        assertThatThrownBy(() -> service.update(e.getId(), request)).isInstanceOf(ResponseStatusException.class)
-                .hasMessageContaining("409");
+        EventResponse result = service.update(e.getId(), request);
+        assertThat(result.title()).isEqualTo("Wedding");
+        assertThat(result.status()).isEqualTo(EventStatus.PUBLISHED);
+        assertThat(result.contactPhone()).isEqualTo("+919876543210");
+        verify(audit).recordChange(eq(user), eq(AuditActorType.CUSTOMER), eq("EVENT"), eq(e.getId()),
+                eq(AuditAction.UPDATE), anyMap(), anyMap(), isNull());
+    }
+
+    @Test void updateCompletedOrCancelledEventRejectedWithoutSaveOrAudit() {
+        Event completed = owned(); completed.transition(EventStatus.PUBLISHED); completed.transition(EventStatus.COMPLETED);
+        Event cancelled = owned(); cancelled.transition(EventStatus.CANCELLED);
+        for (Event e : List.of(completed, cancelled)) {
+            assertThatThrownBy(() -> service.update(e.getId(), request)).isInstanceOf(ResponseStatusException.class)
+                    .hasMessageContaining("409").hasMessageContaining("can no longer be edited");
+        }
         verify(repo, never()).saveAndFlush(any());
         verifyNoInteractions(audit);
     }

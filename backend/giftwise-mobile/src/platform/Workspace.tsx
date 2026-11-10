@@ -10,6 +10,8 @@ import * as Sharing from 'expo-sharing';
 import { nativeBridge } from './bridge';
 import { navigationTarget, parseNativeMessage, isAdminPath } from './policy.mjs';
 import { palette } from '../theme/tokens';
+// Lets the shared web app recognise the app (gift-platform/web/lib/native-app.mjs) and keep administration web-only.
+const NATIVE_USER_AGENT = 'GiftWiseApp/1';
 export type WorkspaceProps = { origin: string; path: string; onClose: () => void; checkoutOrigins: string[] };
 export default function Workspace({ origin, path, onClose, checkoutOrigins }: WorkspaceProps) {
   const ref = useRef<WebView<{}>>(null);
@@ -51,7 +53,7 @@ export default function Workspace({ origin, path, onClose, checkoutOrigins }: Wo
     <Pressable style={s.tool} accessibilityRole="button" accessibilityLabel="Reload page" onPress={() => { setError(''); ref.current?.reload(); }}><Text style={s.toolText}>↻</Text></Pressable>
     <Pressable style={s.tool} accessibilityRole="button" accessibilityLabel="Return to app home" onPress={onClose}><Text style={s.toolText}>⌂</Text></Pressable>
   </View>{loading && <View accessibilityRole="progressbar" accessibilityLabel="Loading workspace" style={s.loading}><ActivityIndicator color={palette.purple}/></View>}
-  <WebView<{}> ref={ref} source={{ uri: origin + path }} style={s.web} originWhitelist={['*']} javaScriptEnabled webviewDebuggingEnabled={process.env.EXPO_PUBLIC_GIFTWISE_LOCAL_PREVIEW === '1'} domStorageEnabled sharedCookiesEnabled thirdPartyCookiesEnabled
+  <WebView<{}> ref={ref} source={{ uri: origin + path }} style={s.web} applicationNameForUserAgent={NATIVE_USER_AGENT} originWhitelist={['*']} javaScriptEnabled webviewDebuggingEnabled={process.env.EXPO_PUBLIC_GIFTWISE_LOCAL_PREVIEW === '1'} domStorageEnabled sharedCookiesEnabled thirdPartyCookiesEnabled
     injectedJavaScript={nativeBridge(origin)} onMessage={event => { void message(event); }}
     onShouldStartLoadWithRequest={request => navigate(request.url, request.isTopFrame !== false)}
     onOpenWindow={({ nativeEvent }) => { if (navigationTarget(nativeEvent.targetUrl, origin, checkoutOrigins) === 'internal') { ref.current?.injectJavaScript(`window.location.assign(${JSON.stringify(nativeEvent.targetUrl)});true;`); } else if (navigationTarget(nativeEvent.targetUrl, origin, checkoutOrigins) === 'checkout') { ref.current?.injectJavaScript(`window.location.assign(${JSON.stringify(nativeEvent.targetUrl)});true;`); } else if (navigationTarget(nativeEvent.targetUrl, origin, checkoutOrigins) === 'external') void external(nativeEvent.targetUrl); }}

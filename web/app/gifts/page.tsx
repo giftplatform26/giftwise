@@ -1,4 +1,5 @@
 'use client';
+import {confirmAction} from '../../lib/confirm-dialog.mjs';
 import {activeLocale} from '../../lib/localization.mjs';
 
 /* localization:instrumented */
@@ -77,7 +78,7 @@ function GiftsPageContent(){useLocalizationRender();
   setItems((await remoteGifts.list(fetch,eventId)).map(toDisplayGift));
  }catch(e){setError(message(e,'Save failed'))}finally{setBusy(false)}}
  async function changeVisibility(g:Item){setBusy(true);setError('');try{await bootstrapCsrf(fetch);await remoteGifts.publish(fetch,eventId,g.id,g.status==='PUBLIC'?'DRAFT':'PUBLIC',document.cookie);setItems((await remoteGifts.list(fetch,eventId)).map(toDisplayGift));setNotice('Gift visibility updated.')}catch(e){setError(message(e,'Publication failed'))}finally{setBusy(false)}}
- async function cancel(g:Item){if(!confirm(`Cancel ${g.name}?`))return;setBusy(true);setError('');try{await bootstrapCsrf(fetch);await remoteGifts.cancel(fetch,eventId,g.id,document.cookie);setItems((await remoteGifts.list(fetch,eventId)).map(toDisplayGift));setNotice('Gift cancelled.')}catch(e){setError(message(e,'Cancellation failed'))}finally{setBusy(false)}}
+ async function cancel(g:Item){if(!await confirmAction(`Cancel “${g.name}”? It will be removed from your active wishlist.`,{confirmLabel:'Cancel gift',cancelLabel:'Keep gift',danger:true}))return;setBusy(true);setError('');try{await bootstrapCsrf(fetch);await remoteGifts.cancel(fetch,eventId,g.id,document.cookie);setItems((await remoteGifts.list(fetch,eventId)).map(toDisplayGift));setNotice('Gift cancelled.')}catch(e){setError(message(e,'Cancellation failed'))}finally{setBusy(false)}}
  async function readBackup(file?:File){if(!file)return;try{if(file.size>1000000)throw Error('Backup must be smaller than 1 MB');setImportDrafts(parseDraft(await file.text()));if(backupPanel.current)backupPanel.current.open=true;setNotice('Backup loaded. Review the gifts in Backup before importing.')}catch(e){setError(message(e,'Invalid backup'))}}
  async function importGift(g:Item){setBusy(true);setError('');try{await bootstrapCsrf(fetch);const saved=await remoteGifts.create(fetch,eventId,{name:g.name,description:g.description,targetAmount:g.targetAmount,priority:g.priority,productUrl:g.productUrl},document.cookie);setItems(current=>[...current,toDisplayGift(saved)]);setImportDrafts(current=>current.filter(row=>row.id!==g.id));setNotice(`${g.name} imported as a private draft.`)}catch(e){setError(message(e,'Import failed'))}finally{setBusy(false)}}
  function download(data:Item[],filename:string){const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=filename;a.click();URL.revokeObjectURL(url)}

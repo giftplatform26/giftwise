@@ -50,7 +50,7 @@ public class EventManagementService {
     @Transactional
     public EventResponse update(UUID id, EventRequest input) {
         Event event=owned(id);
-        if (event.getStatus()!=EventStatus.DRAFT) throw new ResponseStatusException(HttpStatus.CONFLICT,"Only drafts can be edited");
+        if (event.getStatus()!=EventStatus.DRAFT&&event.getStatus()!=EventStatus.PUBLISHED) throw new ResponseStatusException(HttpStatus.CONFLICT,"Completed or cancelled celebrations can no longer be edited");
         Map<String,Object> before=snapshot(event);
         validateContact(input);
         applyDelivery(event,input);

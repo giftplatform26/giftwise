@@ -1,8 +1,6 @@
 export const GROWTH_FEATURES={
- GUIDED_CREATION:['Guided event creation','Offer the autosaved step-by-step event form in both application views.'],
  OCCASION_STARTERS:['Occasion starter wording','Suggest editable titles and welcome messages when choosing an occasion.'],
  SMART_DASHBOARD:['Dashboard next steps','Show a bounded event summary, RSVP totals and useful next actions.'],
- POLISHED_GUEST_VIEW:['Polished mobile invitations','Use the mobile invitation layout in Classic view too. Focused view retains its existing invitation layout.'],
  PUBLIC_DEMO:['Public sample celebration','Let visitors explore a fictional sample without registration or data submission.'],
  SHARE_PREVIEWS:['Rich sharing previews','Allow hosts to opt in to title, occasion and date previews in messaging services.'],
  PUBLIC_KEEPSAKES:['Shareable approved-wishes keepsakes','Allow hosts to share approved guestbook messages after an event. Private albums and photos remain private.'],

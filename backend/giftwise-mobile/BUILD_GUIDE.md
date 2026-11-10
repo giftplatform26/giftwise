@@ -1,10 +1,10 @@
 # GiftWise mobile build guide
 
-Mobile v0.3 is for hosts and guests. Administration remains in the original web application; mobile pages/APIs under `/admin` and `/backend/api/admin` return 404.
+Mobile v0.3 is for hosts and guests. Administration remains in the original web application; the web app returns 404 for `/admin` and `/backend/api/admin` to the app.
 
 ## Local standalone Android preview
 
-Use a supported Node version (22.13+ in 22.x or 24.3+ in 24.x), Java 21 and the Android SDK. Install this package and `web/` dependencies, then run:
+Use a supported Node version (22.13+ in 22.x or 24.3+ in 24.x), Java 21 and the Android SDK. Install this package and the main web app's dependencies (`npm --prefix ../../web ci`), then run:
 
 ```sh
 npm run web:build

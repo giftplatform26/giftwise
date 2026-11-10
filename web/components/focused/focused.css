@@ -30,3 +30,5 @@
 .focusInvitationArt{position:relative}.guest-occasion-mark{position:absolute;left:50%;top:54%;transform:translate(-50%,-50%);font-size:88px;line-height:1;filter:drop-shadow(0 12px 20px #683c5512)}@media(max-width:600px){.guest-occasion-mark{font-size:58px;top:63%}}
 
 .ux-focused .gc-dialog .gc-nav{flex-wrap:wrap;overflow:visible}.ux-focused .gc-dialog .gc-panel h3{font-family:inherit;font-size:1.1rem;line-height:1.4;letter-spacing:normal;margin:0 0 12px}.ux-focused .gc-dialog .gc-guest-checkout h3{font-size:1rem}
+
+.ux-focused .focusGiftComplete,.focusGiftComplete{margin:10px 0 0;padding:10px 14px;border-radius:12px;background:#eef7ef;color:#2f6b3a;font-weight:650}

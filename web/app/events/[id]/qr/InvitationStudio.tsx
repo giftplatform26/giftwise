@@ -84,6 +84,6 @@ export default function InvitationStudio({ eventId }: { eventId: string }) {useL
     <p><button type="button" disabled={!selected || busy} onClick={() => void download()}>{localize("ui.cfe198648de28bd6",{defaultValue:"Download selected invitation PNG"})}</button></p>
     {notice && <p role="status">{localizeText(notice)}</p>}
     {error && <p role="alert" className="hostError">{localizeText(error)}</p>}
-    <p style={{ fontSize: 13 }}>{localize("ui.538d6ca0afe64ed0",{defaultValue:"Security: Only trust the official Gift Platform domain. A QR image or design alone does not verify the host's identity. Live GiftVerify verification will be introduced separately."})}</p>
+    <p style={{ fontSize: 13 }}>{localize("ui.538d6ca0afe64ed0",{defaultValue:"Security: Only trust the official GiftWise domain. A QR image or design alone does not verify the host's identity. Live GiftVerify verification will be introduced separately."})}</p>
   </section>;
 }

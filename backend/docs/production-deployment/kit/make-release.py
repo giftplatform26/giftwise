@@ -43,7 +43,7 @@ def main():
     if source.is_file() and valid_asset(source):
      rel=source.relative_to(root/'web');dest=context/rel;dest.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(source,dest)
      snapshot.update(str(rel).encode()+b'\0'+bytes.fromhex(sha(source)))
-  for name in ['package.json','package-lock.json','tsconfig.json','next-env.d.ts']:
+  for name in ['package.json','package-lock.json','tsconfig.json','next-env.d.ts','middleware.ts']:
    shutil.copy2(root/'web'/name,context/name)
   (context/'next.config.js').write_text("module.exports={output:'standalone',async rewrites(){return [{source:'/backend/:path*',destination:'http://127.0.0.1:8080/:path*'}]}};\n")
   # Override only the temporary deployment copy. The working source remains unchanged.
