@@ -42,7 +42,9 @@ class GrowthExperienceIntegrationTest {
  String publicPreview(){return "/api/public/events/"+token+"/share-preview";}
  void enable(){db.update("UPDATE platform_growth_features SET enabled=TRUE WHERE code='SHARE_PREVIEWS'");}
  @Test void freshMigrationAndPublicDefaultsAreAvailable()throws Exception{
-  assertEquals("107",db.queryForObject("SELECT version FROM flyway_schema_history ORDER BY installed_rank DESC LIMIT 1",String.class));
+  // Every migration (including V107 growth controls and later ones) applied successfully.
+  assertEquals(0,db.queryForObject("SELECT count(*) FROM flyway_schema_history WHERE NOT success",Integer.class));
+  org.junit.jupiter.api.Assertions.assertTrue(db.queryForObject("SELECT max(version::int) FROM flyway_schema_history WHERE version IS NOT NULL",Integer.class)>=107);
   mvc.perform(get("/api/public/growth-settings")).andExpect(status().isOk()).andExpect(header().string("Cache-Control","no-store")).andExpect(jsonPath("$.features.SHARE_PREVIEWS").value(false)).andExpect(jsonPath("$.features.PUBLIC_DEMO").value(true));
  }
  @Test void onlyAdministratorWithCsrfCanSaveAndStaleVersionsAreRejected()throws Exception{
