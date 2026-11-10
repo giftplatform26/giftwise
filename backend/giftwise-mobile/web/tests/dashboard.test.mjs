@@ -1,0 +1,15 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {summarizeEvents,eventActions,invitationPath,safeEventDate} from '../lib/dashboard.mjs';
+const id='123e4567-e89b-42d3-a456-426614174000';
+test('empty dashboard counts',()=>assert.deepEqual(summarizeEvents([]),{total:0,draft:0,published:0,completed:0,cancelled:0}));
+test('counts every lifecycle correctly',()=>assert.deepEqual(summarizeEvents([{status:'DRAFT'},{status:'PUBLISHED'},{status:'COMPLETED'},{status:'CANCELLED'}]),{total:4,draft:1,published:1,completed:1,cancelled:1}));
+test('unexpected event list is rejected',()=>assert.throws(()=>summarizeEvents(null),TypeError));
+test('draft invitation is never exposed',()=>assert.equal(invitationPath({status:'DRAFT',publicToken:id}),null));
+test('published invitation requires token',()=>assert.equal(invitationPath({status:'PUBLISHED'}),null));
+test('published invitation links to public page',()=>assert.equal(invitationPath({status:'PUBLISHED',publicToken:id}),`/e/${id}`));
+test('event actions reject invalid ids',()=>assert.deepEqual(eventActions({id:'../admin'}),[]));
+test('event actions preserve gift and QR routes',()=>{const a=eventActions({id,status:'DRAFT'});assert.ok(a.some(x=>x.href===`/gifts?eventId=${id}`));assert.ok(a.some(x=>x.href===`/events/${id}/qr`));assert.ok(!a.some(x=>x.label==='Guest invitation'));});
+test('missing date is clearly labelled',()=>assert.equal(safeEventDate(null),'Date to be decided'));
+test('invalid date is not displayed',()=>assert.equal(safeEventDate('2026-02-30'),'Date to be decided'));
+test('valid date formatted for India',()=>assert.equal(safeEventDate('2026-10-18'),'18 Oct 2026'));

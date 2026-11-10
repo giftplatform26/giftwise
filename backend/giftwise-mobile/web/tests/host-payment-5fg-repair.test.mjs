@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+const page=readFileSync(new URL('../app/host/payment-settings/page.tsx',import.meta.url),'utf8');
+const css=readFileSync(new URL('../app/host/payment-settings/payment-settings.css',import.meta.url),'utf8');
+const client=readFileSync(new URL('../../../src/main/java/com/giftplatform/payment/provider/RazorpayClient.java',import.meta.url),'utf8');
+test('saved destinations precede add forms visually',()=>{assert.match(css,/\.payPanel>\.payItems\{order:1/);assert.match(css,/\.payPanel>form\{order:3/)});
+test('preferred remains gated by independent verification',()=>assert.match(page,/verificationStatus!=='VERIFIED'/));
+test('QR generation requires independent verification',()=>assert.match(page,/u\.verificationStatus!==\'VERIFIED\'/));
+test('Razorpay unauthorized error does not leak credentials',()=>{assert.match(client,/RestClientResponseException/);assert.match(client,/SERVICE_UNAVAILABLE/);assert.doesNotMatch(client,/ex\.getResponseBodyAsString\(\)/)});

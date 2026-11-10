@@ -15,6 +15,6 @@ for(const [kind,route] of [['Upi','upi'],['Bank','banks']]){
  }
 }
 const page=readFileSync(new URL('../app/host/payment-settings/page.tsx',import.meta.url),'utf8');
-test('disabled accounts offer Enable and enabled accounts offer Disable',()=>{assert.match(page,/u\.enabled===false\?<button[^]*?>Enable<\/button>/);assert.match(page,/b\.enabled===false\?<button[^]*?>Enable<\/button>/);});
+test('disabled accounts offer Enable and enabled accounts offer Disable',()=>{assert.match(page,/u\.enabled===false\?<button[^]*?>\{localize\([^]*?defaultValue:"Enable"[^]*?\)\}<\/button>/);assert.match(page,/b\.enabled===false\?<button[^]*?>\{localize\([^]*?defaultValue:"Enable"[^]*?\)\}<\/button>/);});
 test('new payment actions retain session-aware fetch',()=>{assert.match(page,/paymentProfiles\.enableUpi\(authFetch/);assert.match(page,/paymentProfiles\.enableBank\(authFetch/);assert.match(page,/paymentProfiles\.confirmUpi\(authFetch/);assert.match(page,/paymentProfiles\.confirmBank\(authFetch/);});
 test('preferred requires verified status and is visibly selected',()=>{assert.match(page,/verificationStatus!=='VERIFIED'/);assert.match(page,/paySelected/);assert.match(page,/aria-pressed/);});

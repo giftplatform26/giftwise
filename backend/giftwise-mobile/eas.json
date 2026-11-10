@@ -1,0 +1,10 @@
+{
+  "cli": { "version": ">=16.0.0", "appVersionSource": "remote" },
+  "build": {
+    "development": { "developmentClient": true, "distribution": "internal" },
+    "android-preview": { "distribution": "internal", "android": { "buildType": "apk" }, "env": { "GIFTWISE_RELEASE": "1" } },
+    "ios-simulator": { "ios": { "simulator": true }, "env": { "GIFTWISE_RELEASE": "1" } },
+    "ios-device": { "distribution": "internal", "ios": { "simulator": false }, "env": { "GIFTWISE_RELEASE": "1" } },
+    "production": { "autoIncrement": true, "android": { "buildType": "app-bundle" }, "env": { "GIFTWISE_RELEASE": "1" } }
+  }
+}

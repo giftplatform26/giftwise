@@ -200,15 +200,31 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Feature unavailable");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0013 — backend/src/main/java/com/giftplatform/admin/EffectiveModulePermissionService.java:41
+### RULE-0013 — backend/src/main/java/com/giftplatform/admin/EffectiveModulePermissionService.java:49
 
-[backend/src/main/java/com/giftplatform/admin/EffectiveModulePermissionService.java:41](../../src/main/java/com/giftplatform/admin/EffectiveModulePermissionService.java#L41)
+[backend/src/main/java/com/giftplatform/admin/EffectiveModulePermissionService.java:49](../../src/main/java/com/giftplatform/admin/EffectiveModulePermissionService.java#L49)
 
 When / guard context:
 ```java
-c Map<String,Boolean> eventModules(UUID hostId,UUID eventId){
-  var result=new LinkedHashMap<>(modules(hostId));result.put("MEMORY_ALBUM",albumEnabled(hostId,eventId));result.put("AI_INVITATION",aiInvitationEnabled(hostId,eventId));return Map.copyOf(result);
+de)&&Boolean.TRUE.equals(db.queryForObject("SELECT EXISTS(SELECT 1 FROM platform_event_module_grants g JOIN events e ON e.id=g.event_id WHERE g.event_id=? AND e.owner_id=? AND g.module_code=? AND g.enabled)",Boolean.class,eventId,hostId,code));
  }
+ public void requireEvent(UUID hostId,UUID eventId,String code){if(!eventEnabled(hostId,eventId,code))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Feature unavailable for this event");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0014 — backend/src/main/java/com/giftplatform/admin/EffectiveModulePermissionService.java:51
+
+[backend/src/main/java/com/giftplatform/admin/EffectiveModulePermissionService.java:51](../../src/main/java/com/giftplatform/admin/EffectiveModulePermissionService.java#L51)
+
+When / guard context:
+```java
+e_code=? AND g.enabled)",Boolean.class,eventId,hostId,code));
+ }
+ public void requireEvent(UUID hostId,UUID eventId,String code){if(!eventEnabled(hostId,eventId,code))throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Feature unavailable for this event");}
  public void requireAlbum(UUID hostId,UUID eventId){
   if(!albumEnabled(hostId,eventId))
 ```
@@ -218,9 +234,9 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Memory album unavailable
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0014 — backend/src/main/java/com/giftplatform/admin/EffectiveModulePermissionService.java:47
+### RULE-0015 — backend/src/main/java/com/giftplatform/admin/EffectiveModulePermissionService.java:57
 
-[backend/src/main/java/com/giftplatform/admin/EffectiveModulePermissionService.java:47](../../src/main/java/com/giftplatform/admin/EffectiveModulePermissionService.java#L47)
+[backend/src/main/java/com/giftplatform/admin/EffectiveModulePermissionService.java:57](../../src/main/java/com/giftplatform/admin/EffectiveModulePermissionService.java#L57)
 
 When / guard context:
 ```java
@@ -235,7 +251,40 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Design with AI is not en
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0015 — backend/src/main/java/com/giftplatform/admin/ExperienceSettingsService.java:22
+### RULE-0016 — backend/src/main/java/com/giftplatform/admin/EventModuleGrantsController.java:17
+
+[backend/src/main/java/com/giftplatform/admin/EventModuleGrantsController.java:17](../../src/main/java/com/giftplatform/admin/EventModuleGrantsController.java#L17)
+
+When / guard context:
+```java
+inal JdbcTemplate db;private final ActorContext actor;private final EffectiveModulePermissionService permissions;
+ public EventModuleGrantsController(JdbcTemplate db,ActorContext actor,EffectiveModulePermissionService permissions){this.db=db;this.actor=actor;this.permissions=permissions;}
+ private UUID owner(UUID event){if(!actor.isPlatformAdmin())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0017 — backend/src/main/java/com/giftplatform/admin/EventModuleGrantsController.java:21
+
+[backend/src/main/java/com/giftplatform/admin/EventModuleGrantsController.java:21](../../src/main/java/com/giftplatform/admin/EventModuleGrantsController.java#L21)
+
+When / guard context:
+```java
+));return out;}).toList());}
+ public record GrantChange(@jakarta.validation.constraints.NotNull Boolean enabled){}
+ @PostMapping("/{code}") @Transactional
+ public Map<String,Object> set(@PathVariable UUID eventId,@PathVariable String code,@jakarta.validation.Valid @RequestBody GrantChange input){owner(eventId);if(!CODES.contains(code)||input==null)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Unknown event module");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0018 — backend/src/main/java/com/giftplatform/admin/ExperienceSettingsService.java:22
 
 [backend/src/main/java/com/giftplatform/admin/ExperienceSettingsService.java:22](../../src/main/java/com/giftplatform/admin/ExperienceSettingsService.java#L22)
 
@@ -256,7 +305,7 @@ throw new ResponseStatusException(HttpStatus.FORBIDDEN);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0016 — backend/src/main/java/com/giftplatform/admin/ExperienceSettingsService.java:25
+### RULE-0019 — backend/src/main/java/com/giftplatform/admin/ExperienceSettingsService.java:25
 
 [backend/src/main/java/com/giftplatform/admin/ExperienceSettingsService.java:25](../../src/main/java/com/giftplatform/admin/ExperienceSettingsService.java#L25)
 
@@ -275,7 +324,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Choose Classic or Focu
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0017 — backend/src/main/java/com/giftplatform/admin/GroupMemberEmailPolicyController.java:16
+### RULE-0020 — backend/src/main/java/com/giftplatform/admin/GroupMemberEmailPolicyController.java:16
 
 [backend/src/main/java/com/giftplatform/admin/GroupMemberEmailPolicyController.java:16](../../src/main/java/com/giftplatform/admin/GroupMemberEmailPolicyController.java#L16)
 
@@ -297,7 +346,7 @@ throw new ResponseStatusException(HttpStatus.FORBIDDEN);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0018 — backend/src/main/java/com/giftplatform/admin/GroupMemberEmailPolicyController.java:17
+### RULE-0021 — backend/src/main/java/com/giftplatform/admin/GroupMemberEmailPolicyController.java:17
 
 [backend/src/main/java/com/giftplatform/admin/GroupMemberEmailPolicyController.java:17](../../src/main/java/com/giftplatform/admin/GroupMemberEmailPolicyController.java#L17)
 
@@ -314,7 +363,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0019 — backend/src/main/java/com/giftplatform/admin/GroupMemberEmailPolicyController.java:21
+### RULE-0022 — backend/src/main/java/com/giftplatform/admin/GroupMemberEmailPolicyController.java:21
 
 [backend/src/main/java/com/giftplatform/admin/GroupMemberEmailPolicyController.java:21](../../src/main/java/com/giftplatform/admin/GroupMemberEmailPolicyController.java#L21)
 
@@ -330,7 +379,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0020 — backend/src/main/java/com/giftplatform/admin/GroupMemberEmailPolicyController.java:24
+### RULE-0023 — backend/src/main/java/com/giftplatform/admin/GroupMemberEmailPolicyController.java:24
 
 [backend/src/main/java/com/giftplatform/admin/GroupMemberEmailPolicyController.java:24](../../src/main/java/com/giftplatform/admin/GroupMemberEmailPolicyController.java#L24)
 
@@ -346,7 +395,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0021 — backend/src/main/java/com/giftplatform/admin/GroupModuleInterceptor.java:27
+### RULE-0024 — backend/src/main/java/com/giftplatform/admin/GroupModuleInterceptor.java:27
 
 [backend/src/main/java/com/giftplatform/admin/GroupModuleInterceptor.java:27](../../src/main/java/com/giftplatform/admin/GroupModuleInterceptor.java#L27)
 
@@ -363,7 +412,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Invitation unavailable")
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0022 — backend/src/main/java/com/giftplatform/admin/GroupModuleInterceptor.java:29
+### RULE-0025 — backend/src/main/java/com/giftplatform/admin/GroupModuleInterceptor.java:29
 
 [backend/src/main/java/com/giftplatform/admin/GroupModuleInterceptor.java:29](../../src/main/java/com/giftplatform/admin/GroupModuleInterceptor.java#L29)
 
@@ -381,7 +430,79 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0023 — backend/src/main/java/com/giftplatform/admin/PlatformAdminAuditController.java:32
+### RULE-0026 — backend/src/main/java/com/giftplatform/admin/GroupModuleInterceptor.java:32
+
+[backend/src/main/java/com/giftplatform/admin/GroupModuleInterceptor.java:32](../../src/main/java/com/giftplatform/admin/GroupModuleInterceptor.java#L32)
+
+When / guard context:
+```java
+id;
+        try{id=UUID.fromString(token);}catch(IllegalArgumentException ex){throw new ResponseStatusException(HttpStatus.NOT_FOUND);}
+        var event=events.findByPublicToken(id).filter(e->e.getStatus()==EventStatus.PUBLISHED)
+            .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
+        if(!event.isGiftingEnabled())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Gifting is not enabled for this invitation");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0027 — backend/src/main/java/com/giftplatform/admin/GrowthSettingsService.java:29
+
+[backend/src/main/java/com/giftplatform/admin/GrowthSettingsService.java:29](../../src/main/java/com/giftplatform/admin/GrowthSettingsService.java#L29)
+
+When / guard context:
+```java
+lags.put(rs.getString(1),rs.getBoolean(2)));
+  return new Settings(Map.copyOf(flags),version);
+ }
+ public boolean enabled(String code){return Boolean.TRUE.equals(db.queryForObject("SELECT enabled FROM platform_growth_features WHERE code=?",Boolean.class,code));}
+ @Transactional
+ public Settings update(Settings input){
+  if(!actor.isPlatformAdmin())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Platform administrator access required");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0028 — backend/src/main/java/com/giftplatform/admin/GrowthSettingsService.java:31
+
+[backend/src/main/java/com/giftplatform/admin/GrowthSettingsService.java:31](../../src/main/java/com/giftplatform/admin/GrowthSettingsService.java#L31)
+
+When / guard context:
+```java
+ransactional
+ public Settings update(Settings input){
+  if(!actor.isPlatformAdmin())throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Platform administrator access required");
+  if(input==null||input.features()==null||!input.features().keySet().equals(CODES)||input.features().values().stream().anyMatch(Objects::isNull)||input.version()<0)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Supply all supported feature switches and the current version");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0029 — backend/src/main/java/com/giftplatform/admin/GrowthSettingsService.java:34
+
+[backend/src/main/java/com/giftplatform/admin/GrowthSettingsService.java:34](../../src/main/java/com/giftplatform/admin/GrowthSettingsService.java#L34)
+
+When / guard context:
+```java
+l)||input.version()<0)
+   throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Supply all supported feature switches and the current version");
+  UUID who=actor.requireAuthenticatedUserId();
+  if(db.update("UPDATE platform_growth_settings SET version=version+1,changed_by=?,changed_at=now() WHERE id=1 AND version=?",who,input.version())!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Settings changed. Reload before saving");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0030 — backend/src/main/java/com/giftplatform/admin/PlatformAdminAuditController.java:32
 
 [backend/src/main/java/com/giftplatform/admin/PlatformAdminAuditController.java:32](../../src/main/java/com/giftplatform/admin/PlatformAdminAuditController.java#L32)
 
@@ -399,7 +520,7 @@ throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Platform admin only");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0024 — backend/src/main/java/com/giftplatform/admin/PlatformAdminAuditController.java:38
+### RULE-0031 — backend/src/main/java/com/giftplatform/admin/PlatformAdminAuditController.java:38
 
 [backend/src/main/java/com/giftplatform/admin/PlatformAdminAuditController.java:38](../../src/main/java/com/giftplatform/admin/PlatformAdminAuditController.java#L38)
 
@@ -418,13 +539,13 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid audit filters"
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0025 — backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:18
+### RULE-0032 — backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:18
 
 [backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:18](../../src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java#L18)
 
 When / guard context:
 ```java
-FTING","GUEST_GIFTS","RSVP","GUEST_ATTENDANCE","WHATSAPP_SHARING","GUESTBOOK","SOCIAL_SHARING","MEMORY_ALBUM","AI_INVITATION");
+_SHARING","GUESTBOOK","SOCIAL_SHARING","MEMORY_ALBUM","AI_INVITATION","CELEBRATION_PLANNING","EVENT_ESSENTIALS","EVENT_REUSE");
  private final JdbcTemplate db;
  private final ActorContext actor;
  public PlatformAdminConsoleController(JdbcTemplate db,ActorContext actor){this.db=db;this.actor=actor;}
@@ -436,7 +557,7 @@ throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Platform admin only");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0026 — backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:21
+### RULE-0033 — backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:21
 
 [backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:21](../../src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java#L21)
 
@@ -454,7 +575,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Unknown module");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0027 — backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:30
+### RULE-0034 — backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:30
 
 [backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:30](../../src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java#L30)
 
@@ -472,7 +593,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Search too long");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0028 — backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:34
+### RULE-0035 — backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:34
 
 [backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:34](../../src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java#L34)
 
@@ -488,7 +609,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0029 — backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:38
+### RULE-0036 — backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:38
 
 [backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:38](../../src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java#L38)
 
@@ -504,7 +625,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0030 — backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:38
+### RULE-0037 — backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:38
 
 [backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:38](../../src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java#L38)
 
@@ -518,7 +639,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Host not found");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0031 — backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:40
+### RULE-0038 — backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:40
 
 [backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:40](../../src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java#L40)
 
@@ -534,7 +655,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0032 — backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:43
+### RULE-0039 — backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:43
 
 [backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:43](../../src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java#L43)
 
@@ -551,7 +672,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0033 — backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:44
+### RULE-0040 — backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:44
 
 [backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:44](../../src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java#L44)
 
@@ -568,7 +689,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Event not found");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0034 — backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:50
+### RULE-0041 — backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:50
 
 [backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:50](../../src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java#L50)
 
@@ -587,7 +708,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0035 — backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:51
+### RULE-0042 — backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:51
 
 [backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:51](../../src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java#L51)
 
@@ -604,7 +725,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Event not found");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0036 — backend/src/main/java/com/giftplatform/admin/bootstrap/AdminPasswordRecoveryRunner.java:23
+### RULE-0043 — backend/src/main/java/com/giftplatform/admin/bootstrap/AdminPasswordRecoveryRunner.java:23
 
 [backend/src/main/java/com/giftplatform/admin/bootstrap/AdminPasswordRecoveryRunner.java:23](../../src/main/java/com/giftplatform/admin/bootstrap/AdminPasswordRecoveryRunner.java#L23)
 
@@ -624,30 +745,31 @@ throw new IllegalStateException("Explicit ADMIN_RECOVERY_CONFIRM=YES required");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0037 — backend/src/main/java/com/giftplatform/admin/bootstrap/AdminPasswordRecoveryRunner.java:25
+### RULE-0044 — backend/src/main/java/com/giftplatform/admin/bootstrap/AdminPasswordRecoveryRunner.java:25
 
 [backend/src/main/java/com/giftplatform/admin/bootstrap/AdminPasswordRecoveryRunner.java:25](../../src/main/java/com/giftplatform/admin/bootstrap/AdminPasswordRecoveryRunner.java#L25)
 
 When / guard context:
 ```java
-icationArguments args){
+onArguments args){
   if(!"YES".equals(System.getenv("ADMIN_RECOVERY_CONFIRM")))throw new IllegalStateException("Explicit ADMIN_RECOVERY_CONFIRM=YES required");
   String email=System.getenv("ADMIN_RECOVERY_EMAIL"),password=System.getenv("ADMIN_RECOVERY_NEW_PASSWORD");
-  if(email==null||password==null||password.length()<16||password.length()>72)
+  if(email==null||password==null||password.codePointCount(0,password.length())<16)
 ```
 Failure / enforcement:
 ```java
-throw new IllegalArgumentException("Valid email and password of 16–72 characters required");
+throw new IllegalArgumentException("Valid email and password of at least 16 characters required");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0038 — backend/src/main/java/com/giftplatform/admin/bootstrap/AdminPasswordRecoveryRunner.java:27
+### RULE-0045 — backend/src/main/java/com/giftplatform/admin/bootstrap/AdminPasswordRecoveryRunner.java:28
 
-[backend/src/main/java/com/giftplatform/admin/bootstrap/AdminPasswordRecoveryRunner.java:27](../../src/main/java/com/giftplatform/admin/bootstrap/AdminPasswordRecoveryRunner.java#L27)
+[backend/src/main/java/com/giftplatform/admin/bootstrap/AdminPasswordRecoveryRunner.java:28](../../src/main/java/com/giftplatform/admin/bootstrap/AdminPasswordRecoveryRunner.java#L28)
 
 When / guard context:
 ```java
-||password.length()<16||password.length()>72)throw new IllegalArgumentException("Valid email and password of 16–72 characters required");
+("Valid email and password of at least 16 characters required");
+  com.giftplatform.security.CredentialPolicy.validatePassword(password);
   User admin=users.findByEmailIgnoreCase(email.strip().toLowerCase(Locale.ROOT)).orElseThrow(()->new IllegalStateException("Account not found"));
   if(admin.getRole()!=UserRole.PLATFORM_ADMIN||!admin.isEnabled())
 ```
@@ -657,7 +779,7 @@ throw new IllegalStateException("Account is not an enabled platform administrato
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0039 — backend/src/main/java/com/giftplatform/admin/bootstrap/AdminProvisionRunner.java:26
+### RULE-0046 — backend/src/main/java/com/giftplatform/admin/bootstrap/AdminProvisionRunner.java:26
 
 [backend/src/main/java/com/giftplatform/admin/bootstrap/AdminProvisionRunner.java:26](../../src/main/java/com/giftplatform/admin/bootstrap/AdminProvisionRunner.java#L26)
 
@@ -679,7 +801,7 @@ throw new IllegalStateException("Set ADMIN_PROVISION_CONFIRM=YES explicitly");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0040 — backend/src/main/java/com/giftplatform/admin/bootstrap/AdminProvisionRunner.java:31
+### RULE-0047 — backend/src/main/java/com/giftplatform/admin/bootstrap/AdminProvisionRunner.java:31
 
 [backend/src/main/java/com/giftplatform/admin/bootstrap/AdminProvisionRunner.java:31](../../src/main/java/com/giftplatform/admin/bootstrap/AdminProvisionRunner.java#L31)
 
@@ -698,7 +820,7 @@ throw new IllegalArgumentException("Valid ADMIN_PROVISION_EMAIL required");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0041 — backend/src/main/java/com/giftplatform/admin/bootstrap/AdminProvisionRunner.java:34
+### RULE-0048 — backend/src/main/java/com/giftplatform/admin/bootstrap/AdminProvisionRunner.java:34
 
 [backend/src/main/java/com/giftplatform/admin/bootstrap/AdminProvisionRunner.java:34](../../src/main/java/com/giftplatform/admin/bootstrap/AdminProvisionRunner.java#L34)
 
@@ -708,25 +830,24 @@ String password=System.getenv("ADMIN_PROVISION_PASSWORD");
         if (rawEmail == null || !rawEmail.trim().matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) {
             throw new IllegalArgumentException("Valid ADMIN_PROVISION_EMAIL required");
         }
-        if (password==null || password.length()<16 || password.length()>128) {
+        if (password==null || password.codePointCount(0,password.length())<16) {
 ```
 Failure / enforcement:
 ```java
-throw new IllegalArgumentException("ADMIN_PROVISION_PASSWORD must be 16-128 characters");
+throw new IllegalArgumentException("ADMIN_PROVISION_PASSWORD must contain at least 16 characters");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0042 — backend/src/main/java/com/giftplatform/admin/bootstrap/AdminProvisionRunner.java:38
+### RULE-0049 — backend/src/main/java/com/giftplatform/admin/bootstrap/AdminProvisionRunner.java:39
 
-[backend/src/main/java/com/giftplatform/admin/bootstrap/AdminProvisionRunner.java:38](../../src/main/java/com/giftplatform/admin/bootstrap/AdminProvisionRunner.java#L38)
+[backend/src/main/java/com/giftplatform/admin/bootstrap/AdminProvisionRunner.java:39](../../src/main/java/com/giftplatform/admin/bootstrap/AdminProvisionRunner.java#L39)
 
 When / guard context:
 ```java
-ION_EMAIL required");
+sword.length())<16) {
+            throw new IllegalArgumentException("ADMIN_PROVISION_PASSWORD must contain at least 16 characters");
         }
-        if (password==null || password.length()<16 || password.length()>128) {
-            throw new IllegalArgumentException("ADMIN_PROVISION_PASSWORD must be 16-128 characters");
-        }
+        com.giftplatform.security.CredentialPolicy.validatePassword(password);
         String email=rawEmail.trim().toLowerCase(Locale.ROOT);
         if (users.existsByEmailIgnoreCase(email)) {
 ```
@@ -736,9 +857,115 @@ throw new IllegalStateException("Account already exists; refusing to elevate an 
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
+## analytics
+
+### RULE-0050 — backend/src/main/java/com/giftplatform/analytics/InteractionAdminController.java:20
+
+[backend/src/main/java/com/giftplatform/analytics/InteractionAdminController.java:20](../../src/main/java/com/giftplatform/analytics/InteractionAdminController.java#L20)
+
+When / guard context:
+```java
+ostId,@RequestParam(required=false) UUID eventId,
+  @RequestParam(required=false) LocalDate from,@RequestParam(required=false) LocalDate to,@RequestParam(defaultValue="") String action,
+  @RequestParam(defaultValue="") String outcome,@RequestParam(defaultValue="") String kind,@RequestParam(defaultValue="0") int page){
+  if(!actor.isPlatformAdmin())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0051 — backend/src/main/java/com/giftplatform/analytics/InteractionAdminController.java:22
+
+[backend/src/main/java/com/giftplatform/analytics/InteractionAdminController.java:22](../../src/main/java/com/giftplatform/analytics/InteractionAdminController.java#L22)
+
+When / guard context:
+```java
+us.FORBIDDEN);
+  if(from==null)from=LocalDate.now(ZoneOffset.UTC).minusDays(29);if(to==null)to=LocalDate.now(ZoneOffset.UTC);
+  if(to.isBefore(from)||from.getYear()<2000||to.getYear()>9998||page<0||page>100000||!action.matches("[A-Z0-9_]{0,64}")||!outcome.matches("[A-Z_]{0,32}")||!Set.of("","CLICK","PAGE_VIEW","REQUEST","OPERATION").contains(kind))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid analytics filters");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0052 — backend/src/main/java/com/giftplatform/analytics/InteractionAdminController.java:39
+
+[backend/src/main/java/com/giftplatform/analytics/InteractionAdminController.java:39](../../src/main/java/com/giftplatform/analytics/InteractionAdminController.java#L39)
+
+When / guard context:
+```java
+n ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(Map.of("byPage",byPage,"summary",summary,"entries",entries,"byHost",byHost,"byEvent",byEvent,"byAction",byAction,"page",current,"totalPages",pages,"from",from,"to",to));
+ }
+ @GetMapping("/funnel")
+ public ResponseEntity<List<Map<String,Object>>> funnel(){
+  if(!actor.isPlatformAdmin())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0053 — backend/src/main/java/com/giftplatform/analytics/InteractionAdminController.java:50
+
+[backend/src/main/java/com/giftplatform/analytics/InteractionAdminController.java:50](../../src/main/java/com/giftplatform/analytics/InteractionAdminController.java#L50)
+
+When / guard context:
+```java
+'))
+      OR (source='BROWSER' AND action IN ('INVITATION_LINK_COPY','INVITATION_SHARE','INVITATION_WHATSAPP') AND outcome IN ('SUCCESS','BROWSER_READY','HANDED_OFF')))
+   GROUP BY action ORDER BY action
+   """));
+ }
+ @GetMapping("/{id}") public ResponseEntity<List<Map<String,Object>>> timeline(@PathVariable UUID id){
+  if(!actor.isPlatformAdmin())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0054 — backend/src/main/java/com/giftplatform/analytics/InteractionRequestFilter.java:41
+
+[backend/src/main/java/com/giftplatform/analytics/InteractionRequestFilter.java:41](../../src/main/java/com/giftplatform/analytics/InteractionRequestFilter.java#L41)
+
+When / guard context:
+```java
+e the response can commit its headers.
+  try{req.setAttribute("gift.analytics.visitor",InteractionService.visitor(req));}catch(RuntimeException e){logger.debug("Interaction session unavailable",e);}
+  long start=System.nanoTime();boolean failed=false;
+  try{chain.doFilter(req,res);}catch(ServletException|IOException|RuntimeException e){failed=true;
+```
+Failure / enforcement:
+```java
+throw e;
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0055 — backend/src/main/java/com/giftplatform/analytics/InteractionService.java:29
+
+[backend/src/main/java/com/giftplatform/analytics/InteractionService.java:29](../../src/main/java/com/giftplatform/analytics/InteractionService.java#L29)
+
+When / guard context:
+```java
+ining("/"));
+ }
+ public static String visitor(HttpServletRequest request){if(request.getAttribute("gift.analytics.visitor") instanceof String key)return key;try{return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(request.getSession().getId().getBytes(StandardCharsets.UTF_8)));}catch(java.security.NoSuchAlgorithmException e){
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException(e);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
 ## asset
 
-### RULE-0043 — backend/src/main/java/com/giftplatform/asset/GalleryAssetService.java:23
+### RULE-0056 — backend/src/main/java/com/giftplatform/asset/GalleryAssetService.java:23
 
 [backend/src/main/java/com/giftplatform/asset/GalleryAssetService.java:23](../../src/main/java/com/giftplatform/asset/GalleryAssetService.java#L23)
 
@@ -755,14 +982,34 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0044 — backend/src/main/java/com/giftplatform/asset/GalleryAssetService.java:26
+### RULE-0057 — backend/src/main/java/com/giftplatform/asset/GalleryAssetService.java:26
 
 [backend/src/main/java/com/giftplatform/asset/GalleryAssetService.java:26](../../src/main/java/com/giftplatform/asset/GalleryAssetService.java#L26)
 
 When / guard context:
 ```java
-nfo).toList();}
+().stream().map(this::info).toList();}
  public GalleryAsset publishedImage(UUID id){GalleryAsset a=get(id);if(!a.isPublished() || !"FREE".equals(a.getTier())) throw new ResponseStatusException(HttpStatus.NOT_FOUND);return a;}
+ public byte[] preview(UUID id){
+  actor.requireAuthenticatedUserId();GalleryAsset asset=get(id);
+  if(!asset.isPublished())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0058 — backend/src/main/java/com/giftplatform/asset/GalleryAssetService.java:31
+
+[backend/src/main/java/com/giftplatform/asset/GalleryAssetService.java:31](../../src/main/java/com/giftplatform/asset/GalleryAssetService.java#L31)
+
+When / guard context:
+```java
+eAuthenticatedUserId();GalleryAsset asset=get(id);
+  if(!asset.isPublished())throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+  return GalleryPreviewRenderer.watermarked(asset.getImagePng());
+ }
  public GalleryAsset purchasedImage(UUID id){
   UUID host=actor.requireAuthenticatedUserId();GalleryAsset asset=get(id);
   if(!asset.isPublished())
@@ -773,13 +1020,15 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0045 — backend/src/main/java/com/giftplatform/asset/GalleryAssetService.java:27
+### RULE-0059 — backend/src/main/java/com/giftplatform/asset/GalleryAssetService.java:32
 
-[backend/src/main/java/com/giftplatform/asset/GalleryAssetService.java:27](../../src/main/java/com/giftplatform/asset/GalleryAssetService.java#L27)
+[backend/src/main/java/com/giftplatform/asset/GalleryAssetService.java:32](../../src/main/java/com/giftplatform/asset/GalleryAssetService.java#L32)
 
 When / guard context:
 ```java
-.getTier())) throw new ResponseStatusException(HttpStatus.NOT_FOUND);return a;}
+OT_FOUND);
+  return GalleryPreviewRenderer.watermarked(asset.getImagePng());
+ }
  public GalleryAsset purchasedImage(UUID id){
   UUID host=actor.requireAuthenticatedUserId();GalleryAsset asset=get(id);
   if(!asset.isPublished())throw new ResponseStatusException(HttpStatus.NOT_FOUND);
@@ -791,9 +1040,9 @@ throw new ResponseStatusException(HttpStatus.PAYMENT_REQUIRED,"Purchase this tem
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0046 — backend/src/main/java/com/giftplatform/asset/GalleryAssetService.java:31
+### RULE-0060 — backend/src/main/java/com/giftplatform/asset/GalleryAssetService.java:36
 
-[backend/src/main/java/com/giftplatform/asset/GalleryAssetService.java:31](../../src/main/java/com/giftplatform/asset/GalleryAssetService.java#L31)
+[backend/src/main/java/com/giftplatform/asset/GalleryAssetService.java:36](../../src/main/java/com/giftplatform/asset/GalleryAssetService.java#L36)
 
 When / guard context:
 ```java
@@ -810,9 +1059,9 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0047 — backend/src/main/java/com/giftplatform/asset/GalleryAssetService.java:38
+### RULE-0061 — backend/src/main/java/com/giftplatform/asset/GalleryAssetService.java:43
 
-[backend/src/main/java/com/giftplatform/asset/GalleryAssetService.java:38](../../src/main/java/com/giftplatform/asset/GalleryAssetService.java#L38)
+[backend/src/main/java/com/giftplatform/asset/GalleryAssetService.java:43](../../src/main/java/com/giftplatform/asset/GalleryAssetService.java#L43)
 
 When / guard context:
 ```java
@@ -829,15 +1078,33 @@ throw new ResponseStatusException(HttpStatus.FORBIDDEN);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0048 — backend/src/main/java/com/giftplatform/asset/GalleryAssetService.java:42
+### RULE-0062 — backend/src/main/java/com/giftplatform/asset/GalleryAssetService.java:47
 
-[backend/src/main/java/com/giftplatform/asset/GalleryAssetService.java:42](../../src/main/java/com/giftplatform/asset/GalleryAssetService.java#L42)
+[backend/src/main/java/com/giftplatform/asset/GalleryAssetService.java:47](../../src/main/java/com/giftplatform/asset/GalleryAssetService.java#L47)
 
 When / guard context:
 ```java
-throw new ResponseStatusException(HttpStatus.FORBIDDEN);}
- @Transactional public AssetInfo upload(String category,String occasion,String title,byte[] image){
+DEN);}
+ @Transactional public AssetInfo upload(String category,String occasion,String title,byte[] image){return upload(category,occasion,title,image,"FREE");}
+ @Transactional public AssetInfo upload(String category,String occasion,String title,byte[] image,String tier){
   requireAdmin();
+  if(!Set.of("FREE","PREMIUM").contains(tier==null?"":tier))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Choose Free or Premium access");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0063 — backend/src/main/java/com/giftplatform/asset/GalleryAssetService.java:49
+
+[backend/src/main/java/com/giftplatform/asset/GalleryAssetService.java:49](../../src/main/java/com/giftplatform/asset/GalleryAssetService.java#L49)
+
+When / guard context:
+```java
+tier){
+  requireAdmin();
+  if(!Set.of("FREE","PREMIUM").contains(tier==null?"":tier))throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Choose Free or Premium access");
   if(!Set.of("BACKGROUND","DECORATION").contains(category)||occasion==null||!occasion.matches("[A-Za-z0-9_-]{1,50}")
      ||title==null||title.isBlank()||title.length()>120)
 ```
@@ -847,7 +1114,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid asset metadata
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0049 — backend/src/main/java/com/giftplatform/asset/GalleryImageProcessor.java:15
+### RULE-0064 — backend/src/main/java/com/giftplatform/asset/GalleryImageProcessor.java:15
 
 [backend/src/main/java/com/giftplatform/asset/GalleryImageProcessor.java:15](../../src/main/java/com/giftplatform/asset/GalleryImageProcessor.java#L15)
 
@@ -870,7 +1137,7 @@ throw invalid();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0050 — backend/src/main/java/com/giftplatform/asset/GalleryImageProcessor.java:20
+### RULE-0065 — backend/src/main/java/com/giftplatform/asset/GalleryImageProcessor.java:20
 
 [backend/src/main/java/com/giftplatform/asset/GalleryImageProcessor.java:20](../../src/main/java/com/giftplatform/asset/GalleryImageProcessor.java#L20)
 
@@ -888,7 +1155,7 @@ throw invalid();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0051 — backend/src/main/java/com/giftplatform/asset/GalleryImageProcessor.java:24
+### RULE-0066 — backend/src/main/java/com/giftplatform/asset/GalleryImageProcessor.java:24
 
 [backend/src/main/java/com/giftplatform/asset/GalleryImageProcessor.java:24](../../src/main/java/com/giftplatform/asset/GalleryImageProcessor.java#L24)
 
@@ -908,7 +1175,7 @@ throw invalid();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0052 — backend/src/main/java/com/giftplatform/asset/GalleryImageProcessor.java:29
+### RULE-0067 — backend/src/main/java/com/giftplatform/asset/GalleryImageProcessor.java:29
 
 [backend/src/main/java/com/giftplatform/asset/GalleryImageProcessor.java:29](../../src/main/java/com/giftplatform/asset/GalleryImageProcessor.java#L29)
 
@@ -927,7 +1194,7 @@ throw invalid();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0053 — backend/src/main/java/com/giftplatform/asset/GalleryImageProcessor.java:31
+### RULE-0068 — backend/src/main/java/com/giftplatform/asset/GalleryImageProcessor.java:31
 
 [backend/src/main/java/com/giftplatform/asset/GalleryImageProcessor.java:31](../../src/main/java/com/giftplatform/asset/GalleryImageProcessor.java#L31)
 
@@ -947,7 +1214,7 @@ throw invalid();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0054 — backend/src/main/java/com/giftplatform/asset/GalleryImageProcessor.java:36
+### RULE-0069 — backend/src/main/java/com/giftplatform/asset/GalleryImageProcessor.java:36
 
 [backend/src/main/java/com/giftplatform/asset/GalleryImageProcessor.java:36](../../src/main/java/com/giftplatform/asset/GalleryImageProcessor.java#L36)
 
@@ -966,7 +1233,7 @@ throw invalid();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0055 — backend/src/main/java/com/giftplatform/asset/GalleryImageProcessor.java:39
+### RULE-0070 — backend/src/main/java/com/giftplatform/asset/GalleryImageProcessor.java:39
 
 [backend/src/main/java/com/giftplatform/asset/GalleryImageProcessor.java:39](../../src/main/java/com/giftplatform/asset/GalleryImageProcessor.java#L39)
 
@@ -985,7 +1252,7 @@ throw r;
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0056 — backend/src/main/java/com/giftplatform/asset/GalleryImageProcessor.java:39
+### RULE-0071 — backend/src/main/java/com/giftplatform/asset/GalleryImageProcessor.java:39
 
 [backend/src/main/java/com/giftplatform/asset/GalleryImageProcessor.java:39](../../src/main/java/com/giftplatform/asset/GalleryImageProcessor.java#L39)
 
@@ -1004,9 +1271,176 @@ throw invalid();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
+### RULE-0072 — backend/src/main/java/com/giftplatform/asset/GalleryPreviewRenderer.java:13
+
+[backend/src/main/java/com/giftplatform/asset/GalleryPreviewRenderer.java:13](../../src/main/java/com/giftplatform/asset/GalleryPreviewRenderer.java#L13)
+
+When / guard context:
+```java
+kage com.giftplatform.asset;
+
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import javax.imageio.ImageIO;
+
+public final class GalleryPreviewRenderer {
+ private GalleryPreviewRenderer() {}
+ public static byte[] watermarked(byte[] png) {
+  try {
+   var source=ImageIO.read(new ByteArrayInputStream(png));
+   if(source==null)
+```
+Failure / enforcement:
+```java
+throw new IOException("Invalid gallery image");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0073 — backend/src/main/java/com/giftplatform/asset/GalleryPreviewRenderer.java:25
+
+[backend/src/main/java/com/giftplatform/asset/GalleryPreviewRenderer.java:25](../../src/main/java/com/giftplatform/asset/GalleryPreviewRenderer.java#L25)
+
+When / guard context:
+```java
+w Color(90,55,76,85));
+    for(int y=-100;y<h+180;y+=110)for(int x=-100;x<w+180;x+=180){var transform=g.getTransform();g.rotate(-Math.PI/7,x,y);g.drawString("GiftWise",x,y);g.setTransform(transform);}
+   } finally {g.dispose();}
+   var out=new ByteArrayOutputStream();ImageIO.write(image,"png",out);return out.toByteArray();
+  } catch(IOException e){
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Could not render template preview",e);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0074 — backend/src/main/java/com/giftplatform/asset/HostInvitationUploadService.java:26
+
+[backend/src/main/java/com/giftplatform/asset/HostInvitationUploadService.java:26](../../src/main/java/com/giftplatform/asset/HostInvitationUploadService.java#L26)
+
+When / guard context:
+```java
+quals(rows.getFirst().get("requires_payment"));boolean paid=commerce.premium(host);
+  return new Access(host,enabled,requires,paid,enabled&&(!requires||paid));
+ }
+ public Access mine(){return access(actor.requireAuthenticatedUserId());}
+ private UUID requireAccess(){UUID host=actor.requireAuthenticatedUserId();Access a=access(host);if(!a.enabled())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Your administrator has not enabled custom invitation uploads");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0075 — backend/src/main/java/com/giftplatform/asset/HostInvitationUploadService.java:26
+
+[backend/src/main/java/com/giftplatform/asset/HostInvitationUploadService.java:26](../../src/main/java/com/giftplatform/asset/HostInvitationUploadService.java#L26)
+
+When / guard context:
+```java
+&&(!requires||paid));
+ }
+ public Access mine(){return access(actor.requireAuthenticatedUserId());}
+ private UUID requireAccess(){UUID host=actor.requireAuthenticatedUserId();Access a=access(host);if(!a.enabled())throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Your administrator has not enabled custom invitation uploads");if(!a.accessible())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.PAYMENT_REQUIRED,"An active premium host plan is required for custom uploads");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0076 — backend/src/main/java/com/giftplatform/asset/HostInvitationUploadService.java:29
+
+[backend/src/main/java/com/giftplatform/asset/HostInvitationUploadService.java:29](../../src/main/java/com/giftplatform/asset/HostInvitationUploadService.java#L29)
+
+When / guard context:
+```java
+C",(rs,i)->new Upload(rs.getObject(1,UUID.class),rs.getString(2),rs.getString(3),rs.getInt(4),rs.getInt(5)),host);}
+ @Transactional public Upload upload(String category,String title,byte[] bytes){
+  UUID host=requireAccess();if(!Set.of("BACKGROUND","DECORATION").contains(category==null?"":category)||title==null||title.isBlank()||title.length()>120)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Choose a background or sticker and a title");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0077 — backend/src/main/java/com/giftplatform/asset/HostInvitationUploadService.java:37
+
+[backend/src/main/java/com/giftplatform/asset/HostInvitationUploadService.java:37](../../src/main/java/com/giftplatform/asset/HostInvitationUploadService.java#L37)
+
+When / guard context:
+```java
+(HttpStatus.NOT_FOUND));}
+ public Access adminAccess(UUID host){requireAdmin();return access(host);}
+ @Transactional public Access configure(UUID host,boolean enabled,boolean requiresPayment){
+  UUID admin=requireAdmin();if(!Integer.valueOf(1).equals(db.queryForObject("SELECT count(*) FROM users WHERE id=? AND role='CUSTOMER'",Integer.class,host)))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Host not found");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0078 — backend/src/main/java/com/giftplatform/asset/HostInvitationUploadService.java:41
+
+[backend/src/main/java/com/giftplatform/asset/HostInvitationUploadService.java:41](../../src/main/java/com/giftplatform/asset/HostInvitationUploadService.java#L41)
+
+When / guard context:
+```java
+uiresPayment,admin);
+  audit.recordChange(admin,AuditActorType.ADMIN,"HOST_INVITATION_UPLOAD_ACCESS",host,AuditAction.UPDATE,Map.of("enabled",before.enabled(),"requiresPayment",before.requiresPayment()),Map.of("enabled",enabled,"requiresPayment",requiresPayment),null);return access(host);
+ }
+ private UUID requireAdmin(){if(!actor.isPlatformAdmin())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0079 — backend/src/main/java/com/giftplatform/asset/PremiumInvitationArtwork.java:14
+
+[backend/src/main/java/com/giftplatform/asset/PremiumInvitationArtwork.java:14](../../src/main/java/com/giftplatform/asset/PremiumInvitationArtwork.java#L14)
+
+When / guard context:
+```java
+port java.io.ByteArrayOutputStream;
+import java.util.Random;
+import javax.imageio.ImageIO;
+
+/** Original, code-drawn stationery with an open centre for editable event details. */
+public final class PremiumInvitationArtwork {
+ private PremiumInvitationArtwork(){}
+ public static byte[] render(int variant) throws Exception {
+  if(variant<0||variant>9)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Unknown stationery design");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0080 — backend/src/main/java/com/giftplatform/asset/PremiumInvitationArtwork.java:22
+
+[backend/src/main/java/com/giftplatform/asset/PremiumInvitationArtwork.java:22](../../src/main/java/com/giftplatform/asset/PremiumInvitationArtwork.java#L22)
+
+When / guard context:
+```java
+.setPaint(new GradientPaint(0,0,c(papers[variant][0]),600,800,c(papers[variant][1])));g.fillRect(0,0,600,800);
+   texture(g,variant);
+   switch(variant){case 0->romance(g);case 1->carnival(g);case 2->moonbeam(g);case 3->botanical(g);case 4->golden(g);case 5->palace(g);case 6->festival(g);case 7->ink(g);case 8->peacock(g);case 9->garden(g);default->
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
 ## audit
 
-### RULE-0057 — backend/src/main/java/com/giftplatform/audit/api/AdminAuditController.java:26
+### RULE-0081 — backend/src/main/java/com/giftplatform/audit/api/AdminAuditController.java:26
 
 [backend/src/main/java/com/giftplatform/audit/api/AdminAuditController.java:26](../../src/main/java/com/giftplatform/audit/api/AdminAuditController.java#L26)
 
@@ -1023,7 +1457,38 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid audit query")
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0058 — backend/src/main/java/com/giftplatform/audit/service/AuditServiceImpl.java:52
+### RULE-0082 — backend/src/main/java/com/giftplatform/audit/api/BusinessAuditController.java:13
+
+[backend/src/main/java/com/giftplatform/audit/api/BusinessAuditController.java:13](../../src/main/java/com/giftplatform/audit/api/BusinessAuditController.java#L13)
+
+When / guard context:
+```java
+{
+ private final JdbcTemplate db;private final ActorContext actors;
+ public BusinessAuditController(JdbcTemplate db,ActorContext actors){this.db=db;this.actors=actors;}
+ @GetMapping public ResponseEntity<Map<String,Object>> list(@RequestParam(defaultValue="") String entityType,@RequestParam(defaultValue="0") int page){if(!actors.isPlatformAdmin())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0083 — backend/src/main/java/com/giftplatform/audit/api/BusinessAuditController.java:13
+
+[backend/src/main/java/com/giftplatform/audit/api/BusinessAuditController.java:13](../../src/main/java/com/giftplatform/audit/api/BusinessAuditController.java#L13)
+
+When / guard context:
+```java
+ject>> list(@RequestParam(defaultValue="") String entityType,@RequestParam(defaultValue="0") int page){if(!actors.isPlatformAdmin())throw new ResponseStatusException(HttpStatus.FORBIDDEN);actors.requireAuthenticatedUserId();if(page<0||page>100000||(!entityType.isEmpty()&&!Set.of("USER","EVENT","GIFT","CONTRIBUTION","PAYMENT").contains(entityType)))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Choose valid audit filters.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0084 — backend/src/main/java/com/giftplatform/audit/service/AuditServiceImpl.java:52
 
 [backend/src/main/java/com/giftplatform/audit/service/AuditServiceImpl.java:52](../../src/main/java/com/giftplatform/audit/service/AuditServiceImpl.java#L52)
 
@@ -1048,7 +1513,7 @@ throw new IllegalArgumentException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0059 — backend/src/main/java/com/giftplatform/audit/service/AuditServiceImpl.java:59
+### RULE-0085 — backend/src/main/java/com/giftplatform/audit/service/AuditServiceImpl.java:59
 
 [backend/src/main/java/com/giftplatform/audit/service/AuditServiceImpl.java:59](../../src/main/java/com/giftplatform/audit/service/AuditServiceImpl.java#L59)
 
@@ -1073,9 +1538,331 @@ throw new IllegalArgumentException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
+## branding
+
+### RULE-0086 — backend/src/main/java/com/giftplatform/branding/BrandingController.java:17
+
+[backend/src/main/java/com/giftplatform/branding/BrandingController.java:17](../../src/main/java/com/giftplatform/branding/BrandingController.java#L17)
+
+When / guard context:
+```java
+randingService.Update body){return service.save(body);}
+ @PostMapping(value="/api/admin/branding/{kind}",consumes=MediaType.MULTIPART_FORM_DATA_VALUE)
+ public BrandingService.Settings upload(@PathVariable String kind,@RequestParam long revision,@RequestPart("file") MultipartFile file)throws IOException{service.admin();if(file.getSize()>2*1024*1024)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Choose an image up to 2 MB.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0087 — backend/src/main/java/com/giftplatform/branding/BrandingService.java:20
+
+[backend/src/main/java/com/giftplatform/branding/BrandingService.java:20](../../src/main/java/com/giftplatform/branding/BrandingService.java#L20)
+
+When / guard context:
+```java
+getString("brand_color"),rs.getString("footer_text"),rs.getString("support_email"),rs.getString("social_links"),assetUrl(rs.getObject("logo_id")),assetUrl(rs.getObject("favicon_id")),rs.getLong("revision")));}
+ private String assetUrl(Object id){return id==null?"":"/api/public/branding/assets/"+id;}
+ public UUID admin(){if(!actor.isPlatformAdmin())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Platform administrator access required.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0088 — backend/src/main/java/com/giftplatform/branding/BrandingService.java:22
+
+[backend/src/main/java/com/giftplatform/branding/BrandingService.java:22](../../src/main/java/com/giftplatform/branding/BrandingService.java#L22)
+
+When / guard context:
+```java
+ivate void audit(UUID id,String action){db.update("INSERT INTO platform_admin_action_audit(id,actor_id,action) VALUES(?,?,?)",UUID.randomUUID(),id,action);}
+ static String text(String value,int max,String label,boolean required){if(value==null||value.strip().length()>max||value.chars().anyMatch(Character::isISOControl)||(required&&value.isBlank()))
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Enter a valid "+label+" (maximum "+max+" characters).");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0089 — backend/src/main/java/com/giftplatform/branding/BrandingService.java:24
+
+[backend/src/main/java/com/giftplatform/branding/BrandingService.java:24](../../src/main/java/com/giftplatform/branding/BrandingService.java#L24)
+
+When / guard context:
+```java
+ing text(String value,int max,String label,boolean required){if(value==null||value.strip().length()>max||value.chars().anyMatch(Character::isISOControl)||(required&&value.isBlank()))throw new IllegalArgumentException("Enter a valid "+label+" (maximum "+max+" characters).");return value.strip();}
+ public static void validate(Update u){
+  if(u==null)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Enter branding settings.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0090 — backend/src/main/java/com/giftplatform/branding/BrandingService.java:27
+
+[backend/src/main/java/com/giftplatform/branding/BrandingService.java:27](../../src/main/java/com/giftplatform/branding/BrandingService.java#L27)
+
+When / guard context:
+```java
+lic static void validate(Update u){
+  if(u==null)throw new IllegalArgumentException("Enter branding settings.");
+  text(u.applicationName(),80,"application name",true);text(u.footerText(),240,"footer text",true);
+  String email=text(u.supportEmail(),254,"support email",false);
+  if(!email.isEmpty()&&!email.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$"))
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Please enter a valid support email address.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0091 — backend/src/main/java/com/giftplatform/branding/BrandingService.java:28
+
+[backend/src/main/java/com/giftplatform/branding/BrandingService.java:28](../../src/main/java/com/giftplatform/branding/BrandingService.java#L28)
+
+When / guard context:
+```java
+on name",true);text(u.footerText(),240,"footer text",true);
+  String email=text(u.supportEmail(),254,"support email",false);
+  if(!email.isEmpty()&&!email.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$"))throw new IllegalArgumentException("Please enter a valid support email address.");
+  if(u.brandColor()==null||!u.brandColor().matches("#[a-fA-F0-9]{6}"))
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Choose a valid brand color.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0092 — backend/src/main/java/com/giftplatform/branding/BrandingService.java:29
+
+[backend/src/main/java/com/giftplatform/branding/BrandingService.java:29](../../src/main/java/com/giftplatform/branding/BrandingService.java#L29)
+
+When / guard context:
+```java
+if(!email.isEmpty()&&!email.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$"))throw new IllegalArgumentException("Please enter a valid support email address.");
+  if(u.brandColor()==null||!u.brandColor().matches("#[a-fA-F0-9]{6}"))throw new IllegalArgumentException("Choose a valid brand color.");
+  if(u.socialLinks()==null||u.socialLinks().length()>2000)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Social links must be at most 2000 characters.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0093 — backend/src/main/java/com/giftplatform/branding/BrandingService.java:30
+
+[backend/src/main/java/com/giftplatform/branding/BrandingService.java:30](../../src/main/java/com/giftplatform/branding/BrandingService.java#L30)
+
+When / guard context:
+```java
+);
+  if(u.socialLinks()==null||u.socialLinks().length()>2000)throw new IllegalArgumentException("Social links must be at most 2000 characters.");
+  for(String link:u.socialLinks().split("\\R")){if(link.isBlank())continue;try{URI uri=URI.create(link.strip());if(!"https".equalsIgnoreCase(uri.getScheme())||uri.getHost()==null||uri.getUserInfo()!=null)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0094 — backend/src/main/java/com/giftplatform/branding/BrandingService.java:30
+
+[backend/src/main/java/com/giftplatform/branding/BrandingService.java:30](../../src/main/java/com/giftplatform/branding/BrandingService.java#L30)
+
+When / guard context:
+```java
+legalArgumentException("Social links must be at most 2000 characters.");
+  for(String link:u.socialLinks().split("\\R")){if(link.isBlank())continue;try{URI uri=URI.create(link.strip());if(!"https".equalsIgnoreCase(uri.getScheme())||uri.getHost()==null||uri.getUserInfo()!=null)throw new IllegalArgumentException();}catch(IllegalArgumentException ex){
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Each social link must be a valid HTTPS URL, one per line.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0095 — backend/src/main/java/com/giftplatform/branding/BrandingService.java:34
+
+[backend/src/main/java/com/giftplatform/branding/BrandingService.java:34](../../src/main/java/com/giftplatform/branding/BrandingService.java#L34)
+
+When / guard context:
+```java
+PDATE platform_branding SET application_name=?,brand_color=?,footer_text=?,support_email=?,social_links=?,revision=revision+1,updated_by=?,updated_at=now() WHERE id=1 AND revision=?",input.applicationName().strip(),input.brandColor(),input.footerText().strip(),input.supportEmail().strip(),input.socialLinks().strip(),id,input.revision());
+  if(n!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Branding changed in another session. Reload and try again.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0096 — backend/src/main/java/com/giftplatform/branding/BrandingService.java:38
+
+[backend/src/main/java/com/giftplatform/branding/BrandingService.java:38](../../src/main/java/com/giftplatform/branding/BrandingService.java#L38)
+
+When / guard context:
+```java
+g column=column(kind);byte[] image=SafeBrandImage.png(data);UUID id=UUID.randomUUID();
+  db.update("INSERT INTO platform_brand_assets(id,image_bytes,created_by) VALUES(?,?,?)",id,image,admin);
+  if(db.update("UPDATE platform_branding SET "+column+"=?,revision=revision+1,updated_by=?,updated_at=now() WHERE id=1 AND revision=?",id,admin,revision)!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Branding changed in another session. Reload and try again.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0097 — backend/src/main/java/com/giftplatform/branding/BrandingService.java:40
+
+[backend/src/main/java/com/giftplatform/branding/BrandingService.java:40](../../src/main/java/com/giftplatform/branding/BrandingService.java#L40)
+
+When / guard context:
+```java
+audit(admin,"BRANDING_"+kind.toUpperCase(Locale.ROOT)+"_UPDATED");return get();
+ }
+ @Transactional public Settings remove(String kind,long revision){UUID admin=admin();String column=column(kind);if(db.update("UPDATE platform_branding SET "+column+"=NULL,revision=revision+1,updated_by=?,updated_at=now() WHERE id=1 AND revision=?",admin,revision)!=1)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Branding changed in another session. Reload and try again.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0098 — backend/src/main/java/com/giftplatform/branding/BrandingService.java:41
+
+[backend/src/main/java/com/giftplatform/branding/BrandingService.java:41](../../src/main/java/com/giftplatform/branding/BrandingService.java#L41)
+
+When / guard context:
+```java
+AND revision=?",admin,revision)!=1)throw new ResponseStatusException(HttpStatus.CONFLICT,"Branding changed in another session. Reload and try again.");audit(admin,"BRANDING_"+kind.toUpperCase(Locale.ROOT)+"_REMOVED");return get();}
+ private String column(String kind){return switch(kind){case "logo"->"logo_id";case "favicon"->"favicon_id";default->
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Choose logo or favicon.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0099 — backend/src/main/java/com/giftplatform/branding/BrandingService.java:42
+
+[backend/src/main/java/com/giftplatform/branding/BrandingService.java:42](../../src/main/java/com/giftplatform/branding/BrandingService.java#L42)
+
+When / guard context:
+```java
+return get();}
+ private String column(String kind){return switch(kind){case "logo"->"logo_id";case "favicon"->"favicon_id";default->throw new IllegalArgumentException("Choose logo or favicon.");};}
+ public byte[] image(UUID id){var rows=db.query("SELECT image_bytes FROM platform_brand_assets WHERE id=?",(rs,n)->rs.getBytes(1),id);if(rows.isEmpty())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Brand image not found.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0100 — backend/src/main/java/com/giftplatform/branding/SafeBrandImage.java:11
+
+[backend/src/main/java/com/giftplatform/branding/SafeBrandImage.java:11](../../src/main/java/com/giftplatform/branding/SafeBrandImage.java#L11)
+
+When / guard context:
+```java
+rt java.awt.image.BufferedImage;
+import java.io.*;
+import javax.imageio.ImageIO;
+
+/** Decode, bound dimensions before allocation, and re-encode without metadata or active content. */
+public final class SafeBrandImage {
+ private SafeBrandImage(){}
+ public static byte[] png(byte[] bytes) {
+  if(bytes==null||bytes.length==0||bytes.length>2*1024*1024)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Choose a PNG or JPEG image up to 2 MB.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0101 — backend/src/main/java/com/giftplatform/branding/SafeBrandImage.java:14
+
+[backend/src/main/java/com/giftplatform/branding/SafeBrandImage.java:14](../../src/main/java/com/giftplatform/branding/SafeBrandImage.java#L14)
+
+When / guard context:
+```java
+andImage(){}
+ public static byte[] png(byte[] bytes) {
+  if(bytes==null||bytes.length==0||bytes.length>2*1024*1024) throw new IllegalArgumentException("Choose a PNG or JPEG image up to 2 MB.");
+  try(var stream=ImageIO.createImageInputStream(new ByteArrayInputStream(bytes))){
+   var readers=ImageIO.getImageReaders(stream);
+   if(!readers.hasNext())
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Choose a valid PNG or JPEG image.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0102 — backend/src/main/java/com/giftplatform/branding/SafeBrandImage.java:18
+
+[backend/src/main/java/com/giftplatform/branding/SafeBrandImage.java:18](../../src/main/java/com/giftplatform/branding/SafeBrandImage.java#L18)
+
+When / guard context:
+```java
+mageInputStream(new ByteArrayInputStream(bytes))){
+   var readers=ImageIO.getImageReaders(stream);
+   if(!readers.hasNext())throw new IllegalArgumentException("Choose a valid PNG or JPEG image.");
+   var reader=readers.next();
+   try{
+    String format=reader.getFormatName();
+    if(!format.equalsIgnoreCase("png")&&!format.equalsIgnoreCase("jpeg"))
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Only PNG and JPEG images are supported.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0103 — backend/src/main/java/com/giftplatform/branding/SafeBrandImage.java:20
+
+[backend/src/main/java/com/giftplatform/branding/SafeBrandImage.java:20](../../src/main/java/com/giftplatform/branding/SafeBrandImage.java#L20)
+
+When / guard context:
+```java
+.next();
+   try{
+    String format=reader.getFormatName();
+    if(!format.equalsIgnoreCase("png")&&!format.equalsIgnoreCase("jpeg"))throw new IllegalArgumentException("Only PNG and JPEG images are supported.");
+    reader.setInput(stream,true,true);int w=reader.getWidth(0),h=reader.getHeight(0);
+    if(w<16||h<16||w>4096||h>4096||(long)w*h>8000000)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Image dimensions must be 16–4096 pixels, up to 8 megapixels.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0104 — backend/src/main/java/com/giftplatform/branding/SafeBrandImage.java:26
+
+[backend/src/main/java/com/giftplatform/branding/SafeBrandImage.java:26](../../src/main/java/com/giftplatform/branding/SafeBrandImage.java#L26)
+
+When / guard context:
+```java
+nderingHint(java.awt.RenderingHints.KEY_INTERPOLATION,java.awt.RenderingHints.VALUE_INTERPOLATION_BICUBIC);g.drawImage(source,0,0,output.getWidth(),output.getHeight(),null);}finally{g.dispose();}
+    var out=new ByteArrayOutputStream();ImageIO.write(output,"png",out);return out.toByteArray();
+   }finally{reader.dispose();}
+  }catch(IOException ex){
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Unable to read this image. Choose a valid PNG or JPEG.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
 ## celebration
 
-### RULE-0060 — backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:47
+### RULE-0105 — backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:47
 
 [backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:47](../../src/main/java/com/giftplatform/celebration/CelebrationController.java#L47)
 
@@ -1094,7 +1881,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid "+label);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0061 — backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:55
+### RULE-0106 — backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:55
 
 [backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:55](../../src/main/java/com/giftplatform/celebration/CelebrationController.java#L55)
 
@@ -1115,7 +1902,7 @@ throw new IllegalStateException(e);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0062 — backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:62
+### RULE-0107 — backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:62
 
 [backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:62](../../src/main/java/com/giftplatform/celebration/CelebrationController.java#L62)
 
@@ -1132,7 +1919,7 @@ throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,"Please try again
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0063 — backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:70
+### RULE-0108 — backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:70
 
 [backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:70](../../src/main/java/com/giftplatform/celebration/CelebrationController.java#L70)
 
@@ -1154,7 +1941,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0064 — backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:73
+### RULE-0109 — backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:73
 
 [backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:73](../../src/main/java/com/giftplatform/celebration/CelebrationController.java#L73)
 
@@ -1174,7 +1961,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid email");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0065 — backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:75
+### RULE-0110 — backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:75
 
 [backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:75](../../src/main/java/com/giftplatform/celebration/CelebrationController.java#L75)
 
@@ -1192,7 +1979,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid attendance");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0066 — backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:78
+### RULE-0111 — backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:78
 
 [backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:78](../../src/main/java/com/giftplatform/celebration/CelebrationController.java#L78)
 
@@ -1210,7 +1997,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid party size");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0067 — backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:83
+### RULE-0112 — backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:83
 
 [backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:83](../../src/main/java/com/giftplatform/celebration/CelebrationController.java#L83)
 
@@ -1230,7 +2017,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"An RSVP already exists fo
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0068 — backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:92
+### RULE-0113 — backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:92
 
 [backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:92](../../src/main/java/com/giftplatform/celebration/CelebrationController.java#L92)
 
@@ -1252,7 +2039,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0069 — backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:137
+### RULE-0114 — backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:137
 
 [backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:137](../../src/main/java/com/giftplatform/celebration/CelebrationController.java#L137)
 
@@ -1271,7 +2058,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid guestbook mode
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0070 — backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:145
+### RULE-0115 — backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:145
 
 [backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:145](../../src/main/java/com/giftplatform/celebration/CelebrationController.java#L145)
 
@@ -1291,7 +2078,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid moderation sta
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0071 — backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:147
+### RULE-0116 — backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:147
 
 [backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:147](../../src/main/java/com/giftplatform/celebration/CelebrationController.java#L147)
 
@@ -1308,7 +2095,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0072 — backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:42
+### RULE-0117 — backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:42
 
 [backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:42](../../src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java#L42)
 
@@ -1326,7 +2113,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid message detail
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0073 — backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:57
+### RULE-0118 — backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:57
 
 [backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:57](../../src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java#L57)
 
@@ -1344,7 +2131,7 @@ throw new IllegalStateException("Image processing timed out");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0074 — backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:58
+### RULE-0119 — backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:58
 
 [backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:58](../../src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java#L58)
 
@@ -1362,7 +2149,7 @@ throw new IllegalStateException("Image conversion unavailable or unsupported");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0075 — backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:62
+### RULE-0120 — backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:62
 
 [backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:62](../../src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java#L62)
 
@@ -1381,7 +2168,7 @@ throw new ResponseStatusException(HttpStatus.PAYLOAD_TOO_LARGE,"Photo must be 5 
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0076 — backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:66
+### RULE-0121 — backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:66
 
 [backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:66](../../src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java#L66)
 
@@ -1403,7 +2190,7 @@ throw new ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE,"Use JPG, PN
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0077 — backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:73
+### RULE-0122 — backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:73
 
 [backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:73](../../src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java#L73)
 
@@ -1420,7 +2207,7 @@ throw new ResponseStatusException(HttpStatus.PAYLOAD_TOO_LARGE,"Optimized photo 
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0078 — backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:75
+### RULE-0123 — backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:75
 
 [backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:75](../../src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java#L75)
 
@@ -1439,7 +2226,7 @@ throw e;
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0079 — backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:76
+### RULE-0124 — backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:76
 
 [backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:76](../../src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java#L76)
 
@@ -1459,7 +2246,7 @@ throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Photo conversi
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0080 — backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:85
+### RULE-0125 — backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:85
 
 [backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:85](../../src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java#L85)
 
@@ -1476,7 +2263,7 @@ throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,"Please try again
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0081 — backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:86
+### RULE-0126 — backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:86
 
 [backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:86](../../src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java#L86)
 
@@ -1493,7 +2280,7 @@ throw e;
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0082 — backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:86
+### RULE-0127 — backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:86
 
 [backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:86](../../src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java#L86)
 
@@ -1510,7 +2297,7 @@ throw new IllegalStateException(e);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0083 — backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:98
+### RULE-0128 — backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:98
 
 [backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:98](../../src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java#L98)
 
@@ -1529,7 +2316,7 @@ throw new IllegalStateException("Invalid photo path");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0084 — backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:108
+### RULE-0129 — backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:108
 
 [backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:108](../../src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java#L108)
 
@@ -1547,7 +2334,7 @@ throw e instanceof RuntimeException re?re:new IllegalStateException(e);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0085 — backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:113
+### RULE-0130 — backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:113
 
 [backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:113](../../src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java#L113)
 
@@ -1566,7 +2353,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0086 — backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:115
+### RULE-0131 — backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:115
 
 [backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:115](../../src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java#L115)
 
@@ -1584,7 +2371,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0087 — backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:116
+### RULE-0132 — backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:116
 
 [backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:116](../../src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java#L116)
 
@@ -1602,7 +2389,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0088 — backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:119
+### RULE-0133 — backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:119
 
 [backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:119](../../src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java#L119)
 
@@ -1620,7 +2407,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0089 — backend/src/main/java/com/giftplatform/celebration/MemoryAlbumController.java:30
+### RULE-0134 — backend/src/main/java/com/giftplatform/celebration/MemoryAlbumController.java:30
 
 [backend/src/main/java/com/giftplatform/celebration/MemoryAlbumController.java:30](../../src/main/java/com/giftplatform/celebration/MemoryAlbumController.java#L30)
 
@@ -1638,11 +2425,142 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid album page");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
+## celebrationplanning
+
+### RULE-0135 — backend/src/main/java/com/giftplatform/celebrationplanning/CelebrationCalendar.java:17
+
+[backend/src/main/java/com/giftplatform/celebrationplanning/CelebrationCalendar.java:17](../../src/main/java/com/giftplatform/celebrationplanning/CelebrationCalendar.java#L17)
+
+When / guard context:
+```java
+ndardCharsets.UTF_8).length;if(count+bytes>75){out.append("\r\n ");count=1;}out.append(ch);count+=bytes;i+=Character.charCount(cp);}return out+"\r\n";}
+ public static void validateTime(LocalDate date,LocalTime time,String zone){
+  ZoneId id=ZoneId.of(zone);
+  if(date!=null&&time!=null&&id.getRules().getValidOffsets(date.atTime(time)).size()!=1)
+```
+Failure / enforcement:
+```java
+throw new DateTimeException("Choose a start time outside a daylight-saving gap or overlap");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0136 — backend/src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java:46
+
+[backend/src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java:46](../../src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java#L46)
+
+When / guard context:
+```java
+in V96; acquire before locking the row.
+  db.queryForObject("SELECT pg_advisory_xact_lock(1195984468,hashtext(?))",Object.class,id.toString());
+  e=events.findForUpdate(id).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
+  permissions.requireEvent(e.getOwnerId(),id,"CELEBRATION_PLANNING");
+  if(e.getStatus()!=EventStatus.DRAFT)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Make the invitation private before changing celebration settings");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0137 — backend/src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java:47
+
+[backend/src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java:47](../../src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java#L47)
+
+When / guard context:
+```java
+permissions.requireEvent(e.getOwnerId(),id,"CELEBRATION_PLANNING");
+  if(e.getStatus()!=EventStatus.DRAFT)throw new ResponseStatusException(HttpStatus.CONFLICT,"Make the invitation private before changing celebration settings");
+  try{CelebrationCalendar.validateTime(e.getEventDate(),input.startTime(),input.timezone());}catch(DateTimeException ex){
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Choose a valid timezone and a time outside daylight-saving gaps or overlaps");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0138 — backend/src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java:49
+
+[backend/src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java:49](../../src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java#L49)
+
+When / guard context:
+```java
+ebration settings");
+  try{CelebrationCalendar.validateTime(e.getEventDate(),input.startTime(),input.timezone());}catch(DateTimeException ex){throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Choose a valid timezone and a time outside daylight-saving gaps or overlaps");}
+  Settings before=settings(e);
+  if(before.version()!=input.version())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Settings changed. Reload before saving");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0139 — backend/src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java:52
+
+[backend/src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java:52](../../src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java#L52)
+
+When / guard context:
+```java
+nput.giftingEnabled()&&e.isGiftingEnabled()&&Boolean.TRUE.equals(db.queryForObject("SELECT EXISTS(SELECT 1 FROM payment_orders WHERE event_id=? UNION ALL SELECT 1 FROM gift_groups WHERE event_id=? UNION ALL SELECT 1 FROM guest_direct_transfer_claims WHERE event_id=? UNION ALL SELECT 1 FROM guest_gifts WHERE event_id=?)",Boolean.class,id,id,id,id)))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"This event already has gifting activity. Keep gifting enabled or create a separate invitation-only event");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0140 — backend/src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java:63
+
+[backend/src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java:63](../../src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java#L63)
+
+When / guard context:
+```java
+public/events/{token}/calendar",produces="text/calendar")
+ @Transactional(readOnly=true)
+ public ResponseEntity<String> calendar(@PathVariable UUID token){Event e=published(token);permissions.requireEvent(e.getOwnerId(),e.getId(),"EVENT_ESSENTIALS");permissions.requireEvent(e.getOwnerId(),e.getId(),"CELEBRATION_PLANNING");if(e.getEventDate()==null)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"The host has not set a date yet");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0141 — backend/src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java:63
+
+[backend/src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java:63](../../src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java#L63)
+
+When / guard context:
+```java
+etId(),"EVENT_ESSENTIALS");permissions.requireEvent(e.getOwnerId(),e.getId(),"CELEBRATION_PLANNING");if(e.getEventDate()==null)throw new ResponseStatusException(HttpStatus.CONFLICT,"The host has not set a date yet");Settings s=settings(e);try{CelebrationCalendar.validateTime(e.getEventDate(),s.startTime(),s.timezone());}catch(DateTimeException ex){
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"The host needs to review the event time and timezone");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
 ## event
 
-### RULE-0090 — backend/src/main/java/com/giftplatform/event/entity/Event.java:68
+### RULE-0142 — backend/src/main/java/com/giftplatform/event/Controller/WorkspaceSummaryController.java:17
 
-[backend/src/main/java/com/giftplatform/event/entity/Event.java:68](../../src/main/java/com/giftplatform/event/entity/Event.java#L68)
+[backend/src/main/java/com/giftplatform/event/Controller/WorkspaceSummaryController.java:17](../../src/main/java/com/giftplatform/event/Controller/WorkspaceSummaryController.java#L17)
+
+When / guard context:
+```java
+db,GrowthSettingsService growth,EffectiveModulePermissionService permissions){this.actor=actor;this.db=db;this.growth=growth;this.permissions=permissions;}
+ @GetMapping("/api/v1/events/workspace-summary")
+ public ResponseEntity<List<Map<String,Object>>> summary(){
+  UUID who=actor.requireAuthenticatedUserId();if(!growth.enabled("SMART_DASHBOARD"))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Dashboard insights disabled");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0143 — backend/src/main/java/com/giftplatform/event/entity/Event.java:73
+
+[backend/src/main/java/com/giftplatform/event/entity/Event.java:73](../../src/main/java/com/giftplatform/event/entity/Event.java#L73)
 
 When / guard context:
 ```java
@@ -1659,9 +2577,9 @@ throw new IllegalArgumentException("Delivery address required");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0091 — backend/src/main/java/com/giftplatform/event/entity/Event.java:115
+### RULE-0144 — backend/src/main/java/com/giftplatform/event/entity/Event.java:120
 
-[backend/src/main/java/com/giftplatform/event/entity/Event.java:115](../../src/main/java/com/giftplatform/event/entity/Event.java#L115)
+[backend/src/main/java/com/giftplatform/event/entity/Event.java:120](../../src/main/java/com/giftplatform/event/entity/Event.java#L120)
 
 When / guard context:
 ```java
@@ -1683,9 +2601,9 @@ throw new IllegalStateException("Invalid owner assignment");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0092 — backend/src/main/java/com/giftplatform/event/entity/Event.java:141
+### RULE-0145 — backend/src/main/java/com/giftplatform/event/entity/Event.java:146
 
-[backend/src/main/java/com/giftplatform/event/entity/Event.java:141](../../src/main/java/com/giftplatform/event/entity/Event.java#L141)
+[backend/src/main/java/com/giftplatform/event/entity/Event.java:146](../../src/main/java/com/giftplatform/event/entity/Event.java#L146)
 
 When / guard context:
 ```java
@@ -1709,9 +2627,9 @@ throw new IllegalStateException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0093 — backend/src/main/java/com/giftplatform/event/service/EventManagementService.java:52
+### RULE-0146 — backend/src/main/java/com/giftplatform/event/service/EventManagementService.java:53
 
-[backend/src/main/java/com/giftplatform/event/service/EventManagementService.java:52](../../src/main/java/com/giftplatform/event/service/EventManagementService.java#L52)
+[backend/src/main/java/com/giftplatform/event/service/EventManagementService.java:53](../../src/main/java/com/giftplatform/event/service/EventManagementService.java#L53)
 
 When / guard context:
 ```java
@@ -1730,9 +2648,9 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Only drafts can be edited
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0094 — backend/src/main/java/com/giftplatform/event/service/EventManagementService.java:72
+### RULE-0147 — backend/src/main/java/com/giftplatform/event/service/EventManagementService.java:73
 
-[backend/src/main/java/com/giftplatform/event/service/EventManagementService.java:72](../../src/main/java/com/giftplatform/event/service/EventManagementService.java#L72)
+[backend/src/main/java/com/giftplatform/event/service/EventManagementService.java:73](../../src/main/java/com/giftplatform/event/service/EventManagementService.java#L73)
 
 When / guard context:
 ```java
@@ -1747,9 +2665,9 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,String.join("; ",readiness
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0095 — backend/src/main/java/com/giftplatform/event/service/EventManagementService.java:74
+### RULE-0148 — backend/src/main/java/com/giftplatform/event/service/EventManagementService.java:75
 
-[backend/src/main/java/com/giftplatform/event/service/EventManagementService.java:74](../../src/main/java/com/giftplatform/event/service/EventManagementService.java#L74)
+[backend/src/main/java/com/giftplatform/event/service/EventManagementService.java:75](../../src/main/java/com/giftplatform/event/service/EventManagementService.java#L75)
 
 When / guard context:
 ```java
@@ -1766,9 +2684,9 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Invalid status transition
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0096 — backend/src/main/java/com/giftplatform/event/service/EventManagementService.java:86
+### RULE-0149 — backend/src/main/java/com/giftplatform/event/service/EventManagementService.java:88
 
-[backend/src/main/java/com/giftplatform/event/service/EventManagementService.java:86](../../src/main/java/com/giftplatform/event/service/EventManagementService.java#L86)
+[backend/src/main/java/com/giftplatform/event/service/EventManagementService.java:88](../../src/main/java/com/giftplatform/event/service/EventManagementService.java#L88)
 
 When / guard context:
 ```java
@@ -1783,9 +2701,9 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Valid delivery address
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0097 — backend/src/main/java/com/giftplatform/event/service/EventManagementService.java:96
+### RULE-0150 — backend/src/main/java/com/giftplatform/event/service/EventManagementService.java:98
 
-[backend/src/main/java/com/giftplatform/event/service/EventManagementService.java:96](../../src/main/java/com/giftplatform/event/service/EventManagementService.java#L96)
+[backend/src/main/java/com/giftplatform/event/service/EventManagementService.java:98](../../src/main/java/com/giftplatform/event/service/EventManagementService.java#L98)
 
 When / guard context:
 ```java
@@ -1800,9 +2718,9 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Valid event address an
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0098 — backend/src/main/java/com/giftplatform/event/service/EventManagementService.java:101
+### RULE-0151 — backend/src/main/java/com/giftplatform/event/service/EventManagementService.java:103
 
-[backend/src/main/java/com/giftplatform/event/service/EventManagementService.java:101](../../src/main/java/com/giftplatform/event/service/EventManagementService.java#L101)
+[backend/src/main/java/com/giftplatform/event/service/EventManagementService.java:103](../../src/main/java/com/giftplatform/event/service/EventManagementService.java#L103)
 
 When / guard context:
 ```java
@@ -1821,7 +2739,7 @@ Rationale beyond this enforcement is not declared at this site. There is no docu
 
 ## gift
 
-### RULE-0099 — backend/src/main/java/com/giftplatform/gift/controller/GiftController.java:37
+### RULE-0152 — backend/src/main/java/com/giftplatform/gift/controller/GiftController.java:37
 
 [backend/src/main/java/com/giftplatform/gift/controller/GiftController.java:37](../../src/main/java/com/giftplatform/gift/controller/GiftController.java#L37)
 
@@ -1839,7 +2757,7 @@ throw new org.springframework.web.server.ResponseStatusException(HttpStatus.BAD_
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0100 — backend/src/main/java/com/giftplatform/gift/entity/Gift.java:54
+### RULE-0153 — backend/src/main/java/com/giftplatform/gift/entity/Gift.java:54
 
 [backend/src/main/java/com/giftplatform/gift/entity/Gift.java:54](../../src/main/java/com/giftplatform/gift/entity/Gift.java#L54)
 
@@ -1859,7 +2777,7 @@ throw new IllegalArgumentException("Invalid gift name");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0101 — backend/src/main/java/com/giftplatform/gift/entity/Gift.java:56
+### RULE-0154 — backend/src/main/java/com/giftplatform/gift/entity/Gift.java:56
 
 [backend/src/main/java/com/giftplatform/gift/entity/Gift.java:56](../../src/main/java/com/giftplatform/gift/entity/Gift.java#L56)
 
@@ -1875,7 +2793,7 @@ throw new IllegalArgumentException("Invalid target amount");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0102 — backend/src/main/java/com/giftplatform/gift/entity/Gift.java:57
+### RULE-0155 — backend/src/main/java/com/giftplatform/gift/entity/Gift.java:57
 
 [backend/src/main/java/com/giftplatform/gift/entity/Gift.java:57](../../src/main/java/com/giftplatform/gift/entity/Gift.java#L57)
 
@@ -1892,7 +2810,7 @@ throw new IllegalArgumentException("Invalid image key");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0103 — backend/src/main/java/com/giftplatform/gift/entity/Gift.java:64
+### RULE-0156 — backend/src/main/java/com/giftplatform/gift/entity/Gift.java:64
 
 [backend/src/main/java/com/giftplatform/gift/entity/Gift.java:64](../../src/main/java/com/giftplatform/gift/entity/Gift.java#L64)
 
@@ -1910,7 +2828,7 @@ throw new IllegalStateException("Gift not active");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0104 — backend/src/main/java/com/giftplatform/gift/entity/Gift.java:65
+### RULE-0157 — backend/src/main/java/com/giftplatform/gift/entity/Gift.java:65
 
 [backend/src/main/java/com/giftplatform/gift/entity/Gift.java:65](../../src/main/java/com/giftplatform/gift/entity/Gift.java#L65)
 
@@ -1928,7 +2846,7 @@ throw new IllegalStateException("Gift not active");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0105 — backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoController.java:16
+### RULE-0158 — backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoController.java:16
 
 [backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoController.java:16](../../src/main/java/com/giftplatform/gift/photo/GiftPhotoController.java#L16)
 
@@ -1945,7 +2863,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Choose a JPEG or PNG p
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0106 — backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java:36
+### RULE-0159 — backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java:36
 
 [backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java:36](../../src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java#L36)
 
@@ -1965,7 +2883,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Editable event not found
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0107 — backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java:41
+### RULE-0160 — backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java:41
 
 [backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java:41](../../src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java#L41)
 
@@ -1984,7 +2902,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Choose a clear photo a
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0108 — backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java:46
+### RULE-0161 — backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java:46
 
 [backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java:46](../../src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java#L46)
 
@@ -2003,15 +2921,15 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Photo is too narrow. U
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0109 — backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java:54
+### RULE-0162 — backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java:54
 
 [backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java:54](../../src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java#L54)
 
 When / guard context:
 ```java
-output=new ByteArrayOutputStream();ImageIO.write(result,"jpeg",output);
+write(result,"jpeg",output);
             UUID id=UUID.randomUUID();
-            db.update("INSERT INTO gift_photos(id,event_id,actor_id,content,width,height) VALUES (?,?,?,?,?,?)",id,eventId,actor,output.toByteArray(),w,h);
+            db.update("INSERT INTO gift_photos(id,event_id,actor_id,content,width,height,thumbnail) VALUES (?,?,?,?,?,?,?)",id,eventId,actor,output.toByteArray(),w,h,thumbnail(output.toByteArray()));
             return new Photo("gift-photo:"+id,w,h);
         }catch(IOException e){
 ```
@@ -2021,7 +2939,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Photo could not be rea
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0110 — backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java:59
+### RULE-0163 — backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java:59
 
 [backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java:59](../../src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java#L59)
 
@@ -2040,7 +2958,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid gift photo");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0111 — backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java:61
+### RULE-0164 — backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java:61
 
 [backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java:61](../../src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java#L61)
 
@@ -2058,7 +2976,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Photo does not belong 
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0112 — backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java:65
+### RULE-0165 — backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java:65
 
 [backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java:65](../../src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java#L65)
 
@@ -2076,7 +2994,44 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0113 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java:34
+### RULE-0166 — backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java:71
+
+[backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java:71](../../src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java#L71)
+
+When / guard context:
+```java
+indFirst().orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
+    }
+    /** Fixed-size thumbnail avoids arbitrary resize work and is reused after first access. */
+    public static byte[] thumbnail(byte[] input) throws IOException {
+        BufferedImage source=ImageIO.read(new ByteArrayInputStream(input));
+        if(source==null)
+```
+Failure / enforcement:
+```java
+throw new IOException("Unreadable gift image");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0167 — backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java:89
+
+[backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java:89](../../src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java#L89)
+
+When / guard context:
+```java
+new ResponseStatusException(HttpStatus.NOT_FOUND));
+        if(!small)return image.content();
+        if(image.thumbnail()!=null)return image.thumbnail();
+        try{byte[] bytes=thumbnail(image.content());db.update("UPDATE gift_photos SET thumbnail=? WHERE id=? AND thumbnail IS NULL",bytes,image.id());return bytes;}
+        catch(IOException ex){
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,"Unable to load this gift photo");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0168 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java:34
 
 [backend/src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java:34](../../src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java#L34)
 
@@ -2094,7 +3049,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Editable event not found
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0114 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java:50
+### RULE-0169 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java:50
 
 [backend/src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java:50](../../src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java#L50)
 
@@ -2112,7 +3067,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,e.getMessage());
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0115 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java:51
+### RULE-0170 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java:51
 
 [backend/src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java:51](../../src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java#L51)
 
@@ -2129,7 +3084,7 @@ throw new ResponseStatusException(HttpStatus.GATEWAY_TIMEOUT,"The retailer took 
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0116 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java:52
+### RULE-0171 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java:52
 
 [backend/src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java:52](../../src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java#L52)
 
@@ -2145,7 +3100,7 @@ throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,"The retailer address c
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0117 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java:57
+### RULE-0172 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java:57
 
 [backend/src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java:57](../../src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java#L57)
 
@@ -2162,7 +3117,7 @@ throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,safe?detail:"Could not 
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0118 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java:68
+### RULE-0173 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java:68
 
 [backend/src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java:68](../../src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java#L68)
 
@@ -2181,7 +3136,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Retailer lookup expire
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0119 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java:76
+### RULE-0174 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java:76
 
 [backend/src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java:76](../../src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java#L76)
 
@@ -2198,7 +3153,7 @@ throw new IllegalArgumentException("Amazon requires a browser verification for t
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0120 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java:107
+### RULE-0175 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java:107
 
 [backend/src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java:107](../../src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java#L107)
 
@@ -2214,7 +3169,7 @@ throw new IllegalArgumentException("This link is not a recognizable product page
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0121 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java:126
+### RULE-0176 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java:126
 
 [backend/src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java:126](../../src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java#L126)
 
@@ -2230,7 +3185,7 @@ throw new IllegalArgumentException("No retailer details found. Enter gift detail
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0122 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java:26
+### RULE-0177 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java:26
 
 [backend/src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java:26](../../src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java#L26)
 
@@ -2247,7 +3202,7 @@ throw new IllegalArgumentException();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0123 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java:28
+### RULE-0178 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java:28
 
 [backend/src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java:28](../../src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java#L28)
 
@@ -2266,7 +3221,7 @@ throw new IllegalArgumentException("Enter a public retailer HTTPS URL");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0124 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java:51
+### RULE-0179 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java:51
 
 [backend/src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java:51](../../src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java#L51)
 
@@ -2285,7 +3240,7 @@ throw new UnknownHostException("Retailer must resolve to public addresses");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0125 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java:70
+### RULE-0180 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java:70
 
 [backend/src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java:70](../../src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java#L70)
 
@@ -2303,7 +3258,7 @@ throw new IOException("Retailer redirect has no destination");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0126 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java:74
+### RULE-0181 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java:74
 
 [backend/src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java:74](../../src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java#L74)
 
@@ -2321,7 +3276,7 @@ throw new IOException("This retailer blocks automated lookups. You can still sav
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0127 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java:75
+### RULE-0182 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java:75
 
 [backend/src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java:75](../../src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java#L75)
 
@@ -2339,7 +3294,7 @@ throw new IOException("The retailer product page was not found. Check the produc
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0128 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java:76
+### RULE-0183 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java:76
 
 [backend/src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java:76](../../src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java#L76)
 
@@ -2356,7 +3311,7 @@ throw new IOException("The retailer returned HTTP "+response.getCode()+". Try it
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0129 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java:80
+### RULE-0184 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java:80
 
 [backend/src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java:80](../../src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java#L80)
 
@@ -2373,7 +3328,7 @@ throw new IOException("Retailer did not return HTML");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0130 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java:85
+### RULE-0185 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java:85
 
 [backend/src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java:85](../../src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java#L85)
 
@@ -2391,7 +3346,7 @@ throw new IOException("Retailer photo exceeds 2 MB");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0131 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java:92
+### RULE-0186 — backend/src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java:92
 
 [backend/src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java:92](../../src/main/java/com/giftplatform/gift/retailer/RetailerPageClient.java#L92)
 
@@ -2411,7 +3366,7 @@ throw new IOException("Retailer redirected too many times; use the direct produc
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0132 — backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:56
+### RULE-0187 — backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:56
 
 [backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:56](../../src/main/java/com/giftplatform/gift/service/GiftManagementService.java#L56)
 
@@ -2431,7 +3386,7 @@ throw new IllegalStateException("Retailer audit service unavailable");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0133 — backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:91
+### RULE-0188 — backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:91
 
 [backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:91](../../src/main/java/com/giftplatform/gift/service/GiftManagementService.java#L91)
 
@@ -2451,7 +3406,7 @@ throw new IllegalStateException("Retailer audit service unavailable");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0134 — backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:105
+### RULE-0189 — backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:105
 
 [backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:105](../../src/main/java/com/giftplatform/gift/service/GiftManagementService.java#L105)
 
@@ -2469,7 +3424,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT, "Gift cancellation requir
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0135 — backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:146
+### RULE-0190 — backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:146
 
 [backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:146](../../src/main/java/com/giftplatform/gift/service/GiftManagementService.java#L146)
 
@@ -2487,7 +3442,7 @@ throw new IllegalArgumentException("Invalid product URL");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0136 — backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:148
+### RULE-0191 — backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:148
 
 [backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:148](../../src/main/java/com/giftplatform/gift/service/GiftManagementService.java#L148)
 
@@ -2505,7 +3460,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid product URL")
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0137 — backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:164
+### RULE-0192 — backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:164
 
 [backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:164](../../src/main/java/com/giftplatform/gift/service/GiftManagementService.java#L164)
 
@@ -2526,7 +3481,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0138 — backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:170
+### RULE-0193 — backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:170
 
 [backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:170](../../src/main/java/com/giftplatform/gift/service/GiftManagementService.java#L170)
 
@@ -2546,7 +3501,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0139 — backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:176
+### RULE-0194 — backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:176
 
 [backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:176](../../src/main/java/com/giftplatform/gift/service/GiftManagementService.java#L176)
 
@@ -2566,7 +3521,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT, "Event cannot be edited")
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0140 — backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:181
+### RULE-0195 — backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:181
 
 [backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:181](../../src/main/java/com/giftplatform/gift/service/GiftManagementService.java#L181)
 
@@ -2586,7 +3541,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT, "Gift is not active");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0141 — backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:188
+### RULE-0196 — backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:188
 
 [backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:188](../../src/main/java/com/giftplatform/gift/service/GiftManagementService.java#L188)
 
@@ -2609,9 +3564,9 @@ Rationale beyond this enforcement is not declared at this site. There is no docu
 
 ## group
 
-### RULE-0142 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:57
+### RULE-0197 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:58
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:57](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L57)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:58](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L58)
 
 When / guard context:
 ```java
@@ -2625,9 +3580,9 @@ throw bad("Username must have 3–40 letters, digits or underscores");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0143 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:58
+### RULE-0198 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:59
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:58](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L58)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:59](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L59)
 
 When / guard context:
 ```java
@@ -2641,9 +3596,9 @@ throw bad("Required field missing");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0144 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:58
+### RULE-0199 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:59
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:58](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L58)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:59](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L59)
 
 When / guard context:
 ```java
@@ -2656,9 +3611,9 @@ throw bad("Invalid field");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0145 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:61
+### RULE-0200 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:62
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:61](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L61)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:62](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L62)
 
 When / guard context:
 ```java
@@ -2673,9 +3628,9 @@ throw new ResponseStatusException(HttpStatus.FORBIDDEN,"PIN sign in is disabled.
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0146 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:69
+### RULE-0201 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:70
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:69](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L69)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:70](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L70)
 
 When / guard context:
 ```java
@@ -2692,9 +3647,9 @@ throw bad("PIN must be exactly six digits");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0147 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:70
+### RULE-0202 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:71
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:70](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L70)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:71](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L71)
 
 When / guard context:
 ```java
@@ -2709,9 +3664,9 @@ throw bad("PIN confirmation does not match");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0148 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:81
+### RULE-0203 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:82
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:81](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L81)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:82](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L82)
 
 When / guard context:
 ```java
@@ -2725,9 +3680,9 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"PIN already taken for thi
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0149 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:88
+### RULE-0204 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:89
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:88](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L88)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:89](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L89)
 
 When / guard context:
 ```java
@@ -2741,9 +3696,9 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"PIN already taken for thi
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0150 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:91
+### RULE-0205 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:92
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:91](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L91)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:92](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L92)
 
 When / guard context:
 ```java
@@ -2759,9 +3714,9 @@ throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0151 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:95
+### RULE-0206 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:96
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:95](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L95)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:96](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L96)
 
 When / guard context:
 ```java
@@ -2776,9 +3731,9 @@ throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"Group login required 
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0152 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:100
+### RULE-0207 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:101
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:100](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L100)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:101](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L101)
 
 When / guard context:
 ```java
@@ -2794,9 +3749,9 @@ throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"Group session expired
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0153 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:104
+### RULE-0208 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:105
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:104](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L104)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:105](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L105)
 
 When / guard context:
 ```java
@@ -2813,16 +3768,15 @@ throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"Group session expired
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0154 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:106
+### RULE-0209 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:107
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:106](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L106)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:107](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L107)
 
 When / guard context:
 ```java
-versions.current("GROUP_ADMIN",id)){
-   s.removeAttribute(SESSION_KEY+eventId);throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"Group session expired");
+bute(SESSION_KEY+eventId);throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"Group session expired");
   }
-  s.setAttribute(ACTIVITY_KEY+eventId,now);Integer n=db.queryForObject("SELECT count(*) FROM gift_group_accounts WHERE id=? AND event_id=?",Integer.class,id,eventId);if(n==null||n!=1)
+  if("1".equals(req.getHeader("X-Gift-User-Activity")))s.setAttribute(ACTIVITY_KEY+eventId,now);Integer n=db.queryForObject("SELECT count(*) FROM gift_group_accounts WHERE id=? AND event_id=?",Integer.class,id,eventId);if(n==null||n!=1)
 ```
 Failure / enforcement:
 ```java
@@ -2830,9 +3784,9 @@ throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0155 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:108
+### RULE-0210 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:109
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:108](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L108)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:109](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L109)
 
 When / guard context:
 ```java
@@ -2846,29 +3800,28 @@ throw bad("Credentials required");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0156 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:108
+### RULE-0211 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:109
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:108](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L108)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:109](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L109)
 
 When / guard context:
 ```java
-id;}
- @PostMapping("/register") @ResponseStatus(HttpStatus.CREATED) @Transactional
- public Map<String,String> register(@PathVariable UUID token,@RequestBody Credentials c){UUID e=event(token);if(c==null)throw bad("Credentials required");String u=username(c.username());String pw=c.password();if(pw==null||pw.length()<8||pw.length()>128||pw.isBlank())
+ng("/register") @ResponseStatus(HttpStatus.CREATED) @Transactional
+ public Map<String,String> register(@PathVariable UUID token,@RequestBody Credentials c){UUID e=event(token);if(c==null)throw bad("Credentials required");String u=c.username();String pw=c.password();if(u==null||!u.matches(com.giftplatform.security.CredentialPolicy.USERNAME_PATTERN))
 ```
 Failure / enforcement:
 ```java
-throw bad("Password must contain 8–128 characters");
+throw bad(com.giftplatform.security.CredentialPolicy.USERNAME_MESSAGE);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0157 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:108
+### RULE-0212 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:109
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:108](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L108)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:109](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L109)
 
 When / guard context:
 ```java
-UUID e=event(token);if(c==null)throw bad("Credentials required");String u=username(c.username());String pw=c.password();if(pw==null||pw.length()<8||pw.length()>128||pw.isBlank())throw bad("Password must contain 8–128 characters");String pin=registrationPin(e,c.pin(),c.confirmPin());String fullName=text(c.fullName(),120,true);if(fullName.length()<2)
+!u.matches(com.giftplatform.security.CredentialPolicy.USERNAME_PATTERN))throw bad(com.giftplatform.security.CredentialPolicy.USERNAME_MESSAGE);u=u.toLowerCase(Locale.ROOT);validateNewPassword(pw);requireConsent(c.termsAccepted());String pin=registrationPin(e,c.pin(),c.confirmPin());String fullName=text(c.fullName(),120,true);if(fullName.length()<2)
 ```
 Failure / enforcement:
 ```java
@@ -2876,13 +3829,13 @@ throw bad("Full name must be at least two characters");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0158 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:110
+### RULE-0213 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:111
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:110](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L110)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:111](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L111)
 
 When / guard context:
 ```java
-k())throw bad("Password must contain 8–128 characters");String pin=registrationPin(e,c.pin(),c.confirmPin());String fullName=text(c.fullName(),120,true);if(fullName.length()<2)throw bad("Full name must be at least two characters");
+lidateNewPassword(pw);requireConsent(c.termsAccepted());String pin=registrationPin(e,c.pin(),c.confirmPin());String fullName=text(c.fullName(),120,true);if(fullName.length()<2)throw bad("Full name must be at least two characters");
  String email=text(c.email(),254,true).toLowerCase(Locale.ROOT);
  if(!email.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$"))
 ```
@@ -2892,9 +3845,9 @@ throw bad("Valid email required");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0159 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:114
+### RULE-0214 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:115
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:114](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L114)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:115](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L115)
 
 When / guard context:
 ```java
@@ -2906,13 +3859,13 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Username already exists")
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0160 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:116
+### RULE-0215 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:117
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:116](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L116)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:117](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L117)
 
 When / guard context:
 ```java
-upEmails.consume(c.emailVerificationToken(),"GROUP_ADMIN",e,email))db.update("UPDATE gift_group_accounts SET email_verified_at=now() WHERE id=?",accountId);return Map.of("username",u);}
+ionToken(),"GROUP_ADMIN",e,email))db.update("UPDATE gift_group_accounts SET email_verified_at=now() WHERE id=?",accountId);consent("GROUP_ADMIN",accountId);return Map.of("username",u);}
  @PostMapping("/login")
  public Map<String,String> login(@PathVariable UUID token,@RequestBody Credentials c,HttpServletRequest req){UUID e=event(token);if(c==null)
 ```
@@ -2922,9 +3875,9 @@ throw bad("Credentials required");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0161 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:117
+### RULE-0216 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:118
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:117](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L117)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:118](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L118)
 
 When / guard context:
 ```java
@@ -2938,9 +3891,9 @@ throw bad("PIN must be six digits");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0162 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:118
+### RULE-0217 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:119
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:118](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L118)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:119](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L119)
 
 When / guard context:
 ```java
@@ -2954,9 +3907,9 @@ throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,"Try again later"
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0163 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:120
+### RULE-0218 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:121
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:120](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L120)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:121](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L121)
 
 When / guard context:
 ```java
@@ -2970,9 +3923,9 @@ throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"Invalid credentials")
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0164 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:120
+### RULE-0219 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:121
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:120](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L120)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:121](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L121)
 
 When / guard context:
 ```java
@@ -2984,9 +3937,9 @@ throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,"Try again later"
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0165 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:120
+### RULE-0220 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:121
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:120](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L120)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:121](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L121)
 
 When / guard context:
 ```java
@@ -2998,9 +3951,9 @@ throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"Invalid credentials")
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0166 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:121
+### RULE-0221 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:122
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:121](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L121)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:122](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L122)
 
 When / guard context:
 ```java
@@ -3013,9 +3966,9 @@ throw bad("Missing page identity");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0167 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:122
+### RULE-0222 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:123
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:122](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L122)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:123](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L123)
 
 When / guard context:
 ```java
@@ -3029,9 +3982,9 @@ throw bad("Invalid page identity");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0168 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:128
+### RULE-0223 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:129
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:128](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L128)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:129](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L129)
 
 When / guard context:
 ```java
@@ -3048,9 +4001,9 @@ throw bad("PIN setup required");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0169 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:131
+### RULE-0224 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:132
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:131](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L131)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:132](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L132)
 
 When / guard context:
 ```java
@@ -3066,9 +4019,9 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Current password is in
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0170 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:138
+### RULE-0225 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:139
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:138](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L138)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:139](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L139)
 
 When / guard context:
 ```java
@@ -3085,9 +4038,9 @@ throw bad("PIN setup required");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0171 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:141
+### RULE-0226 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:142
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:141](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L141)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:142](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L142)
 
 When / guard context:
 ```java
@@ -3103,9 +4056,9 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Current password is in
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0172 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:146
+### RULE-0227 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:147
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:146](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L146)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:147](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L147)
 
 When / guard context:
 ```java
@@ -3121,9 +4074,9 @@ throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0173 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:152
+### RULE-0228 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:153
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:152](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L152)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:153](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L153)
 
 When / guard context:
 ```java
@@ -3139,9 +4092,9 @@ throw bad("Full name must be at least two characters");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0174 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:171
+### RULE-0229 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:172
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:171](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L171)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:172](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L172)
 
 When / guard context:
 ```java
@@ -3157,9 +4110,9 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid "+field);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0175 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:172
+### RULE-0230 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:173
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:172](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L172)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:173](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L173)
 
 When / guard context:
 ```java
@@ -3172,9 +4125,9 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Create group first");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0176 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:173
+### RULE-0231 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:174
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:173](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L173)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:174](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L174)
 
 When / guard context:
 ```java
@@ -3187,9 +4140,9 @@ throw bad("Privacy settings required");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0177 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:174
+### RULE-0232 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:175
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:174](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L174)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:175](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L175)
 
 When / guard context:
 ```java
@@ -3202,9 +4155,9 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Creator payment destinati
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0178 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:175
+### RULE-0233 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:176
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:175](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L175)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:176](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L176)
 
 When / guard context:
 ```java
@@ -3217,9 +4170,9 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Group not found or not ed
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0179 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:178
+### RULE-0234 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:179
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:178](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L178)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:179](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L179)
 
 When / guard context:
 ```java
@@ -3233,9 +4186,9 @@ throw bad("Setup required");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0180 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:178
+### RULE-0235 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:179
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:178](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L178)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:179](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L179)
 
 When / guard context:
 ```java
@@ -3248,9 +4201,9 @@ throw bad("Invalid mobile number");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0181 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:178
+### RULE-0236 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:179
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:178](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L178)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:179](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L179)
 
 When / guard context:
 ```java
@@ -3262,9 +4215,9 @@ throw bad("Independent groups choose their own gift, outside the host wishlist")
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0182 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:178
+### RULE-0237 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:179
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:178](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L178)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:179](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L179)
 
 When / guard context:
 ```java
@@ -3276,9 +4229,9 @@ throw bad("Gift link must use HTTPS");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0183 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:178
+### RULE-0238 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:179
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:178](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L178)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:179](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L179)
 
 When / guard context:
 ```java
@@ -3290,9 +4243,9 @@ throw bad("Invalid target amount");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0184 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:178
+### RULE-0239 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:179
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:178](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L178)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:179](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L179)
 
 When / guard context:
 ```java
@@ -3304,9 +4257,9 @@ throw bad("Gift name required for gift details");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0185 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:178
+### RULE-0240 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:179
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:178](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L178)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:179](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L179)
 
 When / guard context:
 ```java
@@ -3318,9 +4271,9 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Group already created");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0186 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:178
+### RULE-0241 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:179
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:178](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L178)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:179](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L179)
 
 When / guard context:
 ```java
@@ -3332,9 +4285,9 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Group already created");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0187 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:178
+### RULE-0242 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:179
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:178](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L178)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:179](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L179)
 
 When / guard context:
 ```java
@@ -3346,9 +4299,9 @@ throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Gift selection
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0188 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:191
+### RULE-0243 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:193
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:191](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L191)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:193](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L193)
 
 When / guard context:
 ```java
@@ -3365,9 +4318,9 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0189 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:197
+### RULE-0244 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:199
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:197](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L197)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:199](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L199)
 
 When / guard context:
 ```java
@@ -3385,9 +4338,9 @@ throw new ResponseStatusException(HttpStatus.FORBIDDEN);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0190 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:203
+### RULE-0245 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:205
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:203](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L203)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:205](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L205)
 
 When / guard context:
 ```java
@@ -3405,9 +4358,9 @@ throw new ResponseStatusException(HttpStatus.FORBIDDEN);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0191 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:208
+### RULE-0246 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:210
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:208](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L208)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:210](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L210)
 
 When / guard context:
 ```java
@@ -3426,9 +4379,9 @@ throw bad("Display name must have at least two characters");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0192 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:213
+### RULE-0247 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:215
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:213](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L213)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:215](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L215)
 
 When / guard context:
 ```java
@@ -3450,32 +4403,46 @@ throw bad("Enter a valid international mobile number");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0193 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:217
+### RULE-0248 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:218
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:217](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L217)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:218](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L218)
 
 When / guard context:
 ```java
-s");
-  return name;
- }
- private String mobile(String value){
+ng mobile(String value){
   String m=value==null?"":value.replace(" ","").replace("-","");
   if(!MOBILE.matcher(m).matches())throw bad("Enter a valid international mobile number");
   return m;
  }
- private String memberPassword(String value){
-  if(value==null||value.length()<10||value.length()>128||value.isBlank())
+ private void validateNewPassword(String value){try{com.giftplatform.security.CredentialPolicy.validatePassword(value);}catch(IllegalArgumentException ex){
 ```
 Failure / enforcement:
 ```java
-throw bad("Member password must have 10–128 characters");
+throw bad(ex.getMessage());
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0194 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:229
+### RULE-0249 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:219
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:229](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L229)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:219](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L219)
+
+When / guard context:
+```java
+if(!MOBILE.matcher(m).matches())throw bad("Enter a valid international mobile number");
+  return m;
+ }
+ private void validateNewPassword(String value){try{com.giftplatform.security.CredentialPolicy.validatePassword(value);}catch(IllegalArgumentException ex){throw bad(ex.getMessage());}}
+ private void requireConsent(boolean accepted){if(!accepted)
+```
+Failure / enforcement:
+```java
+throw bad("Please agree to the Terms & Conditions and Privacy Policy.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0250 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:234
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:234](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L234)
 
 When / guard context:
 ```java
@@ -3488,9 +4455,9 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0195 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:232
+### RULE-0251 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:237
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:232](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L232)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:237](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L237)
 
 When / guard context:
 ```java
@@ -3506,9 +4473,9 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Group invitation is not 
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0196 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:235
+### RULE-0252 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:240
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:235](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L235)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:240](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L240)
 
 When / guard context:
 ```java
@@ -3524,9 +4491,9 @@ throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Member access disabled f
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0197 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:239
+### RULE-0253 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:244
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:239](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L239)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:244](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L244)
 
 When / guard context:
 ```java
@@ -3542,15 +4509,31 @@ throw bad("Member details required");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0198 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:241
+### RULE-0254 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:246
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:241](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L241)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:246](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L246)
 
 When / guard context:
 ```java
-,@RequestBody JoinRequest request){
+upId,@RequestBody JoinRequest request){
   Map<String,Object> group=publicGroup(token,groupId);requireMemberAccess(groupId);
   if(request==null)throw bad("Member details required");
+  requireConsent(request.termsAccepted());
+  if(request.displayName()==null||!request.displayName().matches(com.giftplatform.security.CredentialPolicy.USERNAME_PATTERN))
+```
+Failure / enforcement:
+```java
+throw bad(com.giftplatform.security.CredentialPolicy.USERNAME_MESSAGE);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0255 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:248
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:248](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L248)
+
+When / guard context:
+```java
+ame()==null||!request.displayName().matches(com.giftplatform.security.CredentialPolicy.USERNAME_PATTERN))throw bad(com.giftplatform.security.CredentialPolicy.USERNAME_MESSAGE);
   String name=memberName(request.displayName()),phone=mobile(request.mobile()),password=memberPassword(request.password());
   if(!password.equals(request.confirmPassword()))
 ```
@@ -3560,9 +4543,9 @@ throw bad("Password confirmation does not match");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0199 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:243
+### RULE-0256 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:250
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:243](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L243)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:250](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L250)
 
 When / guard context:
 ```java
@@ -3577,9 +4560,9 @@ throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Invitation-only membersh
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0200 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:246
+### RULE-0257 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:253
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:246](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L246)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:253](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L253)
 
 When / guard context:
 ```java
@@ -3594,9 +4577,9 @@ throw bad("Enter a valid email address");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0201 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:248
+### RULE-0258 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:255
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:248](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L248)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:255](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L255)
 
 When / guard context:
 ```java
@@ -3611,9 +4594,9 @@ throw bad("Verify your email before joining this group");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0202 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:251
+### RULE-0259 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:258
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:251](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L251)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:258](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L258)
 
 When / guard context:
 ```java
@@ -3630,9 +4613,9 @@ throw bad("Email is required to use a verification");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0203 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:254
+### RULE-0260 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:261
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:254](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L254)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:261](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L261)
 
 When / guard context:
 ```java
@@ -3649,9 +4632,9 @@ throw bad("Verify your email before joining this group");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0204 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:257
+### RULE-0261 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:264
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:257](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L257)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:264](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L264)
 
 When / guard context:
 ```java
@@ -3664,9 +4647,9 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Display name already in u
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0205 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:265
+### RULE-0262 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:273
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:265](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L265)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:273](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L273)
 
 When / guard context:
 ```java
@@ -3683,9 +4666,9 @@ throw bad("Credentials required");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0206 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:268
+### RULE-0263 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:276
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:268](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L268)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:276](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L276)
 
 When / guard context:
 ```java
@@ -3702,9 +4685,9 @@ throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0207 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:270
+### RULE-0264 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:278
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:270](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L270)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:278](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L278)
 
 When / guard context:
 ```java
@@ -3720,9 +4703,9 @@ throw bad("PIN must be six digits");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0208 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:273
+### RULE-0265 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:281
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:273](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L273)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:281](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L281)
 
 When / guard context:
 ```java
@@ -3735,9 +4718,9 @@ throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"Invalid member creden
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0209 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:275
+### RULE-0266 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:283
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:275](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L275)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:283](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L283)
 
 When / guard context:
 ```java
@@ -3751,9 +4734,9 @@ throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Membership not approved"
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0210 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:281
+### RULE-0267 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:289
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:281](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L281)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:289](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L289)
 
 When / guard context:
 ```java
@@ -3770,14 +4753,29 @@ throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0211 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:284
+### RULE-0268 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:291
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:284](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L284)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:291](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L291)
 
 When / guard context:
 ```java
-getAttribute(MEMBER_SESSION+groupId);
-  if(!(id instanceof UUID memberId))throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+esponseStatusException(HttpStatus.UNAUTHORIZED);
+  long now=System.currentTimeMillis();Object last=session.getAttribute("gift.group.member.activity."+groupId);
+  if(last instanceof Long time&&(now-time<0||now-time>=GROUP_IDLE_TIMEOUT_MS)){session.removeAttribute(MEMBER_SESSION+groupId);session.removeAttribute("gift.group.member.activity."+groupId);
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"Member session expired after inactivity.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0269 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:295
+
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:295](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L295)
+
+When / guard context:
+```java
+instanceof Long)||"1".equals(req.getHeader("X-Gift-User-Activity")))session.setAttribute("gift.group.member.activity."+groupId,now);
   Object epoch=session.getAttribute("gift.group.member.epoch."+groupId);
   if(!(epoch instanceof Long v)||v.longValue()!=versions.current("GROUP_MEMBER",memberId)){
    session.removeAttribute(MEMBER_SESSION+groupId);
@@ -3788,9 +4786,9 @@ throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"Member session expire
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0212 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:287
+### RULE-0270 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:298
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:287](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L287)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:298](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L298)
 
 When / guard context:
 ```java
@@ -3806,9 +4804,9 @@ throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0213 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:292
+### RULE-0271 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:303
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:292](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L292)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:303](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L303)
 
 When / guard context:
 ```java
@@ -3822,9 +4820,9 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Verify your mobile in Acc
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0214 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:293
+### RULE-0272 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:304
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:293](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L293)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:304](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L304)
 
 When / guard context:
 ```java
@@ -3837,9 +4835,9 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Verify your email in Acco
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0215 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:322
+### RULE-0273 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:333
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:322](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L322)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:333](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L333)
 
 When / guard context:
 ```java
@@ -3856,9 +4854,9 @@ throw bad("Invalid review");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0216 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:325
+### RULE-0274 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:336
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:325](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L325)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:336](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L336)
 
 When / guard context:
 ```java
@@ -3873,9 +4871,9 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Request already reviewed 
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0217 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:333
+### RULE-0275 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:344
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:333](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L333)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:344](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L344)
 
 When / guard context:
 ```java
@@ -3894,9 +4892,9 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,String.join("; ",ready.rea
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0218 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:335
+### RULE-0276 — backend/src/main/java/com/giftplatform/group/GroupContributionController.java:346
 
-[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:335](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L335)
+[backend/src/main/java/com/giftplatform/group/GroupContributionController.java:346](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L346)
 
 When / guard context:
 ```java
@@ -3912,7 +4910,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Group already published")
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0219 — backend/src/main/java/com/giftplatform/group/GroupCoordinationPaymentController.java:19
+### RULE-0277 — backend/src/main/java/com/giftplatform/group/GroupCoordinationPaymentController.java:19
 
 [backend/src/main/java/com/giftplatform/group/GroupCoordinationPaymentController.java:19](../../src/main/java/com/giftplatform/group/GroupCoordinationPaymentController.java#L19)
 
@@ -3928,7 +4926,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0220 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:26
+### RULE-0278 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:26
 
 [backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:26](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L26)
 
@@ -3944,7 +4942,7 @@ throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Secure payment
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0221 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:36
+### RULE-0279 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:36
 
 [backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:36](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L36)
 
@@ -3962,7 +4960,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Payment account not foun
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0222 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:45
+### RULE-0280 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:45
 
 [backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:45](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L45)
 
@@ -3979,7 +4977,7 @@ throw bad("Choose whether to enable the account");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0223 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:53
+### RULE-0281 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:53
 
 [backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:53](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L53)
 
@@ -3996,7 +4994,7 @@ throw bad("QR images are only available for UPI accounts");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0224 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:54
+### RULE-0282 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:54
 
 [backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:54](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L54)
 
@@ -4013,7 +5011,7 @@ throw bad("Please upload a PNG or JPG QR smaller than 2 MB");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0225 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:55
+### RULE-0283 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:55
 
 [backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:55](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L55)
 
@@ -4030,7 +5028,7 @@ throw bad("Please upload a PNG or JPG QR image");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0226 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:62
+### RULE-0284 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:62
 
 [backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:62](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L62)
 
@@ -4049,7 +5047,7 @@ throw bad("We couldn't read this QR image");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0227 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:64
+### RULE-0285 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:64
 
 [backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:64](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L64)
 
@@ -4067,7 +5065,7 @@ throw bad("We couldn't read this QR image");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0228 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:65
+### RULE-0286 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:65
 
 [backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:65](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L65)
 
@@ -4084,7 +5082,7 @@ throw bad(msg.contains("match")||msg.contains("payee")?"This QR belongs to a dif
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0229 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:72
+### RULE-0287 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:72
 
 [backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:72](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L72)
 
@@ -4103,7 +5101,7 @@ throw new java.io.IOException("Cannot normalize QR");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0230 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:78
+### RULE-0288 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:78
 
 [backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:78](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L78)
 
@@ -4120,7 +5118,7 @@ throw bad("QR images are only available for UPI accounts");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0231 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:88
+### RULE-0289 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:88
 
 [backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:88](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L88)
 
@@ -4137,7 +5135,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND,"No QR saved");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0232 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:92
+### RULE-0290 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:92
 
 [backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:92](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L92)
 
@@ -4155,7 +5153,7 @@ throw bad("Enter an account label (up to 80 characters)");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0233 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:106
+### RULE-0291 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:106
 
 [backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:106](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L106)
 
@@ -4172,7 +5170,7 @@ throw bad("Account details required");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0234 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:109
+### RULE-0292 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:109
 
 [backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:109](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L109)
 
@@ -4189,7 +5187,7 @@ throw bad("Please enter a valid UPI ID, such as name@bank");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0235 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:112
+### RULE-0293 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:112
 
 [backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:112](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L112)
 
@@ -4205,7 +5203,7 @@ throw bad("Please enter a valid bank account number");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0236 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:112
+### RULE-0294 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:112
 
 [backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:112](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L112)
 
@@ -4221,7 +5219,7 @@ throw bad("Please check the 11-character IFSC code");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0237 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:113
+### RULE-0295 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:113
 
 [backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:113](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L113)
 
@@ -4236,7 +5234,7 @@ throw bad("Enter the account holder name");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0238 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:115
+### RULE-0296 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:115
 
 [backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:115](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L115)
 
@@ -4251,7 +5249,7 @@ throw bad("Choose UPI or bank transfer");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0239 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:116
+### RULE-0297 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:116
 
 [backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:116](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L116)
 
@@ -4267,7 +5265,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"This account is already r
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0240 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:122
+### RULE-0298 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:122
 
 [backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:122](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L122)
 
@@ -4285,7 +5283,7 @@ throw bad("Select an account");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0241 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:125
+### RULE-0299 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:125
 
 [backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:125](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L125)
 
@@ -4302,7 +5300,7 @@ throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Account switching requir
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0242 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:127
+### RULE-0300 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:127
 
 [backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:127](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L127)
 
@@ -4318,7 +5316,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Only independently verifi
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0243 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:134
+### RULE-0301 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:134
 
 [backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:134](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L134)
 
@@ -4336,7 +5334,7 @@ throw new ResponseStatusException(HttpStatus.FORBIDDEN);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0244 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:135
+### RULE-0302 — backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:135
 
 [backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:135](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L135)
 
@@ -4352,7 +5350,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0245 — backend/src/main/java/com/giftplatform/group/GroupGiftCollectionController.java:32
+### RULE-0303 — backend/src/main/java/com/giftplatform/group/GroupGiftCollectionController.java:32
 
 [backend/src/main/java/com/giftplatform/group/GroupGiftCollectionController.java:32](../../src/main/java/com/giftplatform/group/GroupGiftCollectionController.java#L32)
 
@@ -4370,7 +5368,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0246 — backend/src/main/java/com/giftplatform/group/GroupGiftCollectionController.java:35
+### RULE-0304 — backend/src/main/java/com/giftplatform/group/GroupGiftCollectionController.java:35
 
 [backend/src/main/java/com/giftplatform/group/GroupGiftCollectionController.java:35](../../src/main/java/com/giftplatform/group/GroupGiftCollectionController.java#L35)
 
@@ -4386,7 +5384,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0247 — backend/src/main/java/com/giftplatform/group/GroupGiftCollectionController.java:53
+### RULE-0305 — backend/src/main/java/com/giftplatform/group/GroupGiftCollectionController.java:53
 
 [backend/src/main/java/com/giftplatform/group/GroupGiftCollectionController.java:53](../../src/main/java/com/giftplatform/group/GroupGiftCollectionController.java#L53)
 
@@ -4405,7 +5403,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0248 — backend/src/main/java/com/giftplatform/group/GroupGiftCollectionController.java:59
+### RULE-0306 — backend/src/main/java/com/giftplatform/group/GroupGiftCollectionController.java:59
 
 [backend/src/main/java/com/giftplatform/group/GroupGiftCollectionController.java:59](../../src/main/java/com/giftplatform/group/GroupGiftCollectionController.java#L59)
 
@@ -4424,7 +5422,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0249 — backend/src/main/java/com/giftplatform/group/GroupGiftCollectionController.java:60
+### RULE-0307 — backend/src/main/java/com/giftplatform/group/GroupGiftCollectionController.java:60
 
 [backend/src/main/java/com/giftplatform/group/GroupGiftCollectionController.java:60](../../src/main/java/com/giftplatform/group/GroupGiftCollectionController.java#L60)
 
@@ -4441,7 +5439,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0250 — backend/src/main/java/com/giftplatform/group/GroupGiftCollectionController.java:66
+### RULE-0308 — backend/src/main/java/com/giftplatform/group/GroupGiftCollectionController.java:66
 
 [backend/src/main/java/com/giftplatform/group/GroupGiftCollectionController.java:66](../../src/main/java/com/giftplatform/group/GroupGiftCollectionController.java#L66)
 
@@ -4457,7 +5455,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0251 — backend/src/main/java/com/giftplatform/group/GroupGiftCompletionController.java:57
+### RULE-0309 — backend/src/main/java/com/giftplatform/group/GroupGiftCompletionController.java:57
 
 [backend/src/main/java/com/giftplatform/group/GroupGiftCompletionController.java:57](../../src/main/java/com/giftplatform/group/GroupGiftCompletionController.java#L57)
 
@@ -4476,7 +5474,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"The target must be fully 
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0252 — backend/src/main/java/com/giftplatform/group/GroupGiftCompletionController.java:64
+### RULE-0310 — backend/src/main/java/com/giftplatform/group/GroupGiftCompletionController.java:64
 
 [backend/src/main/java/com/giftplatform/group/GroupGiftCompletionController.java:64](../../src/main/java/com/giftplatform/group/GroupGiftCompletionController.java#L64)
 
@@ -4495,7 +5493,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Gift name required before
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0253 — backend/src/main/java/com/giftplatform/group/GroupGiftCompletionController.java:65
+### RULE-0311 — backend/src/main/java/com/giftplatform/group/GroupGiftCompletionController.java:65
 
 [backend/src/main/java/com/giftplatform/group/GroupGiftCompletionController.java:65](../../src/main/java/com/giftplatform/group/GroupGiftCompletionController.java#L65)
 
@@ -4513,7 +5511,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Gift already published");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0254 — backend/src/main/java/com/giftplatform/group/GroupGiftCompletionController.java:75
+### RULE-0312 — backend/src/main/java/com/giftplatform/group/GroupGiftCompletionController.java:75
 
 [backend/src/main/java/com/giftplatform/group/GroupGiftCompletionController.java:75](../../src/main/java/com/giftplatform/group/GroupGiftCompletionController.java#L75)
 
@@ -4529,7 +5527,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Contribution report not 
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0255 — backend/src/main/java/com/giftplatform/group/GroupGiftCompletionController.java:90
+### RULE-0313 — backend/src/main/java/com/giftplatform/group/GroupGiftCompletionController.java:90
 
 [backend/src/main/java/com/giftplatform/group/GroupGiftCompletionController.java:90](../../src/main/java/com/giftplatform/group/GroupGiftCompletionController.java#L90)
 
@@ -4547,7 +5545,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Invalid fulfilment transi
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0256 — backend/src/main/java/com/giftplatform/group/GroupGiftCompletionController.java:92
+### RULE-0314 — backend/src/main/java/com/giftplatform/group/GroupGiftCompletionController.java:92
 
 [backend/src/main/java/com/giftplatform/group/GroupGiftCompletionController.java:92](../../src/main/java/com/giftplatform/group/GroupGiftCompletionController.java#L92)
 
@@ -4564,7 +5562,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Tracking details requi
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0257 — backend/src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java:17
+### RULE-0315 — backend/src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java:17
 
 [backend/src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java:17](../../src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java#L17)
 
@@ -4582,7 +5580,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Group not found");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0258 — backend/src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java:18
+### RULE-0316 — backend/src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java:18
 
 [backend/src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java:18](../../src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java#L18)
 
@@ -4599,7 +5597,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Published gift plans cann
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0259 — backend/src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java:23
+### RULE-0317 — backend/src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java:23
 
 [backend/src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java:23](../../src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java#L23)
 
@@ -4619,7 +5617,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Choose a wishlist gift
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0260 — backend/src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java:25
+### RULE-0318 — backend/src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java:25
 
 [backend/src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java:25](../../src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java#L25)
 
@@ -4640,7 +5638,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"This group chooses its ow
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0261 — backend/src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java:26
+### RULE-0319 — backend/src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java:26
 
 [backend/src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java:26](../../src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java#L26)
 
@@ -4657,7 +5655,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Release the current gift 
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0262 — backend/src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java:28
+### RULE-0320 — backend/src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java:28
 
 [backend/src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java:28](../../src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java#L28)
 
@@ -4673,7 +5671,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND,"This gift is no longer a
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0263 — backend/src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java:29
+### RULE-0321 — backend/src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java:29
 
 [backend/src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java:29](../../src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java#L29)
 
@@ -4689,7 +5687,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Another group is already 
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0264 — backend/src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java:42
+### RULE-0322 — backend/src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java:42
 
 [backend/src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java:42](../../src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java#L42)
 
@@ -4706,7 +5704,7 @@ throw ex;
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0265 — backend/src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java:48
+### RULE-0323 — backend/src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java:48
 
 [backend/src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java:48](../../src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java#L48)
 
@@ -4727,7 +5725,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"This group has no wishlis
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0266 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:19
+### RULE-0324 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:19
 
 [backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:19](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L19)
 
@@ -4741,7 +5739,7 @@ throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,"Too many payment
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0267 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:27
+### RULE-0325 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:27
 
 [backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:27](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L27)
 
@@ -4758,7 +5756,7 @@ throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Secure payment
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0268 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:38
+### RULE-0326 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:38
 
 [backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:38](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L38)
 
@@ -4773,7 +5771,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"This payment destination 
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0269 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:51
+### RULE-0327 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:51
 
 [backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:51](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L51)
 
@@ -4792,7 +5790,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Contributions are not ena
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0270 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:62
+### RULE-0328 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:62
 
 [backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:62](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L62)
 
@@ -4810,7 +5808,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0271 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:63
+### RULE-0329 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:63
 
 [backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:63](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L63)
 
@@ -4826,7 +5824,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0272 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:68
+### RULE-0330 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:68
 
 [backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:68](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L68)
 
@@ -4842,7 +5840,7 @@ throw new ResponseStatusException(HttpStatus.FORBIDDEN);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0273 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:70
+### RULE-0331 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:70
 
 [backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:70](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L70)
 
@@ -4858,7 +5856,7 @@ throw new ResponseStatusException(HttpStatus.FORBIDDEN);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0274 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:70
+### RULE-0332 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:70
 
 [backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:70](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L70)
 
@@ -4872,7 +5870,7 @@ throw bad("Complete the contribution details");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0275 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:73
+### RULE-0333 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:73
 
 [backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:73](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L73)
 
@@ -4889,7 +5887,7 @@ throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Guest contributions are 
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0276 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:83
+### RULE-0334 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:83
 
 [backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:83](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L83)
 
@@ -4908,7 +5906,7 @@ throw bad("Complete the contribution details");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0277 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:92
+### RULE-0335 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:92
 
 [backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:92](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L92)
 
@@ -4926,7 +5924,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Contributions are not ena
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0278 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:93
+### RULE-0336 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:93
 
 [backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:93](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L93)
 
@@ -4943,7 +5941,7 @@ throw bad("Complete the contribution details");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0279 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:95
+### RULE-0337 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:95
 
 [backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:95](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L95)
 
@@ -4959,7 +5957,7 @@ throw bad("Enter your name");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0280 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:96
+### RULE-0338 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:96
 
 [backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:96](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L96)
 
@@ -4975,7 +5973,7 @@ throw bad("Invalid contact details");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0281 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:97
+### RULE-0339 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:97
 
 [backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:97](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L97)
 
@@ -4991,7 +5989,7 @@ throw bad("Enter a valid mobile number or email address");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0282 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:98
+### RULE-0340 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:98
 
 [backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:98](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L98)
 
@@ -5007,7 +6005,7 @@ throw bad("Enter a valid amount");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0283 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:99
+### RULE-0341 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:99
 
 [backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:99](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L99)
 
@@ -5024,7 +6022,7 @@ throw bad("Enter a valid transaction reference (at least six characters)");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0284 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:103
+### RULE-0342 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:103
 
 [backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:103](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L103)
 
@@ -5038,7 +6036,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Submission key was alread
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0285 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:107
+### RULE-0343 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:107
 
 [backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:107](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L107)
 
@@ -5053,7 +6051,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"This transaction referenc
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0286 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:113
+### RULE-0344 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:113
 
 [backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:113](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L113)
 
@@ -5070,7 +6068,7 @@ throw bad("Settings required");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0287 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:114
+### RULE-0345 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:114
 
 [backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:114](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L114)
 
@@ -5086,7 +6084,7 @@ throw bad("Suggested amount must be between ₹1 and ₹1 crore");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0288 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:116
+### RULE-0346 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:116
 
 [backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:116](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L116)
 
@@ -5101,7 +6099,7 @@ throw bad("Choose an enabled "+choice.getKey()+" account");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0289 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:118
+### RULE-0347 — backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:118
 
 [backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:118](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L118)
 
@@ -5117,7 +6115,7 @@ throw bad("Invalid invitation access mode");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0290 — backend/src/main/java/com/giftplatform/group/GuestGiftController.java:58
+### RULE-0348 — backend/src/main/java/com/giftplatform/group/GuestGiftController.java:58
 
 [backend/src/main/java/com/giftplatform/group/GuestGiftController.java:58](../../src/main/java/com/giftplatform/group/GuestGiftController.java#L58)
 
@@ -5136,7 +6134,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Group required");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0291 — backend/src/main/java/com/giftplatform/group/GuestGiftController.java:60
+### RULE-0349 — backend/src/main/java/com/giftplatform/group/GuestGiftController.java:60
 
 [backend/src/main/java/com/giftplatform/group/GuestGiftController.java:60](../../src/main/java/com/giftplatform/group/GuestGiftController.java#L60)
 
@@ -5154,7 +6152,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Individual gifts canno
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0292 — backend/src/main/java/com/giftplatform/group/GuestGiftController.java:62
+### RULE-0350 — backend/src/main/java/com/giftplatform/group/GuestGiftController.java:62
 
 [backend/src/main/java/com/giftplatform/group/GuestGiftController.java:62](../../src/main/java/com/giftplatform/group/GuestGiftController.java#L62)
 
@@ -5170,7 +6168,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Gift unavailable or alrea
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0293 — backend/src/main/java/com/giftplatform/group/GuestGiftController.java:86
+### RULE-0351 — backend/src/main/java/com/giftplatform/group/GuestGiftController.java:86
 
 [backend/src/main/java/com/giftplatform/group/GuestGiftController.java:86](../../src/main/java/com/giftplatform/group/GuestGiftController.java#L86)
 
@@ -5187,7 +6185,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Select this gift before p
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0294 — backend/src/main/java/com/giftplatform/group/GuestGiftController.java:93
+### RULE-0352 — backend/src/main/java/com/giftplatform/group/GuestGiftController.java:93
 
 [backend/src/main/java/com/giftplatform/group/GuestGiftController.java:93](../../src/main/java/com/giftplatform/group/GuestGiftController.java#L93)
 
@@ -5203,7 +6201,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0295 — backend/src/main/java/com/giftplatform/group/GuestGiftController.java:119
+### RULE-0353 — backend/src/main/java/com/giftplatform/group/GuestGiftController.java:119
 
 [backend/src/main/java/com/giftplatform/group/GuestGiftController.java:119](../../src/main/java/com/giftplatform/group/GuestGiftController.java#L119)
 
@@ -5219,7 +6217,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Tracking details requi
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0296 — backend/src/main/java/com/giftplatform/group/GuestGiftController.java:122
+### RULE-0354 — backend/src/main/java/com/giftplatform/group/GuestGiftController.java:122
 
 [backend/src/main/java/com/giftplatform/group/GuestGiftController.java:122](../../src/main/java/com/giftplatform/group/GuestGiftController.java#L122)
 
@@ -5236,7 +6234,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0297 — backend/src/main/java/com/giftplatform/group/GuestGiftController.java:128
+### RULE-0355 — backend/src/main/java/com/giftplatform/group/GuestGiftController.java:128
 
 [backend/src/main/java/com/giftplatform/group/GuestGiftController.java:128](../../src/main/java/com/giftplatform/group/GuestGiftController.java#L128)
 
@@ -5254,7 +6252,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0298 — backend/src/main/java/com/giftplatform/group/IndependentGroupGiftController.java:38
+### RULE-0356 — backend/src/main/java/com/giftplatform/group/IndependentGroupGiftController.java:38
 
 [backend/src/main/java/com/giftplatform/group/IndependentGroupGiftController.java:38](../../src/main/java/com/giftplatform/group/IndependentGroupGiftController.java#L38)
 
@@ -5271,7 +6269,7 @@ throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,"Please wait befo
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0299 — backend/src/main/java/com/giftplatform/group/IndependentGroupGiftController.java:47
+### RULE-0357 — backend/src/main/java/com/giftplatform/group/IndependentGroupGiftController.java:47
 
 [backend/src/main/java/com/giftplatform/group/IndependentGroupGiftController.java:47](../../src/main/java/com/giftplatform/group/IndependentGroupGiftController.java#L47)
 
@@ -5290,7 +6288,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,ex.getMessage());
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0300 — backend/src/main/java/com/giftplatform/group/IndependentGroupGiftController.java:48
+### RULE-0358 — backend/src/main/java/com/giftplatform/group/IndependentGroupGiftController.java:48
 
 [backend/src/main/java/com/giftplatform/group/IndependentGroupGiftController.java:48](../../src/main/java/com/giftplatform/group/IndependentGroupGiftController.java#L48)
 
@@ -5308,7 +6306,7 @@ throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,"Could not read this pr
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0301 — backend/src/main/java/com/giftplatform/group/IndependentGroupGiftController.java:57
+### RULE-0359 — backend/src/main/java/com/giftplatform/group/IndependentGroupGiftController.java:57
 
 [backend/src/main/java/com/giftplatform/group/IndependentGroupGiftController.java:57](../../src/main/java/com/giftplatform/group/IndependentGroupGiftController.java#L57)
 
@@ -5325,7 +6323,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"This group uses a host wi
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0302 — backend/src/main/java/com/giftplatform/group/IndependentGroupGiftController.java:58
+### RULE-0360 — backend/src/main/java/com/giftplatform/group/IndependentGroupGiftController.java:58
 
 [backend/src/main/java/com/giftplatform/group/IndependentGroupGiftController.java:58](../../src/main/java/com/giftplatform/group/IndependentGroupGiftController.java#L58)
 
@@ -5341,7 +6339,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Published gift plans cann
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0303 — backend/src/main/java/com/giftplatform/group/IndependentGroupGiftController.java:60
+### RULE-0361 — backend/src/main/java/com/giftplatform/group/IndependentGroupGiftController.java:60
 
 [backend/src/main/java/com/giftplatform/group/IndependentGroupGiftController.java:60](../../src/main/java/com/giftplatform/group/IndependentGroupGiftController.java#L60)
 
@@ -5358,7 +6356,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Enter the gift name");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0304 — backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:30
+### RULE-0362 — backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:30
 
 [backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:30](../../src/main/java/com/giftplatform/group/IndividualGuestGiftController.java#L30)
 
@@ -5378,7 +6376,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0305 — backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:34
+### RULE-0363 — backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:34
 
 [backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:34](../../src/main/java/com/giftplatform/group/IndividualGuestGiftController.java#L34)
 
@@ -5398,7 +6396,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0306 — backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:49
+### RULE-0364 — backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:49
 
 [backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:49](../../src/main/java/com/giftplatform/group/IndividualGuestGiftController.java#L49)
 
@@ -5415,7 +6413,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Enter a contribution b
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0307 — backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:51
+### RULE-0365 — backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:51
 
 [backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:51](../../src/main/java/com/giftplatform/group/IndividualGuestGiftController.java#L51)
 
@@ -5431,7 +6429,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Add a product link or 
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0308 — backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:53
+### RULE-0366 — backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:53
 
 [backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:53](../../src/main/java/com/giftplatform/group/IndividualGuestGiftController.java#L53)
 
@@ -5447,7 +6445,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Add the product link f
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0309 — backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:59
+### RULE-0367 — backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:59
 
 [backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:59](../../src/main/java/com/giftplatform/group/IndividualGuestGiftController.java#L59)
 
@@ -5464,7 +6462,7 @@ throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,"Too many gifts a
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0310 — backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:75
+### RULE-0368 — backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:75
 
 [backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:75](../../src/main/java/com/giftplatform/group/IndividualGuestGiftController.java#L75)
 
@@ -5481,7 +6479,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"This gift has already bee
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0311 — backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:89
+### RULE-0369 — backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:89
 
 [backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:89](../../src/main/java/com/giftplatform/group/IndividualGuestGiftController.java#L89)
 
@@ -5497,7 +6495,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0312 — backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:111
+### RULE-0370 — backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:111
 
 [backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:111](../../src/main/java/com/giftplatform/group/IndividualGuestGiftController.java#L111)
 
@@ -5513,7 +6511,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"This gift uses direct del
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0313 — backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:112
+### RULE-0371 — backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:112
 
 [backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:112](../../src/main/java/com/giftplatform/group/IndividualGuestGiftController.java#L112)
 
@@ -5530,7 +6528,7 @@ throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Host contribut
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0314 — backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:131
+### RULE-0372 — backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:131
 
 [backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:131](../../src/main/java/com/giftplatform/group/IndividualGuestGiftController.java#L131)
 
@@ -5548,7 +6546,7 @@ Rationale beyond this enforcement is not declared at this site. There is no docu
 
 ## hostpayment
 
-### RULE-0315 — backend/src/main/java/com/giftplatform/hostpayment/controller/ReceivingAccountHealthController.java:23
+### RULE-0373 — backend/src/main/java/com/giftplatform/hostpayment/controller/ReceivingAccountHealthController.java:23
 
 [backend/src/main/java/com/giftplatform/hostpayment/controller/ReceivingAccountHealthController.java:23](../../src/main/java/com/giftplatform/hostpayment/controller/ReceivingAccountHealthController.java#L23)
 
@@ -5566,7 +6564,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Event not found");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0316 — backend/src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java:35
+### RULE-0374 — backend/src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java:35
 
 [backend/src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java:35](../../src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java#L35)
 
@@ -5585,7 +6583,7 @@ throw new IllegalStateException("Archived account cannot be renamed");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0317 — backend/src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java:36
+### RULE-0375 — backend/src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java:36
 
 [backend/src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java:36](../../src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java#L36)
 
@@ -5604,7 +6602,7 @@ throw new IllegalStateException("Account already archived");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0318 — backend/src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java:38
+### RULE-0376 — backend/src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java:38
 
 [backend/src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java:38](../../src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java#L38)
 
@@ -5621,7 +6619,7 @@ throw new IllegalStateException("Disabled or archived destination cannot be conf
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0319 — backend/src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java:39
+### RULE-0377 — backend/src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java:39
 
 [backend/src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java:39](../../src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java#L39)
 
@@ -5638,7 +6636,7 @@ throw new IllegalStateException("Archived account cannot be enabled");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0320 — backend/src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java:39
+### RULE-0378 — backend/src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java:39
 
 [backend/src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java:39](../../src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java#L39)
 
@@ -5655,7 +6653,7 @@ throw new IllegalStateException("Revoked destination cannot be enabled");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0321 — backend/src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java:40
+### RULE-0379 — backend/src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java:40
 
 [backend/src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java:40](../../src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java#L40)
 
@@ -5670,7 +6668,7 @@ throw new IllegalStateException("Destination must be active and host-confirmed o
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0322 — backend/src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java:41
+### RULE-0380 — backend/src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java:41
 
 [backend/src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java:41](../../src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java#L41)
 
@@ -5685,7 +6683,7 @@ throw new IllegalArgumentException("Invalid verification result");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0323 — backend/src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java:41
+### RULE-0381 — backend/src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java:41
 
 [backend/src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java:41](../../src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java#L41)
 
@@ -5700,7 +6698,7 @@ throw new IllegalStateException("Disabled destination cannot be verified");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0324 — backend/src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java:41
+### RULE-0382 — backend/src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java:41
 
 [backend/src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java:41](../../src/main/java/com/giftplatform/hostpayment/entity/HostBankAccount.java#L41)
 
@@ -5715,7 +6713,7 @@ throw new IllegalStateException("Revoked destination cannot be reverified");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0325 — backend/src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java:32
+### RULE-0383 — backend/src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java:32
 
 [backend/src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java:32](../../src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java#L32)
 
@@ -5734,7 +6732,7 @@ throw new IllegalStateException("Archived account cannot be renamed");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0326 — backend/src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java:33
+### RULE-0384 — backend/src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java:33
 
 [backend/src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java:33](../../src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java#L33)
 
@@ -5753,7 +6751,7 @@ throw new IllegalStateException("Account already archived");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0327 — backend/src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java:35
+### RULE-0385 — backend/src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java:35
 
 [backend/src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java:35](../../src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java#L35)
 
@@ -5770,7 +6768,7 @@ throw new IllegalStateException("Disabled or archived destination cannot be conf
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0328 — backend/src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java:36
+### RULE-0386 — backend/src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java:36
 
 [backend/src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java:36](../../src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java#L36)
 
@@ -5787,7 +6785,7 @@ throw new IllegalStateException("Archived account cannot be enabled");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0329 — backend/src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java:36
+### RULE-0387 — backend/src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java:36
 
 [backend/src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java:36](../../src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java#L36)
 
@@ -5804,7 +6802,7 @@ throw new IllegalStateException("Revoked destination cannot be enabled");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0330 — backend/src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java:37
+### RULE-0388 — backend/src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java:37
 
 [backend/src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java:37](../../src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java#L37)
 
@@ -5819,7 +6817,7 @@ throw new IllegalStateException("Destination must be active and host-confirmed o
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0331 — backend/src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java:39
+### RULE-0389 — backend/src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java:39
 
 [backend/src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java:39](../../src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java#L39)
 
@@ -5835,7 +6833,7 @@ throw new IllegalArgumentException("Invalid verification result");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0332 — backend/src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java:39
+### RULE-0390 — backend/src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java:39
 
 [backend/src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java:39](../../src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java#L39)
 
@@ -5851,7 +6849,7 @@ throw new IllegalStateException("Disabled destination cannot be verified");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0333 — backend/src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java:39
+### RULE-0391 — backend/src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java:39
 
 [backend/src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java:39](../../src/main/java/com/giftplatform/hostpayment/entity/HostUpiAccount.java#L39)
 
@@ -5866,7 +6864,7 @@ throw new IllegalStateException("Revoked destination cannot be reverified");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0334 — backend/src/main/java/com/giftplatform/hostpayment/qr/HostUpiQrController.java:27
+### RULE-0392 — backend/src/main/java/com/giftplatform/hostpayment/qr/HostUpiQrController.java:27
 
 [backend/src/main/java/com/giftplatform/hostpayment/qr/HostUpiQrController.java:27](../../src/main/java/com/giftplatform/hostpayment/qr/HostUpiQrController.java#L27)
 
@@ -5885,7 +6883,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid QR image size"
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0335 — backend/src/main/java/com/giftplatform/hostpayment/qr/HostUpiQrController.java:29
+### RULE-0393 — backend/src/main/java/com/giftplatform/hostpayment/qr/HostUpiQrController.java:29
 
 [backend/src/main/java/com/giftplatform/hostpayment/qr/HostUpiQrController.java:29](../../src/main/java/com/giftplatform/hostpayment/qr/HostUpiQrController.java#L29)
 
@@ -5903,7 +6901,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Unreadable QR image");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0336 — backend/src/main/java/com/giftplatform/hostpayment/qr/HostUpiQrController.java:42
+### RULE-0394 — backend/src/main/java/com/giftplatform/hostpayment/qr/HostUpiQrController.java:42
 
 [backend/src/main/java/com/giftplatform/hostpayment/qr/HostUpiQrController.java:42](../../src/main/java/com/giftplatform/hostpayment/qr/HostUpiQrController.java#L42)
 
@@ -5922,7 +6920,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST, safeReason);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0337 — backend/src/main/java/com/giftplatform/hostpayment/qr/HostUpiQrController.java:48
+### RULE-0395 — backend/src/main/java/com/giftplatform/hostpayment/qr/HostUpiQrController.java:48
 
 [backend/src/main/java/com/giftplatform/hostpayment/qr/HostUpiQrController.java:48](../../src/main/java/com/giftplatform/hostpayment/qr/HostUpiQrController.java#L48)
 
@@ -5943,7 +6941,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"UPI account not verified"
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0338 — backend/src/main/java/com/giftplatform/hostpayment/qr/JdbcUpiQrImageStorage.java:25
+### RULE-0396 — backend/src/main/java/com/giftplatform/hostpayment/qr/JdbcUpiQrImageStorage.java:25
 
 [backend/src/main/java/com/giftplatform/hostpayment/qr/JdbcUpiQrImageStorage.java:25](../../src/main/java/com/giftplatform/hostpayment/qr/JdbcUpiQrImageStorage.java#L25)
 
@@ -5963,7 +6961,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"QR already uploaded for t
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0339 — backend/src/main/java/com/giftplatform/hostpayment/qr/JdbcUpiQrImageStorage.java:41
+### RULE-0397 — backend/src/main/java/com/giftplatform/hostpayment/qr/JdbcUpiQrImageStorage.java:41
 
 [backend/src/main/java/com/giftplatform/hostpayment/qr/JdbcUpiQrImageStorage.java:41](../../src/main/java/com/giftplatform/hostpayment/qr/JdbcUpiQrImageStorage.java#L41)
 
@@ -5984,7 +6982,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Uploaded QR not found");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0340 — backend/src/main/java/com/giftplatform/hostpayment/qr/JpaRegisteredUpiResolver.java:20
+### RULE-0398 — backend/src/main/java/com/giftplatform/hostpayment/qr/JpaRegisteredUpiResolver.java:20
 
 [backend/src/main/java/com/giftplatform/hostpayment/qr/JpaRegisteredUpiResolver.java:20](../../src/main/java/com/giftplatform/hostpayment/qr/JpaRegisteredUpiResolver.java#L20)
 
@@ -6001,7 +6999,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"UPI account is unavailabl
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0341 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java:51
+### RULE-0399 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java:51
 
 [backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java:51](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java#L51)
 
@@ -6020,7 +7018,7 @@ throw new IllegalStateException("PNG writer unavailable");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0342 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java:54
+### RULE-0400 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java:54
 
 [backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java:54](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java#L54)
 
@@ -6038,7 +7036,7 @@ throw new IllegalStateException("Unable to generate QR image", e);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0343 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java:64
+### RULE-0401 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java:64
 
 [backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java:64](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java#L64)
 
@@ -6057,7 +7055,7 @@ throw new IllegalArgumentException("Invalid QR image size");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0344 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java:66
+### RULE-0402 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java:66
 
 [backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java:66](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java#L66)
 
@@ -6075,7 +7073,7 @@ throw new IllegalArgumentException("Invalid image");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0345 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java:68
+### RULE-0403 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java:68
 
 [backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java:68](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java#L68)
 
@@ -6093,7 +7091,7 @@ throw new IllegalArgumentException("Unsupported image format");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0346 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java:72
+### RULE-0404 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java:72
 
 [backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java:72](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java#L72)
 
@@ -6111,7 +7109,7 @@ throw new IllegalArgumentException("Unsupported image format");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0347 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java:77
+### RULE-0405 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java:77
 
 [backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java:77](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java#L77)
 
@@ -6129,7 +7127,7 @@ throw new IllegalArgumentException("Invalid QR image dimensions");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0348 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java:79
+### RULE-0406 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java:79
 
 [backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java:79](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java#L79)
 
@@ -6148,7 +7146,7 @@ throw new IllegalArgumentException("Unreadable image");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0349 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java:89
+### RULE-0407 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java:89
 
 [backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java:89](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java#L89)
 
@@ -6168,7 +7166,7 @@ throw iae;
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0350 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java:90
+### RULE-0408 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java:90
 
 [backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java:90](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageCodec.java#L90)
 
@@ -6187,7 +7185,7 @@ throw new IllegalArgumentException("Invalid or unreadable UPI QR image");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0351 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageService.java:21
+### RULE-0409 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageService.java:21
 
 [backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageService.java:21](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageService.java#L21)
 
@@ -6209,7 +7207,7 @@ throw new org.springframework.web.server.ResponseStatusException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0352 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageService.java:50
+### RULE-0410 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageService.java:50
 
 [backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageService.java:50](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageService.java#L50)
 
@@ -6231,7 +7229,7 @@ throw new IllegalArgumentException("Host and account required");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0353 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageService.java:52
+### RULE-0411 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageService.java:52
 
 [backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageService.java:52](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageService.java#L52)
 
@@ -6251,7 +7249,7 @@ throw new IllegalArgumentException("UPI account unavailable");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0354 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageService.java:64
+### RULE-0412 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageService.java:64
 
 [backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageService.java:64](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrImageService.java#L64)
 
@@ -6272,7 +7270,7 @@ throw new IllegalStateException(e);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0355 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:24
+### RULE-0413 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:24
 
 [backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:24](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java#L24)
 
@@ -6290,7 +7288,7 @@ throw new IllegalArgumentException("Invalid UPI QR payload");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0356 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:27
+### RULE-0414 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:27
 
 [backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:27](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java#L27)
 
@@ -6311,7 +7309,7 @@ throw new IllegalArgumentException("Invalid UPI QR payload");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0357 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:33
+### RULE-0415 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:33
 
 [backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:33](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java#L33)
 
@@ -6330,7 +7328,7 @@ throw new IllegalArgumentException("Unsupported QR destination");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0358 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:38
+### RULE-0416 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:38
 
 [backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:38](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java#L38)
 
@@ -6351,7 +7349,7 @@ throw new IllegalArgumentException("Malformed UPI parameter");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0359 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:42
+### RULE-0417 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:42
 
 [backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:42](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java#L42)
 
@@ -6369,7 +7367,7 @@ throw new IllegalArgumentException("Unexpected or repeated UPI parameter");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0360 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:44
+### RULE-0418 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:44
 
 [backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:44](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java#L44)
 
@@ -6387,7 +7385,7 @@ throw new IllegalArgumentException("Invalid UPI parameter");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0361 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:48
+### RULE-0419 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:48
 
 [backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:48](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java#L48)
 
@@ -6406,7 +7404,7 @@ throw new IllegalArgumentException("Invalid UPI payee ID");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0362 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:51
+### RULE-0420 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:51
 
 [backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:51](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java#L51)
 
@@ -6426,7 +7424,7 @@ throw new IllegalArgumentException("Unsupported currency");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0363 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:56
+### RULE-0421 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:56
 
 [backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:56](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java#L56)
 
@@ -6445,7 +7443,7 @@ throw new IllegalArgumentException("Invalid amount");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0364 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:58
+### RULE-0422 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:58
 
 [backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:58](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java#L58)
 
@@ -6464,7 +7462,7 @@ throw new IllegalArgumentException("Invalid amount");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0365 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:67
+### RULE-0423 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:67
 
 [backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:67](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java#L67)
 
@@ -6483,7 +7481,7 @@ throw new IllegalArgumentException("QR payee does not match registered UPI ID");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0366 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:73
+### RULE-0424 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:73
 
 [backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:73](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java#L73)
 
@@ -6502,7 +7500,7 @@ throw new IllegalArgumentException("Invalid UPI ID");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0367 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:76
+### RULE-0425 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:76
 
 [backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:76](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java#L76)
 
@@ -6520,7 +7518,7 @@ throw new IllegalArgumentException("Invalid payee name");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0368 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:83
+### RULE-0426 — backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:83
 
 [backend/src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java:83](../../src/main/java/com/giftplatform/hostpayment/qr/UpiQrPayload.java#L83)
 
@@ -6541,7 +7539,7 @@ throw new IllegalArgumentException("Malformed UPI encoding");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0369 — backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtectionConfig.java:18
+### RULE-0427 — backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtectionConfig.java:18
 
 [backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtectionConfig.java:18](../../src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtectionConfig.java#L18)
 
@@ -6559,7 +7557,7 @@ throw new IllegalStateException("Missing gift payment encryption/fingerprint sec
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0370 — backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtectionConfig.java:23
+### RULE-0428 — backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtectionConfig.java:23
 
 [backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtectionConfig.java:23](../../src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtectionConfig.java#L23)
 
@@ -6578,7 +7576,7 @@ throw new IllegalStateException("Invalid payment protection key configuration", 
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0371 — backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:26
+### RULE-0429 — backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:26
 
 [backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:26](../../src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java#L26)
 
@@ -6597,7 +7595,7 @@ throw new IllegalArgumentException("Independent 256-bit encryption and fingerpri
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0372 — backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:29
+### RULE-0430 — backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:29
 
 [backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:29](../../src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java#L29)
 
@@ -6615,7 +7613,7 @@ throw new IllegalArgumentException("Encryption and fingerprint keys must differ"
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0373 — backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:37
+### RULE-0431 — backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:37
 
 [backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:37](../../src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java#L37)
 
@@ -6635,7 +7633,7 @@ throw new IllegalArgumentException("Sensitive value is required");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0374 — backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:47
+### RULE-0432 — backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:47
 
 [backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:47](../../src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java#L47)
 
@@ -6652,7 +7650,7 @@ throw new IllegalStateException("Sensitive data encryption failed", e);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0375 — backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:53
+### RULE-0433 — backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:53
 
 [backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:53](../../src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java#L53)
 
@@ -6674,7 +7672,7 @@ throw new IllegalArgumentException("Unsupported ciphertext version");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0376 — backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:56
+### RULE-0434 — backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:56
 
 [backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:56](../../src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java#L56)
 
@@ -6693,7 +7691,7 @@ throw new IllegalArgumentException("Invalid ciphertext");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0377 — backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:62
+### RULE-0435 — backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:62
 
 [backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:62](../../src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java#L62)
 
@@ -6710,7 +7708,7 @@ throw new IllegalArgumentException("Unable to decrypt sensitive data", e);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0378 — backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:69
+### RULE-0436 — backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:69
 
 [backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:69](../../src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java#L69)
 
@@ -6730,7 +7728,7 @@ throw new IllegalArgumentException("Invalid fingerprint input");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0379 — backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:76
+### RULE-0437 — backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:76
 
 [backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:76](../../src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java#L76)
 
@@ -6750,7 +7748,7 @@ throw new IllegalStateException("Fingerprint generation failed", e);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0380 — backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:81
+### RULE-0438 — backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:81
 
 [backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:81](../../src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java#L81)
 
@@ -6772,7 +7770,7 @@ throw new IllegalArgumentException("UPI ID is required");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0381 — backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:84
+### RULE-0439 — backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:84
 
 [backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:84](../../src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java#L84)
 
@@ -6793,7 +7791,7 @@ throw new IllegalArgumentException("Invalid UPI ID format");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0382 — backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:90
+### RULE-0440 — backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:90
 
 [backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:90](../../src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java#L90)
 
@@ -6815,7 +7813,7 @@ throw new IllegalArgumentException("Invalid account number");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0383 — backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:95
+### RULE-0441 — backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:95
 
 [backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:95](../../src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java#L95)
 
@@ -6840,7 +7838,7 @@ throw new IllegalArgumentException("IFSC required");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0384 — backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:97
+### RULE-0442 — backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:97
 
 [backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:97](../../src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java#L97)
 
@@ -6861,7 +7859,7 @@ throw new IllegalArgumentException("Invalid IFSC format");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0385 — backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:120
+### RULE-0443 — backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:120
 
 [backend/src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java:120](../../src/main/java/com/giftplatform/hostpayment/security/PaymentDataProtector.java#L120)
 
@@ -6880,7 +7878,7 @@ throw new IllegalArgumentException("Invalid encryption context");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0386 — backend/src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java:21
+### RULE-0444 — backend/src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java:21
 
 [backend/src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java:21](../../src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java#L21)
 
@@ -6896,7 +7894,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid account kind")
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0387 — backend/src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java:25
+### RULE-0445 — backend/src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java:25
 
 [backend/src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java:25](../../src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java#L25)
 
@@ -6914,7 +7912,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Event not found");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0388 — backend/src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java:30
+### RULE-0446 — backend/src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java:30
 
 [backend/src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java:30](../../src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java#L30)
 
@@ -6931,7 +7929,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Account not found");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0389 — backend/src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java:38
+### RULE-0447 — backend/src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java:38
 
 [backend/src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java:38](../../src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java#L38)
 
@@ -6947,7 +7945,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Account not found");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0390 — backend/src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java:40
+### RULE-0448 — backend/src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java:40
 
 [backend/src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java:40](../../src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java#L40)
 
@@ -6964,7 +7962,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Account is not linked to
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0391 — backend/src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java:46
+### RULE-0449 — backend/src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java:46
 
 [backend/src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java:46](../../src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java#L46)
 
@@ -6980,7 +7978,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Enable and confirm this l
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0392 — backend/src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java:51
+### RULE-0450 — backend/src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java:51
 
 [backend/src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java:51](../../src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java#L51)
 
@@ -6998,7 +7996,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Revoked accounts cannot b
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0393 — backend/src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java:53
+### RULE-0451 — backend/src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java:53
 
 [backend/src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java:53](../../src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java#L53)
 
@@ -7017,7 +8015,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Enable the host account b
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0394 — backend/src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java:64
+### RULE-0452 — backend/src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java:64
 
 [backend/src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java:64](../../src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java#L64)
 
@@ -7034,7 +8032,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid link action");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0395 — backend/src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java:20
+### RULE-0453 — backend/src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java:20
 
 [backend/src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java:20](../../src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java#L20)
 
@@ -7050,7 +8048,7 @@ throw new NoSuchElementException("Event not found");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0396 — backend/src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java:26
+### RULE-0454 — backend/src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java:26
 
 [backend/src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java:26](../../src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java#L26)
 
@@ -7065,7 +8063,7 @@ throw new IllegalStateException("Authenticated host is not eligible");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0397 — backend/src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java:35
+### RULE-0455 — backend/src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java:35
 
 [backend/src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java:35](../../src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java#L35)
 
@@ -7080,7 +8078,7 @@ throw new IllegalArgumentException("Destination already registered");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0398 — backend/src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java:37
+### RULE-0456 — backend/src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java:37
 
 [backend/src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java:37](../../src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java#L37)
 
@@ -7094,7 +8092,7 @@ throw new IllegalArgumentException("Invalid account holder name");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0399 — backend/src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java:37
+### RULE-0457 — backend/src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java:37
 
 [backend/src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java:37](../../src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java#L37)
 
@@ -7108,7 +8106,7 @@ throw new IllegalArgumentException("Destination already registered");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0400 — backend/src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java:55
+### RULE-0458 — backend/src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java:55
 
 [backend/src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java:55](../../src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java#L55)
 
@@ -7128,7 +8126,7 @@ throw new IllegalArgumentException("Account name must be 1-50 visible characters
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0401 — backend/src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java:59
+### RULE-0459 — backend/src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java:59
 
 [backend/src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java:59](../../src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java#L59)
 
@@ -7148,7 +8146,7 @@ throw new IllegalStateException("Upload or generate a valid UPI QR before confir
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0402 — backend/src/main/java/com/giftplatform/hostpayment/verification/DisabledHostDestinationVerifier.java:9
+### RULE-0460 — backend/src/main/java/com/giftplatform/hostpayment/verification/DisabledHostDestinationVerifier.java:9
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/DisabledHostDestinationVerifier.java:9](../../src/main/java/com/giftplatform/hostpayment/verification/DisabledHostDestinationVerifier.java#L9)
 
@@ -7171,7 +8169,7 @@ throw new IllegalStateException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0403 — backend/src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationInboxController.java:46
+### RULE-0461 — backend/src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationInboxController.java:46
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationInboxController.java:46](../../src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationInboxController.java#L46)
 
@@ -7190,7 +8188,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid pagination");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0404 — backend/src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationInboxController.java:70
+### RULE-0462 — backend/src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationInboxController.java:70
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationInboxController.java:70](../../src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationInboxController.java#L70)
 
@@ -7211,7 +8209,7 @@ throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0405 — backend/src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationInboxController.java:102
+### RULE-0463 — backend/src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationInboxController.java:102
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationInboxController.java:102](../../src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationInboxController.java#L102)
 
@@ -7229,7 +8227,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Destination not found")
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0406 — backend/src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationInboxController.java:108
+### RULE-0464 — backend/src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationInboxController.java:108
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationInboxController.java:108](../../src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationInboxController.java#L108)
 
@@ -7250,7 +8248,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid destination k
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0407 — backend/src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationService.java:139
+### RULE-0465 — backend/src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationService.java:139
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationService.java:139](../../src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationService.java#L139)
 
@@ -7281,7 +8279,7 @@ throw new IllegalStateException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0408 — backend/src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationService.java:145
+### RULE-0466 — backend/src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationService.java:145
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationService.java:145](../../src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationService.java#L145)
 
@@ -7310,7 +8308,7 @@ throw new IllegalStateException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0409 — backend/src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationService.java:155
+### RULE-0467 — backend/src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationService.java:155
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationService.java:155](../../src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationService.java#L155)
 
@@ -7339,7 +8337,7 @@ throw new IllegalStateException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0410 — backend/src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationService.java:172
+### RULE-0468 — backend/src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationService.java:172
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationService.java:172](../../src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationService.java#L172)
 
@@ -7365,7 +8363,7 @@ throw new IllegalStateException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0411 — backend/src/main/java/com/giftplatform/hostpayment/verification/ProviderVerificationEnvelope.java:15
+### RULE-0469 — backend/src/main/java/com/giftplatform/hostpayment/verification/ProviderVerificationEnvelope.java:15
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/ProviderVerificationEnvelope.java:15](../../src/main/java/com/giftplatform/hostpayment/verification/ProviderVerificationEnvelope.java#L15)
 
@@ -7384,7 +8382,7 @@ throw new IllegalArgumentException("Missing verification response identity");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0412 — backend/src/main/java/com/giftplatform/hostpayment/verification/ProviderVerificationEvidenceGuard.java:19
+### RULE-0470 — backend/src/main/java/com/giftplatform/hostpayment/verification/ProviderVerificationEvidenceGuard.java:19
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/ProviderVerificationEvidenceGuard.java:19](../../src/main/java/com/giftplatform/hostpayment/verification/ProviderVerificationEvidenceGuard.java#L19)
 
@@ -7403,7 +8401,7 @@ throw new SecurityException("Unauthenticated verification provider response");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0413 — backend/src/main/java/com/giftplatform/hostpayment/verification/ProviderVerificationEvidenceGuard.java:23
+### RULE-0471 — backend/src/main/java/com/giftplatform/hostpayment/verification/ProviderVerificationEvidenceGuard.java:23
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/ProviderVerificationEvidenceGuard.java:23](../../src/main/java/com/giftplatform/hostpayment/verification/ProviderVerificationEvidenceGuard.java#L23)
 
@@ -7421,7 +8419,7 @@ throw new SecurityException("Verification request correlation mismatch");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0414 — backend/src/main/java/com/giftplatform/hostpayment/verification/ProviderVerificationEvidenceGuard.java:27
+### RULE-0472 — backend/src/main/java/com/giftplatform/hostpayment/verification/ProviderVerificationEvidenceGuard.java:27
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/ProviderVerificationEvidenceGuard.java:27](../../src/main/java/com/giftplatform/hostpayment/verification/ProviderVerificationEvidenceGuard.java#L27)
 
@@ -7439,7 +8437,7 @@ throw new SecurityException("Verified evidence provider mismatch");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0415 — backend/src/main/java/com/giftplatform/hostpayment/verification/ProviderVerificationGate.java:33
+### RULE-0473 — backend/src/main/java/com/giftplatform/hostpayment/verification/ProviderVerificationGate.java:33
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/ProviderVerificationGate.java:33](../../src/main/java/com/giftplatform/hostpayment/verification/ProviderVerificationGate.java#L33)
 
@@ -7464,7 +8462,7 @@ throw new IllegalStateException("Live destination verification unavailable");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0416 — backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXAuthenticatedReader.java:28
+### RULE-0474 — backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXAuthenticatedReader.java:28
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXAuthenticatedReader.java:28](../../src/main/java/com/giftplatform/hostpayment/verification/RazorpayXAuthenticatedReader.java#L28)
 
@@ -7483,7 +8481,7 @@ throw new IllegalArgumentException("RazorpayX credentials and transport required
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0417 — backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXAuthenticatedReader.java:30
+### RULE-0475 — backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXAuthenticatedReader.java:30
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXAuthenticatedReader.java:30](../../src/main/java/com/giftplatform/hostpayment/verification/RazorpayXAuthenticatedReader.java#L30)
 
@@ -7502,7 +8500,7 @@ throw new IllegalArgumentException("Invalid credential format");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0418 — backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXAuthenticatedReader.java:35
+### RULE-0476 — backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXAuthenticatedReader.java:35
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXAuthenticatedReader.java:35](../../src/main/java/com/giftplatform/hostpayment/verification/RazorpayXAuthenticatedReader.java#L35)
 
@@ -7521,7 +8519,7 @@ throw new IllegalArgumentException("Invalid validation reference");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0419 — backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXAuthenticatedReader.java:42
+### RULE-0477 — backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXAuthenticatedReader.java:42
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXAuthenticatedReader.java:42](../../src/main/java/com/giftplatform/hostpayment/verification/RazorpayXAuthenticatedReader.java#L42)
 
@@ -7539,7 +8537,7 @@ throw new IOException("RazorpayX validation lookup failed (HTTP "+response.statu
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0420 — backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXAuthenticatedReader.java:44
+### RULE-0478 — backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXAuthenticatedReader.java:44
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXAuthenticatedReader.java:44](../../src/main/java/com/giftplatform/hostpayment/verification/RazorpayXAuthenticatedReader.java#L44)
 
@@ -7556,7 +8554,7 @@ throw new IOException("Invalid RazorpayX validation response");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0421 — backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXReconciliationPreview.java:1
+### RULE-0479 — backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXReconciliationPreview.java:1
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXReconciliationPreview.java:1](../../src/main/java/com/giftplatform/hostpayment/verification/RazorpayXReconciliationPreview.java#L1)
 
@@ -7570,7 +8568,7 @@ throw new IllegalArgumentException("Complete request context required");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0422 — backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXReconciliationPreview.java:1
+### RULE-0480 — backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXReconciliationPreview.java:1
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXReconciliationPreview.java:1](../../src/main/java/com/giftplatform/hostpayment/verification/RazorpayXReconciliationPreview.java#L1)
 
@@ -7584,7 +8582,7 @@ throw new IllegalArgumentException("Attempt ownership mismatch");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0423 — backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXReconciliationPreview.java:1
+### RULE-0481 — backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXReconciliationPreview.java:1
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXReconciliationPreview.java:1](../../src/main/java/com/giftplatform/hostpayment/verification/RazorpayXReconciliationPreview.java#L1)
 
@@ -7598,7 +8596,7 @@ throw new IllegalArgumentException("Bank validation only");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0424 — backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXReconciliationPreview.java:1
+### RULE-0482 — backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXReconciliationPreview.java:1
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXReconciliationPreview.java:1](../../src/main/java/com/giftplatform/hostpayment/verification/RazorpayXReconciliationPreview.java#L1)
 
@@ -7612,7 +8610,7 @@ throw new IllegalStateException("Missing trusted RazorpayX request binding");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0425 — backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXValidationResponse.java:24
+### RULE-0483 — backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXValidationResponse.java:24
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXValidationResponse.java:24](../../src/main/java/com/giftplatform/hostpayment/verification/RazorpayXValidationResponse.java#L24)
 
@@ -7636,7 +8634,7 @@ throw new IllegalArgumentException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0426 — backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXValidationResponse.java:39
+### RULE-0484 — backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXValidationResponse.java:39
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXValidationResponse.java:39](../../src/main/java/com/giftplatform/hostpayment/verification/RazorpayXValidationResponse.java#L39)
 
@@ -7660,7 +8658,7 @@ throw new IllegalArgumentException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0427 — backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXVerificationConfiguration.java:24
+### RULE-0485 — backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXVerificationConfiguration.java:24
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/RazorpayXVerificationConfiguration.java:24](../../src/main/java/com/giftplatform/hostpayment/verification/RazorpayXVerificationConfiguration.java#L24)
 
@@ -7687,7 +8685,7 @@ throw new IllegalStateException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0428 — backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java:22
+### RULE-0486 — backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java:22
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java:22](../../src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java#L22)
 
@@ -7705,7 +8703,7 @@ throw new IllegalArgumentException("Missing attempt identity");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0429 — backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java:30
+### RULE-0487 — backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java:30
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java:30](../../src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java#L30)
 
@@ -7726,7 +8724,7 @@ throw new IllegalStateException("Attempt already finalized");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0430 — backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java:31
+### RULE-0488 — backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java:31
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java:31](../../src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java#L31)
 
@@ -7746,7 +8744,7 @@ throw new IllegalArgumentException("Request binding required");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0431 — backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java:32
+### RULE-0489 — backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java:32
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java:32](../../src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java#L32)
 
@@ -7765,7 +8763,7 @@ throw new IllegalStateException("Request already bound");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0432 — backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java:44
+### RULE-0490 — backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java:44
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java:44](../../src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java#L44)
 
@@ -7784,7 +8782,7 @@ throw new IllegalStateException("Attempt already finalized");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0433 — backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java:45
+### RULE-0491 — backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java:45
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java:45](../../src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java#L45)
 
@@ -7803,7 +8801,7 @@ throw new IllegalArgumentException("Evidence required");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0434 — backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java:47
+### RULE-0492 — backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java:47
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java:47](../../src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java#L47)
 
@@ -7821,7 +8819,7 @@ throw new IllegalArgumentException("Missing verified evidence");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0435 — backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java:50
+### RULE-0493 — backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java:50
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java:50](../../src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java#L50)
 
@@ -7838,7 +8836,7 @@ throw new IllegalArgumentException("Pending is not a final result");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0436 — backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttemptCoordinator.java:20
+### RULE-0494 — backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttemptCoordinator.java:20
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttemptCoordinator.java:20](../../src/main/java/com/giftplatform/hostpayment/verification/VerificationAttemptCoordinator.java#L20)
 
@@ -7855,7 +8853,7 @@ throw new IllegalArgumentException("Missing identity");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0437 — backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttemptCoordinator.java:23
+### RULE-0495 — backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttemptCoordinator.java:23
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttemptCoordinator.java:23](../../src/main/java/com/giftplatform/hostpayment/verification/VerificationAttemptCoordinator.java#L23)
 
@@ -7872,7 +8870,7 @@ throw new IllegalStateException("Destination ineligible");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0438 — backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttemptCoordinator.java:26
+### RULE-0496 — backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttemptCoordinator.java:26
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttemptCoordinator.java:26](../../src/main/java/com/giftplatform/hostpayment/verification/VerificationAttemptCoordinator.java#L26)
 
@@ -7890,7 +8888,7 @@ throw new IllegalStateException("Destination ineligible");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0439 — backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttemptCoordinator.java:36
+### RULE-0497 — backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttemptCoordinator.java:36
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttemptCoordinator.java:36](../../src/main/java/com/giftplatform/hostpayment/verification/VerificationAttemptCoordinator.java#L36)
 
@@ -7911,7 +8909,7 @@ throw new IllegalArgumentException("Missing identity");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0440 — backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationEvidence.java:18
+### RULE-0498 — backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationEvidence.java:18
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationEvidence.java:18](../../src/main/java/com/giftplatform/hostpayment/verification/VerificationEvidence.java#L18)
 
@@ -7935,7 +8933,7 @@ throw new IllegalArgumentException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0441 — backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationRequestBinding.java:7
+### RULE-0499 — backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationRequestBinding.java:7
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationRequestBinding.java:7](../../src/main/java/com/giftplatform/hostpayment/verification/VerificationRequestBinding.java#L7)
 
@@ -7954,7 +8952,7 @@ throw new IllegalArgumentException("Complete request binding required");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0442 — backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationRequestBinding.java:9
+### RULE-0500 — backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationRequestBinding.java:9
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationRequestBinding.java:9](../../src/main/java/com/giftplatform/hostpayment/verification/VerificationRequestBinding.java#L9)
 
@@ -7972,7 +8970,7 @@ throw new IllegalArgumentException("Request binding exceeds storage limits");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0443 — backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationResultMatcher.java:24
+### RULE-0501 — backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationResultMatcher.java:24
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationResultMatcher.java:24](../../src/main/java/com/giftplatform/hostpayment/verification/VerificationResultMatcher.java#L24)
 
@@ -7992,7 +8990,7 @@ throw new IllegalStateException("Verification attempt is not pending");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0444 — backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationClient.java:24
+### RULE-0502 — backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationClient.java:24
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationClient.java:24](../../src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationClient.java#L24)
 
@@ -8010,7 +9008,7 @@ throw new IllegalArgumentException("Invalid account verification environment");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0445 — backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationClient.java:33
+### RULE-0503 — backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationClient.java:33
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationClient.java:33](../../src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationClient.java#L33)
 
@@ -8030,7 +9028,7 @@ throw new IllegalStateException("Account verification credentials are not config
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0446 — backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationClient.java:34
+### RULE-0504 — backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationClient.java:34
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationClient.java:34](../../src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationClient.java#L34)
 
@@ -8047,7 +9045,7 @@ throw new IllegalArgumentException("Invalid kind");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0447 — backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationClient.java:44
+### RULE-0505 — backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationClient.java:44
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationClient.java:44](../../src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationClient.java#L44)
 
@@ -8065,7 +9063,7 @@ throw new IllegalStateException("Account verification provider unavailable");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0448 — backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationClient.java:47
+### RULE-0506 — backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationClient.java:47
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationClient.java:47](../../src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationClient.java#L47)
 
@@ -8084,7 +9082,7 @@ throw new IllegalStateException("Account verification interrupted");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0449 — backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationClient.java:48
+### RULE-0507 — backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationClient.java:48
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationClient.java:48](../../src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationClient.java#L48)
 
@@ -8102,7 +9100,7 @@ throw new IllegalStateException("Account verification provider unavailable");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0450 — backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java:36
+### RULE-0508 — backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java:36
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java:36](../../src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java#L36)
 
@@ -8119,7 +9117,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid account kind")
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0451 — backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java:39
+### RULE-0509 — backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java:39
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java:39](../../src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java#L39)
 
@@ -8136,7 +9134,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Account not found");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0452 — backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java:53
+### RULE-0510 — backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java:53
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java:53](../../src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java#L53)
 
@@ -8154,7 +9152,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Consent is required fo
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0453 — backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java:54
+### RULE-0511 — backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java:54
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java:54](../../src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java#L54)
 
@@ -8171,7 +9169,7 @@ throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Account verifi
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0454 — backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java:60
+### RULE-0512 — backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java:60
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java:60](../../src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java#L60)
 
@@ -8187,7 +9185,7 @@ throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,"Wait a minute be
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0455 — backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java:62
+### RULE-0513 — backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java:62
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java:62](../../src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java#L62)
 
@@ -8203,7 +9201,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Account verification is a
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0456 — backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java:70
+### RULE-0514 — backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java:70
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java:70](../../src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java#L70)
 
@@ -8220,7 +9218,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Enter the account hold
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0457 — backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java:74
+### RULE-0515 — backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java:74
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java:74](../../src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java#L74)
 
@@ -8238,7 +9236,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Account is not eligible f
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0458 — backend/src/main/java/com/giftplatform/hostpayment/verification/cashfree/CashfreeSecureIdTransport.java:28
+### RULE-0516 — backend/src/main/java/com/giftplatform/hostpayment/verification/cashfree/CashfreeSecureIdTransport.java:28
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/cashfree/CashfreeSecureIdTransport.java:28](../../src/main/java/com/giftplatform/hostpayment/verification/cashfree/CashfreeSecureIdTransport.java#L28)
 
@@ -8258,7 +9256,7 @@ throw new IllegalStateException("Cashfree Secure ID sandbox not configured");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0459 — backend/src/main/java/com/giftplatform/hostpayment/verification/cashfree/CashfreeSecureIdTransport.java:30
+### RULE-0517 — backend/src/main/java/com/giftplatform/hostpayment/verification/cashfree/CashfreeSecureIdTransport.java:30
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/cashfree/CashfreeSecureIdTransport.java:30](../../src/main/java/com/giftplatform/hostpayment/verification/cashfree/CashfreeSecureIdTransport.java#L30)
 
@@ -8275,7 +9273,7 @@ throw new IllegalArgumentException("Unsupported Secure ID route");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0460 — backend/src/main/java/com/giftplatform/hostpayment/verification/cashfree/CashfreeSecureIdTransport.java:31
+### RULE-0518 — backend/src/main/java/com/giftplatform/hostpayment/verification/cashfree/CashfreeSecureIdTransport.java:31
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/cashfree/CashfreeSecureIdTransport.java:31](../../src/main/java/com/giftplatform/hostpayment/verification/cashfree/CashfreeSecureIdTransport.java#L31)
 
@@ -8293,7 +9291,7 @@ throw new IllegalArgumentException("Invalid request size");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0461 — backend/src/main/java/com/giftplatform/hostpayment/verification/cashfree/CashfreeSecureIdTransport.java:40
+### RULE-0519 — backend/src/main/java/com/giftplatform/hostpayment/verification/cashfree/CashfreeSecureIdTransport.java:40
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/cashfree/CashfreeSecureIdTransport.java:40](../../src/main/java/com/giftplatform/hostpayment/verification/cashfree/CashfreeSecureIdTransport.java#L40)
 
@@ -8311,7 +9309,7 @@ throw new IllegalStateException("Sandbox request interrupted");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0462 — backend/src/main/java/com/giftplatform/hostpayment/verification/cashfree/CashfreeSecureIdTransport.java:41
+### RULE-0520 — backend/src/main/java/com/giftplatform/hostpayment/verification/cashfree/CashfreeSecureIdTransport.java:41
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/cashfree/CashfreeSecureIdTransport.java:41](../../src/main/java/com/giftplatform/hostpayment/verification/cashfree/CashfreeSecureIdTransport.java#L41)
 
@@ -8328,7 +9326,7 @@ throw new IllegalStateException("Sandbox verification unavailable");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0463 — backend/src/main/java/com/giftplatform/hostpayment/verification/cashfree/CashfreeVerificationAttemptService.java:18
+### RULE-0521 — backend/src/main/java/com/giftplatform/hostpayment/verification/cashfree/CashfreeVerificationAttemptService.java:18
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/cashfree/CashfreeVerificationAttemptService.java:18](../../src/main/java/com/giftplatform/hostpayment/verification/cashfree/CashfreeVerificationAttemptService.java#L18)
 
@@ -8346,7 +9344,7 @@ throw new IllegalArgumentException("Destination not found");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0464 — backend/src/main/java/com/giftplatform/hostpayment/verification/provider/DisabledVerificationProviderTransport.java:6
+### RULE-0522 — backend/src/main/java/com/giftplatform/hostpayment/verification/provider/DisabledVerificationProviderTransport.java:6
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/provider/DisabledVerificationProviderTransport.java:6](../../src/main/java/com/giftplatform/hostpayment/verification/provider/DisabledVerificationProviderTransport.java#L6)
 
@@ -8364,7 +9362,7 @@ throw new VerificationProviderUnavailableException("Live verification transport 
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0465 — backend/src/main/java/com/giftplatform/hostpayment/verification/provider/ProviderResponseCorrelation.java:13
+### RULE-0523 — backend/src/main/java/com/giftplatform/hostpayment/verification/provider/ProviderResponseCorrelation.java:13
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/provider/ProviderResponseCorrelation.java:13](../../src/main/java/com/giftplatform/hostpayment/verification/provider/ProviderResponseCorrelation.java#L13)
 
@@ -8381,7 +9379,7 @@ throw new SecurityException("Provider response reference mismatch");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0466 — backend/src/main/java/com/giftplatform/hostpayment/verification/provider/ProviderVerificationRequest.java:13
+### RULE-0524 — backend/src/main/java/com/giftplatform/hostpayment/verification/provider/ProviderVerificationRequest.java:13
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/provider/ProviderVerificationRequest.java:13](../../src/main/java/com/giftplatform/hostpayment/verification/provider/ProviderVerificationRequest.java#L13)
 
@@ -8400,7 +9398,7 @@ throw new IllegalArgumentException("Invalid verification request identity");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0467 — backend/src/main/java/com/giftplatform/hostpayment/verification/provider/ProviderVerificationResponse.java:8
+### RULE-0525 — backend/src/main/java/com/giftplatform/hostpayment/verification/provider/ProviderVerificationResponse.java:8
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/provider/ProviderVerificationResponse.java:8](../../src/main/java/com/giftplatform/hostpayment/verification/provider/ProviderVerificationResponse.java#L8)
 
@@ -8419,7 +9417,7 @@ throw new IllegalArgumentException("Outcome required");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0468 — backend/src/main/java/com/giftplatform/hostpayment/verification/provider/ProviderVerificationTransportFactory.java:7
+### RULE-0526 — backend/src/main/java/com/giftplatform/hostpayment/verification/provider/ProviderVerificationTransportFactory.java:7
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/provider/ProviderVerificationTransportFactory.java:7](../../src/main/java/com/giftplatform/hostpayment/verification/provider/ProviderVerificationTransportFactory.java#L7)
 
@@ -8439,7 +9437,7 @@ throw new IllegalArgumentException("Settings required");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0469 — backend/src/main/java/com/giftplatform/hostpayment/verification/provider/VerificationProviderSettings.java:13
+### RULE-0527 — backend/src/main/java/com/giftplatform/hostpayment/verification/provider/VerificationProviderSettings.java:13
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/provider/VerificationProviderSettings.java:13](../../src/main/java/com/giftplatform/hostpayment/verification/provider/VerificationProviderSettings.java#L13)
 
@@ -8459,7 +9457,7 @@ throw new IllegalArgumentException("Provider required");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0470 — backend/src/main/java/com/giftplatform/hostpayment/verification/provider/VerificationProviderSettings.java:16
+### RULE-0528 — backend/src/main/java/com/giftplatform/hostpayment/verification/provider/VerificationProviderSettings.java:16
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/provider/VerificationProviderSettings.java:16](../../src/main/java/com/giftplatform/hostpayment/verification/provider/VerificationProviderSettings.java#L16)
 
@@ -8478,7 +9476,7 @@ throw new IllegalArgumentException("Timeout must be 1ms to 15s");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0471 — backend/src/main/java/com/giftplatform/hostpayment/verification/provider/VerificationProviderSettings.java:19
+### RULE-0529 — backend/src/main/java/com/giftplatform/hostpayment/verification/provider/VerificationProviderSettings.java:19
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/provider/VerificationProviderSettings.java:19](../../src/main/java/com/giftplatform/hostpayment/verification/provider/VerificationProviderSettings.java#L19)
 
@@ -8497,7 +9495,7 @@ throw new IllegalStateException("Enabled provider requires credentials");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0472 — backend/src/main/java/com/giftplatform/hostpayment/verification/provider/VerificationProviderSettings.java:23
+### RULE-0530 — backend/src/main/java/com/giftplatform/hostpayment/verification/provider/VerificationProviderSettings.java:23
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/provider/VerificationProviderSettings.java:23](../../src/main/java/com/giftplatform/hostpayment/verification/provider/VerificationProviderSettings.java#L23)
 
@@ -8515,7 +9513,7 @@ throw new IllegalStateException("Enabled provider requires HTTPS endpoint");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0473 — backend/src/main/java/com/giftplatform/hostpayment/verification/provider/VerificationProviderSettings.java:28
+### RULE-0531 — backend/src/main/java/com/giftplatform/hostpayment/verification/provider/VerificationProviderSettings.java:28
 
 [backend/src/main/java/com/giftplatform/hostpayment/verification/provider/VerificationProviderSettings.java:28](../../src/main/java/com/giftplatform/hostpayment/verification/provider/VerificationProviderSettings.java#L28)
 
@@ -8536,9 +9534,439 @@ throw new VerificationProviderUnavailableException("Provider verification disabl
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
+## localization
+
+### RULE-0532 — backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:18
+
+[backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:18](../../src/main/java/com/giftplatform/localization/LocalizationAdminController.java#L18)
+
+When / guard context:
+```java
+ss LocalizationAdminController {
+    private final JdbcTemplate db;private final ActorContext actor;private final LocalizationService service;
+    public LocalizationAdminController(JdbcTemplate db,ActorContext actor,LocalizationService service){this.db=db;this.actor=actor;this.service=service;}
+    private UUID admin(){if(!actor.isPlatformAdmin())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0533 — backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:26
+
+[backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:26](../../src/main/java/com/giftplatform/localization/LocalizationAdminController.java#L26)
+
+When / guard context:
+```java
+.of("settings",service.settings(),"languages",service.languages(false));}
+    @PutMapping @Transactional
+    public LocalizationService.Settings configure(@Valid @RequestBody Configuration input){admin();long version=db.queryForObject("SELECT version FROM platform_localization_settings WHERE id=1 FOR UPDATE",Long.class);if(version!=input.version())
+```
+Failure / enforcement:
+```java
+throw conflict();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0534 — backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:27
+
+[backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:27](../../src/main/java/com/giftplatform/localization/LocalizationAdminController.java#L27)
+
+When / guard context:
+```java
+dy Configuration input){admin();long version=db.queryForObject("SELECT version FROM platform_localization_settings WHERE id=1 FOR UPDATE",Long.class);if(version!=input.version())throw conflict();
+        for(String code:List.of(input.defaultLanguage(),input.fallbackLanguage()))if(service.languages(true).stream().noneMatch(l->l.code().equals(code)))
+```
+Failure / enforcement:
+```java
+throw bad("Default and fallback languages must be enabled");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0535 — backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:30
+
+[backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:30](../../src/main/java/com/giftplatform/localization/LocalizationAdminController.java#L30)
+
+When / guard context:
+```java
+ic List<LocalizationService.Language> language(@PathVariable String code,@Valid @RequestBody LanguageInput input){admin();db.queryForObject("SELECT version FROM platform_localization_settings WHERE id=1 FOR UPDATE",Long.class);if(code.equalsIgnoreCase("cimode")||code.length()>63||!code.matches("[A-Za-z]{2,8}(-[A-Za-z0-9]{2,8})*")||!canonical(code))
+```
+Failure / enforcement:
+```java
+throw bad("Use a canonical BCP 47 language code");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0536 — backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:31
+
+[backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:31](../../src/main/java/com/giftplatform/localization/LocalizationAdminController.java#L31)
+
+When / guard context:
+```java
+alsIgnoreCase("cimode")||code.length()>63||!code.matches("[A-Za-z]{2,8}(-[A-Za-z0-9]{2,8})*")||!canonical(code))throw bad("Use a canonical BCP 47 language code");
+        var current=db.query("SELECT version FROM platform_languages WHERE code=?",(rs,i)->rs.getLong(1),code);long version=current.isEmpty()?0:current.get(0);if(version!=input.version())
+```
+Failure / enforcement:
+```java
+throw conflict();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0537 — backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:31
+
+[backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:31](../../src/main/java/com/giftplatform/localization/LocalizationAdminController.java#L31)
+
+When / guard context:
+```java
+nguage code");
+        var current=db.query("SELECT version FROM platform_languages WHERE code=?",(rs,i)->rs.getLong(1),code);long version=current.isEmpty()?0:current.get(0);if(version!=input.version())throw conflict();var config=service.settings();if(!input.enabled()&&(code.equals(config.defaultLanguage())||code.equals(config.fallbackLanguage())))
+```
+Failure / enforcement:
+```java
+throw bad("Choose another default/fallback language before disabling this one");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0538 — backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:34
+
+[backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:34](../../src/main/java/com/giftplatform/localization/LocalizationAdminController.java#L34)
+
+When / guard context:
+```java
+LOCALIZATION_LANGUAGE_CHANGED",null);return service.languages(false);}
+    @GetMapping("/translations")
+    public Map<String,Object> translations(@RequestParam String language,@RequestParam(defaultValue="") String search,@RequestParam(defaultValue="0") int offset,@RequestParam(defaultValue="50") int limit){admin();if(!service.settings().enabled())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Enable multi-language support to manage translations");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0539 — backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:34
+
+[backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:34](../../src/main/java/com/giftplatform/localization/LocalizationAdminController.java#L34)
+
+When / guard context:
+```java
+lue="") String search,@RequestParam(defaultValue="0") int offset,@RequestParam(defaultValue="50") int limit){admin();if(!service.settings().enabled())throw new ResponseStatusException(HttpStatus.CONFLICT,"Enable multi-language support to manage translations");if(language.length()>63||search.length()>200||offset<0||offset>100000||limit<1||limit>100)
+```
+Failure / enforcement:
+```java
+throw bad("Invalid translation page");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0540 — backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:36
+
+[backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:36](../../src/main/java/com/giftplatform/localization/LocalizationAdminController.java#L36)
+
+When / guard context:
+```java
+SELECT count(*) FROM localization_translations WHERE language_code=? AND published",Long.class,language));}
+    @PutMapping("/translations/{language}/{key}") @Transactional
+    public Map<String,Object> translation(@PathVariable String language,@PathVariable String key,@Valid @RequestBody Translation input){admin();if(!service.settings().enabled())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Multi-language support is disabled");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0541 — backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:36
+
+[backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:36](../../src/main/java/com/giftplatform/localization/LocalizationAdminController.java#L36)
+
+When / guard context:
+```java
+ions/{language}/{key}") @Transactional
+    public Map<String,Object> translation(@PathVariable String language,@PathVariable String key,@Valid @RequestBody Translation input){admin();if(!service.settings().enabled())throw new ResponseStatusException(HttpStatus.CONFLICT,"Multi-language support is disabled");if(language.length()>63||key.length()>120)
+```
+Failure / enforcement:
+```java
+throw bad("Invalid translation key");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0542 — backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:38
+
+[backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:38](../../src/main/java/com/giftplatform/localization/LocalizationAdminController.java#L38)
+
+When / guard context:
+```java
+nvalid translation key");
+        String source=db.query("SELECT source_text FROM localization_sources WHERE message_key=?",(rs,i)->rs.getString(1),key).stream().findFirst().orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
+        if(!LocalizationService.placeholders(source).equals(LocalizationService.placeholders(input.text())))
+```
+Failure / enforcement:
+```java
+throw bad("Translation must preserve every named placeholder");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0543 — backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:39
+
+[backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:39](../../src/main/java/com/giftplatform/localization/LocalizationAdminController.java#L39)
+
+When / guard context:
+```java
+aceholder");
+        db.queryForObject("SELECT version FROM platform_localization_settings WHERE id=1 FOR UPDATE",Long.class);var versions=db.query("SELECT version FROM localization_translations WHERE language_code=? AND message_key=?",(rs,i)->rs.getLong(1),language,key);long version=versions.isEmpty()?0:versions.get(0);if(version!=input.version())
+```
+Failure / enforcement:
+```java
+throw conflict();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0544 — backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:40
+
+[backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:40](../../src/main/java/com/giftplatform/localization/LocalizationAdminController.java#L40)
+
+When / guard context:
+```java
+version FROM localization_translations WHERE language_code=? AND message_key=?",(rs,i)->rs.getLong(1),language,key);long version=versions.isEmpty()?0:versions.get(0);if(version!=input.version())throw conflict();
+        if(!Boolean.TRUE.equals(db.queryForObject("SELECT EXISTS(SELECT 1 FROM platform_languages WHERE code=?)",Boolean.class,language)))
+```
+Failure / enforcement:
+```java
+throw bad("Unknown language");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0545 — backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:44
+
+[backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:44](../../src/main/java/com/giftplatform/localization/LocalizationAdminController.java#L44)
+
+When / guard context:
+```java
+",null);return Map.of("version",version+1,"published",input.published());}
+    public record ImportBatch(@NotNull @Size(max=2000) Map<String,Translation> entries,@NotNull Boolean publish){}
+    @GetMapping("/translations/{language}/export")
+    public Map<String,Object> export(@PathVariable String language){admin();if(!service.settings().enabled())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Multi-language support is disabled");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0546 — backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:44
+
+[backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:44](../../src/main/java/com/giftplatform/localization/LocalizationAdminController.java#L44)
+
+When / guard context:
+```java
+ize(max=2000) Map<String,Translation> entries,@NotNull Boolean publish){}
+    @GetMapping("/translations/{language}/export")
+    public Map<String,Object> export(@PathVariable String language){admin();if(!service.settings().enabled())throw new ResponseStatusException(HttpStatus.CONFLICT,"Multi-language support is disabled");if(language.length()>63)
+```
+Failure / enforcement:
+```java
+throw bad("Invalid language");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0547 — backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:46
+
+[backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:46](../../src/main/java/com/giftplatform/localization/LocalizationAdminController.java#L46)
+
+When / guard context:
+```java
+/translations/{language}/import") @Transactional
+    public Map<String,Object> importBatch(@PathVariable String language,@Valid @RequestBody ImportBatch input){admin();for(var entry:input.entries().entrySet()){Translation value=entry.getValue();if(entry.getKey()==null||value==null||value.text()==null||value.text().length()>10000||value.version()<0)
+```
+Failure / enforcement:
+```java
+throw bad("Invalid translation import entry");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0548 — backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:54
+
+[backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:54](../../src/main/java/com/giftplatform/localization/LocalizationAdminController.java#L54)
+
+When / guard context:
+```java
+e_delivery_templates ORDER BY language_code,provider");}
+    @PutMapping("/delivery-templates/{language}") @Transactional
+    public Map<String,Object> deliveryTemplate(@PathVariable String language,@Valid @RequestBody DeliveryTemplate input){admin();if(language.length()>63||service.languages(false).stream().noneMatch(l->l.code().equals(language)))
+```
+Failure / enforcement:
+```java
+throw bad("Unknown language");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0549 — backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:54
+
+[backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:54](../../src/main/java/com/giftplatform/localization/LocalizationAdminController.java#L54)
+
+When / guard context:
+```java
+"Unknown language");db.queryForObject("SELECT version FROM platform_localization_settings WHERE id=1 FOR UPDATE",Long.class);var versions=db.query("SELECT version FROM language_delivery_templates WHERE language_code=? AND provider='MSG91'",(rs,i)->rs.getLong(1),language);long version=versions.isEmpty()?0:versions.get(0);if(version!=input.version())
+```
+Failure / enforcement:
+```java
+throw conflict();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0550 — backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:58
+
+[backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:58](../../src/main/java/com/giftplatform/localization/LocalizationAdminController.java#L58)
+
+When / guard context:
+```java
+()",language,input.templateId(),admin());audit("LOCALIZATION_SMS_TEMPLATE_CHANGED",null);return Map.of("version",version+1);}
+
+    public record Source(@NotBlank @Size(max=10000) String text){}
+    @PostMapping("/sources") @Transactional
+    public Map<String,String> source(@Valid @RequestBody Source input){admin();if(!service.settings().enabled())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Multi-language support is disabled");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0551 — backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:60
+
+[backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:60](../../src/main/java/com/giftplatform/localization/LocalizationAdminController.java#L60)
+
+When / guard context:
+```java
+e.Builder().setLanguageTag(code).build().toLanguageTag().equals(code);}catch(IllformedLocaleException ex){return false;}}
+    private String[] scopeNames(String scope){return switch(scope){case "HOST"->new String[]{"localization_host_controls","host_id","users"};case "EVENT"->new String[]{"localization_event_controls","event_id","events"};default->
+```
+Failure / enforcement:
+```java
+throw bad("Unknown localization scope");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0552 — backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:61
+
+[backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:61](../../src/main/java/com/giftplatform/localization/LocalizationAdminController.java#L61)
+
+When / guard context:
+```java
+localization_host_controls","host_id","users"};case "EVENT"->new String[]{"localization_event_controls","event_id","events"};default->throw bad("Unknown localization scope");};}
+    private void validateTarget(String[] names,UUID id){if(!Boolean.TRUE.equals(db.queryForObject("SELECT EXISTS(SELECT 1 FROM "+names[2]+" WHERE id=?)",Boolean.class,id)))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0553 — backend/src/main/java/com/giftplatform/localization/LocalizationController.java:21
+
+[backend/src/main/java/com/giftplatform/localization/LocalizationController.java:21](../../src/main/java/com/giftplatform/localization/LocalizationController.java#L21)
+
+When / guard context:
+```java
+lic record Preference(@NotBlank @Size(max=63) String language) {}
+    @GetMapping("/api/public/localization/catalog")
+    @Transactional(readOnly=true)
+    public ResponseEntity<LocalizationService.Catalog> guest(@RequestParam(required=false) UUID token,@RequestParam(required=false) String language){
+        if(language!=null&&language.length()>63)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0554 — backend/src/main/java/com/giftplatform/localization/LocalizationController.java:31
+
+[backend/src/main/java/com/giftplatform/localization/LocalizationController.java:31](../../src/main/java/com/giftplatform/localization/LocalizationController.java#L31)
+
+When / guard context:
+```java
+;return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(result);}
+    @PostMapping("/api/auth/language")
+    @Transactional
+    public Map<String,String> preference(@Valid @RequestBody Preference input){UUID user=actor.requireAuthenticatedUserId();if(!(actor.isPlatformAdmin()?service.settings().enabled():service.available(user,null)))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Multi-language support is disabled");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0555 — backend/src/main/java/com/giftplatform/localization/LocalizationController.java:32
+
+[backend/src/main/java/com/giftplatform/localization/LocalizationController.java:32](../../src/main/java/com/giftplatform/localization/LocalizationController.java#L32)
+
+When / guard context:
+```java
+@RequestBody Preference input){UUID user=actor.requireAuthenticatedUserId();if(!(actor.isPlatformAdmin()?service.settings().enabled():service.available(user,null)))throw new ResponseStatusException(HttpStatus.CONFLICT,"Multi-language support is disabled");
+        if(service.languages(true).stream().noneMatch(l->l.code().equals(input.language())))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Choose an enabled language");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0556 — backend/src/main/java/com/giftplatform/localization/LocalizationService.java:64
+
+[backend/src/main/java/com/giftplatform/localization/LocalizationService.java:64](../../src/main/java/com/giftplatform/localization/LocalizationService.java#L64)
+
+When / guard context:
+```java
+nguage(),s.fallbackLanguage(),selected,direction,active,resources,Map.copyOf(source),s.version());
+    }
+    public static String sourceKey(String text) {
+        try{return "ui."+HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(text.getBytes(StandardCharsets.UTF_8))).substring(0,16);}
+        catch(NoSuchAlgorithmException ex){
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException(ex);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0557 — backend/src/main/java/com/giftplatform/localization/LocalizationService.java:101
+
+[backend/src/main/java/com/giftplatform/localization/LocalizationService.java:101](../../src/main/java/com/giftplatform/localization/LocalizationService.java#L101)
+
+When / guard context:
+```java
+ault;
+    }
+    public static Set<String> placeholders(String text) {
+        Set<String> result=new TreeSet<>();Matcher matcher=Pattern.compile("\\{\\{([A-Za-z][A-Za-z0-9_]*)}}").matcher(text);
+        String remainder=matcher.replaceAll(match->{result.add(match.group(1));return "";});
+        if(remainder.contains("{{")||remainder.contains("}}"))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Use named {{placeholder}} values without formatting expressions");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0558 — backend/src/main/java/com/giftplatform/localization/LocalizationSourceBootstrap.java:33
+
+[backend/src/main/java/com/giftplatform/localization/LocalizationSourceBootstrap.java:33](../../src/main/java/com/giftplatform/localization/LocalizationSourceBootstrap.java#L33)
+
+When / guard context:
+```java
+alue().indexOf(lookup);String prefix=source.getValue().substring(0,first),suffix=source.getValue().substring(first+lookup.length());
+   if(language.getKey().equals("ar")){prefix=mirror(prefix);suffix=mirror(suffix);}value=prefix+value+suffix;
+   if(!LocalizationService.placeholders(source.getValue()).equals(LocalizationService.placeholders(value)))
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Invalid starter translation placeholders: "+source.getKey());
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
 ## monetization
 
-### RULE-0474 — backend/src/main/java/com/giftplatform/monetization/CommercialAccessService.java:32
+### RULE-0559 — backend/src/main/java/com/giftplatform/monetization/CommercialAccessService.java:32
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialAccessService.java:32](../../src/main/java/com/giftplatform/monetization/CommercialAccessService.java#L32)
 
@@ -8555,7 +9983,7 @@ throw new ResponseStatusException(HttpStatus.PAYMENT_REQUIRED,"Your free active-
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0475 — backend/src/main/java/com/giftplatform/monetization/CommercialAccessService.java:39
+### RULE-0560 — backend/src/main/java/com/giftplatform/monetization/CommercialAccessService.java:39
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialAccessService.java:39](../../src/main/java/com/giftplatform/monetization/CommercialAccessService.java#L39)
 
@@ -8573,7 +10001,7 @@ throw new ResponseStatusException(HttpStatus.PAYMENT_REQUIRED,"Pay the group coo
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0476 — backend/src/main/java/com/giftplatform/monetization/CommercialController.java:38
+### RULE-0561 — backend/src/main/java/com/giftplatform/monetization/CommercialController.java:38
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialController.java:38](../../src/main/java/com/giftplatform/monetization/CommercialController.java#L38)
 
@@ -8590,7 +10018,7 @@ throw new org.springframework.web.server.ResponseStatusException(HttpStatus.NOT_
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0477 — backend/src/main/java/com/giftplatform/monetization/CommercialController.java:39
+### RULE-0562 — backend/src/main/java/com/giftplatform/monetization/CommercialController.java:39
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialController.java:39](../../src/main/java/com/giftplatform/monetization/CommercialController.java#L39)
 
@@ -8607,7 +10035,7 @@ throw new org.springframework.web.server.ResponseStatusException(HttpStatus.PAYM
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0478 — backend/src/main/java/com/giftplatform/monetization/CommercialPublicService.java:17
+### RULE-0563 — backend/src/main/java/com/giftplatform/monetization/CommercialPublicService.java:17
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialPublicService.java:17](../../src/main/java/com/giftplatform/monetization/CommercialPublicService.java#L17)
 
@@ -8624,7 +10052,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0479 — backend/src/main/java/com/giftplatform/monetization/CommercialPublicService.java:31
+### RULE-0564 — backend/src/main/java/com/giftplatform/monetization/CommercialPublicService.java:31
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialPublicService.java:31](../../src/main/java/com/giftplatform/monetization/CommercialPublicService.java#L31)
 
@@ -8644,7 +10072,7 @@ throw notFound();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0480 — backend/src/main/java/com/giftplatform/monetization/CommercialPublicService.java:32
+### RULE-0565 — backend/src/main/java/com/giftplatform/monetization/CommercialPublicService.java:32
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialPublicService.java:32](../../src/main/java/com/giftplatform/monetization/CommercialPublicService.java#L32)
 
@@ -8659,7 +10087,7 @@ throw notFound();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0481 — backend/src/main/java/com/giftplatform/monetization/CommercialPublicService.java:41
+### RULE-0566 — backend/src/main/java/com/giftplatform/monetization/CommercialPublicService.java:41
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialPublicService.java:41](../../src/main/java/com/giftplatform/monetization/CommercialPublicService.java#L41)
 
@@ -8679,7 +10107,7 @@ throw notFound();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0482 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:40
+### RULE-0567 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:40
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:40](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L40)
 
@@ -8698,7 +10126,7 @@ throw bad("Invalid product");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0483 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:43
+### RULE-0568 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:43
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:43](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L43)
 
@@ -8716,7 +10144,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"This revenue stream is sw
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0484 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:47
+### RULE-0569 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:47
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:47](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L47)
 
@@ -8734,7 +10162,7 @@ throw notFound();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0485 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:49
+### RULE-0570 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:49
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:49](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L49)
 
@@ -8752,7 +10180,7 @@ throw notFound();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0486 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:52
+### RULE-0571 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:52
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:52](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L52)
 
@@ -8769,7 +10197,7 @@ throw bad("Set a group gift goal before calculating a percentage coordination fe
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0487 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:57
+### RULE-0572 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:57
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:57](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L57)
 
@@ -8787,7 +10215,7 @@ throw notFound();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0488 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:59
+### RULE-0573 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:59
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:59](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L59)
 
@@ -8807,7 +10235,7 @@ throw notFound();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0489 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:62
+### RULE-0574 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:62
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:62](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L62)
 
@@ -8824,7 +10252,7 @@ throw notFound();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0490 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:66
+### RULE-0575 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:66
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:66](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L66)
 
@@ -8842,7 +10270,7 @@ throw notFound();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0491 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:77
+### RULE-0576 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:77
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:77](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L77)
 
@@ -8858,7 +10286,7 @@ throw bad("Price exceeds supported checkout amount");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0492 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:83
+### RULE-0577 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:83
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:83](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L83)
 
@@ -8877,7 +10305,7 @@ throw bad("Valid checkout key required");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0493 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:90
+### RULE-0578 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:90
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:90](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L90)
 
@@ -8894,7 +10322,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Checkout key already belo
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0494 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:94
+### RULE-0579 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:94
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:94](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L94)
 
@@ -8913,7 +10341,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Price changed. Review the
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0495 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:95
+### RULE-0580 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:95
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:95](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L95)
 
@@ -8929,7 +10357,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"This purchase is already 
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0496 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:105
+### RULE-0581 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:105
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:105](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L105)
 
@@ -8947,7 +10375,7 @@ throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Razorpay test 
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0497 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:107
+### RULE-0582 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:107
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:107](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L107)
 
@@ -8963,7 +10391,7 @@ throw new IllegalStateException("Invalid provider order response");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0498 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:120
+### RULE-0583 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:120
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:120](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L120)
 
@@ -8983,7 +10411,7 @@ throw bad("Purchase required");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0499 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:122
+### RULE-0584 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:122
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:122](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L122)
 
@@ -9002,7 +10430,7 @@ throw notFound();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0500 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:123
+### RULE-0585 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:123
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:123](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L123)
 
@@ -9019,7 +10447,7 @@ throw bad("Invalid payment confirmation");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0501 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:127
+### RULE-0586 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:127
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:127](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L127)
 
@@ -9037,7 +10465,7 @@ throw bad("Invalid payment identity");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0502 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:129
+### RULE-0587 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:129
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:129](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L129)
 
@@ -9053,7 +10481,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Verified captured purchas
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0503 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:132
+### RULE-0588 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:132
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:132](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L132)
 
@@ -9070,7 +10498,7 @@ throw notFound();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0504 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:133
+### RULE-0589 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:133
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:133](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L133)
 
@@ -9088,7 +10516,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Payment does not match th
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0505 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:135
+### RULE-0590 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:135
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:135](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L135)
 
@@ -9104,7 +10532,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Purchase was already paid
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0506 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:138
+### RULE-0591 — backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:138
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:138](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L138)
 
@@ -9123,7 +10551,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Purchase is not awaiting 
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0507 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:24
+### RULE-0592 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:24
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:24](../../src/main/java/com/giftplatform/monetization/CommercialSetupService.java#L24)
 
@@ -9140,7 +10568,7 @@ throw bad("Invalid commercial policy");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0508 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:27
+### RULE-0593 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:27
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:27](../../src/main/java/com/giftplatform/monetization/CommercialSetupService.java#L27)
 
@@ -9157,7 +10585,7 @@ throw conflict();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0509 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:36
+### RULE-0594 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:36
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:36](../../src/main/java/com/giftplatform/monetization/CommercialSetupService.java#L36)
 
@@ -9174,7 +10602,7 @@ throw bad("Invalid placement type");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0510 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:43
+### RULE-0595 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:43
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:43](../../src/main/java/com/giftplatform/monetization/CommercialSetupService.java#L43)
 
@@ -9192,7 +10620,7 @@ throw bad("Select approval or rejection");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0511 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:44
+### RULE-0596 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:44
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:44](../../src/main/java/com/giftplatform/monetization/CommercialSetupService.java#L44)
 
@@ -9208,7 +10636,7 @@ throw notFound();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0512 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:52
+### RULE-0597 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:52
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:52](../../src/main/java/com/giftplatform/monetization/CommercialSetupService.java#L52)
 
@@ -9225,7 +10653,7 @@ throw bad("Partner setup required");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0513 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:54
+### RULE-0598 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:54
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:54](../../src/main/java/com/giftplatform/monetization/CommercialSetupService.java#L54)
 
@@ -9242,7 +10670,7 @@ throw bad("Use the retailer product domain without a scheme or path");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0514 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:55
+### RULE-0599 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:55
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:55](../../src/main/java/com/giftplatform/monetization/CommercialSetupService.java#L55)
 
@@ -9258,7 +10686,7 @@ throw bad("Invalid affiliate parameter name");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0515 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:57
+### RULE-0600 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:57
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:57](../../src/main/java/com/giftplatform/monetization/CommercialSetupService.java#L57)
 
@@ -9274,7 +10702,7 @@ throw bad("Invalid or duplicate click parameter");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0516 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:59
+### RULE-0601 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:59
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:59](../../src/main/java/com/giftplatform/monetization/CommercialSetupService.java#L59)
 
@@ -9290,7 +10718,7 @@ throw bad("Redirect template must include {url}");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0517 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:62
+### RULE-0602 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:62
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:62](../../src/main/java/com/giftplatform/monetization/CommercialSetupService.java#L62)
 
@@ -9307,7 +10735,7 @@ throw bad("Redirect placeholders must be in the path or query");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0518 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:65
+### RULE-0603 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:65
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:65](../../src/main/java/com/giftplatform/monetization/CommercialSetupService.java#L65)
 
@@ -9324,7 +10752,7 @@ throw notFound();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0519 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:65
+### RULE-0604 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:65
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:65](../../src/main/java/com/giftplatform/monetization/CommercialSetupService.java#L65)
 
@@ -9341,7 +10769,7 @@ throw conflict();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0520 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:75
+### RULE-0605 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:75
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:75](../../src/main/java/com/giftplatform/monetization/CommercialSetupService.java#L75)
 
@@ -9358,7 +10786,7 @@ throw bad("Invalid commission");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0521 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:77
+### RULE-0606 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:77
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:77](../../src/main/java/com/giftplatform/monetization/CommercialSetupService.java#L77)
 
@@ -9374,7 +10802,7 @@ throw notFound();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0522 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:78
+### RULE-0607 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:78
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:78](../../src/main/java/com/giftplatform/monetization/CommercialSetupService.java#L78)
 
@@ -9389,7 +10817,7 @@ throw bad("Click does not belong to this partner");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0523 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:81
+### RULE-0608 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:81
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:81](../../src/main/java/com/giftplatform/monetization/CommercialSetupService.java#L81)
 
@@ -9406,7 +10834,7 @@ throw conflict();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0524 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:82
+### RULE-0609 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:82
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:82](../../src/main/java/com/giftplatform/monetization/CommercialSetupService.java#L82)
 
@@ -9421,7 +10849,7 @@ throw bad("Statement identity and amount cannot change; reverse the entry and re
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0525 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:83
+### RULE-0610 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:83
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:83](../../src/main/java/com/giftplatform/monetization/CommercialSetupService.java#L83)
 
@@ -9436,7 +10864,7 @@ throw bad("Invalid commission state transition");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0526 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:101
+### RULE-0611 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:101
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:101](../../src/main/java/com/giftplatform/monetization/CommercialSetupService.java#L101)
 
@@ -9452,7 +10880,7 @@ throw bad("Required field is missing or too long");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0527 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:103
+### RULE-0612 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:103
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:103](../../src/main/java/com/giftplatform/monetization/CommercialSetupService.java#L103)
 
@@ -9468,7 +10896,7 @@ throw new IllegalArgumentException();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0528 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:103
+### RULE-0613 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:103
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:103](../../src/main/java/com/giftplatform/monetization/CommercialSetupService.java#L103)
 
@@ -9483,7 +10911,7 @@ throw new IllegalArgumentException();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0529 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:103
+### RULE-0614 — backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:103
 
 [backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:103](../../src/main/java/com/giftplatform/monetization/CommercialSetupService.java#L103)
 
@@ -9497,7 +10925,7 @@ throw bad("Use a valid HTTPS URL without embedded credentials or a custom port")
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0530 — backend/src/main/java/com/giftplatform/monetization/MonetizationService.java:38
+### RULE-0615 — backend/src/main/java/com/giftplatform/monetization/MonetizationService.java:38
 
 [backend/src/main/java/com/giftplatform/monetization/MonetizationService.java:38](../../src/main/java/com/giftplatform/monetization/MonetizationService.java#L38)
 
@@ -9516,7 +10944,7 @@ throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Platform admin only");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0531 — backend/src/main/java/com/giftplatform/monetization/MonetizationService.java:45
+### RULE-0616 — backend/src/main/java/com/giftplatform/monetization/MonetizationService.java:45
 
 [backend/src/main/java/com/giftplatform/monetization/MonetizationService.java:45](../../src/main/java/com/giftplatform/monetization/MonetizationService.java#L45)
 
@@ -9537,7 +10965,7 @@ throw bad("Supply all streams and a change reason (1–500 characters)");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0532 — backend/src/main/java/com/giftplatform/monetization/MonetizationService.java:52
+### RULE-0617 — backend/src/main/java/com/giftplatform/monetization/MonetizationService.java:52
 
 [backend/src/main/java/com/giftplatform/monetization/MonetizationService.java:52](../../src/main/java/com/giftplatform/monetization/MonetizationService.java#L52)
 
@@ -9554,7 +10982,7 @@ throw bad("Invalid monetization stream");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0533 — backend/src/main/java/com/giftplatform/monetization/MonetizationService.java:54
+### RULE-0618 — backend/src/main/java/com/giftplatform/monetization/MonetizationService.java:54
 
 [backend/src/main/java/com/giftplatform/monetization/MonetizationService.java:54](../../src/main/java/com/giftplatform/monetization/MonetizationService.java#L54)
 
@@ -9570,7 +10998,7 @@ throw bad("Purchases require a fixed price; percentage pricing is available for 
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0534 — backend/src/main/java/com/giftplatform/monetization/MonetizationService.java:57
+### RULE-0619 — backend/src/main/java/com/giftplatform/monetization/MonetizationService.java:57
 
 [backend/src/main/java/com/giftplatform/monetization/MonetizationService.java:57](../../src/main/java/com/giftplatform/monetization/MonetizationService.java#L57)
 
@@ -9587,7 +11015,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Settings changed; reload 
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0535 — backend/src/main/java/com/giftplatform/monetization/MonetizationService.java:74
+### RULE-0620 — backend/src/main/java/com/giftplatform/monetization/MonetizationService.java:74
 
 [backend/src/main/java/com/giftplatform/monetization/MonetizationService.java:74](../../src/main/java/com/giftplatform/monetization/MonetizationService.java#L74)
 
@@ -9606,7 +11034,7 @@ throw bad("Invalid history page");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0536 — backend/src/main/java/com/giftplatform/monetization/MonetizationService.java:87
+### RULE-0621 — backend/src/main/java/com/giftplatform/monetization/MonetizationService.java:87
 
 [backend/src/main/java/com/giftplatform/monetization/MonetizationService.java:87](../../src/main/java/com/giftplatform/monetization/MonetizationService.java#L87)
 
@@ -9628,7 +11056,7 @@ throw bad("Contribution must be between 1 paise and ₹10,00,000");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0537 — backend/src/main/java/com/giftplatform/monetization/MonetizationService.java:96
+### RULE-0622 — backend/src/main/java/com/giftplatform/monetization/MonetizationService.java:96
 
 [backend/src/main/java/com/giftplatform/monetization/MonetizationService.java:96](../../src/main/java/com/giftplatform/monetization/MonetizationService.java#L96)
 
@@ -9649,7 +11077,7 @@ Rationale beyond this enforcement is not declared at this site. There is no docu
 
 ## notification
 
-### RULE-0538 — backend/src/main/java/com/giftplatform/notification/HostInboxController.java:29
+### RULE-0623 — backend/src/main/java/com/giftplatform/notification/HostInboxController.java:29
 
 [backend/src/main/java/com/giftplatform/notification/HostInboxController.java:29](../../src/main/java/com/giftplatform/notification/HostInboxController.java#L29)
 
@@ -9669,7 +11097,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid pagination");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0539 — backend/src/main/java/com/giftplatform/notification/HostInboxController.java:56
+### RULE-0624 — backend/src/main/java/com/giftplatform/notification/HostInboxController.java:56
 
 [backend/src/main/java/com/giftplatform/notification/HostInboxController.java:56](../../src/main/java/com/giftplatform/notification/HostInboxController.java#L56)
 
@@ -9690,7 +11118,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Notification not found")
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0540 — backend/src/main/java/com/giftplatform/notification/HostThankYouService.java:23
+### RULE-0625 — backend/src/main/java/com/giftplatform/notification/HostThankYouService.java:23
 
 [backend/src/main/java/com/giftplatform/notification/HostThankYouService.java:23](../../src/main/java/com/giftplatform/notification/HostThankYouService.java#L23)
 
@@ -9709,7 +11137,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Event not found");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0541 — backend/src/main/java/com/giftplatform/notification/HostThankYouService.java:49
+### RULE-0626 — backend/src/main/java/com/giftplatform/notification/HostThankYouService.java:49
 
 [backend/src/main/java/com/giftplatform/notification/HostThankYouService.java:49](../../src/main/java/com/giftplatform/notification/HostThankYouService.java#L49)
 
@@ -9727,9 +11155,286 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid thank-you conf
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
+### RULE-0627 — backend/src/main/java/com/giftplatform/notification/email/BrandedEmailService.java:23
+
+[backend/src/main/java/com/giftplatform/notification/email/BrandedEmailService.java:23](../../src/main/java/com/giftplatform/notification/email/BrandedEmailService.java#L23)
+
+When / guard context:
+```java
+heme())&&uri.getHost()!=null&&uri.getUserInfo()==null&&(uri.getPath().isEmpty()||uri.getPath().equals("/"))&&uri.getQuery()==null&&uri.getFragment()==null;}catch(IllegalArgumentException ex){return false;}}
+ public String url(String path){if(!path.startsWith("/")||path.startsWith("//")||path.contains("\\")||path.contains("\r")||path.contains("\n"))
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Invalid email link.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0628 — backend/src/main/java/com/giftplatform/notification/email/BrandedEmailService.java:25
+
+[backend/src/main/java/com/giftplatform/notification/email/BrandedEmailService.java:25](../../src/main/java/com/giftplatform/notification/email/BrandedEmailService.java#L25)
+
+When / guard context:
+```java
+n+path;}
+ public record Email(String subject,String text,String html){}
+ public static String substitute(String template,Map<String,String> values,boolean html){var matcher=Pattern.compile("\\{\\{([A-Za-z][A-Za-z0-9]*)}}").matcher(template);var output=new StringBuffer();while(matcher.find()){String value=values.get(matcher.group(1));if(value==null)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Missing email variable: "+matcher.group(1));
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0629 — backend/src/main/java/com/giftplatform/notification/email/BrandedEmailService.java:27
+
+[backend/src/main/java/com/giftplatform/notification/email/BrandedEmailService.java:27](../../src/main/java/com/giftplatform/notification/email/BrandedEmailService.java#L27)
+
+When / guard context:
+```java
+eHtml(value):value));}matcher.appendTail(output);return output.toString();}
+ public Email render(String template,Map<String,String> supplied,String language)throws java.io.IOException{
+  if(!Set.of("registration","email-verification","password-reset","event-invitation","contribution-received","payment-success","event-completed").contains(template))
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Unknown email template.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0630 — backend/src/main/java/com/giftplatform/notification/email/BrandedEmailService.java:30
+
+[backend/src/main/java/com/giftplatform/notification/email/BrandedEmailService.java:30](../../src/main/java/com/giftplatform/notification/email/BrandedEmailService.java#L30)
+
+When / guard context:
+```java
+l").contains(entry.getKey())){if(entry.getValue().startsWith("/")&&!entry.getValue().startsWith("//"))entry.setValue(url(entry.getValue()));URI link=URI.create(entry.getValue());if(!Objects.equals(link.getScheme(),URI.create(origin).getScheme())||!Objects.equals(link.getRawAuthority(),URI.create(origin).getRawAuthority())||link.getUserInfo()!=null)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Email action must use the configured public origin.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0631 — backend/src/main/java/com/giftplatform/notification/email/BrandedEmailService.java:42
+
+[backend/src/main/java/com/giftplatform/notification/email/BrandedEmailService.java:42](../../src/main/java/com/giftplatform/notification/email/BrandedEmailService.java#L42)
+
+When / guard context:
+```java
+\">Privacy Policy</a> · <a href=\""+esc(url("/terms"))+"\">Terms &amp; Conditions</a></p><p>"+esc(brand.footerText())+"</p></body></html>";return new Email(subject,text,html);
+ }
+ private String esc(String value){return ThankYouMessageRenderer.escapeHtml(value);}
+ public void send(String recipient,Email email,String idempotencyKey){if(!available())
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Configure email delivery and an HTTPS public website URL.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0632 — backend/src/main/java/com/giftplatform/notification/email/BrandedEmailService.java:42
+
+[backend/src/main/java/com/giftplatform/notification/email/BrandedEmailService.java:42](../../src/main/java/com/giftplatform/notification/email/BrandedEmailService.java#L42)
+
+When / guard context:
+```java
+ring esc(String value){return ThankYouMessageRenderer.escapeHtml(value);}
+ public void send(String recipient,Email email,String idempotencyKey){if(!available())throw new IllegalStateException("Configure email delivery and an HTTPS public website URL.");if(recipient==null||recipient.length()>254||!recipient.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$"))
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Invalid email recipient.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0633 — backend/src/main/java/com/giftplatform/notification/email/BrandedEmailService.java:43
+
+[backend/src/main/java/com/giftplatform/notification/email/BrandedEmailService.java:43](../../src/main/java/com/giftplatform/notification/email/BrandedEmailService.java#L43)
+
+When / guard context:
+```java
+ails")).timeout(Duration.ofSeconds(12)).header("Authorization","Bearer "+key).header("Content-Type","application/json").header("Idempotency-Key",idempotencyKey).POST(HttpRequest.BodyPublishers.ofString(payload)).build();var response=client.send(request,HttpResponse.BodyHandlers.discarding());if(response.statusCode()<200||response.statusCode()>=300)
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Email provider rejected delivery (HTTP "+response.statusCode()+").");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0634 — backend/src/main/java/com/giftplatform/notification/email/BrandedEmailService.java:44
+
+[backend/src/main/java/com/giftplatform/notification/email/BrandedEmailService.java:44](../../src/main/java/com/giftplatform/notification/email/BrandedEmailService.java#L44)
+
+When / guard context:
+```java
+quest.BodyPublishers.ofString(payload)).build();var response=client.send(request,HttpResponse.BodyHandlers.discarding());if(response.statusCode()<200||response.statusCode()>=300)throw new IllegalStateException("Email provider rejected delivery (HTTP "+response.statusCode()+").");
+  }catch(InterruptedException ex){Thread.currentThread().interrupt();
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Email delivery interrupted.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0635 — backend/src/main/java/com/giftplatform/notification/email/BrandedEmailService.java:44
+
+[backend/src/main/java/com/giftplatform/notification/email/BrandedEmailService.java:44](../../src/main/java/com/giftplatform/notification/email/BrandedEmailService.java#L44)
+
+When / guard context:
+```java
+BodyHandlers.discarding());if(response.statusCode()<200||response.statusCode()>=300)throw new IllegalStateException("Email provider rejected delivery (HTTP "+response.statusCode()+").");
+  }catch(InterruptedException ex){Thread.currentThread().interrupt();throw new IllegalStateException("Email delivery interrupted.");}catch(java.io.IOException ex){
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Unable to connect to the email provider.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0636 — backend/src/main/java/com/giftplatform/notification/email/EmailAdminController.java:13
+
+[backend/src/main/java/com/giftplatform/notification/email/EmailAdminController.java:13](../../src/main/java/com/giftplatform/notification/email/EmailAdminController.java#L13)
+
+When / guard context:
+```java
+EmailAdminController {
+ private final JdbcTemplate db;private final ActorContext actor;private final BrandedEmailService service;
+ public EmailAdminController(JdbcTemplate db,ActorContext actor,BrandedEmailService service){this.db=db;this.actor=actor;this.service=service;}
+ @GetMapping public Map<String,Object> status(){if(!actor.isPlatformAdmin())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0637 — backend/src/main/java/com/giftplatform/notification/email/EventInvitationEmailController.java:15
+
+[backend/src/main/java/com/giftplatform/notification/email/EventInvitationEmailController.java:15](../../src/main/java/com/giftplatform/notification/email/EventInvitationEmailController.java#L15)
+
+When / guard context:
+```java
+atus.ACCEPTED) @Transactional public Map<String,String> send(@PathVariable UUID eventId,@RequestBody Invitation input){UUID user=actor.requireAuthenticatedUserId();var rows=db.queryForList("SELECT title,host_display_name,event_date,public_token FROM events WHERE id=? AND owner_id=? AND status='PUBLISHED' FOR UPDATE",eventId,user);if(rows.isEmpty())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Publish your event before sending invitations.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0638 — backend/src/main/java/com/giftplatform/notification/email/EventInvitationEmailController.java:15
+
+[backend/src/main/java/com/giftplatform/notification/email/EventInvitationEmailController.java:15](../../src/main/java/com/giftplatform/notification/email/EventInvitationEmailController.java#L15)
+
+When / guard context:
+```java
+ents WHERE id=? AND owner_id=? AND status='PUBLISHED' FOR UPDATE",eventId,user);if(rows.isEmpty())throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Publish your event before sending invitations.");if(input==null||input.email()==null||input.email().length()>254||!input.email().matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")||input.requestId()==null)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Please enter a valid email address.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0639 — backend/src/main/java/com/giftplatform/notification/email/EventInvitationEmailController.java:15
+
+[backend/src/main/java/com/giftplatform/notification/email/EventInvitationEmailController.java:15](../../src/main/java/com/giftplatform/notification/email/EventInvitationEmailController.java#L15)
+
+When / guard context:
+```java
+usException(HttpStatus.NOT_FOUND,"Publish your event before sending invitations.");if(input==null||input.email()==null||input.email().length()>254||!input.email().matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")||input.requestId()==null)throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Please enter a valid email address.");if(!service.available())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Email delivery is not configured. Contact platform support.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0640 — backend/src/main/java/com/giftplatform/notification/email/EventInvitationEmailController.java:15
+
+[backend/src/main/java/com/giftplatform/notification/email/EventInvitationEmailController.java:15](../../src/main/java/com/giftplatform/notification/email/EventInvitationEmailController.java#L15)
+
+When / guard context:
+```java
+;if(!service.available())throw new ResponseStatusException(HttpStatus.CONFLICT,"Email delivery is not configured. Contact platform support.");Long count=db.queryForObject("SELECT count(*) FROM transactional_email_outbox WHERE source_key LIKE ? AND created_at>now()-interval '1 hour'",Long.class,"invitation:"+eventId+":%");if(count!=null&&count>=100)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,"Invitation email limit reached. Try again later.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0641 — backend/src/main/java/com/giftplatform/notification/email/TransactionalEmailOutbox.java:15
+
+[backend/src/main/java/com/giftplatform/notification/email/TransactionalEmailOutbox.java:15](../../src/main/java/com/giftplatform/notification/email/TransactionalEmailOutbox.java#L15)
+
+When / guard context:
+```java
+Blank())return;try{db.update("INSERT INTO transactional_email_outbox(id,source_key,template_key,recipient,variables,language_code) VALUES(?,?,?,?,?::jsonb,?) ON CONFLICT(source_key) DO NOTHING",UUID.randomUUID(),source,template,recipient,json.writeValueAsString(variables),language==null?"en":language);}catch(tools.jackson.core.JacksonException ex){
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Unable to prepare email.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+## operations
+
+### RULE-0642 — backend/src/main/java/com/giftplatform/operations/ProductionConfigurationPolicy.java:18
+
+[backend/src/main/java/com/giftplatform/operations/ProductionConfigurationPolicy.java:18](../../src/main/java/com/giftplatform/operations/ProductionConfigurationPolicy.java#L18)
+
+When / guard context:
+```java
+ty("gift.production.public-origin","");
+  try{URI uri=URI.create(origin);String host=uri.getHost();if(!"https".equals(uri.getScheme())||host==null||Set.of("localhost","127.0.0.1","::1").contains(host)||uri.getUserInfo()!=null||uri.getQuery()!=null||uri.getFragment()!=null||(uri.getPath()!=null&&!uri.getPath().isEmpty()&&!uri.getPath().equals("/")))
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0643 — backend/src/main/java/com/giftplatform/operations/ProductionStartupGuard.java:11
+
+[backend/src/main/java/com/giftplatform/operations/ProductionStartupGuard.java:11](../../src/main/java/com/giftplatform/operations/ProductionStartupGuard.java#L11)
+
+When / guard context:
+```java
+","prod"})
+public class ProductionStartupGuard implements ApplicationRunner {
+ private final Environment environment;
+ public ProductionStartupGuard(Environment environment){this.environment=environment;}
+ @Override public void run(ApplicationArguments arguments){var errors=ProductionConfigurationPolicy.violations(environment);if(!errors.isEmpty())
+```
+Failure / enforcement:
+```java
+throw new IllegalStateException("Production configuration rejected: "+String.join("; ",errors));
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0644 — backend/src/main/java/com/giftplatform/operations/ProductionStatusController.java:13
+
+[backend/src/main/java/com/giftplatform/operations/ProductionStatusController.java:13](../../src/main/java/com/giftplatform/operations/ProductionStatusController.java#L13)
+
+When / guard context:
+```java
+uction-status")
+public class ProductionStatusController {
+ private final ActorContext actor;private final Environment environment;
+ public ProductionStatusController(ActorContext actor,Environment environment){this.actor=actor;this.environment=environment;}
+ @GetMapping public ResponseEntity<Map<String,Object>> status(){if(!actor.isPlatformAdmin())
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
 ## otp
 
-### RULE-0542 — backend/src/main/java/com/giftplatform/otp/config/OtpConfiguration.java:39
+### RULE-0645 — backend/src/main/java/com/giftplatform/otp/config/OtpConfiguration.java:39
 
 [backend/src/main/java/com/giftplatform/otp/config/OtpConfiguration.java:39](../../src/main/java/com/giftplatform/otp/config/OtpConfiguration.java#L39)
 
@@ -9750,7 +11455,7 @@ throw new IllegalStateException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0543 — backend/src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java:70
+### RULE-0646 — backend/src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java:70
 
 [backend/src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java:70](../../src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java#L70)
 
@@ -9779,7 +11484,7 @@ throw new IllegalArgumentException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0544 — backend/src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java:77
+### RULE-0647 — backend/src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java:77
 
 [backend/src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java:77](../../src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java#L77)
 
@@ -9804,7 +11509,7 @@ throw new IllegalArgumentException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0545 — backend/src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java:82
+### RULE-0648 — backend/src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java:82
 
 [backend/src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java:82](../../src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java#L82)
 
@@ -9829,7 +11534,7 @@ throw new IllegalArgumentException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0546 — backend/src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java:88
+### RULE-0649 — backend/src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java:88
 
 [backend/src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java:88](../../src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java#L88)
 
@@ -9854,7 +11559,7 @@ throw new IllegalArgumentException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0547 — backend/src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java:161
+### RULE-0650 — backend/src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java:161
 
 [backend/src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java:161](../../src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java#L161)
 
@@ -9884,7 +11589,7 @@ throw new IllegalStateException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0548 — backend/src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java:173
+### RULE-0651 — backend/src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java:173
 
 [backend/src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java:173](../../src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java#L173)
 
@@ -9911,7 +11616,7 @@ throw new IllegalStateException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0549 — backend/src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java:208
+### RULE-0652 — backend/src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java:208
 
 [backend/src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java:208](../../src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java#L208)
 
@@ -9937,7 +11642,7 @@ throw new IllegalArgumentException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0550 — backend/src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java:217
+### RULE-0653 — backend/src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java:217
 
 [backend/src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java:217](../../src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java#L217)
 
@@ -9965,7 +11670,7 @@ throw new IllegalStateException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0551 — backend/src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java:227
+### RULE-0654 — backend/src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java:227
 
 [backend/src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java:227](../../src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java#L227)
 
@@ -9990,7 +11695,7 @@ throw new IllegalArgumentException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0552 — backend/src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java:233
+### RULE-0655 — backend/src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java:233
 
 [backend/src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java:233](../../src/main/java/com/giftplatform/otp/entity/PhoneOtpChallenge.java#L233)
 
@@ -10015,7 +11720,7 @@ throw new IllegalStateException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0553 — backend/src/main/java/com/giftplatform/otp/service/AwsSnsSmsConfiguration.java:16
+### RULE-0656 — backend/src/main/java/com/giftplatform/otp/service/AwsSnsSmsConfiguration.java:16
 
 [backend/src/main/java/com/giftplatform/otp/service/AwsSnsSmsConfiguration.java:16](../../src/main/java/com/giftplatform/otp/service/AwsSnsSmsConfiguration.java#L16)
 
@@ -10034,9 +11739,9 @@ throw new IllegalArgumentException("SNS region must be configured");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0554 — backend/src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java:29
+### RULE-0657 — backend/src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java:30
 
-[backend/src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java:29](../../src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java#L29)
+[backend/src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java:30](../../src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java#L30)
 
 When / guard context:
 ```java
@@ -10053,9 +11758,9 @@ throw new IllegalArgumentException("Invalid SNS SMS type");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0555 — backend/src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java:37
+### RULE-0658 — backend/src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java:38
 
-[backend/src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java:37](../../src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java#L37)
+[backend/src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java:38](../../src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java#L38)
 
 When / guard context:
 ```java
@@ -10075,9 +11780,9 @@ throw new IllegalArgumentException("Invalid phone number");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0556 — backend/src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java:40
+### RULE-0659 — backend/src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java:41
 
-[backend/src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java:40](../../src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java#L40)
+[backend/src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java:41](../../src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java#L41)
 
 When / guard context:
 ```java
@@ -10097,13 +11802,13 @@ throw new IllegalArgumentException("Invalid OTP format");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0557 — backend/src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java:53
+### RULE-0660 — backend/src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java:54
 
-[backend/src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java:53](../../src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java#L53)
+[backend/src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java:54](../../src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java#L54)
 
 When / guard context:
 ```java
-.message("Your Gift Platform verification code is " + otp + ". Do not share this code.")
+,otp),org.springframework.context.i18n.LocaleContextHolder.getLocale().toLanguageTag()))
                 .messageAttributes(attrs)
                 .build();
         try {
@@ -10116,9 +11821,9 @@ throw new OtpDeliveryUncertainException("SNS acceptance could not be confirmed",
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0558 — backend/src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java:60
+### RULE-0661 — backend/src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java:61
 
-[backend/src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java:60](../../src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java#L60)
+[backend/src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java:61](../../src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java#L61)
 
 When / guard context:
 ```java
@@ -10133,9 +11838,9 @@ throw new OtpSmsRejectedException("AWS SNS rejected SMS");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0559 — backend/src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java:62
+### RULE-0662 — backend/src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java:63
 
-[backend/src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java:62](../../src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java#L62)
+[backend/src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java:63](../../src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java#L63)
 
 When / guard context:
 ```java
@@ -10152,9 +11857,9 @@ throw new OtpDeliveryUncertainException("SNS delivery acceptance is uncertain", 
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0560 — backend/src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java:64
+### RULE-0663 — backend/src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java:65
 
-[backend/src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java:64](../../src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java#L64)
+[backend/src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java:65](../../src/main/java/com/giftplatform/otp/service/AwsSnsSmsSender.java#L65)
 
 When / guard context:
 ```java
@@ -10171,7 +11876,7 @@ throw new OtpDeliveryUncertainException("SNS delivery acceptance is uncertain", 
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0561 — backend/src/main/java/com/giftplatform/otp/service/DisabledSmsSender.java:27
+### RULE-0664 — backend/src/main/java/com/giftplatform/otp/service/DisabledSmsSender.java:27
 
 [backend/src/main/java/com/giftplatform/otp/service/DisabledSmsSender.java:27](../../src/main/java/com/giftplatform/otp/service/DisabledSmsSender.java#L27)
 
@@ -10196,7 +11901,7 @@ throw new IllegalStateException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0562 — backend/src/main/java/com/giftplatform/otp/service/OtpCryptoService.java:19
+### RULE-0665 — backend/src/main/java/com/giftplatform/otp/service/OtpCryptoService.java:19
 
 [backend/src/main/java/com/giftplatform/otp/service/OtpCryptoService.java:19](../../src/main/java/com/giftplatform/otp/service/OtpCryptoService.java#L19)
 
@@ -10222,7 +11927,7 @@ throw new IllegalArgumentException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0563 — backend/src/main/java/com/giftplatform/otp/service/OtpCryptoService.java:37
+### RULE-0666 — backend/src/main/java/com/giftplatform/otp/service/OtpCryptoService.java:37
 
 [backend/src/main/java/com/giftplatform/otp/service/OtpCryptoService.java:37](../../src/main/java/com/giftplatform/otp/service/OtpCryptoService.java#L37)
 
@@ -10251,7 +11956,7 @@ throw new IllegalArgumentException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0564 — backend/src/main/java/com/giftplatform/otp/service/OtpCryptoService.java:52
+### RULE-0667 — backend/src/main/java/com/giftplatform/otp/service/OtpCryptoService.java:52
 
 [backend/src/main/java/com/giftplatform/otp/service/OtpCryptoService.java:52](../../src/main/java/com/giftplatform/otp/service/OtpCryptoService.java#L52)
 
@@ -10275,7 +11980,7 @@ throw new IllegalStateException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0565 — backend/src/main/java/com/giftplatform/otp/service/OtpEndpointRateLimiter.java:41
+### RULE-0668 — backend/src/main/java/com/giftplatform/otp/service/OtpEndpointRateLimiter.java:41
 
 [backend/src/main/java/com/giftplatform/otp/service/OtpEndpointRateLimiter.java:41](../../src/main/java/com/giftplatform/otp/service/OtpEndpointRateLimiter.java#L41)
 
@@ -10296,7 +12001,7 @@ throw new IllegalArgumentException("Missing user");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0566 — backend/src/main/java/com/giftplatform/otp/service/OtpEndpointRateLimiter.java:77
+### RULE-0669 — backend/src/main/java/com/giftplatform/otp/service/OtpEndpointRateLimiter.java:77
 
 [backend/src/main/java/com/giftplatform/otp/service/OtpEndpointRateLimiter.java:77](../../src/main/java/com/giftplatform/otp/service/OtpEndpointRateLimiter.java#L77)
 
@@ -10317,7 +12022,7 @@ throw new IllegalArgumentException("Invalid remote address");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0567 — backend/src/main/java/com/giftplatform/otp/service/OtpEndpointRateLimiter.java:86
+### RULE-0670 — backend/src/main/java/com/giftplatform/otp/service/OtpEndpointRateLimiter.java:86
 
 [backend/src/main/java/com/giftplatform/otp/service/OtpEndpointRateLimiter.java:86](../../src/main/java/com/giftplatform/otp/service/OtpEndpointRateLimiter.java#L86)
 
@@ -10339,7 +12044,7 @@ throw new IllegalStateException(ex);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0568 — backend/src/main/java/com/giftplatform/otp/service/OtpRequestRateLimiter.java:37
+### RULE-0671 — backend/src/main/java/com/giftplatform/otp/service/OtpRequestRateLimiter.java:37
 
 [backend/src/main/java/com/giftplatform/otp/service/OtpRequestRateLimiter.java:37](../../src/main/java/com/giftplatform/otp/service/OtpRequestRateLimiter.java#L37)
 
@@ -10360,7 +12065,7 @@ throw new IllegalArgumentException("Invalid rate-limit subject");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0569 — backend/src/main/java/com/giftplatform/otp/service/OtpRequestRateLimiter.java:79
+### RULE-0672 — backend/src/main/java/com/giftplatform/otp/service/OtpRequestRateLimiter.java:79
 
 [backend/src/main/java/com/giftplatform/otp/service/OtpRequestRateLimiter.java:79](../../src/main/java/com/giftplatform/otp/service/OtpRequestRateLimiter.java#L79)
 
@@ -10382,7 +12087,7 @@ throw new IllegalStateException(ex);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0570 — backend/src/main/java/com/giftplatform/otp/service/PhoneOtpIssuanceTransactionService.java:58
+### RULE-0673 — backend/src/main/java/com/giftplatform/otp/service/PhoneOtpIssuanceTransactionService.java:58
 
 [backend/src/main/java/com/giftplatform/otp/service/PhoneOtpIssuanceTransactionService.java:58](../../src/main/java/com/giftplatform/otp/service/PhoneOtpIssuanceTransactionService.java#L58)
 
@@ -10406,7 +12111,7 @@ throw new IllegalArgumentException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0571 — backend/src/main/java/com/giftplatform/otp/service/PhoneOtpOrchestrationService.java:62
+### RULE-0674 — backend/src/main/java/com/giftplatform/otp/service/PhoneOtpOrchestrationService.java:62
 
 [backend/src/main/java/com/giftplatform/otp/service/PhoneOtpOrchestrationService.java:62](../../src/main/java/com/giftplatform/otp/service/PhoneOtpOrchestrationService.java#L62)
 
@@ -10432,7 +12137,7 @@ throw new OtpDeliveryUncertainException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0572 — backend/src/main/java/com/giftplatform/otp/service/PhoneOtpOrchestrationService.java:68
+### RULE-0675 — backend/src/main/java/com/giftplatform/otp/service/PhoneOtpOrchestrationService.java:68
 
 [backend/src/main/java/com/giftplatform/otp/service/PhoneOtpOrchestrationService.java:68](../../src/main/java/com/giftplatform/otp/service/PhoneOtpOrchestrationService.java#L68)
 
@@ -10456,7 +12161,7 @@ throw new OtpDispatchException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0573 — backend/src/main/java/com/giftplatform/otp/service/PhoneOtpOrchestrationService.java:76
+### RULE-0676 — backend/src/main/java/com/giftplatform/otp/service/PhoneOtpOrchestrationService.java:76
 
 [backend/src/main/java/com/giftplatform/otp/service/PhoneOtpOrchestrationService.java:76](../../src/main/java/com/giftplatform/otp/service/PhoneOtpOrchestrationService.java#L76)
 
@@ -10482,7 +12187,7 @@ throw new OtpDeliveryUncertainException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0574 — backend/src/main/java/com/giftplatform/otp/service/PhoneOtpOrchestrationService.java:86
+### RULE-0677 — backend/src/main/java/com/giftplatform/otp/service/PhoneOtpOrchestrationService.java:86
 
 [backend/src/main/java/com/giftplatform/otp/service/PhoneOtpOrchestrationService.java:86](../../src/main/java/com/giftplatform/otp/service/PhoneOtpOrchestrationService.java#L86)
 
@@ -10507,7 +12212,7 @@ throw new OtpSmsRejectedException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0575 — backend/src/main/java/com/giftplatform/otp/service/PhoneOtpOrchestrationService.java:92
+### RULE-0678 — backend/src/main/java/com/giftplatform/otp/service/PhoneOtpOrchestrationService.java:92
 
 [backend/src/main/java/com/giftplatform/otp/service/PhoneOtpOrchestrationService.java:92](../../src/main/java/com/giftplatform/otp/service/PhoneOtpOrchestrationService.java#L92)
 
@@ -10533,7 +12238,7 @@ Rationale beyond this enforcement is not declared at this site. There is no docu
 
 ## payment
 
-### RULE-0576 — backend/src/main/java/com/giftplatform/payment/control/PaymentControlController.java:29
+### RULE-0679 — backend/src/main/java/com/giftplatform/payment/control/PaymentControlController.java:29
 
 [backend/src/main/java/com/giftplatform/payment/control/PaymentControlController.java:29](../../src/main/java/com/giftplatform/payment/control/PaymentControlController.java#L29)
 
@@ -10550,7 +12255,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0577 — backend/src/main/java/com/giftplatform/payment/control/PaymentControlController.java:30
+### RULE-0680 — backend/src/main/java/com/giftplatform/payment/control/PaymentControlController.java:30
 
 [backend/src/main/java/com/giftplatform/payment/control/PaymentControlController.java:30](../../src/main/java/com/giftplatform/payment/control/PaymentControlController.java#L30)
 
@@ -10566,7 +12271,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0578 — backend/src/main/java/com/giftplatform/payment/control/PaymentControlController.java:46
+### RULE-0681 — backend/src/main/java/com/giftplatform/payment/control/PaymentControlController.java:46
 
 [backend/src/main/java/com/giftplatform/payment/control/PaymentControlController.java:46](../../src/main/java/com/giftplatform/payment/control/PaymentControlController.java#L46)
 
@@ -10585,7 +12290,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0579 — backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:20
+### RULE-0682 — backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:20
 
 [backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:20](../../src/main/java/com/giftplatform/payment/control/PaymentControlService.java#L20)
 
@@ -10602,7 +12307,7 @@ throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Platform administrator r
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0580 — backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:23
+### RULE-0683 — backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:23
 
 [backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:23](../../src/main/java/com/giftplatform/payment/control/PaymentControlService.java#L23)
 
@@ -10620,7 +12325,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Event not found");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0581 — backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:34
+### RULE-0684 — backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:34
 
 [backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:34](../../src/main/java/com/giftplatform/payment/control/PaymentControlService.java#L34)
 
@@ -10638,7 +12343,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,channel+" payments are dis
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0582 — backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:35
+### RULE-0685 — backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:35
 
 [backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:35](../../src/main/java/com/giftplatform/payment/control/PaymentControlService.java#L35)
 
@@ -10655,7 +12360,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,channel+" payments are dis
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0583 — backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:37
+### RULE-0686 — backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:37
 
 [backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:37](../../src/main/java/com/giftplatform/payment/control/PaymentControlService.java#L37)
 
@@ -10672,7 +12377,7 @@ throw bad("Invalid platform scope");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0584 — backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:38
+### RULE-0687 — backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:38
 
 [backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:38](../../src/main/java/com/giftplatform/payment/control/PaymentControlService.java#L38)
 
@@ -10689,7 +12394,7 @@ throw bad("Choose a host or event");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0585 — backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:39
+### RULE-0688 — backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:39
 
 [backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:39](../../src/main/java/com/giftplatform/payment/control/PaymentControlService.java#L39)
 
@@ -10706,7 +12411,7 @@ throw missing();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0586 — backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:40
+### RULE-0689 — backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:40
 
 [backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:40](../../src/main/java/com/giftplatform/payment/control/PaymentControlService.java#L40)
 
@@ -10722,7 +12427,7 @@ throw missing();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0587 — backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:41
+### RULE-0690 — backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:41
 
 [backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:41](../../src/main/java/com/giftplatform/payment/control/PaymentControlService.java#L41)
 
@@ -10737,7 +12442,7 @@ throw bad("Invalid payment scope");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0588 — backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:55
+### RULE-0691 — backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:55
 
 [backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:55](../../src/main/java/com/giftplatform/payment/control/PaymentControlService.java#L55)
 
@@ -10755,7 +12460,7 @@ throw bad("Choose a channel, setting and change reason");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0589 — backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:57
+### RULE-0692 — backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:57
 
 [backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:57](../../src/main/java/com/giftplatform/payment/control/PaymentControlService.java#L57)
 
@@ -10771,7 +12476,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Route/VPA activation is d
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0590 — backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:59
+### RULE-0693 — backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:59
 
 [backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:59](../../src/main/java/com/giftplatform/payment/control/PaymentControlService.java#L59)
 
@@ -10787,7 +12492,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Payment controls changed;
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0591 — backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:68
+### RULE-0694 — backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:68
 
 [backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:68](../../src/main/java/com/giftplatform/payment/control/PaymentControlService.java#L68)
 
@@ -10804,7 +12509,7 @@ throw bad("Invalid history page");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0592 — backend/src/main/java/com/giftplatform/payment/control/RoutingCommissionService.java:29
+### RULE-0695 — backend/src/main/java/com/giftplatform/payment/control/RoutingCommissionService.java:29
 
 [backend/src/main/java/com/giftplatform/payment/control/RoutingCommissionService.java:29](../../src/main/java/com/giftplatform/payment/control/RoutingCommissionService.java#L29)
 
@@ -10822,7 +12527,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Supply a revision, per
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0593 — backend/src/main/java/com/giftplatform/payment/control/RoutingCommissionService.java:32
+### RULE-0696 — backend/src/main/java/com/giftplatform/payment/control/RoutingCommissionService.java:32
 
 [backend/src/main/java/com/giftplatform/payment/control/RoutingCommissionService.java:32](../../src/main/java/com/giftplatform/payment/control/RoutingCommissionService.java#L32)
 
@@ -10839,7 +12544,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Routing commission change
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0594 — backend/src/main/java/com/giftplatform/payment/control/RoutingCommissionService.java:41
+### RULE-0697 — backend/src/main/java/com/giftplatform/payment/control/RoutingCommissionService.java:41
 
 [backend/src/main/java/com/giftplatform/payment/control/RoutingCommissionService.java:41](../../src/main/java/com/giftplatform/payment/control/RoutingCommissionService.java#L41)
 
@@ -10859,7 +12564,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid history page")
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0595 — backend/src/main/java/com/giftplatform/payment/controller/PublicGiftProgressController.java:21
+### RULE-0698 — backend/src/main/java/com/giftplatform/payment/controller/PublicGiftProgressController.java:21
 
 [backend/src/main/java/com/giftplatform/payment/controller/PublicGiftProgressController.java:21](../../src/main/java/com/giftplatform/payment/controller/PublicGiftProgressController.java#L21)
 
@@ -10879,17 +12584,17 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation unavailable"
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0596 — backend/src/main/java/com/giftplatform/payment/controller/PublicPaymentContextController.java:20
+### RULE-0699 — backend/src/main/java/com/giftplatform/payment/controller/PublicPaymentContextController.java:20
 
 [backend/src/main/java/com/giftplatform/payment/controller/PublicPaymentContextController.java:20](../../src/main/java/com/giftplatform/payment/controller/PublicPaymentContextController.java#L20)
 
 When / guard context:
 ```java
-tController(JdbcTemplate jdbc) { this.jdbc = jdbc; }
+late jdbc) { this.jdbc = jdbc; }
 
     @GetMapping("/context/{token}")
     public Map<String, UUID> context(@PathVariable UUID token) {
-        var ids = jdbc.query("SELECT id FROM events WHERE public_token = ? AND status = 'PUBLISHED'",
+        var ids = jdbc.query("SELECT id FROM events WHERE public_token = ? AND status = 'PUBLISHED' AND gifting_enabled",
                 (rs, i) -> rs.getObject(1, UUID.class), token);
         if (ids.size() != 1)
 ```
@@ -10899,7 +12604,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation unavailable"
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0597 — backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:40
+### RULE-0700 — backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:40
 
 [backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:40](../../src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java#L40)
 
@@ -10922,7 +12627,7 @@ throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0598 — backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:44
+### RULE-0701 — backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:44
 
 [backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:44](../../src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java#L44)
 
@@ -10946,18 +12651,17 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Invitation unavailable")
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0599 — backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:47
+### RULE-0702 — backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:47
 
 [backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:47](../../src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java#L47)
 
 When / guard context:
 ```java
-E,
-   "Manual transfer reporting is disabled");
+er reporting is disabled");
  }
  private UUID event(UUID token) {
   if(token==null) throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Invitation unavailable");
-  List<UUID> rows=jdbc.query("SELECT id FROM events WHERE public_token=? AND status='PUBLISHED'",
+  List<UUID> rows=jdbc.query("SELECT id FROM events WHERE public_token=? AND status='PUBLISHED' AND gifting_enabled",
    (rs,i)->rs.getObject(1,UUID.class),token);
   if(rows.size()!=1)
 ```
@@ -10967,7 +12671,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Invitation unavailable")
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0600 — backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:77
+### RULE-0703 — backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:77
 
 [backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:77](../../src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java#L77)
 
@@ -10984,7 +12688,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid transfer confi
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0601 — backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:83
+### RULE-0704 — backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:83
 
 [backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:83](../../src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java#L83)
 
@@ -11004,7 +12708,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Gift unavailable");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0602 — backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:91
+### RULE-0705 — backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:91
 
 [backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:91](../../src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java#L91)
 
@@ -11020,7 +12724,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Eligible destination una
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0603 — backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:108
+### RULE-0706 — backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:108
 
 [backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:108](../../src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java#L108)
 
@@ -11038,7 +12742,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Idempotency conflict");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0604 — backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:119
+### RULE-0707 — backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:119
 
 [backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:119](../../src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java#L119)
 
@@ -11058,7 +12762,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Gift unavailable");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0605 — backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:120
+### RULE-0708 — backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:120
 
 [backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:120](../../src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java#L120)
 
@@ -11075,7 +12779,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"A surprise is waiting for
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0606 — backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:131
+### RULE-0709 — backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:131
 
 [backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:131](../../src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java#L131)
 
@@ -11093,7 +12797,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Reference already submitt
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0607 — backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:137
+### RULE-0710 — backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:137
 
 [backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:137](../../src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java#L137)
 
@@ -11113,7 +12817,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Gift unavailable");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0608 — backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:164
+### RULE-0711 — backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:164
 
 [backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:164](../../src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java#L164)
 
@@ -11133,7 +12837,7 @@ throw new IllegalStateException(e);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0609 — backend/src/main/java/com/giftplatform/payment/direct/GuestVerifiedDestinationService.java:36
+### RULE-0712 — backend/src/main/java/com/giftplatform/payment/direct/GuestVerifiedDestinationService.java:36
 
 [backend/src/main/java/com/giftplatform/payment/direct/GuestVerifiedDestinationService.java:36](../../src/main/java/com/giftplatform/payment/direct/GuestVerifiedDestinationService.java#L36)
 
@@ -11153,15 +12857,15 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Invitation unavailable")
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0610 — backend/src/main/java/com/giftplatform/payment/direct/GuestVerifiedDestinationService.java:39
+### RULE-0713 — backend/src/main/java/com/giftplatform/payment/direct/GuestVerifiedDestinationService.java:39
 
 [backend/src/main/java/com/giftplatform/payment/direct/GuestVerifiedDestinationService.java:39](../../src/main/java/com/giftplatform/payment/direct/GuestVerifiedDestinationService.java#L39)
 
 When / guard context:
 ```java
-if(!active) return List.of();
+List.of();
   if(token==null) throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Invitation unavailable");
-  List<UUID[]> owners=jdbc.query("SELECT id,owner_id FROM events WHERE public_token=? AND status='PUBLISHED'",
+  List<UUID[]> owners=jdbc.query("SELECT id,owner_id FROM events WHERE public_token=? AND status='PUBLISHED' AND gifting_enabled",
    (rs,i)->new UUID[]{rs.getObject(1,UUID.class),rs.getObject(2,UUID.class)},token);
   if(owners.size()!=1)
 ```
@@ -11171,7 +12875,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Invitation unavailable")
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0611 — backend/src/main/java/com/giftplatform/payment/entity/PaymentOrder.java:68
+### RULE-0714 — backend/src/main/java/com/giftplatform/payment/entity/PaymentOrder.java:68
 
 [backend/src/main/java/com/giftplatform/payment/entity/PaymentOrder.java:68](../../src/main/java/com/giftplatform/payment/entity/PaymentOrder.java#L68)
 
@@ -11199,7 +12903,7 @@ throw new IllegalArgumentException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0612 — backend/src/main/java/com/giftplatform/payment/entity/PaymentOrder.java:75
+### RULE-0715 — backend/src/main/java/com/giftplatform/payment/entity/PaymentOrder.java:75
 
 [backend/src/main/java/com/giftplatform/payment/entity/PaymentOrder.java:75](../../src/main/java/com/giftplatform/payment/entity/PaymentOrder.java#L75)
 
@@ -11223,7 +12927,7 @@ throw new IllegalArgumentException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0613 — backend/src/main/java/com/giftplatform/payment/entity/PaymentOrder.java:84
+### RULE-0716 — backend/src/main/java/com/giftplatform/payment/entity/PaymentOrder.java:84
 
 [backend/src/main/java/com/giftplatform/payment/entity/PaymentOrder.java:84](../../src/main/java/com/giftplatform/payment/entity/PaymentOrder.java#L84)
 
@@ -11248,7 +12952,7 @@ throw new IllegalArgumentException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0614 — backend/src/main/java/com/giftplatform/payment/entity/PaymentOrder.java:90
+### RULE-0717 — backend/src/main/java/com/giftplatform/payment/entity/PaymentOrder.java:90
 
 [backend/src/main/java/com/giftplatform/payment/entity/PaymentOrder.java:90](../../src/main/java/com/giftplatform/payment/entity/PaymentOrder.java#L90)
 
@@ -11273,7 +12977,7 @@ throw new IllegalArgumentException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0615 — backend/src/main/java/com/giftplatform/payment/entity/PaymentOrder.java:96
+### RULE-0718 — backend/src/main/java/com/giftplatform/payment/entity/PaymentOrder.java:96
 
 [backend/src/main/java/com/giftplatform/payment/entity/PaymentOrder.java:96](../../src/main/java/com/giftplatform/payment/entity/PaymentOrder.java#L96)
 
@@ -11298,7 +13002,7 @@ throw new IllegalArgumentException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0616 — backend/src/main/java/com/giftplatform/payment/entity/PaymentOrder.java:114
+### RULE-0719 — backend/src/main/java/com/giftplatform/payment/entity/PaymentOrder.java:114
 
 [backend/src/main/java/com/giftplatform/payment/entity/PaymentOrder.java:114](../../src/main/java/com/giftplatform/payment/entity/PaymentOrder.java#L114)
 
@@ -11320,7 +13024,7 @@ throw new IllegalStateException("Invalid pricing snapshot");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0617 — backend/src/main/java/com/giftplatform/payment/hybrid/HybridCheckoutQuoteController.java:14
+### RULE-0720 — backend/src/main/java/com/giftplatform/payment/hybrid/HybridCheckoutQuoteController.java:14
 
 [backend/src/main/java/com/giftplatform/payment/hybrid/HybridCheckoutQuoteController.java:14](../../src/main/java/com/giftplatform/payment/hybrid/HybridCheckoutQuoteController.java#L14)
 
@@ -11339,7 +13043,7 @@ throw new IllegalArgumentException("Request required");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0618 — backend/src/main/java/com/giftplatform/payment/hybrid/HybridCheckoutQuoteService.java:32
+### RULE-0721 — backend/src/main/java/com/giftplatform/payment/hybrid/HybridCheckoutQuoteService.java:32
 
 [backend/src/main/java/com/giftplatform/payment/hybrid/HybridCheckoutQuoteService.java:32](../../src/main/java/com/giftplatform/payment/hybrid/HybridCheckoutQuoteService.java#L32)
 
@@ -11358,13 +13062,13 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid contribution"
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0619 — backend/src/main/java/com/giftplatform/payment/hybrid/HybridCheckoutQuoteService.java:42
+### RULE-0722 — backend/src/main/java/com/giftplatform/payment/hybrid/HybridCheckoutQuoteService.java:42
 
 [backend/src/main/java/com/giftplatform/payment/hybrid/HybridCheckoutQuoteService.java:42](../../src/main/java/com/giftplatform/payment/hybrid/HybridCheckoutQuoteService.java#L42)
 
 When / guard context:
 ```java
-HERE e.id = ? AND e.status = 'PUBLISHED'
+status = 'PUBLISHED' AND gifting_enabled
               AND (?::uuid IS NULL OR EXISTS (
                   SELECT 1 FROM gifts g WHERE g.id = ? AND g.event_id = e.id
                     AND g.status = 'ACTIVE' AND g.visibility = 'PUBLIC'))
@@ -11377,13 +13081,13 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation unavailable"
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0620 — backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java:42
+### RULE-0723 — backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java:47
 
-[backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java:42](../../src/main/java/com/giftplatform/payment/provider/RazorpayClient.java#L42)
+[backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java:47](../../src/main/java/com/giftplatform/payment/provider/RazorpayClient.java#L47)
 
 When / guard context:
 ```java
-lient = RestClient.builder()
+r().requestFactory(requests)
                 .baseUrl("https://api.razorpay.com/v1")
                 .build();
 
@@ -11403,9 +13107,9 @@ throw new IllegalStateException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0621 — backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java:86
+### RULE-0724 — backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java:91
 
-[backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java:86](../../src/main/java/com/giftplatform/payment/provider/RazorpayClient.java#L86)
+[backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java:91](../../src/main/java/com/giftplatform/payment/provider/RazorpayClient.java#L91)
 
 When / guard context:
 ```java
@@ -11425,9 +13129,9 @@ throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0622 — backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java:89
+### RULE-0725 — backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java:94
 
-[backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java:89](../../src/main/java/com/giftplatform/payment/provider/RazorpayClient.java#L89)
+[backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java:94](../../src/main/java/com/giftplatform/payment/provider/RazorpayClient.java#L94)
 
 When / guard context:
 ```java
@@ -11444,9 +13148,9 @@ throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0623 — backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java:102
+### RULE-0726 — backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java:107
 
-[backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java:102](../../src/main/java/com/giftplatform/payment/provider/RazorpayClient.java#L102)
+[backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java:107](../../src/main/java/com/giftplatform/payment/provider/RazorpayClient.java#L107)
 
 When / guard context:
 ```java
@@ -11470,9 +13174,9 @@ throw new IllegalArgumentException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0624 — backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java:118
+### RULE-0727 — backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java:123
 
-[backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java:118](../../src/main/java/com/giftplatform/payment/provider/RazorpayClient.java#L118)
+[backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java:123](../../src/main/java/com/giftplatform/payment/provider/RazorpayClient.java#L123)
 
 When / guard context:
 ```java
@@ -11494,9 +13198,9 @@ throw new IllegalStateException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0625 — backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java:130
+### RULE-0728 — backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java:135
 
-[backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java:130](../../src/main/java/com/giftplatform/payment/provider/RazorpayClient.java#L130)
+[backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java:135](../../src/main/java/com/giftplatform/payment/provider/RazorpayClient.java#L135)
 
 When / guard context:
 ```java
@@ -11516,9 +13220,9 @@ throw new IllegalStateException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0626 — backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java:143
+### RULE-0729 — backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java:148
 
-[backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java:143](../../src/main/java/com/giftplatform/payment/provider/RazorpayClient.java#L143)
+[backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java:148](../../src/main/java/com/giftplatform/payment/provider/RazorpayClient.java#L148)
 
 When / guard context:
 ```java
@@ -11538,9 +13242,9 @@ throw new IllegalStateException("Invalid provider charge amount");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0627 — backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java:151
+### RULE-0730 — backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java:156
 
-[backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java:151](../../src/main/java/com/giftplatform/payment/provider/RazorpayClient.java#L151)
+[backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java:156](../../src/main/java/com/giftplatform/payment/provider/RazorpayClient.java#L156)
 
 When / guard context:
 ```java
@@ -11560,9 +13264,9 @@ throw new IllegalArgumentException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0628 — backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java:162
+### RULE-0731 — backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java:167
 
-[backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java:162](../../src/main/java/com/giftplatform/payment/provider/RazorpayClient.java#L162)
+[backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java:167](../../src/main/java/com/giftplatform/payment/provider/RazorpayClient.java#L167)
 
 When / guard context:
 ```java
@@ -11584,7 +13288,7 @@ throw new IllegalStateException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0629 — backend/src/main/java/com/giftplatform/payment/report/HostContributionReportService.java:68
+### RULE-0732 — backend/src/main/java/com/giftplatform/payment/report/HostContributionReportService.java:68
 
 [backend/src/main/java/com/giftplatform/payment/report/HostContributionReportService.java:68](../../src/main/java/com/giftplatform/payment/report/HostContributionReportService.java#L68)
 
@@ -11602,7 +13306,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Export limited to 1000
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0630 — backend/src/main/java/com/giftplatform/payment/report/HostContributionReportService.java:99
+### RULE-0733 — backend/src/main/java/com/giftplatform/payment/report/HostContributionReportService.java:99
 
 [backend/src/main/java/com/giftplatform/payment/report/HostContributionReportService.java:99](../../src/main/java/com/giftplatform/payment/report/HostContributionReportService.java#L99)
 
@@ -11621,7 +13325,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Search must be at most
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0631 — backend/src/main/java/com/giftplatform/payment/report/HostContributionReportService.java:103
+### RULE-0734 — backend/src/main/java/com/giftplatform/payment/report/HostContributionReportService.java:103
 
 [backend/src/main/java/com/giftplatform/payment/report/HostContributionReportService.java:103](../../src/main/java/com/giftplatform/payment/report/HostContributionReportService.java#L103)
 
@@ -11639,7 +13343,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid report filters
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0632 — backend/src/main/java/com/giftplatform/payment/report/HostContributionReportService.java:105
+### RULE-0735 — backend/src/main/java/com/giftplatform/payment/report/HostContributionReportService.java:105
 
 [backend/src/main/java/com/giftplatform/payment/report/HostContributionReportService.java:105](../../src/main/java/com/giftplatform/payment/report/HostContributionReportService.java#L105)
 
@@ -11657,7 +13361,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid date range");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0633 — backend/src/main/java/com/giftplatform/payment/report/HostContributionReportService.java:108
+### RULE-0736 — backend/src/main/java/com/giftplatform/payment/report/HostContributionReportService.java:108
 
 [backend/src/main/java/com/giftplatform/payment/report/HostContributionReportService.java:108](../../src/main/java/com/giftplatform/payment/report/HostContributionReportService.java#L108)
 
@@ -11676,7 +13380,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Event not found");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0634 — backend/src/main/java/com/giftplatform/payment/report/HostContributionReportService.java:114
+### RULE-0737 — backend/src/main/java/com/giftplatform/payment/report/HostContributionReportService.java:114
 
 [backend/src/main/java/com/giftplatform/payment/report/HostContributionReportService.java:114](../../src/main/java/com/giftplatform/payment/report/HostContributionReportService.java#L114)
 
@@ -11694,7 +13398,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Gift not found for event
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0635 — backend/src/main/java/com/giftplatform/payment/service/ContributionAllocationService.java:40
+### RULE-0738 — backend/src/main/java/com/giftplatform/payment/service/ContributionAllocationService.java:40
 
 [backend/src/main/java/com/giftplatform/payment/service/ContributionAllocationService.java:40](../../src/main/java/com/giftplatform/payment/service/ContributionAllocationService.java#L40)
 
@@ -11722,7 +13426,7 @@ throw new ResponseStatusException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0636 — backend/src/main/java/com/giftplatform/payment/service/ContributionAllocationService.java:61
+### RULE-0739 — backend/src/main/java/com/giftplatform/payment/service/ContributionAllocationService.java:61
 
 [backend/src/main/java/com/giftplatform/payment/service/ContributionAllocationService.java:61](../../src/main/java/com/giftplatform/payment/service/ContributionAllocationService.java#L61)
 
@@ -11744,7 +13448,7 @@ throw new ResponseStatusException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0637 — backend/src/main/java/com/giftplatform/payment/service/ContributionAllocationService.java:85
+### RULE-0740 — backend/src/main/java/com/giftplatform/payment/service/ContributionAllocationService.java:85
 
 [backend/src/main/java/com/giftplatform/payment/service/ContributionAllocationService.java:85](../../src/main/java/com/giftplatform/payment/service/ContributionAllocationService.java#L85)
 
@@ -11768,7 +13472,7 @@ throw new ResponseStatusException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0638 — backend/src/main/java/com/giftplatform/payment/service/ContributionAllocationService.java:112
+### RULE-0741 — backend/src/main/java/com/giftplatform/payment/service/ContributionAllocationService.java:112
 
 [backend/src/main/java/com/giftplatform/payment/service/ContributionAllocationService.java:112](../../src/main/java/com/giftplatform/payment/service/ContributionAllocationService.java#L112)
 
@@ -11793,7 +13497,7 @@ throw new ResponseStatusException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0639 — backend/src/main/java/com/giftplatform/payment/service/ContributionAllocationService.java:119
+### RULE-0742 — backend/src/main/java/com/giftplatform/payment/service/ContributionAllocationService.java:119
 
 [backend/src/main/java/com/giftplatform/payment/service/ContributionAllocationService.java:119](../../src/main/java/com/giftplatform/payment/service/ContributionAllocationService.java#L119)
 
@@ -11814,7 +13518,7 @@ throw new IllegalStateException("Invalid fee snapshot");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0640 — backend/src/main/java/com/giftplatform/payment/service/ContributionAllocationService.java:136
+### RULE-0743 — backend/src/main/java/com/giftplatform/payment/service/ContributionAllocationService.java:136
 
 [backend/src/main/java/com/giftplatform/payment/service/ContributionAllocationService.java:136](../../src/main/java/com/giftplatform/payment/service/ContributionAllocationService.java#L136)
 
@@ -11838,7 +13542,7 @@ throw new ResponseStatusException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0641 — backend/src/main/java/com/giftplatform/payment/service/GiftFundingService.java:35
+### RULE-0744 — backend/src/main/java/com/giftplatform/payment/service/GiftFundingService.java:35
 
 [backend/src/main/java/com/giftplatform/payment/service/GiftFundingService.java:35](../../src/main/java/com/giftplatform/payment/service/GiftFundingService.java#L35)
 
@@ -11860,7 +13564,7 @@ throw new ResponseStatusException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0642 — backend/src/main/java/com/giftplatform/payment/service/GiftFundingService.java:45
+### RULE-0745 — backend/src/main/java/com/giftplatform/payment/service/GiftFundingService.java:45
 
 [backend/src/main/java/com/giftplatform/payment/service/GiftFundingService.java:45](../../src/main/java/com/giftplatform/payment/service/GiftFundingService.java#L45)
 
@@ -11885,7 +13589,7 @@ throw new IllegalStateException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0643 — backend/src/main/java/com/giftplatform/payment/service/GuestCheckoutService.java:47
+### RULE-0746 — backend/src/main/java/com/giftplatform/payment/service/GuestCheckoutService.java:47
 
 [backend/src/main/java/com/giftplatform/payment/service/GuestCheckoutService.java:47](../../src/main/java/com/giftplatform/payment/service/GuestCheckoutService.java#L47)
 
@@ -11903,7 +13607,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid guest details
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0644 — backend/src/main/java/com/giftplatform/payment/service/GuestCheckoutService.java:50
+### RULE-0747 — backend/src/main/java/com/giftplatform/payment/service/GuestCheckoutService.java:50
 
 [backend/src/main/java/com/giftplatform/payment/service/GuestCheckoutService.java:50](../../src/main/java/com/giftplatform/payment/service/GuestCheckoutService.java#L50)
 
@@ -11922,7 +13626,7 @@ throw new IllegalStateException("Razorpay Test Mode key required");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0645 — backend/src/main/java/com/giftplatform/payment/service/GuestCheckoutService.java:79
+### RULE-0748 — backend/src/main/java/com/giftplatform/payment/service/GuestCheckoutService.java:79
 
 [backend/src/main/java/com/giftplatform/payment/service/GuestCheckoutService.java:79](../../src/main/java/com/giftplatform/payment/service/GuestCheckoutService.java#L79)
 
@@ -11942,9 +13646,9 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0646 — backend/src/main/java/com/giftplatform/payment/service/PaymentNotificationService.java:26
+### RULE-0749 — backend/src/main/java/com/giftplatform/payment/service/PaymentNotificationService.java:27
 
-[backend/src/main/java/com/giftplatform/payment/service/PaymentNotificationService.java:26](../../src/main/java/com/giftplatform/payment/service/PaymentNotificationService.java#L26)
+[backend/src/main/java/com/giftplatform/payment/service/PaymentNotificationService.java:27](../../src/main/java/com/giftplatform/payment/service/PaymentNotificationService.java#L27)
 
 When / guard context:
 ```java
@@ -11962,9 +13666,9 @@ throw new IllegalStateException("Verified contribution not found");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0647 — backend/src/main/java/com/giftplatform/payment/service/PaymentNotificationService.java:30
+### RULE-0750 — backend/src/main/java/com/giftplatform/payment/service/PaymentNotificationService.java:31
 
-[backend/src/main/java/com/giftplatform/payment/service/PaymentNotificationService.java:30](../../src/main/java/com/giftplatform/payment/service/PaymentNotificationService.java#L30)
+[backend/src/main/java/com/giftplatform/payment/service/PaymentNotificationService.java:31](../../src/main/java/com/giftplatform/payment/service/PaymentNotificationService.java#L31)
 
 When / guard context:
 ```java
@@ -11981,7 +13685,7 @@ throw new IllegalStateException("Contribution allocation mismatch");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0648 — backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:54
+### RULE-0751 — backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:54
 
 [backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:54](../../src/main/java/com/giftplatform/payment/service/PaymentOrderService.java#L54)
 
@@ -12004,7 +13708,7 @@ throw new ResponseStatusException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0649 — backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:74
+### RULE-0752 — backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:74
 
 [backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:74](../../src/main/java/com/giftplatform/payment/service/PaymentOrderService.java#L74)
 
@@ -12026,13 +13730,13 @@ throw new ResponseStatusException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0650 — backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:86
+### RULE-0753 — backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:86
 
 [backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:86](../../src/main/java/com/giftplatform/payment/service/PaymentOrderService.java#L86)
 
 When / guard context:
 ```java
-"Idempotency key belongs to another request");
+o another request");
             }
             return order;
         }
@@ -12041,7 +13745,7 @@ When / guard context:
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Event not found"));
 
-        if (event.getStatus() != EventStatus.PUBLISHED) {
+        if (event.getStatus() != EventStatus.PUBLISHED || !event.isGiftingEnabled()) {
 ```
 Failure / enforcement:
 ```java
@@ -12051,15 +13755,13 @@ throw new ResponseStatusException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0651 — backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:93
+### RULE-0754 — backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:93
 
 [backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:93](../../src/main/java/com/giftplatform/payment/service/PaymentOrderService.java#L93)
 
 When / guard context:
 ```java
-UND, "Event not found"));
-
-        if (event.getStatus() != EventStatus.PUBLISHED) {
+if (event.getStatus() != EventStatus.PUBLISHED || !event.isGiftingEnabled()) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
                     "Event is not accepting contributions");
@@ -12076,7 +13778,7 @@ throw new ResponseStatusException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0652 — backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:101
+### RULE-0755 — backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:101
 
 [backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:101](../../src/main/java/com/giftplatform/payment/service/PaymentOrderService.java#L101)
 
@@ -12099,7 +13801,7 @@ throw new ResponseStatusException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0653 — backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:111
+### RULE-0756 — backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:111
 
 [backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:111](../../src/main/java/com/giftplatform/payment/service/PaymentOrderService.java#L111)
 
@@ -12122,7 +13824,7 @@ throw new ResponseStatusException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0654 — backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:117
+### RULE-0757 — backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:117
 
 [backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:117](../../src/main/java/com/giftplatform/payment/service/PaymentOrderService.java#L117)
 
@@ -12141,7 +13843,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"A surprise is waiting for
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0655 — backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:120
+### RULE-0758 — backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:120
 
 [backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:120](../../src/main/java/com/giftplatform/payment/service/PaymentOrderService.java#L120)
 
@@ -12160,7 +13862,7 @@ throw new ResponseStatusException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0656 — backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:126
+### RULE-0759 — backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:126
 
 [backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:126](../../src/main/java/com/giftplatform/payment/service/PaymentOrderService.java#L126)
 
@@ -12183,7 +13885,7 @@ throw new ResponseStatusException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0657 — backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:132
+### RULE-0760 — backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:132
 
 [backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:132](../../src/main/java/com/giftplatform/payment/service/PaymentOrderService.java#L132)
 
@@ -12207,9 +13909,9 @@ throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Routing is sel
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0658 — backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:75
+### RULE-0761 — backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:76
 
-[backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:75](../../src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java#L75)
+[backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:76](../../src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java#L76)
 
 When / guard context:
 ```java
@@ -12230,9 +13932,9 @@ throw new ResponseStatusException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0659 — backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:113
+### RULE-0762 — backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:114
 
-[backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:113](../../src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java#L113)
+[backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:114](../../src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java#L114)
 
 When / guard context:
 ```java
@@ -12254,9 +13956,9 @@ throw new ResponseStatusException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0660 — backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:127
+### RULE-0763 — backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:128
 
-[backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:127](../../src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java#L127)
+[backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:128](../../src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java#L128)
 
 When / guard context:
 ```java
@@ -12277,9 +13979,9 @@ throw new ResponseStatusException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0661 — backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:151
+### RULE-0764 — backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:152
 
-[backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:151](../../src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java#L151)
+[backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:152](../../src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java#L152)
 
 When / guard context:
 ```java
@@ -12301,9 +14003,9 @@ throw new ResponseStatusException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0662 — backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:161
+### RULE-0765 — backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:162
 
-[backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:161](../../src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java#L161)
+[backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:162](../../src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java#L162)
 
 When / guard context:
 ```java
@@ -12325,9 +14027,9 @@ throw new ResponseStatusException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0663 — backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:177
+### RULE-0766 — backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:178
 
-[backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:177](../../src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java#L177)
+[backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:178](../../src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java#L178)
 
 When / guard context:
 ```java
@@ -12350,9 +14052,9 @@ throw new ResponseStatusException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0664 — backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:197
+### RULE-0767 — backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:198
 
-[backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:197](../../src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java#L197)
+[backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:198](../../src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java#L198)
 
 When / guard context:
 ```java
@@ -12374,9 +14076,9 @@ throw new ResponseStatusException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0665 — backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:211
+### RULE-0768 — backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:212
 
-[backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:211](../../src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java#L211)
+[backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:212](../../src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java#L212)
 
 When / guard context:
 ```java
@@ -12398,18 +14100,18 @@ throw new ResponseStatusException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0666 — backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:220
+### RULE-0769 — backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:222
 
-[backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:220](../../src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java#L220)
+[backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:222](../../src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java#L222)
 
 When / guard context:
 ```java
-tatusException(
-                        HttpStatus.CONFLICT,
+tus.CONFLICT,
                         "Provider payment already belongs to another order");
             }
 
-            if (!"CAPTURED".equals(order.status())) {
+            boolean firstCapture=!"CAPTURED".equals(order.status());
+            if (firstCapture) {
 
                 if (!"PENDING".equals(order.status())
                         && !"AUTHORIZED".equals(order.status())) {
@@ -12422,9 +14124,9 @@ throw new ResponseStatusException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0667 — backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:239
+### RULE-0770 — backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:241
 
-[backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:239](../../src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java#L239)
+[backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:241](../../src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java#L241)
 
 When / guard context:
 ```java
@@ -12446,9 +14148,9 @@ throw new IllegalStateException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0668 — backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:252
+### RULE-0771 — backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:254
 
-[backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:252](../../src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java#L252)
+[backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:254](../../src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java#L254)
 
 When / guard context:
 ```java
@@ -12469,9 +14171,9 @@ throw new IllegalStateException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0669 — backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:257
+### RULE-0772 — backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:259
 
-[backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:257](../../src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java#L257)
+[backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:259](../../src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java#L259)
 
 When / guard context:
 ```java
@@ -12493,9 +14195,9 @@ throw new ResponseStatusException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0670 — backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:272
+### RULE-0773 — backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:274
 
-[backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:272](../../src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java#L272)
+[backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:274](../../src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java#L274)
 
 When / guard context:
 ```java
@@ -12511,7 +14213,7 @@ throw new IllegalStateException("Invalid provider fee/tax breakdown");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0671 — backend/src/main/java/com/giftplatform/payment/service/RazorpayOrderCreationService.java:69
+### RULE-0774 — backend/src/main/java/com/giftplatform/payment/service/RazorpayOrderCreationService.java:69
 
 [backend/src/main/java/com/giftplatform/payment/service/RazorpayOrderCreationService.java:69](../../src/main/java/com/giftplatform/payment/service/RazorpayOrderCreationService.java#L69)
 
@@ -12528,7 +14230,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Platform fee changed. Rev
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0672 — backend/src/main/java/com/giftplatform/payment/service/RazorpayOrderCreationService.java:87
+### RULE-0775 — backend/src/main/java/com/giftplatform/payment/service/RazorpayOrderCreationService.java:87
 
 [backend/src/main/java/com/giftplatform/payment/service/RazorpayOrderCreationService.java:87](../../src/main/java/com/giftplatform/payment/service/RazorpayOrderCreationService.java#L87)
 
@@ -12549,7 +14251,7 @@ throw new IllegalStateException("Payment order missing");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0673 — backend/src/main/java/com/giftplatform/payment/service/RazorpayOrderCreationService.java:97
+### RULE-0776 — backend/src/main/java/com/giftplatform/payment/service/RazorpayOrderCreationService.java:97
 
 [backend/src/main/java/com/giftplatform/payment/service/RazorpayOrderCreationService.java:97](../../src/main/java/com/giftplatform/payment/service/RazorpayOrderCreationService.java#L97)
 
@@ -12577,7 +14279,7 @@ throw new ResponseStatusException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0674 — backend/src/main/java/com/giftplatform/payment/service/RazorpayOrderCreationService.java:104
+### RULE-0777 — backend/src/main/java/com/giftplatform/payment/service/RazorpayOrderCreationService.java:104
 
 [backend/src/main/java/com/giftplatform/payment/service/RazorpayOrderCreationService.java:104](../../src/main/java/com/giftplatform/payment/service/RazorpayOrderCreationService.java#L104)
 
@@ -12599,7 +14301,7 @@ throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Complete Route
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0675 — backend/src/main/java/com/giftplatform/payment/service/RazorpayOrderCreationService.java:117
+### RULE-0778 — backend/src/main/java/com/giftplatform/payment/service/RazorpayOrderCreationService.java:117
 
 [backend/src/main/java/com/giftplatform/payment/service/RazorpayOrderCreationService.java:117](../../src/main/java/com/giftplatform/payment/service/RazorpayOrderCreationService.java#L117)
 
@@ -12621,7 +14323,7 @@ throw new IllegalStateException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0676 — backend/src/main/java/com/giftplatform/payment/service/RazorpayOrderCreationService.java:132
+### RULE-0779 — backend/src/main/java/com/giftplatform/payment/service/RazorpayOrderCreationService.java:132
 
 [backend/src/main/java/com/giftplatform/payment/service/RazorpayOrderCreationService.java:132](../../src/main/java/com/giftplatform/payment/service/RazorpayOrderCreationService.java#L132)
 
@@ -12645,7 +14347,7 @@ throw new IllegalStateException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0677 — backend/src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java:44
+### RULE-0780 — backend/src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java:44
 
 [backend/src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java:44](../../src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java#L44)
 
@@ -12667,7 +14369,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid webhook reque
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0678 — backend/src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java:48
+### RULE-0781 — backend/src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java:48
 
 [backend/src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java:48](../../src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java#L48)
 
@@ -12686,7 +14388,7 @@ throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid webhook sign
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0679 — backend/src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java:54
+### RULE-0782 — backend/src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java:54
 
 [backend/src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java:54](../../src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java#L54)
 
@@ -12707,7 +14409,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid webhook JSON"
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0680 — backend/src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java:58
+### RULE-0783 — backend/src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java:58
 
 [backend/src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java:58](../../src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java#L58)
 
@@ -12730,7 +14432,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid webhook type"
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0681 — backend/src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java:68
+### RULE-0784 — backend/src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java:68
 
 [backend/src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java:68](../../src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java#L68)
 
@@ -12749,7 +14451,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid payment ident
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0682 — backend/src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java:89
+### RULE-0785 — backend/src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java:89
 
 [backend/src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java:89](../../src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java#L89)
 
@@ -12768,7 +14470,7 @@ throw new IllegalStateException("Webhook event missing");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0683 — backend/src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java:92
+### RULE-0786 — backend/src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java:92
 
 [backend/src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java:92](../../src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java#L92)
 
@@ -12785,7 +14487,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT, "Webhook event ID reused"
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0684 — backend/src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java:108
+### RULE-0787 — backend/src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java:108
 
 [backend/src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java:108](../../src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java#L108)
 
@@ -12803,7 +14505,7 @@ throw new IllegalStateException("Local payment order not found");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0685 — backend/src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java:113
+### RULE-0788 — backend/src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java:113
 
 [backend/src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java:113](../../src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java#L113)
 
@@ -12821,7 +14523,7 @@ throw new IllegalStateException("Ambiguous payment order");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0686 — backend/src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java:132
+### RULE-0789 — backend/src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java:132
 
 [backend/src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java:132](../../src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java#L132)
 
@@ -12840,7 +14542,7 @@ throw ex;
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0687 — backend/src/main/java/com/giftplatform/payment/settlement/HostPayoutRequestService.java:27
+### RULE-0790 — backend/src/main/java/com/giftplatform/payment/settlement/HostPayoutRequestService.java:27
 
 [backend/src/main/java/com/giftplatform/payment/settlement/HostPayoutRequestService.java:27](../../src/main/java/com/giftplatform/payment/settlement/HostPayoutRequestService.java#L27)
 
@@ -12859,7 +14561,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid payout request
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0688 — backend/src/main/java/com/giftplatform/payment/settlement/HostPayoutRequestService.java:42
+### RULE-0791 — backend/src/main/java/com/giftplatform/payment/settlement/HostPayoutRequestService.java:42
 
 [backend/src/main/java/com/giftplatform/payment/settlement/HostPayoutRequestService.java:42](../../src/main/java/com/giftplatform/payment/settlement/HostPayoutRequestService.java#L42)
 
@@ -12878,7 +14580,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Idempotency conflict");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0689 — backend/src/main/java/com/giftplatform/payment/settlement/HostPayoutRequestService.java:52
+### RULE-0792 — backend/src/main/java/com/giftplatform/payment/settlement/HostPayoutRequestService.java:52
 
 [backend/src/main/java/com/giftplatform/payment/settlement/HostPayoutRequestService.java:52](../../src/main/java/com/giftplatform/payment/settlement/HostPayoutRequestService.java#L52)
 
@@ -12896,7 +14598,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Eligible destination not
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0690 — backend/src/main/java/com/giftplatform/payment/settlement/HostSettlementUiService.java:42
+### RULE-0793 — backend/src/main/java/com/giftplatform/payment/settlement/HostSettlementUiService.java:42
 
 [backend/src/main/java/com/giftplatform/payment/settlement/HostSettlementUiService.java:42](../../src/main/java/com/giftplatform/payment/settlement/HostSettlementUiService.java#L42)
 
@@ -12917,7 +14619,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Event not found");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0691 — backend/src/main/java/com/giftplatform/payment/settlement/HostSettlementUiService.java:96
+### RULE-0794 — backend/src/main/java/com/giftplatform/payment/settlement/HostSettlementUiService.java:96
 
 [backend/src/main/java/com/giftplatform/payment/settlement/HostSettlementUiService.java:96](../../src/main/java/com/giftplatform/payment/settlement/HostSettlementUiService.java#L96)
 
@@ -12937,7 +14639,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Payout request not found
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0692 — backend/src/main/java/com/giftplatform/payment/settlement/PayoutReservationService.java:24
+### RULE-0795 — backend/src/main/java/com/giftplatform/payment/settlement/PayoutReservationService.java:24
 
 [backend/src/main/java/com/giftplatform/payment/settlement/PayoutReservationService.java:24](../../src/main/java/com/giftplatform/payment/settlement/PayoutReservationService.java#L24)
 
@@ -12959,7 +14661,7 @@ throw new IllegalArgumentException("request required");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0693 — backend/src/main/java/com/giftplatform/payment/settlement/PayoutReservationService.java:28
+### RULE-0796 — backend/src/main/java/com/giftplatform/payment/settlement/PayoutReservationService.java:28
 
 [backend/src/main/java/com/giftplatform/payment/settlement/PayoutReservationService.java:28](../../src/main/java/com/giftplatform/payment/settlement/PayoutReservationService.java#L28)
 
@@ -12977,7 +14679,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Payout request not found
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0694 — backend/src/main/java/com/giftplatform/payment/settlement/PayoutReservationService.java:31
+### RULE-0797 — backend/src/main/java/com/giftplatform/payment/settlement/PayoutReservationService.java:31
 
 [backend/src/main/java/com/giftplatform/payment/settlement/PayoutReservationService.java:31](../../src/main/java/com/giftplatform/payment/settlement/PayoutReservationService.java#L31)
 
@@ -12995,7 +14697,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Payout request state inva
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0695 — backend/src/main/java/com/giftplatform/payment/settlement/PayoutReservationService.java:41
+### RULE-0798 — backend/src/main/java/com/giftplatform/payment/settlement/PayoutReservationService.java:41
 
 [backend/src/main/java/com/giftplatform/payment/settlement/PayoutReservationService.java:41](../../src/main/java/com/giftplatform/payment/settlement/PayoutReservationService.java#L41)
 
@@ -13013,7 +14715,7 @@ throw new IllegalStateException("Inconsistent payout reservation");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0696 — backend/src/main/java/com/giftplatform/payment/settlement/PayoutReservationService.java:49
+### RULE-0799 — backend/src/main/java/com/giftplatform/payment/settlement/PayoutReservationService.java:49
 
 [backend/src/main/java/com/giftplatform/payment/settlement/PayoutReservationService.java:49](../../src/main/java/com/giftplatform/payment/settlement/PayoutReservationService.java#L49)
 
@@ -13033,7 +14735,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Reservation already relea
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0697 — backend/src/main/java/com/giftplatform/payment/settlement/PayoutReservationService.java:52
+### RULE-0800 — backend/src/main/java/com/giftplatform/payment/settlement/PayoutReservationService.java:52
 
 [backend/src/main/java/com/giftplatform/payment/settlement/PayoutReservationService.java:52](../../src/main/java/com/giftplatform/payment/settlement/PayoutReservationService.java#L52)
 
@@ -13051,7 +14753,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Insufficient settled bala
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0698 — backend/src/main/java/com/giftplatform/payment/settlement/PayoutSafetyFinalizationService.java:21
+### RULE-0801 — backend/src/main/java/com/giftplatform/payment/settlement/PayoutSafetyFinalizationService.java:21
 
 [backend/src/main/java/com/giftplatform/payment/settlement/PayoutSafetyFinalizationService.java:21](../../src/main/java/com/giftplatform/payment/settlement/PayoutSafetyFinalizationService.java#L21)
 
@@ -13071,7 +14773,7 @@ throw new IllegalArgumentException("Host and request required");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0699 — backend/src/main/java/com/giftplatform/payment/settlement/PayoutSafetyFinalizationService.java:30
+### RULE-0802 — backend/src/main/java/com/giftplatform/payment/settlement/PayoutSafetyFinalizationService.java:30
 
 [backend/src/main/java/com/giftplatform/payment/settlement/PayoutSafetyFinalizationService.java:30](../../src/main/java/com/giftplatform/payment/settlement/PayoutSafetyFinalizationService.java#L30)
 
@@ -13090,7 +14792,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Payout request not found
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0700 — backend/src/main/java/com/giftplatform/payment/settlement/PayoutSafetyFinalizationService.java:33
+### RULE-0803 — backend/src/main/java/com/giftplatform/payment/settlement/PayoutSafetyFinalizationService.java:33
 
 [backend/src/main/java/com/giftplatform/payment/settlement/PayoutSafetyFinalizationService.java:33](../../src/main/java/com/giftplatform/payment/settlement/PayoutSafetyFinalizationService.java#L33)
 
@@ -13108,7 +14810,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Request not cancellable")
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0701 — backend/src/main/java/com/giftplatform/payment/settlement/PayoutSafetyFinalizationService.java:45
+### RULE-0804 — backend/src/main/java/com/giftplatform/payment/settlement/PayoutSafetyFinalizationService.java:45
 
 [backend/src/main/java/com/giftplatform/payment/settlement/PayoutSafetyFinalizationService.java:45](../../src/main/java/com/giftplatform/payment/settlement/PayoutSafetyFinalizationService.java#L45)
 
@@ -13128,7 +14830,7 @@ throw new IllegalStateException("Cancellation race");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0702 — backend/src/main/java/com/giftplatform/payment/settlement/PayoutSafetyFinalizationService.java:52
+### RULE-0805 — backend/src/main/java/com/giftplatform/payment/settlement/PayoutSafetyFinalizationService.java:52
 
 [backend/src/main/java/com/giftplatform/payment/settlement/PayoutSafetyFinalizationService.java:52](../../src/main/java/com/giftplatform/payment/settlement/PayoutSafetyFinalizationService.java#L52)
 
@@ -13148,7 +14850,7 @@ throw new IllegalArgumentException("Invalid observation");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0703 — backend/src/main/java/com/giftplatform/payment/settlement/PayoutSafetyFinalizationService.java:55
+### RULE-0806 — backend/src/main/java/com/giftplatform/payment/settlement/PayoutSafetyFinalizationService.java:55
 
 [backend/src/main/java/com/giftplatform/payment/settlement/PayoutSafetyFinalizationService.java:55](../../src/main/java/com/giftplatform/payment/settlement/PayoutSafetyFinalizationService.java#L55)
 
@@ -13166,7 +14868,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Request not found");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0704 — backend/src/main/java/com/giftplatform/payment/settlement/SettlementBalanceService.java:15
+### RULE-0807 — backend/src/main/java/com/giftplatform/payment/settlement/SettlementBalanceService.java:15
 
 [backend/src/main/java/com/giftplatform/payment/settlement/SettlementBalanceService.java:15](../../src/main/java/com/giftplatform/payment/settlement/SettlementBalanceService.java#L15)
 
@@ -13188,7 +14890,7 @@ throw new IllegalArgumentException("eventId required");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0705 — backend/src/main/java/com/giftplatform/payment/settlement/SettlementBalanceService.java:27
+### RULE-0808 — backend/src/main/java/com/giftplatform/payment/settlement/SettlementBalanceService.java:27
 
 [backend/src/main/java/com/giftplatform/payment/settlement/SettlementBalanceService.java:27](../../src/main/java/com/giftplatform/payment/settlement/SettlementBalanceService.java#L27)
 
@@ -13209,7 +14911,7 @@ throw new IllegalStateException("Inconsistent settlement balance");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0706 — backend/src/main/java/com/giftplatform/payment/settlement/VerifiedBankFallbackService.java:15
+### RULE-0809 — backend/src/main/java/com/giftplatform/payment/settlement/VerifiedBankFallbackService.java:15
 
 [backend/src/main/java/com/giftplatform/payment/settlement/VerifiedBankFallbackService.java:15](../../src/main/java/com/giftplatform/payment/settlement/VerifiedBankFallbackService.java#L15)
 
@@ -13230,7 +14932,7 @@ throw new IllegalArgumentException("Host required");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0707 — backend/src/main/java/com/giftplatform/payment/verification/HostTransactionVerificationController.java:19
+### RULE-0810 — backend/src/main/java/com/giftplatform/payment/verification/HostTransactionVerificationController.java:19
 
 [backend/src/main/java/com/giftplatform/payment/verification/HostTransactionVerificationController.java:19](../../src/main/java/com/giftplatform/payment/verification/HostTransactionVerificationController.java#L19)
 
@@ -13247,7 +14949,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Event not found");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0708 — backend/src/main/java/com/giftplatform/payment/verification/HostTransactionVerificationController.java:26
+### RULE-0811 — backend/src/main/java/com/giftplatform/payment/verification/HostTransactionVerificationController.java:26
 
 [backend/src/main/java/com/giftplatform/payment/verification/HostTransactionVerificationController.java:26](../../src/main/java/com/giftplatform/payment/verification/HostTransactionVerificationController.java#L26)
 
@@ -13265,7 +14967,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid pagination");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0709 — backend/src/main/java/com/giftplatform/payment/verification/HostTransactionVerificationController.java:49
+### RULE-0812 — backend/src/main/java/com/giftplatform/payment/verification/HostTransactionVerificationController.java:49
 
 [backend/src/main/java/com/giftplatform/payment/verification/HostTransactionVerificationController.java:49](../../src/main/java/com/giftplatform/payment/verification/HostTransactionVerificationController.java#L49)
 
@@ -13283,9 +14985,134 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"No provider payment is re
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
+## publicevent
+
+### RULE-0813 — backend/src/main/java/com/giftplatform/publicevent/PublicKeepsakeController.java:27
+
+[backend/src/main/java/com/giftplatform/publicevent/PublicKeepsakeController.java:27](../../src/main/java/com/giftplatform/publicevent/PublicKeepsakeController.java#L27)
+
+When / guard context:
+```java
+ariable UUID id){return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(preference(owned(id)));}
+ @PutMapping("/api/v1/events/{id}/keepsake-sharing") @Transactional
+ public Map<String,Object> save(@PathVariable UUID id,@Valid @RequestBody Consent input){var e=owned(id);
+  if(input.enabled()){
+   if(!growth.enabled("PUBLIC_KEEPSAKES"))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Public keepsakes are disabled by the administrator");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0814 — backend/src/main/java/com/giftplatform/publicevent/PublicKeepsakeController.java:29
+
+[backend/src/main/java/com/giftplatform/publicevent/PublicKeepsakeController.java:29](../../src/main/java/com/giftplatform/publicevent/PublicKeepsakeController.java#L29)
+
+When / guard context:
+```java
+alid @RequestBody Consent input){var e=owned(id);
+  if(input.enabled()){
+   if(!growth.enabled("PUBLIC_KEEPSAKES"))throw new ResponseStatusException(HttpStatus.CONFLICT,"Public keepsakes are disabled by the administrator");
+   permissions.require((UUID)e.get("owner_id"),"GUESTBOOK");
+   if(!Set.of("PUBLISHED","COMPLETED").contains(e.get("status")))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Publish or complete this event before sharing a keepsake");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0815 — backend/src/main/java/com/giftplatform/publicevent/PublicKeepsakeController.java:35
+
+[backend/src/main/java/com/giftplatform/publicevent/PublicKeepsakeController.java:35](../../src/main/java/com/giftplatform/publicevent/PublicKeepsakeController.java#L35)
+
+When / guard context:
+```java
+)",UUID.randomUUID(),actor.requireAuthenticatedUserId(),input.enabled()?"KEEPSAKE_SHARING_ENABLED":"KEEPSAKE_SHARING_DISABLED",id);return preference(owned(id));
+ }
+ @GetMapping("/api/public/keepsakes/{token}")
+ public ResponseEntity<Map<String,Object>> view(@PathVariable UUID token,@RequestParam(defaultValue="0") int page){
+  if(page<0||page>10000)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Choose a valid page");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0816 — backend/src/main/java/com/giftplatform/publicevent/PublicKeepsakeController.java:36
+
+[backend/src/main/java/com/giftplatform/publicevent/PublicKeepsakeController.java:36](../../src/main/java/com/giftplatform/publicevent/PublicKeepsakeController.java#L36)
+
+When / guard context:
+```java
+LED",id);return preference(owned(id));
+ }
+ @GetMapping("/api/public/keepsakes/{token}")
+ public ResponseEntity<Map<String,Object>> view(@PathVariable UUID token,@RequestParam(defaultValue="0") int page){
+  if(page<0||page>10000)throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Choose a valid page");
+  if(!growth.enabled("PUBLIC_KEEPSAKES"))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Keepsake unavailable");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0817 — backend/src/main/java/com/giftplatform/publicevent/SharingPreviewController.java:26
+
+[backend/src/main/java/com/giftplatform/publicevent/SharingPreviewController.java:26](../../src/main/java/com/giftplatform/publicevent/SharingPreviewController.java#L26)
+
+When / guard context:
+```java
+tNull Boolean enabled){}
+ public record Preference(boolean enabled,boolean platformEnabled){}
+ public record Preview(String title,String occasion,String date){}
+ private void owned(UUID id){if(!Boolean.TRUE.equals(db.queryForObject("SELECT EXISTS(SELECT 1 FROM events WHERE id=? AND owner_id=?)",Boolean.class,id,actor.requireAuthenticatedUserId())))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Event not found");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0818 — backend/src/main/java/com/giftplatform/publicevent/SharingPreviewController.java:31
+
+[backend/src/main/java/com/giftplatform/publicevent/SharingPreviewController.java:31](../../src/main/java/com/giftplatform/publicevent/SharingPreviewController.java#L31)
+
+When / guard context:
+```java
+T share_preview_enabled FROM events WHERE id=?",Boolean.class,id)),settings.enabled("SHARE_PREVIEWS")));}
+ @PutMapping("/api/v1/events/{id}/share-preview")
+ @Transactional
+ public Preference consent(@PathVariable UUID id,@Valid @RequestBody Consent input){owned(id);boolean available=settings.enabled("SHARE_PREVIEWS");if(input.enabled()&&!available)
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.CONFLICT,"Sharing previews are disabled by the platform administrator");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0819 — backend/src/main/java/com/giftplatform/publicevent/SharingPreviewController.java:33
+
+[backend/src/main/java/com/giftplatform/publicevent/SharingPreviewController.java:33](../../src/main/java/com/giftplatform/publicevent/SharingPreviewController.java#L33)
+
+When / guard context:
+```java
+db.update("INSERT INTO platform_admin_action_audit(id,actor_id,action,target_id) VALUES(?,?,?,?)",UUID.randomUUID(),actor.requireAuthenticatedUserId(),input.enabled()?"SHARE_PREVIEW_ENABLED":"SHARE_PREVIEW_DISABLED",id);return new Preference(input.enabled(),available);}
+ private Preview preview(UUID token){
+  if(!settings.enabled("SHARE_PREVIEWS"))
+```
+Failure / enforcement:
+```java
+throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Preview unavailable");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
 ## qr
 
-### RULE-0710 — backend/src/main/java/com/giftplatform/qr/EventQrService.java:29
+### RULE-0820 — backend/src/main/java/com/giftplatform/qr/EventQrService.java:29
 
 [backend/src/main/java/com/giftplatform/qr/EventQrService.java:29](../../src/main/java/com/giftplatform/qr/EventQrService.java#L29)
 
@@ -13302,7 +15129,7 @@ throw new IllegalArgumentException("Invalid guest base URL");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0711 — backend/src/main/java/com/giftplatform/qr/EventQrService.java:41
+### RULE-0821 — backend/src/main/java/com/giftplatform/qr/EventQrService.java:41
 
 [backend/src/main/java/com/giftplatform/qr/EventQrService.java:41](../../src/main/java/com/giftplatform/qr/EventQrService.java#L41)
 
@@ -13324,7 +15151,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "QR theme required");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0712 — backend/src/main/java/com/giftplatform/qr/EventQrService.java:45
+### RULE-0822 — backend/src/main/java/com/giftplatform/qr/EventQrService.java:45
 
 [backend/src/main/java/com/giftplatform/qr/EventQrService.java:45](../../src/main/java/com/giftplatform/qr/EventQrService.java#L45)
 
@@ -13342,7 +15169,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT, "Event cannot be edited")
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0713 — backend/src/main/java/com/giftplatform/qr/EventQrService.java:60
+### RULE-0823 — backend/src/main/java/com/giftplatform/qr/EventQrService.java:60
 
 [backend/src/main/java/com/giftplatform/qr/EventQrService.java:60](../../src/main/java/com/giftplatform/qr/EventQrService.java#L60)
 
@@ -13364,7 +15191,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0714 — backend/src/main/java/com/giftplatform/qr/QrRenderer.java:26
+### RULE-0824 — backend/src/main/java/com/giftplatform/qr/QrRenderer.java:26
 
 [backend/src/main/java/com/giftplatform/qr/QrRenderer.java:26](../../src/main/java/com/giftplatform/qr/QrRenderer.java#L26)
 
@@ -13390,7 +15217,7 @@ throw new IllegalArgumentException("Invalid QR URL");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0715 — backend/src/main/java/com/giftplatform/qr/QrRenderer.java:48
+### RULE-0825 — backend/src/main/java/com/giftplatform/qr/QrRenderer.java:48
 
 [backend/src/main/java/com/giftplatform/qr/QrRenderer.java:48](../../src/main/java/com/giftplatform/qr/QrRenderer.java#L48)
 
@@ -13412,7 +15239,7 @@ throw new IllegalStateException("Could not produce scannable QR");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0716 — backend/src/main/java/com/giftplatform/qr/QrRenderer.java:50
+### RULE-0826 — backend/src/main/java/com/giftplatform/qr/QrRenderer.java:50
 
 [backend/src/main/java/com/giftplatform/qr/QrRenderer.java:50](../../src/main/java/com/giftplatform/qr/QrRenderer.java#L50)
 
@@ -13433,7 +15260,7 @@ throw new IllegalStateException("Could not render QR", ex);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0717 — backend/src/main/java/com/giftplatform/qr/design/InvitationComposer.java:40
+### RULE-0827 — backend/src/main/java/com/giftplatform/qr/design/InvitationComposer.java:40
 
 [backend/src/main/java/com/giftplatform/qr/design/InvitationComposer.java:40](../../src/main/java/com/giftplatform/qr/design/InvitationComposer.java#L40)
 
@@ -13452,7 +15279,7 @@ throw new IllegalStateException("Composed invitation failed QR validation");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0718 — backend/src/main/java/com/giftplatform/qr/design/InvitationComposer.java:42
+### RULE-0828 — backend/src/main/java/com/giftplatform/qr/design/InvitationComposer.java:42
 
 [backend/src/main/java/com/giftplatform/qr/design/InvitationComposer.java:42](../../src/main/java/com/giftplatform/qr/design/InvitationComposer.java#L42)
 
@@ -13469,7 +15296,7 @@ throw new IllegalStateException("Could not produce scannable invitation",ex);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0719 — backend/src/main/java/com/giftplatform/qr/design/InvitationDesignController.java:21
+### RULE-0829 — backend/src/main/java/com/giftplatform/qr/design/InvitationDesignController.java:21
 
 [backend/src/main/java/com/giftplatform/qr/design/InvitationDesignController.java:21](../../src/main/java/com/giftplatform/qr/design/InvitationDesignController.java#L21)
 
@@ -13486,7 +15313,7 @@ throw new org.springframework.web.server.ResponseStatusException(org.springframe
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0720 — backend/src/main/java/com/giftplatform/qr/design/InvitationDesignService.java:34
+### RULE-0830 — backend/src/main/java/com/giftplatform/qr/design/InvitationDesignService.java:34
 
 [backend/src/main/java/com/giftplatform/qr/design/InvitationDesignService.java:34](../../src/main/java/com/giftplatform/qr/design/InvitationDesignService.java#L34)
 
@@ -13506,7 +15333,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Event cannot be edited");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0721 — backend/src/main/java/com/giftplatform/qr/design/InvitationDesignService.java:36
+### RULE-0831 — backend/src/main/java/com/giftplatform/qr/design/InvitationDesignService.java:36
 
 [backend/src/main/java/com/giftplatform/qr/design/InvitationDesignService.java:36](../../src/main/java/com/giftplatform/qr/design/InvitationDesignService.java#L36)
 
@@ -13524,7 +15351,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid invitation det
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0722 — backend/src/main/java/com/giftplatform/qr/design/InvitationDesignService.java:48
+### RULE-0832 — backend/src/main/java/com/giftplatform/qr/design/InvitationDesignService.java:48
 
 [backend/src/main/java/com/giftplatform/qr/design/InvitationDesignService.java:48](../../src/main/java/com/giftplatform/qr/design/InvitationDesignService.java#L48)
 
@@ -13542,7 +15369,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0723 — backend/src/main/java/com/giftplatform/qr/design/InvitationDesignService.java:53
+### RULE-0833 — backend/src/main/java/com/giftplatform/qr/design/InvitationDesignService.java:53
 
 [backend/src/main/java/com/giftplatform/qr/design/InvitationDesignService.java:53](../../src/main/java/com/giftplatform/qr/design/InvitationDesignService.java#L53)
 
@@ -13561,7 +15388,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0724 — backend/src/main/java/com/giftplatform/qr/design/InvitationImageProcessor.java:19
+### RULE-0834 — backend/src/main/java/com/giftplatform/qr/design/InvitationImageProcessor.java:19
 
 [backend/src/main/java/com/giftplatform/qr/design/InvitationImageProcessor.java:19](../../src/main/java/com/giftplatform/qr/design/InvitationImageProcessor.java#L19)
 
@@ -13583,7 +15410,7 @@ throw invalid();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0725 — backend/src/main/java/com/giftplatform/qr/design/InvitationImageProcessor.java:22
+### RULE-0835 — backend/src/main/java/com/giftplatform/qr/design/InvitationImageProcessor.java:22
 
 [backend/src/main/java/com/giftplatform/qr/design/InvitationImageProcessor.java:22](../../src/main/java/com/giftplatform/qr/design/InvitationImageProcessor.java#L22)
 
@@ -13601,7 +15428,7 @@ throw invalid();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0726 — backend/src/main/java/com/giftplatform/qr/design/InvitationImageProcessor.java:25
+### RULE-0836 — backend/src/main/java/com/giftplatform/qr/design/InvitationImageProcessor.java:25
 
 [backend/src/main/java/com/giftplatform/qr/design/InvitationImageProcessor.java:25](../../src/main/java/com/giftplatform/qr/design/InvitationImageProcessor.java#L25)
 
@@ -13620,7 +15447,7 @@ throw invalid();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0727 — backend/src/main/java/com/giftplatform/qr/design/InvitationImageProcessor.java:30
+### RULE-0837 — backend/src/main/java/com/giftplatform/qr/design/InvitationImageProcessor.java:30
 
 [backend/src/main/java/com/giftplatform/qr/design/InvitationImageProcessor.java:30](../../src/main/java/com/giftplatform/qr/design/InvitationImageProcessor.java#L30)
 
@@ -13640,7 +15467,7 @@ throw invalid();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0728 — backend/src/main/java/com/giftplatform/qr/design/InvitationImageProcessor.java:44
+### RULE-0838 — backend/src/main/java/com/giftplatform/qr/design/InvitationImageProcessor.java:44
 
 [backend/src/main/java/com/giftplatform/qr/design/InvitationImageProcessor.java:44](../../src/main/java/com/giftplatform/qr/design/InvitationImageProcessor.java#L44)
 
@@ -13661,7 +15488,7 @@ throw e;
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0729 — backend/src/main/java/com/giftplatform/qr/design/InvitationImageProcessor.java:45
+### RULE-0839 — backend/src/main/java/com/giftplatform/qr/design/InvitationImageProcessor.java:45
 
 [backend/src/main/java/com/giftplatform/qr/design/InvitationImageProcessor.java:45](../../src/main/java/com/giftplatform/qr/design/InvitationImageProcessor.java#L45)
 
@@ -13682,7 +15509,7 @@ throw invalid();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0730 — backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java:35
+### RULE-0840 — backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java:35
 
 [backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java:35](../../src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java#L35)
 
@@ -13701,7 +15528,7 @@ throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"AI design is n
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0731 — backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java:55
+### RULE-0841 — backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java:55
 
 [backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java:55](../../src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java#L55)
 
@@ -13719,7 +15546,7 @@ throw ex;
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0732 — backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java:56
+### RULE-0842 — backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java:56
 
 [backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java:56](../../src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java#L56)
 
@@ -13737,7 +15564,7 @@ throw providerFailure(ex);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0733 — backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java:57
+### RULE-0843 — backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java:57
 
 [backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java:57](../../src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java#L57)
 
@@ -13756,7 +15583,7 @@ throw new AiInvitationFailure(HttpStatus.GATEWAY_TIMEOUT,"AI_PROVIDER_CONNECTION
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0734 — backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java:58
+### RULE-0844 — backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java:58
 
 [backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java:58](../../src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java#L58)
 
@@ -13773,7 +15600,7 @@ throw new AiInvitationFailure(HttpStatus.BAD_GATEWAY,"AI_INVALID_RESPONSE","AI r
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0735 — backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java:80
+### RULE-0845 — backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java:80
 
 [backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java:80](../../src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java#L80)
 
@@ -13791,7 +15618,7 @@ throw new IllegalArgumentException("Incomplete AI response");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0736 — backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java:83
+### RULE-0846 — backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java:83
 
 [backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java:83](../../src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java#L83)
 
@@ -13809,7 +15636,7 @@ throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,"AI could not 
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0737 — backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java:86
+### RULE-0847 — backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java:86
 
 [backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java:86](../../src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java#L86)
 
@@ -13826,7 +15653,7 @@ throw new IllegalArgumentException("Invalid AI output");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0738 — backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java:90
+### RULE-0848 — backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java:90
 
 [backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java:90](../../src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java#L90)
 
@@ -13842,7 +15669,7 @@ throw new IllegalArgumentException("Invalid design choice");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0739 — backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java:95
+### RULE-0849 — backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java:95
 
 [backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java:95](../../src/main/java/com/giftplatform/qr/design/ai/AiInvitationClient.java#L95)
 
@@ -13858,7 +15685,7 @@ throw new IllegalArgumentException("Invalid generated field");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0740 — backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationService.java:54
+### RULE-0850 — backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationService.java:54
 
 [backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationService.java:54](../../src/main/java/com/giftplatform/qr/design/ai/AiInvitationService.java#L54)
 
@@ -13875,7 +15702,7 @@ throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"AI design is n
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0741 — backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationService.java:59
+### RULE-0851 — backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationService.java:59
 
 [backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationService.java:59](../../src/main/java/com/giftplatform/qr/design/ai/AiInvitationService.java#L59)
 
@@ -13893,7 +15720,7 @@ throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,"You have reached
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0742 — backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationService.java:70
+### RULE-0852 — backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationService.java:70
 
 [backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationService.java:70](../../src/main/java/com/giftplatform/qr/design/ai/AiInvitationService.java#L70)
 
@@ -13911,7 +15738,109 @@ Rationale beyond this enforcement is not declared at this site. There is no docu
 
 ## security
 
-### RULE-0743 — backend/src/main/java/com/giftplatform/security/GiftUserDetailsService.java:30
+### RULE-0853 — backend/src/main/java/com/giftplatform/security/CredentialPolicy.java:12
+
+[backend/src/main/java/com/giftplatform/security/CredentialPolicy.java:12](../../src/main/java/com/giftplatform/security/CredentialPolicy.java#L12)
+
+When / guard context:
+```java
+N = "^[A-Za-z0-9][A-Za-z0-9_]{3,29}$";
+    public static final String USERNAME_MESSAGE = "Username must be 4–30 characters, contain only letters, numbers and underscores, and start with a letter or number.";
+    public static void validatePassword(String value) {
+        if (value == null || value.codePointCount(0, value.length()) < 8)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Password must contain at least 8 characters.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0854 — backend/src/main/java/com/giftplatform/security/CredentialPolicy.java:13
+
+[backend/src/main/java/com/giftplatform/security/CredentialPolicy.java:13](../../src/main/java/com/giftplatform/security/CredentialPolicy.java#L13)
+
+When / guard context:
+```java
+in only letters, numbers and underscores, and start with a letter or number.";
+    public static void validatePassword(String value) {
+        if (value == null || value.codePointCount(0, value.length()) < 8)
+            throw new IllegalArgumentException("Password must contain at least 8 characters.");
+        if (!value.matches("(?s).*[A-Z].*"))
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Password must contain an uppercase letter.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0855 — backend/src/main/java/com/giftplatform/security/CredentialPolicy.java:14
+
+[backend/src/main/java/com/giftplatform/security/CredentialPolicy.java:14](../../src/main/java/com/giftplatform/security/CredentialPolicy.java#L14)
+
+When / guard context:
+```java
+alue) {
+        if (value == null || value.codePointCount(0, value.length()) < 8)
+            throw new IllegalArgumentException("Password must contain at least 8 characters.");
+        if (!value.matches("(?s).*[A-Z].*")) throw new IllegalArgumentException("Password must contain an uppercase letter.");
+        if (!value.matches("(?s).*[a-z].*"))
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Password must contain a lowercase letter.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0856 — backend/src/main/java/com/giftplatform/security/CredentialPolicy.java:15
+
+[backend/src/main/java/com/giftplatform/security/CredentialPolicy.java:15](../../src/main/java/com/giftplatform/security/CredentialPolicy.java#L15)
+
+When / guard context:
+```java
+on("Password must contain at least 8 characters.");
+        if (!value.matches("(?s).*[A-Z].*")) throw new IllegalArgumentException("Password must contain an uppercase letter.");
+        if (!value.matches("(?s).*[a-z].*")) throw new IllegalArgumentException("Password must contain a lowercase letter.");
+        if (!value.matches("(?s).*[0-9].*"))
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Password must contain a number.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0857 — backend/src/main/java/com/giftplatform/security/CredentialPolicy.java:16
+
+[backend/src/main/java/com/giftplatform/security/CredentialPolicy.java:16](../../src/main/java/com/giftplatform/security/CredentialPolicy.java#L16)
+
+When / guard context:
+```java
+s).*[a-z].*")) throw new IllegalArgumentException("Password must contain a lowercase letter.");
+        if (!value.matches("(?s).*[0-9].*")) throw new IllegalArgumentException("Password must contain a number.");
+        if (value.chars().noneMatch(c -> (c >= 33 && c <= 47) || (c >= 58 && c <= 64) || (c >= 91 && c <= 96) || (c >= 123 && c <= 126)))
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Password must contain a special character.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0858 — backend/src/main/java/com/giftplatform/security/CredentialPolicy.java:18
+
+[backend/src/main/java/com/giftplatform/security/CredentialPolicy.java:18](../../src/main/java/com/giftplatform/security/CredentialPolicy.java#L18)
+
+When / guard context:
+```java
+ArgumentException("Password must contain a number.");
+        if (value.chars().noneMatch(c -> (c >= 33 && c <= 47) || (c >= 58 && c <= 64) || (c >= 91 && c <= 96) || (c >= 123 && c <= 126))) throw new IllegalArgumentException("Password must contain a special character.");
+        if (value.getBytes(StandardCharsets.UTF_8).length > 72)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Password must not exceed 72 UTF-8 bytes.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-0859 — backend/src/main/java/com/giftplatform/security/GiftUserDetailsService.java:30
 
 [backend/src/main/java/com/giftplatform/security/GiftUserDetailsService.java:30](../../src/main/java/com/giftplatform/security/GiftUserDetailsService.java#L30)
 
@@ -13939,7 +15868,7 @@ throw new UsernameNotFoundException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0744 — backend/src/main/java/com/giftplatform/security/SpringSecurityActorContext.java:26
+### RULE-0860 — backend/src/main/java/com/giftplatform/security/SpringSecurityActorContext.java:26
 
 [backend/src/main/java/com/giftplatform/security/SpringSecurityActorContext.java:26](../../src/main/java/com/giftplatform/security/SpringSecurityActorContext.java#L26)
 
@@ -13962,9 +15891,9 @@ throw new AccessDeniedException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0745 — backend/src/main/java/com/giftplatform/security/delivery/EmailDeliveryConfiguration.java:31
+### RULE-0861 — backend/src/main/java/com/giftplatform/security/delivery/EmailDeliveryConfiguration.java:34
 
-[backend/src/main/java/com/giftplatform/security/delivery/EmailDeliveryConfiguration.java:31](../../src/main/java/com/giftplatform/security/delivery/EmailDeliveryConfiguration.java#L31)
+[backend/src/main/java/com/giftplatform/security/delivery/EmailDeliveryConfiguration.java:34](../../src/main/java/com/giftplatform/security/delivery/EmailDeliveryConfiguration.java#L34)
 
 When / guard context:
 ```java
@@ -13979,9 +15908,9 @@ throw new IllegalStateException("Email OTP delivery is not configured");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0746 — backend/src/main/java/com/giftplatform/security/delivery/EmailDeliveryConfiguration.java:33
+### RULE-0862 — backend/src/main/java/com/giftplatform/security/delivery/EmailDeliveryConfiguration.java:36
 
-[backend/src/main/java/com/giftplatform/security/delivery/EmailDeliveryConfiguration.java:33](../../src/main/java/com/giftplatform/security/delivery/EmailDeliveryConfiguration.java#L33)
+[backend/src/main/java/com/giftplatform/security/delivery/EmailDeliveryConfiguration.java:36](../../src/main/java/com/giftplatform/security/delivery/EmailDeliveryConfiguration.java#L36)
 
 When / guard context:
 ```java
@@ -13997,9 +15926,9 @@ throw new IllegalStateException("Unsupported email OTP provider");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0747 — backend/src/main/java/com/giftplatform/security/delivery/EmailDeliveryConfiguration.java:36
+### RULE-0863 — backend/src/main/java/com/giftplatform/security/delivery/EmailDeliveryConfiguration.java:39
 
-[backend/src/main/java/com/giftplatform/security/delivery/EmailDeliveryConfiguration.java:36](../../src/main/java/com/giftplatform/security/delivery/EmailDeliveryConfiguration.java#L36)
+[backend/src/main/java/com/giftplatform/security/delivery/EmailDeliveryConfiguration.java:39](../../src/main/java/com/giftplatform/security/delivery/EmailDeliveryConfiguration.java#L39)
 
 When / guard context:
 ```java
@@ -14016,9 +15945,9 @@ throw new IllegalArgumentException("Invalid recipient");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0748 — backend/src/main/java/com/giftplatform/security/delivery/EmailDeliveryConfiguration.java:46
+### RULE-0864 — backend/src/main/java/com/giftplatform/security/delivery/EmailDeliveryConfiguration.java:53
 
-[backend/src/main/java/com/giftplatform/security/delivery/EmailDeliveryConfiguration.java:46](../../src/main/java/com/giftplatform/security/delivery/EmailDeliveryConfiguration.java#L46)
+[backend/src/main/java/com/giftplatform/security/delivery/EmailDeliveryConfiguration.java:53](../../src/main/java/com/giftplatform/security/delivery/EmailDeliveryConfiguration.java#L53)
 
 When / guard context:
 ```java
@@ -14034,9 +15963,9 @@ throw EmailDeliveryException.rejected(response.statusCode(),response.body());
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0749 — backend/src/main/java/com/giftplatform/security/delivery/EmailDeliveryConfiguration.java:49
+### RULE-0865 — backend/src/main/java/com/giftplatform/security/delivery/EmailDeliveryConfiguration.java:56
 
-[backend/src/main/java/com/giftplatform/security/delivery/EmailDeliveryConfiguration.java:49](../../src/main/java/com/giftplatform/security/delivery/EmailDeliveryConfiguration.java#L49)
+[backend/src/main/java/com/giftplatform/security/delivery/EmailDeliveryConfiguration.java:56](../../src/main/java/com/giftplatform/security/delivery/EmailDeliveryConfiguration.java#L56)
 
 When / guard context:
 ```java
@@ -14052,9 +15981,9 @@ throw new EmailDeliveryException("Email delivery was interrupted. Please try aga
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0750 — backend/src/main/java/com/giftplatform/security/delivery/EmailDeliveryConfiguration.java:51
+### RULE-0866 — backend/src/main/java/com/giftplatform/security/delivery/EmailDeliveryConfiguration.java:58
 
-[backend/src/main/java/com/giftplatform/security/delivery/EmailDeliveryConfiguration.java:51](../../src/main/java/com/giftplatform/security/delivery/EmailDeliveryConfiguration.java#L51)
+[backend/src/main/java/com/giftplatform/security/delivery/EmailDeliveryConfiguration.java:58](../../src/main/java/com/giftplatform/security/delivery/EmailDeliveryConfiguration.java#L58)
 
 When / guard context:
 ```java
@@ -14070,7 +15999,7 @@ throw new EmailDeliveryException("Could not connect to the email provider. Pleas
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0751 — backend/src/main/java/com/giftplatform/security/delivery/MessageDelivery.java:7
+### RULE-0867 — backend/src/main/java/com/giftplatform/security/delivery/MessageDelivery.java:7
 
 [backend/src/main/java/com/giftplatform/security/delivery/MessageDelivery.java:7](../../src/main/java/com/giftplatform/security/delivery/MessageDelivery.java#L7)
 
@@ -14090,9 +16019,9 @@ throw new IllegalArgumentException("Invalid OTP");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0752 — backend/src/main/java/com/giftplatform/security/delivery/Msg91SmsDelivery.java:18
+### RULE-0868 — backend/src/main/java/com/giftplatform/security/delivery/Msg91SmsDelivery.java:20
 
-[backend/src/main/java/com/giftplatform/security/delivery/Msg91SmsDelivery.java:18](../../src/main/java/com/giftplatform/security/delivery/Msg91SmsDelivery.java#L18)
+[backend/src/main/java/com/giftplatform/security/delivery/Msg91SmsDelivery.java:20](../../src/main/java/com/giftplatform/security/delivery/Msg91SmsDelivery.java#L20)
 
 When / guard context:
 ```java
@@ -14109,9 +16038,9 @@ throw new IllegalArgumentException("SMS OTP expiry must be 1–10 minutes");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0753 — backend/src/main/java/com/giftplatform/security/delivery/Msg91SmsDelivery.java:25
+### RULE-0869 — backend/src/main/java/com/giftplatform/security/delivery/Msg91SmsDelivery.java:27
 
-[backend/src/main/java/com/giftplatform/security/delivery/Msg91SmsDelivery.java:25](../../src/main/java/com/giftplatform/security/delivery/Msg91SmsDelivery.java#L25)
+[backend/src/main/java/com/giftplatform/security/delivery/Msg91SmsDelivery.java:27](../../src/main/java/com/giftplatform/security/delivery/Msg91SmsDelivery.java#L27)
 
 When / guard context:
 ```java
@@ -14127,9 +16056,9 @@ throw new IllegalStateException("MSG91 is not configured");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0754 — backend/src/main/java/com/giftplatform/security/delivery/Msg91SmsDelivery.java:26
+### RULE-0870 — backend/src/main/java/com/giftplatform/security/delivery/Msg91SmsDelivery.java:28
 
-[backend/src/main/java/com/giftplatform/security/delivery/Msg91SmsDelivery.java:26](../../src/main/java/com/giftplatform/security/delivery/Msg91SmsDelivery.java#L26)
+[backend/src/main/java/com/giftplatform/security/delivery/Msg91SmsDelivery.java:28](../../src/main/java/com/giftplatform/security/delivery/Msg91SmsDelivery.java#L28)
 
 When / guard context:
 ```java
@@ -14145,9 +16074,9 @@ throw new IllegalArgumentException("Invalid mobile or OTP");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0755 — backend/src/main/java/com/giftplatform/security/delivery/Msg91SmsDelivery.java:33
+### RULE-0871 — backend/src/main/java/com/giftplatform/security/delivery/Msg91SmsDelivery.java:35
 
-[backend/src/main/java/com/giftplatform/security/delivery/Msg91SmsDelivery.java:33](../../src/main/java/com/giftplatform/security/delivery/Msg91SmsDelivery.java#L33)
+[backend/src/main/java/com/giftplatform/security/delivery/Msg91SmsDelivery.java:35](../../src/main/java/com/giftplatform/security/delivery/Msg91SmsDelivery.java#L35)
 
 When / guard context:
 ```java
@@ -14164,9 +16093,9 @@ throw new IllegalStateException("MSG91 did not accept the verification request")
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0756 — backend/src/main/java/com/giftplatform/security/delivery/Msg91SmsDelivery.java:34
+### RULE-0872 — backend/src/main/java/com/giftplatform/security/delivery/Msg91SmsDelivery.java:36
 
-[backend/src/main/java/com/giftplatform/security/delivery/Msg91SmsDelivery.java:34](../../src/main/java/com/giftplatform/security/delivery/Msg91SmsDelivery.java#L34)
+[backend/src/main/java/com/giftplatform/security/delivery/Msg91SmsDelivery.java:36](../../src/main/java/com/giftplatform/security/delivery/Msg91SmsDelivery.java#L36)
 
 When / guard context:
 ```java
@@ -14182,9 +16111,9 @@ throw new IllegalStateException("Mobile delivery interrupted");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0757 — backend/src/main/java/com/giftplatform/security/delivery/Msg91SmsDelivery.java:35
+### RULE-0873 — backend/src/main/java/com/giftplatform/security/delivery/Msg91SmsDelivery.java:37
 
-[backend/src/main/java/com/giftplatform/security/delivery/Msg91SmsDelivery.java:35](../../src/main/java/com/giftplatform/security/delivery/Msg91SmsDelivery.java#L35)
+[backend/src/main/java/com/giftplatform/security/delivery/Msg91SmsDelivery.java:37](../../src/main/java/com/giftplatform/security/delivery/Msg91SmsDelivery.java#L37)
 
 When / guard context:
 ```java
@@ -14199,9 +16128,9 @@ throw new IllegalStateException("Mobile delivery unavailable");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0758 — backend/src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java:25
+### RULE-0874 — backend/src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java:26
 
-[backend/src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java:25](../../src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java#L25)
+[backend/src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java:26](../../src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java#L26)
 
 When / guard context:
 ```java
@@ -14218,14 +16147,13 @@ throw new IllegalStateException("SMS OTP delivery is not configured");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0759 — backend/src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java:33
+### RULE-0875 — backend/src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java:34
 
-[backend/src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java:33](../../src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java#L33)
+[backend/src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java:34](../../src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java#L34)
 
 When / guard context:
 ```java
-vironment.getProperty("gift.otp.sms.msg91.template-id",""),
-            environment.getProperty("gift.otp.sms.expiry-minutes",Integer.class,5));
+org.springframework.context.i18n.LocaleContextHolder.getLocale().toLanguageTag(),environment.getProperty("gift.otp.sms.msg91.template-id","")));
         if ("simulator".equals(provider)) {
             boolean localProfile = Arrays.stream(environment.getActiveProfiles()).anyMatch("local"::equals);
             if (!localProfile || !simulatorEnabled)
@@ -14236,9 +16164,9 @@ throw new IllegalStateException("SMS simulator requires explicit local profile a
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0760 — backend/src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java:37
+### RULE-0876 — backend/src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java:38
 
-[backend/src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java:37](../../src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java#L37)
+[backend/src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java:38](../../src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java#L38)
 
 When / guard context:
 ```java
@@ -14254,9 +16182,9 @@ throw new IllegalStateException("Local SMS inbox directory is not configured");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0761 — backend/src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java:41
+### RULE-0877 — backend/src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java:42
 
-[backend/src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java:41](../../src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java#L41)
+[backend/src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java:42](../../src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java#L42)
 
 When / guard context:
 ```java
@@ -14272,9 +16200,9 @@ throw new IllegalStateException("SMS inbox must be an existing non-symlink direc
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0762 — backend/src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java:45
+### RULE-0878 — backend/src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java:46
 
-[backend/src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java:45](../../src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java#L45)
+[backend/src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java:46](../../src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java#L46)
 
 When / guard context:
 ```java
@@ -14289,9 +16217,9 @@ throw new IllegalStateException("SMS inbox directory permissions must be 0700");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0763 — backend/src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java:50
+### RULE-0879 — backend/src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java:51
 
-[backend/src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java:50](../../src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java#L50)
+[backend/src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java:51](../../src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java#L51)
 
 When / guard context:
 ```java
@@ -14306,9 +16234,9 @@ throw new IllegalStateException("Local SMS inbox write failed", ex);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0764 — backend/src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java:54
+### RULE-0880 — backend/src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java:55
 
-[backend/src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java:54](../../src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java#L54)
+[backend/src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java:55](../../src/main/java/com/giftplatform/security/delivery/SmsDeliveryConfiguration.java#L55)
 
 When / guard context:
 ```java
@@ -14324,7 +16252,7 @@ throw new IllegalStateException("Unsupported SMS OTP provider: " + provider);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0765 — backend/src/main/java/com/giftplatform/security/recovery/CredentialSessionVersionStore.java:16
+### RULE-0881 — backend/src/main/java/com/giftplatform/security/recovery/CredentialSessionVersionStore.java:16
 
 [backend/src/main/java/com/giftplatform/security/recovery/CredentialSessionVersionStore.java:16](../../src/main/java/com/giftplatform/security/recovery/CredentialSessionVersionStore.java#L16)
 
@@ -14343,7 +16271,7 @@ throw new IllegalArgumentException("Invalid account");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0766 — backend/src/main/java/com/giftplatform/security/recovery/CredentialSessionVersionStore.java:30
+### RULE-0882 — backend/src/main/java/com/giftplatform/security/recovery/CredentialSessionVersionStore.java:30
 
 [backend/src/main/java/com/giftplatform/security/recovery/CredentialSessionVersionStore.java:30](../../src/main/java/com/giftplatform/security/recovery/CredentialSessionVersionStore.java#L30)
 
@@ -14360,7 +16288,7 @@ throw new IllegalStateException("Could not revoke sessions");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0767 — backend/src/main/java/com/giftplatform/security/recovery/EffectiveRecoveryPolicyService.java:25
+### RULE-0883 — backend/src/main/java/com/giftplatform/security/recovery/EffectiveRecoveryPolicyService.java:25
 
 [backend/src/main/java/com/giftplatform/security/recovery/EffectiveRecoveryPolicyService.java:25](../../src/main/java/com/giftplatform/security/recovery/EffectiveRecoveryPolicyService.java#L25)
 
@@ -14378,7 +16306,7 @@ throw new IllegalArgumentException("Unknown event policy target");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0768 — backend/src/main/java/com/giftplatform/security/recovery/EffectiveRecoveryPolicyService.java:26
+### RULE-0884 — backend/src/main/java/com/giftplatform/security/recovery/EffectiveRecoveryPolicyService.java:26
 
 [backend/src/main/java/com/giftplatform/security/recovery/EffectiveRecoveryPolicyService.java:26](../../src/main/java/com/giftplatform/security/recovery/EffectiveRecoveryPolicyService.java#L26)
 
@@ -14396,7 +16324,7 @@ throw new IllegalArgumentException("Event does not belong to host");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0769 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:46
+### RULE-0885 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:46
 
 [backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:46](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L46)
 
@@ -14414,7 +16342,7 @@ throw new IllegalStateException("Invalid OTP HMAC key",ex);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0770 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:49
+### RULE-0886 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:49
 
 [backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:49](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L49)
 
@@ -14434,7 +16362,7 @@ throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Recovery not c
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0771 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:53
+### RULE-0887 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:53
 
 [backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:53](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L53)
 
@@ -14452,7 +16380,7 @@ throw new IllegalStateException(ex);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0772 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:76
+### RULE-0888 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:76
 
 [backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:76](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L76)
 
@@ -14470,7 +16398,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid recovery purpo
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0773 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:89
+### RULE-0889 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:89
 
 [backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:89](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L89)
 
@@ -14491,7 +16419,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0774 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:93
+### RULE-0890 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:93
 
 [backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:93](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L93)
 
@@ -14511,7 +16439,7 @@ throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,"Please try again
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0775 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:105
+### RULE-0891 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:105
 
 [backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:105](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L105)
 
@@ -14531,7 +16459,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Credentials do not mat
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0776 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:107
+### RULE-0892 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:107
 
 [backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:107](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L107)
 
@@ -14550,30 +16478,32 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"PIN must be six digits
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0777 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:109
+### RULE-0893 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:110
 
-[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:109](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L109)
+[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:110](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L110)
 
 When / guard context:
 ```java
-ch");
+edentials do not match");
         if("RESET_PIN".equals(purpose)) {
             if(!value.matches("[0-9]{6}")) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"PIN must be six digits");
-        } else if(value.length()<8||value.length()>128||!value.matches("(?s).*\\p{L}.*")||!value.matches("(?s).*\\d.*")||!value.matches("(?s).*[\\p{Punct}].*")) {
+        } else {
+            try { com.giftplatform.security.CredentialPolicy.validatePassword(value); }
+            catch (IllegalArgumentException ex) {
 ```
 Failure / enforcement:
 ```java
-throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Password must have 8–128 characters including a letter, number and symbol");
+throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage());
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0778 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:115
+### RULE-0894 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:116
 
-[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:115](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L115)
+[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:116](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L116)
 
 When / guard context:
 ```java
-tatusException(HttpStatus.BAD_REQUEST,"Password must have 8–128 characters including a letter, number and symbol");
+catch (IllegalArgumentException ex) { throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage()); }
         }
     }
     @PostMapping("/complete") @Transactional
@@ -14587,9 +16517,9 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid or expired cod
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0779 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:119
+### RULE-0895 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:120
 
-[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:119](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L119)
+[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:120](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L120)
 
 When / guard context:
 ```java
@@ -14605,9 +16535,9 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid or expired cod
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0780 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:121
+### RULE-0896 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:122
 
-[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:121](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L121)
+[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:122](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L122)
 
 When / guard context:
 ```java
@@ -14621,9 +16551,9 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid or expired cod
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0781 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:129
+### RULE-0897 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:130
 
-[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:129](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L129)
+[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:130](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L130)
 
 When / guard context:
 ```java
@@ -14637,9 +16567,9 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"PIN already taken for thi
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0782 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:133
+### RULE-0898 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:134
 
-[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:133](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L133)
+[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:134](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L134)
 
 When / guard context:
 ```java
@@ -14655,9 +16585,9 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Account unavailable");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0783 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:140
+### RULE-0899 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:141
 
-[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:140](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L140)
+[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:141](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L141)
 
 When / guard context:
 ```java
@@ -14675,9 +16605,9 @@ throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0784 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:145
+### RULE-0900 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:146
 
-[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:145](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L145)
+[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:146](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L146)
 
 When / guard context:
 ```java
@@ -14692,9 +16622,9 @@ throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0785 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:151
+### RULE-0901 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:152
 
-[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:151](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L151)
+[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:152](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L152)
 
 When / guard context:
 ```java
@@ -14713,9 +16643,9 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Verified email addresses 
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0786 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:154
+### RULE-0902 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:155
 
-[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:154](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L154)
+[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:155](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L155)
 
 When / guard context:
 ```java
@@ -14731,9 +16661,9 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Enter a valid email ad
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0787 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:157
+### RULE-0903 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:158
 
-[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:157](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L157)
+[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:158](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L158)
 
 When / guard context:
 ```java
@@ -14749,9 +16679,9 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"The email is already veri
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0788 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:159
+### RULE-0904 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:160
 
-[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:159](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L159)
+[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:160](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L160)
 
 When / guard context:
 ```java
@@ -14767,9 +16697,9 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"This email address is alr
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0789 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:173
+### RULE-0905 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:174
 
-[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:173](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L173)
+[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:174](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L174)
 
 When / guard context:
 ```java
@@ -14788,9 +16718,9 @@ throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0790 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:176
+### RULE-0906 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:177
 
-[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:176](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L176)
+[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:177](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L177)
 
 When / guard context:
 ```java
@@ -14805,9 +16735,9 @@ throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0791 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:177
+### RULE-0907 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:178
 
-[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:177](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L177)
+[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:178](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L178)
 
 When / guard context:
 ```java
@@ -14821,9 +16751,9 @@ throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Email verifica
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0792 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:180
+### RULE-0908 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:181
 
-[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:180](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L180)
+[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:181](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L181)
 
 When / guard context:
 ```java
@@ -14837,9 +16767,9 @@ throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,ex.getMessage());
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0793 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:186
+### RULE-0909 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:187
 
-[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:186](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L186)
+[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:187](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L187)
 
 When / guard context:
 ```java
@@ -14857,9 +16787,9 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0794 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:188
+### RULE-0910 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:189
 
-[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:188](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L188)
+[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:189](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L189)
 
 When / guard context:
 ```java
@@ -14873,9 +16803,9 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid or expired cod
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0795 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:190
+### RULE-0911 — backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:191
 
-[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:190](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L190)
+[backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:191](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L191)
 
 When / guard context:
 ```java
@@ -14888,7 +16818,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Email changed. Send a new
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0796 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:39
+### RULE-0912 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:39
 
 [backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:39](../../src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java#L39)
 
@@ -14906,7 +16836,7 @@ throw new IllegalStateException("Invalid OTP HMAC key",ex);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0797 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:42
+### RULE-0913 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:42
 
 [backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:42](../../src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java#L42)
 
@@ -14925,7 +16855,7 @@ throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Email verifica
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0798 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:47
+### RULE-0914 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:47
 
 [backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:47](../../src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java#L47)
 
@@ -14942,7 +16872,7 @@ throw new IllegalStateException(ex);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0799 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:51
+### RULE-0915 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:51
 
 [backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:51](../../src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java#L51)
 
@@ -14961,7 +16891,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0800 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:57
+### RULE-0916 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:57
 
 [backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:57](../../src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java#L57)
 
@@ -14982,7 +16912,7 @@ throw denied();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0801 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:64
+### RULE-0917 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:64
 
 [backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:64](../../src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java#L64)
 
@@ -14999,7 +16929,7 @@ throw denied();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0802 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:66
+### RULE-0918 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:66
 
 [backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:66](../../src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java#L66)
 
@@ -15016,7 +16946,7 @@ throw denied();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0803 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:68
+### RULE-0919 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:68
 
 [backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:68](../../src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java#L68)
 
@@ -15033,7 +16963,7 @@ throw denied();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0804 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:73
+### RULE-0920 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:73
 
 [backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:73](../../src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java#L73)
 
@@ -15052,7 +16982,7 @@ throw denied();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0805 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:75
+### RULE-0921 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:75
 
 [backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:75](../../src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java#L75)
 
@@ -15071,7 +17001,7 @@ throw denied();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0806 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:77
+### RULE-0922 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:77
 
 [backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:77](../../src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java#L77)
 
@@ -15089,7 +17019,7 @@ throw denied();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0807 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:79
+### RULE-0923 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:79
 
 [backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:79](../../src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java#L79)
 
@@ -15106,7 +17036,7 @@ throw denied();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0808 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:96
+### RULE-0924 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:96
 
 [backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:96](../../src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java#L96)
 
@@ -15126,7 +17056,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Email required");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0809 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:100
+### RULE-0925 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:100
 
 [backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:100](../../src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java#L100)
 
@@ -15144,7 +17074,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Verified email addresses 
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0810 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:103
+### RULE-0926 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:103
 
 [backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:103](../../src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java#L103)
 
@@ -15161,7 +17091,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Enter a valid email ad
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0811 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:105
+### RULE-0927 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:105
 
 [backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:105](../../src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java#L105)
 
@@ -15177,7 +17107,7 @@ throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,"Try again later"
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0812 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:110
+### RULE-0928 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:110
 
 [backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:110](../../src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java#L110)
 
@@ -15193,7 +17123,7 @@ throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Email delivery
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0813 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:118
+### RULE-0929 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:118
 
 [backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:118](../../src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java#L118)
 
@@ -15213,7 +17143,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid or expired cod
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0814 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:121
+### RULE-0930 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:121
 
 [backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:121](../../src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java#L121)
 
@@ -15230,7 +17160,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid or expired cod
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0815 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:124
+### RULE-0931 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:124
 
 [backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:124](../../src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java#L124)
 
@@ -15247,7 +17177,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid or expired cod
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0816 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:127
+### RULE-0932 — backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:127
 
 [backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:127](../../src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java#L127)
 
@@ -15264,7 +17194,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"The email is already veri
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0817 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:50
+### RULE-0933 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:50
 
 [backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:50](../../src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java#L50)
 
@@ -15282,7 +17212,7 @@ throw new IllegalStateException("Invalid HMAC key",ex);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0818 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:53
+### RULE-0934 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:53
 
 [backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:53](../../src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java#L53)
 
@@ -15301,7 +17231,7 @@ throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Mobile OTP not
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0819 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:55
+### RULE-0935 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:55
 
 [backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:55](../../src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java#L55)
 
@@ -15319,7 +17249,7 @@ throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Mobile OTP dev
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0820 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:56
+### RULE-0936 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:56
 
 [backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:56](../../src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java#L56)
 
@@ -15336,7 +17266,7 @@ throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Real SMS provi
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0821 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:61
+### RULE-0937 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:61
 
 [backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:61](../../src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java#L61)
 
@@ -15355,7 +17285,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0822 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:66
+### RULE-0938 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:66
 
 [backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:66](../../src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java#L66)
 
@@ -15375,7 +17305,7 @@ throw denied();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0823 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:72
+### RULE-0939 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:72
 
 [backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:72](../../src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java#L72)
 
@@ -15392,7 +17322,7 @@ throw denied();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0824 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:74
+### RULE-0940 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:74
 
 [backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:74](../../src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java#L74)
 
@@ -15409,7 +17339,7 @@ throw denied();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0825 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:76
+### RULE-0941 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:76
 
 [backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:76](../../src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java#L76)
 
@@ -15426,7 +17356,7 @@ throw denied();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0826 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:81
+### RULE-0942 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:81
 
 [backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:81](../../src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java#L81)
 
@@ -15445,7 +17375,7 @@ throw denied();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0827 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:83
+### RULE-0943 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:83
 
 [backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:83](../../src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java#L83)
 
@@ -15464,7 +17394,7 @@ throw denied();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0828 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:85
+### RULE-0944 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:85
 
 [backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:85](../../src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java#L85)
 
@@ -15483,7 +17413,7 @@ throw denied();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0829 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:87
+### RULE-0945 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:87
 
 [backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:87](../../src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java#L87)
 
@@ -15500,7 +17430,7 @@ throw denied();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0830 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:92
+### RULE-0946 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:92
 
 [backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:92](../../src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java#L92)
 
@@ -15519,7 +17449,7 @@ throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0831 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:97
+### RULE-0947 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:97
 
 [backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:97](../../src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java#L97)
 
@@ -15538,7 +17468,7 @@ throw new IllegalStateException(ex);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0832 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:106
+### RULE-0948 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:106
 
 [backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:106](../../src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java#L106)
 
@@ -15559,7 +17489,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0833 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:113
+### RULE-0949 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:113
 
 [backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:113](../../src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java#L113)
 
@@ -15579,7 +17509,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Use international mobi
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0834 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:116
+### RULE-0950 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:116
 
 [backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:116](../../src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java#L116)
 
@@ -15596,7 +17526,7 @@ throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,"Try again later"
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0835 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:122
+### RULE-0951 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:122
 
 [backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:122](../../src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java#L122)
 
@@ -15613,7 +17543,7 @@ throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"SMS simulator 
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0836 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:129
+### RULE-0952 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:129
 
 [backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:129](../../src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java#L129)
 
@@ -15634,7 +17564,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0837 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:136
+### RULE-0953 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:136
 
 [backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:136](../../src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java#L136)
 
@@ -15654,7 +17584,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid code");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0838 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:140
+### RULE-0954 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:140
 
 [backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:140](../../src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java#L140)
 
@@ -15672,7 +17602,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid or expired cod
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0839 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:143
+### RULE-0955 — backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:143
 
 [backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:143](../../src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java#L143)
 
@@ -15689,7 +17619,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid or expired cod
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0840 — backend/src/main/java/com/giftplatform/security/recovery/RecoveryChallengeStore.java:17
+### RULE-0956 — backend/src/main/java/com/giftplatform/security/recovery/RecoveryChallengeStore.java:17
 
 [backend/src/main/java/com/giftplatform/security/recovery/RecoveryChallengeStore.java:17](../../src/main/java/com/giftplatform/security/recovery/RecoveryChallengeStore.java#L17)
 
@@ -15707,7 +17637,7 @@ throw new IllegalArgumentException("Invalid challenge");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0841 — backend/src/main/java/com/giftplatform/security/recovery/RecoveryChallengeStore.java:22
+### RULE-0957 — backend/src/main/java/com/giftplatform/security/recovery/RecoveryChallengeStore.java:22
 
 [backend/src/main/java/com/giftplatform/security/recovery/RecoveryChallengeStore.java:22](../../src/main/java/com/giftplatform/security/recovery/RecoveryChallengeStore.java#L22)
 
@@ -15724,7 +17654,7 @@ throw new IllegalArgumentException("Invalid challenge binding");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0842 — backend/src/main/java/com/giftplatform/security/recovery/RecoveryOtp.java:21
+### RULE-0958 — backend/src/main/java/com/giftplatform/security/recovery/RecoveryOtp.java:21
 
 [backend/src/main/java/com/giftplatform/security/recovery/RecoveryOtp.java:21](../../src/main/java/com/giftplatform/security/recovery/RecoveryOtp.java#L21)
 
@@ -15741,7 +17671,7 @@ throw new IllegalArgumentException("OTP HMAC key must be at least 32 bytes");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0843 — backend/src/main/java/com/giftplatform/security/recovery/RecoveryOtp.java:23
+### RULE-0959 — backend/src/main/java/com/giftplatform/security/recovery/RecoveryOtp.java:23
 
 [backend/src/main/java/com/giftplatform/security/recovery/RecoveryOtp.java:23](../../src/main/java/com/giftplatform/security/recovery/RecoveryOtp.java#L23)
 
@@ -15757,7 +17687,7 @@ throw new IllegalArgumentException("Missing challenge binding");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0844 — backend/src/main/java/com/giftplatform/security/recovery/RecoveryOtp.java:29
+### RULE-0960 — backend/src/main/java/com/giftplatform/security/recovery/RecoveryOtp.java:29
 
 [backend/src/main/java/com/giftplatform/security/recovery/RecoveryOtp.java:29](../../src/main/java/com/giftplatform/security/recovery/RecoveryOtp.java#L29)
 
@@ -15774,7 +17704,7 @@ throw new IllegalStateException("HMAC unavailable", ex);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0845 — backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationController.java:15
+### RULE-0961 — backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationController.java:15
 
 [backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationController.java:15](../../src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationController.java#L15)
 
@@ -15792,7 +17722,7 @@ throw new org.springframework.web.server.ResponseStatusException(org.springframe
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0846 — backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationController.java:18
+### RULE-0962 — backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationController.java:18
 
 [backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationController.java:18](../../src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationController.java#L18)
 
@@ -15809,7 +17739,7 @@ throw new org.springframework.web.server.ResponseStatusException(org.springframe
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0847 — backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:30
+### RULE-0963 — backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:30
 
 [backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:30](../../src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java#L30)
 
@@ -15826,7 +17756,7 @@ throw new IllegalStateException("Invalid email verification key");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0848 — backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:33
+### RULE-0964 — backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:33
 
 [backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:33](../../src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java#L33)
 
@@ -15841,7 +17771,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Enter a valid email ad
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0849 — backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:34
+### RULE-0965 — backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:34
 
 [backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:34](../../src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java#L34)
 
@@ -15856,7 +17786,7 @@ throw new IllegalStateException(ex);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0850 — backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:38
+### RULE-0966 — backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:38
 
 [backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:38](../../src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java#L38)
 
@@ -15873,7 +17803,7 @@ throw bad();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0851 — backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:40
+### RULE-0967 — backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:40
 
 [backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:40](../../src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java#L40)
 
@@ -15890,7 +17820,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Invitation unavailable")
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0852 — backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:44
+### RULE-0968 — backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:44
 
 [backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:44](../../src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java#L44)
 
@@ -15907,7 +17837,7 @@ throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Group registration unava
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0853 — backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:48
+### RULE-0969 — backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:48
 
 [backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:48](../../src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java#L48)
 
@@ -15926,7 +17856,7 @@ throw bad();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0854 — backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:49
+### RULE-0970 — backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:49
 
 [backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:49](../../src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java#L49)
 
@@ -15945,7 +17875,7 @@ throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Email verifica
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0855 — backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:56
+### RULE-0971 — backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:56
 
 [backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:56](../../src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java#L56)
 
@@ -15961,7 +17891,7 @@ throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,"Too many verific
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0856 — backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:60
+### RULE-0972 — backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:60
 
 [backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:60](../../src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java#L60)
 
@@ -15978,7 +17908,7 @@ throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,ex.getMessage());
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0857 — backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:64
+### RULE-0973 — backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:64
 
 [backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:64](../../src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java#L64)
 
@@ -15997,7 +17927,7 @@ throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Email verifica
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0858 — backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:65
+### RULE-0974 — backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:65
 
 [backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:65](../../src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java#L65)
 
@@ -16016,7 +17946,7 @@ throw bad();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0859 — backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:75
+### RULE-0975 — backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:75
 
 [backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:75](../../src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java#L75)
 
@@ -16033,7 +17963,7 @@ throw bad();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0860 — backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:82
+### RULE-0976 — backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:82
 
 [backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:82](../../src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java#L82)
 
@@ -16052,7 +17982,7 @@ throw bad();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0861 — backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:84
+### RULE-0977 — backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:84
 
 [backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:84](../../src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java#L84)
 
@@ -16068,7 +17998,7 @@ throw bad();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0862 — backend/src/main/java/com/giftplatform/security/recovery/UsernameRecoveryController.java:63
+### RULE-0978 — backend/src/main/java/com/giftplatform/security/recovery/UsernameRecoveryController.java:63
 
 [backend/src/main/java/com/giftplatform/security/recovery/UsernameRecoveryController.java:63](../../src/main/java/com/giftplatform/security/recovery/UsernameRecoveryController.java#L63)
 
@@ -16088,7 +18018,7 @@ throw new IllegalStateException(ex);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0863 — backend/src/main/java/com/giftplatform/security/recovery/UsernameRecoveryController.java:69
+### RULE-0979 — backend/src/main/java/com/giftplatform/security/recovery/UsernameRecoveryController.java:69
 
 [backend/src/main/java/com/giftplatform/security/recovery/UsernameRecoveryController.java:69](../../src/main/java/com/giftplatform/security/recovery/UsernameRecoveryController.java#L69)
 
@@ -16105,7 +18035,7 @@ throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,"Please try again
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0864 — backend/src/main/java/com/giftplatform/security/recovery/UsernameRecoveryController.java:83
+### RULE-0980 — backend/src/main/java/com/giftplatform/security/recovery/UsernameRecoveryController.java:83
 
 [backend/src/main/java/com/giftplatform/security/recovery/UsernameRecoveryController.java:83](../../src/main/java/com/giftplatform/security/recovery/UsernameRecoveryController.java#L83)
 
@@ -16125,7 +18055,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Choose a valid account
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0865 — backend/src/main/java/com/giftplatform/security/recovery/UsernameRecoveryController.java:86
+### RULE-0981 — backend/src/main/java/com/giftplatform/security/recovery/UsernameRecoveryController.java:86
 
 [backend/src/main/java/com/giftplatform/security/recovery/UsernameRecoveryController.java:86](../../src/main/java/com/giftplatform/security/recovery/UsernameRecoveryController.java#L86)
 
@@ -16142,7 +18072,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Enter your verified em
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0866 — backend/src/main/java/com/giftplatform/security/recovery/UsernameRecoveryController.java:87
+### RULE-0982 — backend/src/main/java/com/giftplatform/security/recovery/UsernameRecoveryController.java:87
 
 [backend/src/main/java/com/giftplatform/security/recovery/UsernameRecoveryController.java:87](../../src/main/java/com/giftplatform/security/recovery/UsernameRecoveryController.java#L87)
 
@@ -16160,7 +18090,7 @@ throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Username remin
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0867 — backend/src/main/java/com/giftplatform/security/verification/AccountMobileVerificationController.java:18
+### RULE-0983 — backend/src/main/java/com/giftplatform/security/verification/AccountMobileVerificationController.java:18
 
 [backend/src/main/java/com/giftplatform/security/verification/AccountMobileVerificationController.java:18](../../src/main/java/com/giftplatform/security/verification/AccountMobileVerificationController.java#L18)
 
@@ -16177,7 +18107,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0868 — backend/src/main/java/com/giftplatform/security/verification/AccountMobileVerificationController.java:19
+### RULE-0984 — backend/src/main/java/com/giftplatform/security/verification/AccountMobileVerificationController.java:19
 
 [backend/src/main/java/com/giftplatform/security/verification/AccountMobileVerificationController.java:19](../../src/main/java/com/giftplatform/security/verification/AccountMobileVerificationController.java#L19)
 
@@ -16192,7 +18122,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0869 — backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:27
+### RULE-0985 — backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:27
 
 [backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:27](../../src/main/java/com/giftplatform/security/verification/MobileVerificationService.java#L27)
 
@@ -16209,7 +18139,7 @@ throw new IllegalArgumentException("SMS OTP expiry must be 1–10 minutes");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0870 — backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:28
+### RULE-0986 — backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:28
 
 [backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:28](../../src/main/java/com/giftplatform/security/verification/MobileVerificationService.java#L28)
 
@@ -16226,7 +18156,7 @@ throw new IllegalStateException("Invalid OTP signing key");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0871 — backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:30
+### RULE-0987 — backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:30
 
 [backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:30](../../src/main/java/com/giftplatform/security/verification/MobileVerificationService.java#L30)
 
@@ -16243,7 +18173,7 @@ throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Mobile verific
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0872 — backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:31
+### RULE-0988 — backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:31
 
 [backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:31](../../src/main/java/com/giftplatform/security/verification/MobileVerificationService.java#L31)
 
@@ -16258,7 +18188,7 @@ throw new IllegalArgumentException("Invalid account kind");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0873 — backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:32
+### RULE-0989 — backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:32
 
 [backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:32](../../src/main/java/com/giftplatform/security/verification/MobileVerificationService.java#L32)
 
@@ -16273,7 +18203,7 @@ throw new IllegalStateException(ex);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0874 — backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:38
+### RULE-0990 — backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:38
 
 [backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:38](../../src/main/java/com/giftplatform/security/verification/MobileVerificationService.java#L38)
 
@@ -16291,7 +18221,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Enter a mobile number 
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0875 — backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:47
+### RULE-0991 — backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:47
 
 [backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:47](../../src/main/java/com/giftplatform/security/verification/MobileVerificationService.java#L47)
 
@@ -16307,7 +18237,7 @@ throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,"Please wait befo
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0876 — backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:53
+### RULE-0992 — backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:53
 
 [backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:53](../../src/main/java/com/giftplatform/security/verification/MobileVerificationService.java#L53)
 
@@ -16324,7 +18254,7 @@ throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Could not send
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0877 — backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:58
+### RULE-0993 — backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:58
 
 [backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:58](../../src/main/java/com/giftplatform/security/verification/MobileVerificationService.java#L58)
 
@@ -16343,7 +18273,7 @@ throw invalid();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0878 — backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:60
+### RULE-0994 — backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:60
 
 [backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:60](../../src/main/java/com/giftplatform/security/verification/MobileVerificationService.java#L60)
 
@@ -16360,7 +18290,7 @@ throw invalid();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0879 — backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:61
+### RULE-0995 — backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:61
 
 [backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:61](../../src/main/java/com/giftplatform/security/verification/MobileVerificationService.java#L61)
 
@@ -16376,7 +18306,7 @@ throw invalid();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0880 — backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:63
+### RULE-0996 — backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:63
 
 [backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:63](../../src/main/java/com/giftplatform/security/verification/MobileVerificationService.java#L63)
 
@@ -16392,7 +18322,7 @@ throw invalid();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0881 — backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:64
+### RULE-0997 — backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:64
 
 [backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:64](../../src/main/java/com/giftplatform/security/verification/MobileVerificationService.java#L64)
 
@@ -16409,7 +18339,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"This mobile number cannot
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0882 — backend/src/main/java/com/giftplatform/security/verification/VerificationSettings.java:24
+### RULE-0998 — backend/src/main/java/com/giftplatform/security/verification/VerificationSettings.java:24
 
 [backend/src/main/java/com/giftplatform/security/verification/VerificationSettings.java:24](../../src/main/java/com/giftplatform/security/verification/VerificationSettings.java#L24)
 
@@ -16428,7 +18358,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Email verification is dis
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0883 — backend/src/main/java/com/giftplatform/security/verification/VerificationSettings.java:25
+### RULE-0999 — backend/src/main/java/com/giftplatform/security/verification/VerificationSettings.java:25
 
 [backend/src/main/java/com/giftplatform/security/verification/VerificationSettings.java:25](../../src/main/java/com/giftplatform/security/verification/VerificationSettings.java#L25)
 
@@ -16445,7 +18375,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Mobile verification is di
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0884 — backend/src/main/java/com/giftplatform/security/verification/VerificationSettingsController.java:23
+### RULE-1000 — backend/src/main/java/com/giftplatform/security/verification/VerificationSettingsController.java:23
 
 [backend/src/main/java/com/giftplatform/security/verification/VerificationSettingsController.java:23](../../src/main/java/com/giftplatform/security/verification/VerificationSettingsController.java#L23)
 
@@ -16463,7 +18393,7 @@ throw new ResponseStatusException(HttpStatus.FORBIDDEN);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0885 — backend/src/main/java/com/giftplatform/security/verification/VerificationSettingsController.java:36
+### RULE-1001 — backend/src/main/java/com/giftplatform/security/verification/VerificationSettingsController.java:36
 
 [backend/src/main/java/com/giftplatform/security/verification/VerificationSettingsController.java:36](../../src/main/java/com/giftplatform/security/verification/VerificationSettingsController.java#L36)
 
@@ -16480,7 +18410,7 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0886 — backend/src/main/java/com/giftplatform/security/verification/VerificationSettingsController.java:38
+### RULE-1002 — backend/src/main/java/com/giftplatform/security/verification/VerificationSettingsController.java:38
 
 [backend/src/main/java/com/giftplatform/security/verification/VerificationSettingsController.java:38](../../src/main/java/com/giftplatform/security/verification/VerificationSettingsController.java#L38)
 
@@ -16498,7 +18428,7 @@ throw new ResponseStatusException(HttpStatus.CONFLICT,"Configure MSG91 credentia
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0887 — backend/src/main/java/com/giftplatform/security/verification/VerificationSettingsController.java:39
+### RULE-1003 — backend/src/main/java/com/giftplatform/security/verification/VerificationSettingsController.java:39
 
 [backend/src/main/java/com/giftplatform/security/verification/VerificationSettingsController.java:39](../../src/main/java/com/giftplatform/security/verification/VerificationSettingsController.java#L39)
 
@@ -16515,14 +18445,13 @@ Rationale beyond this enforcement is not declared at this site. There is no docu
 
 ## user
 
-### RULE-0888 — backend/src/main/java/com/giftplatform/user/controller/ProfileNameController.java:19
+### RULE-1004 — backend/src/main/java/com/giftplatform/user/controller/ProfileNameController.java:20
 
-[backend/src/main/java/com/giftplatform/user/controller/ProfileNameController.java:19](../../src/main/java/com/giftplatform/user/controller/ProfileNameController.java#L19)
+[backend/src/main/java/com/giftplatform/user/controller/ProfileNameController.java:20](../../src/main/java/com/giftplatform/user/controller/ProfileNameController.java#L20)
 
 When / guard context:
 ```java
-h/profile-name")
-public class ProfileNameController {
+te com.giftplatform.audit.service.AuditService audit;
  private final JdbcTemplate db;
  public ProfileNameController(JdbcTemplate db){this.db=db;}
  public record NameInput(String fullName){}
@@ -16535,7 +18464,55 @@ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Enter your full name (
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0889 — backend/src/main/java/com/giftplatform/user/entity/User.java:50
+### RULE-1005 — backend/src/main/java/com/giftplatform/user/controller/ProfilePreferencesController.java:25
+
+[backend/src/main/java/com/giftplatform/user/controller/ProfilePreferencesController.java:25](../../src/main/java/com/giftplatform/user/controller/ProfilePreferencesController.java#L25)
+
+When / guard context:
+```java
+picture_png IS NOT NULL) AS \"hasPicture\" FROM users u LEFT JOIN user_profile_preferences p ON p.user_id=u.id WHERE u.id=?",id);
+  return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(data);
+ }
+ public static void validate(Input input){if(input==null||input.timezone()==null||!ZoneId.getAvailableZoneIds().contains(input.timezone()))
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Choose a valid time zone.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-1006 — backend/src/main/java/com/giftplatform/user/controller/ProfilePreferencesController.java:25
+
+[backend/src/main/java/com/giftplatform/user/controller/ProfilePreferencesController.java:25](../../src/main/java/com/giftplatform/user/controller/ProfilePreferencesController.java#L25)
+
+When / guard context:
+```java
+ntrol.noStore()).body(data);
+ }
+ public static void validate(Input input){if(input==null||input.timezone()==null||!ZoneId.getAvailableZoneIds().contains(input.timezone()))throw new IllegalArgumentException("Choose a valid time zone.");if(input.eventNotifications()==null||input.contributionNotifications()==null||input.marketingNotifications()==null)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Choose your notification preferences.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-1007 — backend/src/main/java/com/giftplatform/user/controller/ProfilePreferencesController.java:27
+
+[backend/src/main/java/com/giftplatform/user/controller/ProfilePreferencesController.java:27](../../src/main/java/com/giftplatform/user/controller/ProfilePreferencesController.java#L27)
+
+When / guard context:
+```java
+ibutionNotifications(),input.marketingNotifications());log(id,"preferences");return get();}
+ @PostMapping(value="/picture",consumes=MediaType.MULTIPART_FORM_DATA_VALUE) @Transactional public Map<String,String> picture(@RequestPart("file") MultipartFile file)throws IOException{UUID id=actor.requireAuthenticatedUserId();if(file.getSize()>2*1024*1024)
+```
+Failure / enforcement:
+```java
+throw new IllegalArgumentException("Choose a profile picture up to 2 MB.");
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-1008 — backend/src/main/java/com/giftplatform/user/entity/User.java:50
 
 [backend/src/main/java/com/giftplatform/user/entity/User.java:50](../../src/main/java/com/giftplatform/user/entity/User.java#L50)
 
@@ -16557,14 +18534,13 @@ throw new IllegalArgumentException("Full name must be 2–120 characters");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0890 — backend/src/main/java/com/giftplatform/user/entity/User.java:66
+### RULE-1009 — backend/src/main/java/com/giftplatform/user/entity/User.java:66
 
 [backend/src/main/java/com/giftplatform/user/entity/User.java:66](../../src/main/java/com/giftplatform/user/entity/User.java#L66)
 
 When / guard context:
 ```java
-st be 2–120 characters");
-        fullName=value.strip();
+ullName=value.strip();
     }
     protected User() {
     }
@@ -16578,26 +18554,25 @@ st be 2–120 characters");
         this(email, passwordHash);
 
         if (username == null ||
-                !username.matches("^[a-z][a-z0-9_]{3,29}$")) {
+                !username.matches(com.giftplatform.security.CredentialPolicy.USERNAME_PATTERN)) {
 ```
 Failure / enforcement:
 ```java
 throw new IllegalArgumentException(
-                    "Invalid username"
+                    com.giftplatform.security.CredentialPolicy.USERNAME_MESSAGE
             );
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0891 — backend/src/main/java/com/giftplatform/user/entity/User.java:76
+### RULE-1010 — backend/src/main/java/com/giftplatform/user/entity/User.java:76
 
 [backend/src/main/java/com/giftplatform/user/entity/User.java:76](../../src/main/java/com/giftplatform/user/entity/User.java#L76)
 
 When / guard context:
 ```java
-username == null ||
-                !username.matches("^[a-z][a-z0-9_]{3,29}$")) {
+ity.CredentialPolicy.USERNAME_PATTERN)) {
             throw new IllegalArgumentException(
-                    "Invalid username"
+                    com.giftplatform.security.CredentialPolicy.USERNAME_MESSAGE
             );
         }
 
@@ -16615,7 +18590,7 @@ throw new IllegalArgumentException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0892 — backend/src/main/java/com/giftplatform/user/entity/User.java:82
+### RULE-1011 — backend/src/main/java/com/giftplatform/user/entity/User.java:82
 
 [backend/src/main/java/com/giftplatform/user/entity/User.java:82](../../src/main/java/com/giftplatform/user/entity/User.java#L82)
 
@@ -16644,7 +18619,7 @@ throw new IllegalArgumentException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0893 — backend/src/main/java/com/giftplatform/user/entity/User.java:113
+### RULE-1012 — backend/src/main/java/com/giftplatform/user/entity/User.java:113
 
 [backend/src/main/java/com/giftplatform/user/entity/User.java:113](../../src/main/java/com/giftplatform/user/entity/User.java#L113)
 
@@ -16674,7 +18649,7 @@ throw new IllegalArgumentException("Password hash required");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0894 — backend/src/main/java/com/giftplatform/user/entity/User.java:124
+### RULE-1013 — backend/src/main/java/com/giftplatform/user/entity/User.java:124
 
 [backend/src/main/java/com/giftplatform/user/entity/User.java:124](../../src/main/java/com/giftplatform/user/entity/User.java#L124)
 
@@ -16698,7 +18673,7 @@ throw new IllegalStateException("Unexpected existing role");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0895 — backend/src/main/java/com/giftplatform/user/entity/User.java:162
+### RULE-1014 — backend/src/main/java/com/giftplatform/user/entity/User.java:162
 
 [backend/src/main/java/com/giftplatform/user/entity/User.java:162](../../src/main/java/com/giftplatform/user/entity/User.java#L162)
 
@@ -16722,7 +18697,7 @@ throw new IllegalArgumentException("Mobile must use international format");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0896 — backend/src/main/java/com/giftplatform/user/entity/User.java:174
+### RULE-1015 — backend/src/main/java/com/giftplatform/user/entity/User.java:174
 
 [backend/src/main/java/com/giftplatform/user/entity/User.java:174](../../src/main/java/com/giftplatform/user/entity/User.java#L174)
 
@@ -16748,7 +18723,7 @@ throw new IllegalArgumentException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0897 — backend/src/main/java/com/giftplatform/user/entity/User.java:179
+### RULE-1016 — backend/src/main/java/com/giftplatform/user/entity/User.java:179
 
 [backend/src/main/java/com/giftplatform/user/entity/User.java:179](../../src/main/java/com/giftplatform/user/entity/User.java#L179)
 
@@ -16774,7 +18749,7 @@ throw new IllegalArgumentException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0898 — backend/src/main/java/com/giftplatform/user/entity/User.java:184
+### RULE-1017 — backend/src/main/java/com/giftplatform/user/entity/User.java:184
 
 [backend/src/main/java/com/giftplatform/user/entity/User.java:184](../../src/main/java/com/giftplatform/user/entity/User.java#L184)
 
@@ -16800,9 +18775,9 @@ throw new IllegalStateException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0899 — backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:45
+### RULE-1018 — backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:46
 
-[backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:45](../../src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java#L45)
+[backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:46](../../src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java#L46)
 
 When / guard context:
 ```java
@@ -16824,9 +18799,9 @@ throw new IllegalArgumentException(
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0900 — backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:50
+### RULE-1019 — backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:51
 
-[backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:50](../../src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java#L50)
+[backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:51](../../src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java#L51)
 
 When / guard context:
 ```java
@@ -16848,9 +18823,9 @@ throw new IllegalStateException("Registration policy service is required");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0901 — backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:61
+### RULE-1020 — backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:62
 
-[backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:61](../../src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java#L61)
+[backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:62](../../src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java#L62)
 
 When / guard context:
 ```java
@@ -16867,53 +18842,46 @@ l); // Policy must exist; contact collection is not verification.
 ```
 Failure / enforcement:
 ```java
-throw new IllegalArgumentException("Invalid email");
+throw new IllegalArgumentException("Please enter a valid email address.");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0902 — backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:74
+### RULE-1021 — backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:68
 
-[backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:74](../../src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java#L74)
+[backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:68](../../src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java#L68)
 
 When / guard context:
 ```java
-throw new IllegalArgumentException("Invalid email");
+|| !email.matches(
+                "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$"
+        )) {
+            throw new IllegalArgumentException("Please enter a valid email address.");
         }
 
         String password = request.password();
 
-        int passwordBytes = password
-                .getBytes(StandardCharsets.UTF_8)
-                .length;
-
-        if (password.isBlank()
-                || passwordBytes < 12
-                || passwordBytes > 72) {
+        com.giftplatform.security.CredentialPolicy.validatePassword(password);
+        if (!request.termsAccepted())
 ```
 Failure / enforcement:
 ```java
-throw new IllegalArgumentException(
-                    "Password must be between 12 and 72 UTF-8 bytes"
-            );
+throw new IllegalArgumentException("Please agree to the Terms & Conditions and Privacy Policy.");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0903 — backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:80
+### RULE-1022 — backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:71
 
-[backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:80](../../src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java#L80)
+[backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:71](../../src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java#L71)
 
 When / guard context:
 ```java
-.length;
-
-        if (password.isBlank()
-                || passwordBytes < 12
-                || passwordBytes > 72) {
-
-            throw new IllegalArgumentException(
-                    "Password must be between 12 and 72 UTF-8 bytes"
-            );
+ss.");
         }
+
+        String password = request.password();
+
+        com.giftplatform.security.CredentialPolicy.validatePassword(password);
+        if (!request.termsAccepted()) throw new IllegalArgumentException("Please agree to the Terms & Conditions and Privacy Policy.");
 
         if (repository.existsByEmailIgnoreCase(email)) {
 ```
@@ -16923,9 +18891,9 @@ throw new DuplicateEmailException();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0904 — backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:90
+### RULE-1023 — backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:81
 
-[backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:90](../../src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java#L90)
+[backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:81](../../src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java#L81)
 
 When / guard context:
 ```java
@@ -16946,38 +18914,37 @@ throw new IllegalArgumentException("Mobile number is required in international f
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0905 — backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:96
+### RULE-1024 — backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:87
 
-[backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:96](../../src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java#L96)
+[backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:87](../../src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java#L87)
 
 When / guard context:
 ```java
-e().matches("^\\+[1-9][0-9]{7,14}$"))
+))
             throw new IllegalArgumentException("Mobile number is required in international format");
         user.setUnverifiedPhoneNumber(request.mobile());
         String username = request.username();
 
         if (username == null ||
-                !username.matches("^[a-z][a-z0-9_]{3,29}$")) {
+                !username.matches(com.giftplatform.security.CredentialPolicy.USERNAME_PATTERN)) {
 ```
 Failure / enforcement:
 ```java
-throw new IllegalArgumentException("Invalid username");
+throw new IllegalArgumentException(com.giftplatform.security.CredentialPolicy.USERNAME_MESSAGE);
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0906 — backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:100
+### RULE-1025 — backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:91
 
-[backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:100](../../src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java#L100)
+[backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:91](../../src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java#L91)
 
 When / guard context:
 ```java
-user.setUnverifiedPhoneNumber(request.mobile());
-        String username = request.username();
+e = request.username();
 
         if (username == null ||
-                !username.matches("^[a-z][a-z0-9_]{3,29}$")) {
-            throw new IllegalArgumentException("Invalid username");
+                !username.matches(com.giftplatform.security.CredentialPolicy.USERNAME_PATTERN)) {
+            throw new IllegalArgumentException(com.giftplatform.security.CredentialPolicy.USERNAME_MESSAGE);
         }
 
         if (repository.existsByUsernameIgnoreCase(username)) {
@@ -16988,21 +18955,14 @@ throw new DuplicateUsernameException();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0907 — backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:106
+### RULE-1026 — backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:98
 
-[backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:106](../../src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java#L106)
+[backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:98](../../src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java#L98)
 
 When / guard context:
 ```java
-");
-        }
-
-        if (repository.existsByUsernameIgnoreCase(username)) {
-            throw new DuplicateUsernameException();
-        }
-
-        try {
-            User saved = repository.saveAndFlush(user);
+ed = repository.saveAndFlush(user);
+            if (jdbc != null) jdbc.update("INSERT INTO user_legal_consents(user_id,terms_version,privacy_version) VALUES (?,?,?)", saved.getId(), "2026-11-05", "2026-11-05");
             if(request.emailVerificationToken()!=null&&!request.emailVerificationToken().isBlank()){
                 if(signupEmails==null)
 ```
@@ -17012,20 +18972,35 @@ throw new IllegalStateException("Signup verification service unavailable");
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
-### RULE-0908 — backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:120
+### RULE-1027 — backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:114
 
-[backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:120](../../src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java#L120)
+[backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:114](../../src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java#L114)
 
 When / guard context:
 ```java
-saved.getId(),
-                    saved.getUsername(),
-                    saved.getEmail(),
-                    saved.getRole().name()
+saved.getRole().name()
             );
         } catch (DataIntegrityViolationException ex) {
-            // The database unique index also protects
-            // against concurrent duplicate registrations.
+            // Classify database races without exposing SQL or mislabelling other failures.
+            String detail = ex.getMostSpecificCause().getMessage();
+            if (detail != null && detail.contains("ux_users_username_normalized"))
+```
+Failure / enforcement:
+```java
+throw new DuplicateUsernameException();
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
+### RULE-1028 — backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:115
+
+[backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:115](../../src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java#L115)
+
+When / guard context:
+```java
+/ Classify database races without exposing SQL or mislabelling other failures.
+            String detail = ex.getMostSpecificCause().getMessage();
+            if (detail != null && detail.contains("ux_users_username_normalized")) throw new DuplicateUsernameException();
+            if (detail != null && detail.contains("ux_users_email_normalized"))
 ```
 Failure / enforcement:
 ```java
@@ -17033,10 +19008,59 @@ throw new DuplicateEmailException();
 ```
 Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
 
+### RULE-1029 — backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:116
+
+[backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:116](../../src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java#L116)
+
+When / guard context:
+```java
+mislabelling other failures.
+            String detail = ex.getMostSpecificCause().getMessage();
+            if (detail != null && detail.contains("ux_users_username_normalized")) throw new DuplicateUsernameException();
+            if (detail != null && detail.contains("ux_users_email_normalized")) throw new DuplicateEmailException();
+```
+Failure / enforcement:
+```java
+throw ex;
+```
+Rationale beyond this enforcement is not declared at this site. There is no documented administrative exception unless the surrounding source defines one. Test null/boundary values and transaction/retry behavior before altering the rule.
+
 # Declarative Java validations
 
 | Source | Line | Annotation |
 | --- | --- | --- |
+| backend/src/main/java/com/giftplatform/analytics/InteractionController.java | 15 | `@NotNull` |
+| backend/src/main/java/com/giftplatform/analytics/InteractionController.java | 15 | `@Size(min=1,max=50)` |
+| backend/src/main/java/com/giftplatform/analytics/InteractionController.java | 15 | `@NotNull` |
+| backend/src/main/java/com/giftplatform/analytics/InteractionService.java | 17 | `@NotNull` |
+| backend/src/main/java/com/giftplatform/analytics/InteractionService.java | 17 | `@Pattern(regexp="CLICK\|PAGE_VIEW\|OPERATION")` |
+| backend/src/main/java/com/giftplatform/analytics/InteractionService.java | 17 | `@NotNull` |
+| backend/src/main/java/com/giftplatform/analytics/InteractionService.java | 18 | `@Pattern(regexp="[A-Z][A-Z0-9_]{0,63}")` |
+| backend/src/main/java/com/giftplatform/analytics/InteractionService.java | 18 | `@NotNull` |
+| backend/src/main/java/com/giftplatform/analytics/InteractionService.java | 18 | `@Size(max=240)` |
+| backend/src/main/java/com/giftplatform/analytics/InteractionService.java | 18 | `@NotNull` |
+| backend/src/main/java/com/giftplatform/analytics/InteractionService.java | 19 | `@Size(max=160)` |
+| backend/src/main/java/com/giftplatform/analytics/InteractionService.java | 19 | `@Size(max=240)` |
+| backend/src/main/java/com/giftplatform/analytics/InteractionService.java | 20 | `@Pattern(regexp="CLICKED\|OPENED\|HANDED_OFF\|BROWSER_READY\|SUCCESS\|FAILURE\|CANCELLED\|UNKNOWN")` |
+| backend/src/main/java/com/giftplatform/analytics/InteractionService.java | 20 | `@NotNull` |
+| backend/src/main/java/com/giftplatform/analytics/InteractionService.java | 21 | `@Pattern(regexp="[A-Z0-9_]{0,120}")` |
+| backend/src/main/java/com/giftplatform/analytics/InteractionService.java | 21 | `@Min(0)` |
+| backend/src/main/java/com/giftplatform/analytics/InteractionService.java | 21 | `@Max(86400000)` |
+| backend/src/main/java/com/giftplatform/asset/HostInvitationUploadController.java | 20 | `@NotNull` |
+| backend/src/main/java/com/giftplatform/asset/HostInvitationUploadController.java | 20 | `@NotNull` |
+| backend/src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java | 25 | `@NotNull` |
+| backend/src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java | 25 | `@NotNull` |
+| backend/src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java | 25 | `@Size(max=500)` |
+| backend/src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java | 26 | `@NotNull` |
+| backend/src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java | 26 | `@NotBlank` |
+| backend/src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java | 26 | `@Size(max=80)` |
+| backend/src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java | 27 | `@Min(15)` |
+| backend/src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java | 27 | `@Max(1440)` |
+| backend/src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java | 27 | `@NotNull` |
+| backend/src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java | 27 | `@Size(max=1000)` |
+| backend/src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java | 27 | `@Min(0)` |
+| backend/src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java | 30 | `@NotBlank` |
+| backend/src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java | 30 | `@Size(max=200)` |
 | backend/src/main/java/com/giftplatform/event/dto/EventRequest.java | 10 | `@NotBlank` |
 | backend/src/main/java/com/giftplatform/event/dto/EventRequest.java | 10 | `@Size(max=200)` |
 | backend/src/main/java/com/giftplatform/event/dto/EventRequest.java | 11 | `@Size(max=10000)` |
@@ -17123,10 +19147,42 @@ Rationale beyond this enforcement is not declared at this site. There is no docu
 | backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java | 102 | `@Pattern(regexp="UPI\|BANK")` |
 | backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java | 103 | `@NotBlank` |
 | backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java | 103 | `@Pattern(regexp="[A-Za-z0-9-]{8,40}")` |
+| backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java | 20 | `@NotNull` |
+| backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java | 20 | `@NotBlank` |
+| backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java | 20 | `@Size(max=63)` |
+| backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java | 20 | `@NotBlank` |
+| backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java | 20 | `@Size(max=63)` |
+| backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java | 20 | `@Min(0)` |
+| backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java | 21 | `@NotBlank` |
+| backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java | 21 | `@Size(max=120)` |
+| backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java | 21 | `@NotBlank` |
+| backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java | 21 | `@Size(max=120)` |
+| backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java | 21 | `@Pattern(regexp="LTR\|RTL")` |
+| backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java | 21 | `@NotNull` |
+| backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java | 21 | `@NotNull` |
+| backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java | 21 | `@Min(0)` |
+| backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java | 22 | `@NotNull` |
+| backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java | 22 | `@Size(max=10000)` |
+| backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java | 22 | `@NotNull` |
+| backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java | 22 | `@Min(0)` |
+| backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java | 23 | `@NotNull` |
+| backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java | 23 | `@Pattern(regexp="INHERIT\|ENABLED\|DISABLED")` |
+| backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java | 42 | `@NotNull` |
+| backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java | 42 | `@Size(max=2000)` |
+| backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java | 42 | `@NotNull` |
+| backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java | 51 | `@NotNull` |
+| backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java | 51 | `@Pattern(regexp="[A-Za-z0-9_-]{1,120}")` |
+| backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java | 51 | `@Min(0)` |
+| backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java | 56 | `@NotBlank` |
+| backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java | 56 | `@Size(max=10000)` |
+| backend/src/main/java/com/giftplatform/localization/LocalizationController.java | 17 | `@NotBlank` |
+| backend/src/main/java/com/giftplatform/localization/LocalizationController.java | 17 | `@Size(max=63)` |
 | backend/src/main/java/com/giftplatform/otp/controller/dto/PhoneOtpRequest.java | 7 | `@NotBlank` |
 | backend/src/main/java/com/giftplatform/otp/controller/dto/PhoneOtpRequest.java | 8 | `@Pattern(regexp = "^\\+[1-9][0-9]{1,14}$")` |
 | backend/src/main/java/com/giftplatform/otp/controller/dto/PhoneOtpVerifyRequest.java | 7 | `@NotNull` |
 | backend/src/main/java/com/giftplatform/otp/controller/dto/PhoneOtpVerifyRequest.java | 8 | `@Pattern(regexp = "^[0-9]{6}$")` |
+| backend/src/main/java/com/giftplatform/publicevent/PublicKeepsakeController.java | 19 | `@NotNull` |
+| backend/src/main/java/com/giftplatform/publicevent/SharingPreviewController.java | 23 | `@NotNull` |
 | backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationService.java | 20 | `@NotBlank` |
 | backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationService.java | 20 | `@Pattern(regexp="ELEGANT\|FLORAL\|PLAYFUL\|MINIMAL\|TRADITIONAL")` |
 | backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationService.java | 21 | `@NotBlank` |
@@ -17139,17 +19195,18 @@ Rationale beyond this enforcement is not declared at this site. There is no docu
 | backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationService.java | 22 | `@Size(max=400)` |
 | backend/src/main/java/com/giftplatform/security/dto/LoginRequest.java | 7 | `@NotBlank` |
 | backend/src/main/java/com/giftplatform/security/dto/LoginRequest.java | 8 | `@NotBlank` |
-| backend/src/main/java/com/giftplatform/user/dto/RegisterRequest.java | 10 | `@NotBlank` |
-| backend/src/main/java/com/giftplatform/user/dto/RegisterRequest.java | 10 | `@Size(min = 2, max = 120)` |
-| backend/src/main/java/com/giftplatform/user/dto/RegisterRequest.java | 12 | `@NotBlank` |
-| backend/src/main/java/com/giftplatform/user/dto/RegisterRequest.java | 13 | `@Pattern` |
-| backend/src/main/java/com/giftplatform/user/dto/RegisterRequest.java | 19 | `@NotBlank` |
-| backend/src/main/java/com/giftplatform/user/dto/RegisterRequest.java | 20 | `@Email` |
-| backend/src/main/java/com/giftplatform/user/dto/RegisterRequest.java | 21 | `@Size(max = 254)` |
-| backend/src/main/java/com/giftplatform/user/dto/RegisterRequest.java | 24 | `@NotBlank` |
-| backend/src/main/java/com/giftplatform/user/dto/RegisterRequest.java | 24 | `@Pattern(regexp = "^\\+[1-9][0-9]{7,14}$", message = "Mobile must use international format")` |
-| backend/src/main/java/com/giftplatform/user/dto/RegisterRequest.java | 26 | `@NotBlank` |
-| backend/src/main/java/com/giftplatform/user/dto/RegisterRequest.java | 27 | `@Size(min = 12)` |
+| backend/src/main/java/com/giftplatform/user/dto/RegisterRequest.java | 11 | `@NotBlank` |
+| backend/src/main/java/com/giftplatform/user/dto/RegisterRequest.java | 11 | `@Size(min = 2, max = 120)` |
+| backend/src/main/java/com/giftplatform/user/dto/RegisterRequest.java | 13 | `@NotBlank` |
+| backend/src/main/java/com/giftplatform/user/dto/RegisterRequest.java | 14 | `@Pattern` |
+| backend/src/main/java/com/giftplatform/user/dto/RegisterRequest.java | 20 | `@NotBlank` |
+| backend/src/main/java/com/giftplatform/user/dto/RegisterRequest.java | 21 | `@Email(message = "Please enter a valid email address.")` |
+| backend/src/main/java/com/giftplatform/user/dto/RegisterRequest.java | 22 | `@Size(max = 254)` |
+| backend/src/main/java/com/giftplatform/user/dto/RegisterRequest.java | 25 | `@NotBlank` |
+| backend/src/main/java/com/giftplatform/user/dto/RegisterRequest.java | 25 | `@Pattern(regexp = "^\\+[1-9][0-9]{7,14}$", message = "Mobile must use international format")` |
+| backend/src/main/java/com/giftplatform/user/dto/RegisterRequest.java | 27 | `@NotBlank` |
+| backend/src/main/java/com/giftplatform/user/dto/RegisterRequest.java | 28 | `@Size(min = 8, message = "Password must contain at least 8 characters.")` |
+| backend/src/main/java/com/giftplatform/user/dto/RegisterRequest.java | 31 | `@AssertTrue(message = "Please agree to the Terms & Conditions and Privacy Policy.")` |
 
 
 # Database-enforced rules

@@ -30,6 +30,10 @@ Every row is a foreign-key column. Composite FKs contribute multiple rows. Delet
 | contributions_payment_order_id_fkey | contributions.payment_order_id | payment_orders.id | `FOREIGN KEY (payment_order_id) REFERENCES payment_orders(id)` |
 | fk_contribution_gift_event | contributions.gift_id | gifts.id | `FOREIGN KEY (gift_id, event_id) REFERENCES gifts(id, event_id)` |
 | fk_contribution_gift_event | contributions.event_id | gifts.event_id | `FOREIGN KEY (gift_id, event_id) REFERENCES gifts(id, event_id)` |
+| coupon_redemptions_coupon_id_fkey | coupon_redemptions.coupon_id | promotional_coupons.id | `FOREIGN KEY (coupon_id) REFERENCES promotional_coupons(id)` |
+| coupon_redemptions_currency_fkey | coupon_redemptions.currency | supported_currencies.code | `FOREIGN KEY (currency) REFERENCES supported_currencies(code)` |
+| coupon_redemptions_user_id_fkey | coupon_redemptions.user_id | users.id | `FOREIGN KEY (user_id) REFERENCES users(id)` |
+| event_celebration_settings_event_id_fkey | event_celebration_settings.event_id | events.id | `FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE` |
 | event_guest_submission_limits_event_id_fkey | event_guest_submission_limits.event_id | events.id | `FOREIGN KEY (event_id) REFERENCES events(id)` |
 | event_guestbook_event_id_fkey | event_guestbook.event_id | events.id | `FOREIGN KEY (event_id) REFERENCES events(id)` |
 | event_payment_account_links_bank_account_id_host_id_fkey | event_payment_account_links.bank_account_id | host_bank_accounts.id | `FOREIGN KEY (bank_account_id, host_id) REFERENCES host_bank_accounts(id, host_id)` |
@@ -72,6 +76,8 @@ Every row is a foreign-key column. Composite FKs contribute multiple rows. Delet
 | gift_groups_guest_upi_destination_id_fkey | gift_groups.guest_upi_destination_id | gift_group_payment_destinations.id | `FOREIGN KEY (guest_upi_destination_id) REFERENCES gift_group_payment_destinations(id)` |
 | gift_photos_actor_id_fkey | gift_photos.actor_id | users.id | `FOREIGN KEY (actor_id) REFERENCES users(id)` |
 | gift_photos_event_id_fkey | gift_photos.event_id | events.id | `FOREIGN KEY (event_id) REFERENCES events(id)` |
+| gift_recommendations_event_id_fkey | gift_recommendations.event_id | events.id | `FOREIGN KEY (event_id) REFERENCES events(id)` |
+| gift_recommendations_requested_by_fkey | gift_recommendations.requested_by | users.id | `FOREIGN KEY (requested_by) REFERENCES users(id)` |
 | gift_retailer_metadata_audit_actor_id_fkey | gift_retailer_metadata_audit.actor_id | users.id | `FOREIGN KEY (actor_id) REFERENCES users(id)` |
 | gift_retailer_metadata_audit_event_id_fkey | gift_retailer_metadata_audit.event_id | events.id | `FOREIGN KEY (event_id) REFERENCES events(id)` |
 | gift_retailer_metadata_audit_gift_id_fkey | gift_retailer_metadata_audit.gift_id | gifts.id | `FOREIGN KEY (gift_id) REFERENCES gifts(id)` |
@@ -95,6 +101,9 @@ Every row is a foreign-key column. Composite FKs contribute multiple rows. Delet
 | fk_bank_event_owner | host_bank_accounts.host_id | events.owner_id | `FOREIGN KEY (event_id, host_id) REFERENCES events(id, owner_id)` |
 | host_bank_accounts_host_id_fkey | host_bank_accounts.host_id | users.id | `FOREIGN KEY (host_id) REFERENCES users(id)` |
 | host_destination_verification_attempts_host_id_fkey | host_destination_verification_attempts.host_id | users.id | `FOREIGN KEY (host_id) REFERENCES users(id)` |
+| host_invitation_upload_controls_changed_by_fkey | host_invitation_upload_controls.changed_by | users.id | `FOREIGN KEY (changed_by) REFERENCES users(id)` |
+| host_invitation_upload_controls_host_id_fkey | host_invitation_upload_controls.host_id | users.id | `FOREIGN KEY (host_id) REFERENCES users(id)` |
+| host_invitation_uploads_host_id_fkey | host_invitation_uploads.host_id | users.id | `FOREIGN KEY (host_id) REFERENCES users(id)` |
 | host_payout_requests_destination_id_fkey | host_payout_requests.destination_id | host_bank_accounts.id | `FOREIGN KEY (destination_id) REFERENCES host_bank_accounts(id)` |
 | host_payout_requests_event_id_fkey | host_payout_requests.event_id | events.id | `FOREIGN KEY (event_id) REFERENCES events(id)` |
 | host_payout_requests_host_id_fkey | host_payout_requests.host_id | users.id | `FOREIGN KEY (host_id) REFERENCES users(id)` |
@@ -109,7 +118,17 @@ Every row is a foreign-key column. Composite FKs contribute multiple rows. Delet
 | hybrid_checkout_quotes_gift_id_fkey | hybrid_checkout_quotes.gift_id | gifts.id | `FOREIGN KEY (gift_id) REFERENCES gifts(id)` |
 | invitation_ai_requests_event_id_fkey | invitation_ai_requests.event_id | events.id | `FOREIGN KEY (event_id) REFERENCES events(id)` |
 | invitation_ai_requests_host_id_fkey | invitation_ai_requests.host_id | users.id | `FOREIGN KEY (host_id) REFERENCES users(id)` |
+| language_delivery_templates_changed_by_fkey | language_delivery_templates.changed_by | users.id | `FOREIGN KEY (changed_by) REFERENCES users(id)` |
+| language_delivery_templates_language_code_fkey | language_delivery_templates.language_code | platform_languages.code | `FOREIGN KEY (language_code) REFERENCES platform_languages(code)` |
+| localization_event_controls_changed_by_fkey | localization_event_controls.changed_by | users.id | `FOREIGN KEY (changed_by) REFERENCES users(id)` |
+| localization_event_controls_event_id_fkey | localization_event_controls.event_id | events.id | `FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE` |
+| localization_host_controls_changed_by_fkey | localization_host_controls.changed_by | users.id | `FOREIGN KEY (changed_by) REFERENCES users(id)` |
+| localization_host_controls_host_id_fkey | localization_host_controls.host_id | users.id | `FOREIGN KEY (host_id) REFERENCES users(id) ON DELETE CASCADE` |
+| localization_translations_changed_by_fkey | localization_translations.changed_by | users.id | `FOREIGN KEY (changed_by) REFERENCES users(id)` |
+| localization_translations_language_code_fkey | localization_translations.language_code | platform_languages.code | `FOREIGN KEY (language_code) REFERENCES platform_languages(code)` |
+| localization_translations_message_key_fkey | localization_translations.message_key | localization_sources.message_key | `FOREIGN KEY (message_key) REFERENCES localization_sources(message_key)` |
 | notification_outbox_event_id_fkey | notification_outbox.event_id | events.id | `FOREIGN KEY (event_id) REFERENCES events(id)` |
+| notification_outbox_language_code_fkey | notification_outbox.language_code | platform_languages.code | `FOREIGN KEY (language_code) REFERENCES platform_languages(code)` |
 | payment_channel_controls_changed_by_fkey | payment_channel_controls.changed_by | users.id | `FOREIGN KEY (changed_by) REFERENCES users(id)` |
 | payment_control_history_actor_id_fkey | payment_control_history.actor_id | users.id | `FOREIGN KEY (actor_id) REFERENCES users(id)` |
 | payment_notifications_contribution_id_fkey | payment_notifications.contribution_id | contributions.id | `FOREIGN KEY (contribution_id) REFERENCES contributions(id)` |
@@ -125,21 +144,60 @@ Every row is a foreign-key column. Composite FKs contribute multiple rows. Delet
 | payout_reservations_payout_request_id_fkey | payout_reservations.payout_request_id | host_payout_requests.id | `FOREIGN KEY (payout_request_id) REFERENCES host_payout_requests(id)` |
 | phone_otp_challenges_user_id_fkey | phone_otp_challenges.user_id | users.id | `FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE` |
 | platform_admin_action_audit_actor_id_fkey | platform_admin_action_audit.actor_id | users.id | `FOREIGN KEY (actor_id) REFERENCES users(id)` |
+| platform_brand_assets_created_by_fkey | platform_brand_assets.created_by | users.id | `FOREIGN KEY (created_by) REFERENCES users(id)` |
+| platform_branding_favicon_id_fkey | platform_branding.favicon_id | platform_brand_assets.id | `FOREIGN KEY (favicon_id) REFERENCES platform_brand_assets(id)` |
+| platform_branding_logo_id_fkey | platform_branding.logo_id | platform_brand_assets.id | `FOREIGN KEY (logo_id) REFERENCES platform_brand_assets(id)` |
+| platform_branding_updated_by_fkey | platform_branding.updated_by | users.id | `FOREIGN KEY (updated_by) REFERENCES users(id)` |
 | platform_event_ai_design_settings_changed_by_fkey | platform_event_ai_design_settings.changed_by | users.id | `FOREIGN KEY (changed_by) REFERENCES users(id)` |
 | platform_event_ai_design_settings_event_id_fkey | platform_event_ai_design_settings.event_id | events.id | `FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE` |
 | platform_event_album_settings_changed_by_fkey | platform_event_album_settings.changed_by | users.id | `FOREIGN KEY (changed_by) REFERENCES users(id)` |
 | platform_event_album_settings_event_id_fkey | platform_event_album_settings.event_id | events.id | `FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE` |
 | platform_event_message_settings_event_id_fkey | platform_event_message_settings.event_id | events.id | `FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE` |
+| platform_event_module_grants_changed_by_fkey | platform_event_module_grants.changed_by | users.id | `FOREIGN KEY (changed_by) REFERENCES users(id)` |
+| platform_event_module_grants_event_id_fkey | platform_event_module_grants.event_id | events.id | `FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE` |
+| platform_event_module_grants_module_code_fkey | platform_event_module_grants.module_code | platform_module_controls.module_code | `FOREIGN KEY (module_code) REFERENCES platform_module_controls(module_code)` |
 | platform_experience_settings_changed_by_fkey | platform_experience_settings.changed_by | users.id | `FOREIGN KEY (changed_by) REFERENCES users(id)` |
+| platform_growth_settings_changed_by_fkey | platform_growth_settings.changed_by | users.id | `FOREIGN KEY (changed_by) REFERENCES users(id)` |
 | platform_host_module_grants_changed_by_fkey | platform_host_module_grants.changed_by | users.id | `FOREIGN KEY (changed_by) REFERENCES users(id)` |
 | platform_host_module_grants_host_id_fkey | platform_host_module_grants.host_id | users.id | `FOREIGN KEY (host_id) REFERENCES users(id) ON DELETE CASCADE` |
 | platform_host_module_grants_module_code_fkey | platform_host_module_grants.module_code | platform_module_controls.module_code | `FOREIGN KEY (module_code) REFERENCES platform_module_controls(module_code)` |
+| platform_languages_changed_by_fkey | platform_languages.changed_by | users.id | `FOREIGN KEY (changed_by) REFERENCES users(id)` |
+| platform_localization_settings_changed_by_fkey | platform_localization_settings.changed_by | users.id | `FOREIGN KEY (changed_by) REFERENCES users(id)` |
+| platform_localization_settings_default_language_fkey | platform_localization_settings.default_language | platform_languages.code | `FOREIGN KEY (default_language) REFERENCES platform_languages(code)` |
+| platform_localization_settings_fallback_language_fkey | platform_localization_settings.fallback_language | platform_languages.code | `FOREIGN KEY (fallback_language) REFERENCES platform_languages(code)` |
 | platform_module_controls_changed_by_fkey | platform_module_controls.changed_by | users.id | `FOREIGN KEY (changed_by) REFERENCES users(id)` |
 | platform_monetization_history_actor_id_fkey | platform_monetization_history.actor_id | users.id | `FOREIGN KEY (actor_id) REFERENCES users(id)` |
 | platform_monetization_settings_changed_by_fkey | platform_monetization_settings.changed_by | users.id | `FOREIGN KEY (changed_by) REFERENCES users(id)` |
 | platform_verification_settings_changed_by_fkey | platform_verification_settings.changed_by | users.id | `FOREIGN KEY (changed_by) REFERENCES users(id)` |
+| promotional_coupons_created_by_fkey | promotional_coupons.created_by | users.id | `FOREIGN KEY (created_by) REFERENCES users(id)` |
+| promotional_coupons_currency_fkey | promotional_coupons.currency | supported_currencies.code | `FOREIGN KEY (currency) REFERENCES supported_currencies(code)` |
+| promotional_coupons_tenant_id_fkey | promotional_coupons.tenant_id | platform_tenants.id | `FOREIGN KEY (tenant_id) REFERENCES platform_tenants(id)` |
 | qr_invitation_designs_event_id_fkey | qr_invitation_designs.event_id | events.id | `FOREIGN KEY (event_id) REFERENCES events(id)` |
+| referral_codes_referrer_id_fkey | referral_codes.referrer_id | users.id | `FOREIGN KEY (referrer_id) REFERENCES users(id)` |
+| referral_codes_tenant_id_fkey | referral_codes.tenant_id | platform_tenants.id | `FOREIGN KEY (tenant_id) REFERENCES platform_tenants(id)` |
 | routing_commission_history_actor_id_fkey | routing_commission_history.actor_id | users.id | `FOREIGN KEY (actor_id) REFERENCES users(id)` |
 | routing_commission_settings_changed_by_fkey | routing_commission_settings.changed_by | users.id | `FOREIGN KEY (changed_by) REFERENCES users(id)` |
+| subscription_plans_currency_fkey | subscription_plans.currency | supported_currencies.code | `FOREIGN KEY (currency) REFERENCES supported_currencies(code)` |
+| tenant_branding_favicon_id_fkey | tenant_branding.favicon_id | platform_brand_assets.id | `FOREIGN KEY (favicon_id) REFERENCES platform_brand_assets(id)` |
+| tenant_branding_logo_id_fkey | tenant_branding.logo_id | platform_brand_assets.id | `FOREIGN KEY (logo_id) REFERENCES platform_brand_assets(id)` |
+| tenant_branding_tenant_id_fkey | tenant_branding.tenant_id | platform_tenants.id | `FOREIGN KEY (tenant_id) REFERENCES platform_tenants(id)` |
+| tenant_events_event_id_fkey | tenant_events.event_id | events.id | `FOREIGN KEY (event_id) REFERENCES events(id)` |
+| tenant_events_tenant_id_fkey | tenant_events.tenant_id | platform_tenants.id | `FOREIGN KEY (tenant_id) REFERENCES platform_tenants(id)` |
+| tenant_memberships_tenant_id_fkey | tenant_memberships.tenant_id | platform_tenants.id | `FOREIGN KEY (tenant_id) REFERENCES platform_tenants(id)` |
+| tenant_memberships_user_id_fkey | tenant_memberships.user_id | users.id | `FOREIGN KEY (user_id) REFERENCES users(id)` |
+| user_language_preferences_language_code_fkey | user_language_preferences.language_code | platform_languages.code | `FOREIGN KEY (language_code) REFERENCES platform_languages(code)` |
+| user_language_preferences_user_id_fkey | user_language_preferences.user_id | users.id | `FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE` |
+| user_legal_consents_user_id_fkey | user_legal_consents.user_id | users.id | `FOREIGN KEY (user_id) REFERENCES users(id)` |
+| user_profile_preferences_user_id_fkey | user_profile_preferences.user_id | users.id | `FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE` |
+| user_referrals_referral_code_id_referrer_id_fkey | user_referrals.referral_code_id | referral_codes.id | `FOREIGN KEY (referral_code_id, referrer_id) REFERENCES referral_codes(id, referrer_id)` |
+| user_referrals_referral_code_id_referrer_id_fkey | user_referrals.referrer_id | referral_codes.referrer_id | `FOREIGN KEY (referral_code_id, referrer_id) REFERENCES referral_codes(id, referrer_id)` |
+| user_referrals_referred_user_id_fkey | user_referrals.referred_user_id | users.id | `FOREIGN KEY (referred_user_id) REFERENCES users(id)` |
+| user_referrals_referrer_id_fkey | user_referrals.referrer_id | users.id | `FOREIGN KEY (referrer_id) REFERENCES users(id)` |
+| user_subscriptions_currency_fkey | user_subscriptions.currency | supported_currencies.code | `FOREIGN KEY (currency) REFERENCES supported_currencies(code)` |
+| user_subscriptions_plan_id_fkey | user_subscriptions.plan_id | subscription_plans.id | `FOREIGN KEY (plan_id) REFERENCES subscription_plans(id)` |
+| user_subscriptions_tenant_id_fkey | user_subscriptions.tenant_id | platform_tenants.id | `FOREIGN KEY (tenant_id) REFERENCES platform_tenants(id)` |
+| user_subscriptions_tenant_id_user_id_fkey | user_subscriptions.tenant_id | tenant_memberships.tenant_id | `FOREIGN KEY (tenant_id, user_id) REFERENCES tenant_memberships(tenant_id, user_id)` |
+| user_subscriptions_tenant_id_user_id_fkey | user_subscriptions.user_id | tenant_memberships.user_id | `FOREIGN KEY (tenant_id, user_id) REFERENCES tenant_memberships(tenant_id, user_id)` |
+| user_subscriptions_user_id_fkey | user_subscriptions.user_id | users.id | `FOREIGN KEY (user_id) REFERENCES users(id)` |
 | wallet_ledger_entries_contribution_id_fkey | wallet_ledger_entries.contribution_id | contributions.id | `FOREIGN KEY (contribution_id) REFERENCES contributions(id)` |
 | wallet_ledger_entries_event_id_fkey | wallet_ledger_entries.event_id | events.id | `FOREIGN KEY (event_id) REFERENCES events(id)` |

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class ManualClaimNotificationService {
+ @org.springframework.beans.factory.annotation.Autowired(required=false) private com.giftplatform.localization.LocalizationService localization;
  private final JdbcTemplate jdbc;
  public ManualClaimNotificationService(JdbcTemplate jdbc){this.jdbc=jdbc;}
  public void enqueue(UUID eventId,UUID claimId,String guestName,String guestEmail,String guestPhone,long amountPaise,UUID giftId) {
@@ -30,21 +31,28 @@ public class ManualClaimNotificationService {
   String gift=giftId==null?"event contribution":"gift contribution";
   Map<String,String> values=Map.of("guestName",guestName,"hostName",x[2],
     "eventName",x[0],"giftName",gift,"amount",amount);
-  String safeWording=ThankYouMessageRenderer.paymentWording(false);
+  String language=localization==null?"en":localization.eventLanguage(eventId);
+  String safeWording=localization==null?ThankYouMessageRenderer.paymentWording(false):localization.render("notification.transfer.unverified",Map.of(),language);
+  String guestSubject=x[3],guestBody=ThankYouMessageRenderer.render(x[4],values);
+  if(localization!=null){
+   if(x[3].equals("Thank you for celebrating with us"))guestSubject=localization.render("notification.thanks.subject",Map.of(),language);
+   if(x[4].equals("Dear {{guestName}}, thank you for your thoughtful contribution to {{eventName}}. With love, {{hostName}}"))guestBody=localization.render("notification.thanks.body",values,language);
+  }
   if(guestAutoSend&&guestEmail!=null&&!guestEmail.isBlank()&&Boolean.parseBoolean(x[8])){
-    add(eventId,claimId,"GUEST","EMAIL",x[3],
-      ThankYouMessageRenderer.render(x[4],values)+"\n\n"+safeWording,x[6]);
+    add(eventId,claimId,"GUEST","EMAIL",guestSubject,
+      guestBody+"\n\n"+safeWording,x[6]);
   }
   // Host notification is in-app; contact email can be enabled by a later delivery adapter.
-  add(eventId,claimId,"HOST","IN_APP","Guest transfer reported",
-    guestName+" reported "+amount+" for "+x[0]+" ("+gift+"). Transfer is not verified.",null);
+  add(eventId,claimId,"HOST","IN_APP",localization==null?"Guest transfer reported":localization.render("notification.host.transfer.subject",Map.of(),language),
+    localization==null?guestName+" reported "+amount+" for "+x[0]+" ("+gift+"). Transfer is not verified.":localization.render("notification.host.transfer.body",values,language),null);
  }
  private void add(UUID eventId,UUID claimId,String who,String channel,String subject,String body,String card){
+  String language=localization==null?"en":localization.eventLanguage(eventId);
   jdbc.update("""
    INSERT INTO notification_outbox
-     (id,event_id,notification_kind,recipient_kind,channel,source_kind,source_id,payment_evidence,subject,message,card_template)
-   VALUES(?,?,'CONTRIBUTION',?,?,'MANUAL_CLAIM',?,'GUEST_REPORTED',?,?,?)
+     (id,event_id,notification_kind,recipient_kind,channel,source_kind,source_id,payment_evidence,subject,message,card_template,language_code)
+   VALUES(?,?,'CONTRIBUTION',?,?,'MANUAL_CLAIM',?,'GUEST_REPORTED',?,?,?,?)
    ON CONFLICT (event_id,notification_kind,recipient_kind,channel,source_kind,source_id) DO NOTHING
-   """,UUID.randomUUID(),eventId,who,channel,claimId,subject,body,card);
+   """,UUID.randomUUID(),eventId,who,channel,claimId,subject,body,card,language);
  }
 }

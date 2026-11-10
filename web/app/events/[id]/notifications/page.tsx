@@ -1,4 +1,11 @@
 'use client';
+import EventInvitationEmail from '../../../../components/EventInvitationEmail';
+import {activeLocale} from '../../../../lib/localization.mjs';
+
+/* localization:instrumented */
+import {localize,localizeText} from '../../../../lib/localization.mjs';
+import {useLocalizationRender} from '../../../../components/LocalizationProvider';
+
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
@@ -18,7 +25,7 @@ type History = {
   created_at: string;
 };
 
-export default function NotificationsPage() {
+export default function NotificationsPage() {useLocalizationRender();
   const {mode}=useExperience();const focused=mode==='FOCUSED';
   const params = useParams();
   const id = String(params.id ?? '');
@@ -86,36 +93,32 @@ export default function NotificationsPage() {
       margin: '0 auto',
       padding: '28px 20px'
     }}>
-      <Link href="/events">← Back to My Events</Link>
+      <Link href="/events">{localize("ui.34bd233410c2ceb9",{defaultValue:"← Back to My Events"})}</Link>
 
-      <GroupCollectionReport eventId={id} notifications/><h1>{focused?'Activity & notifications':'Notification History'}</h1>
+      <GroupCollectionReport eventId={id} notifications/><h1>{focused?localize("ui.783222ed531ca517",{defaultValue:"Activity & notifications"}):localize("ui.61d4e77e9eb4e3c0",{defaultValue:"Notification History"})}</h1>
       <p>
-        Review acknowledgments and notification records for this celebration.
-        Queued notifications are not proof of external delivery.
-        Guest-reported UPI and bank transfers are not independently verified payments.
-      </p>
+        {localize("ui.747151be868ef32b",{defaultValue:"Review acknowledgments and notification records for this celebration. Queued notifications are not proof of external delivery. Guest-reported UPI and bank transfers are not independently verified payments."})}</p>
 
       <p>
         <Link href={`/events/${encodeURIComponent(id)}/thank-you`}>
-          Open Thank-you Card Studio →
-        </Link>
+          {localize("ui.fc8d555ac7c4f591",{defaultValue:"Open Thank-you Card Studio →"})}</Link>
       </p>
 
-      <h2>Contribution activity</h2>
-      <p>These are in-app activity previews, not proof of email/SMS delivery or payment verification.</p>
-      <p><Link href={`/events/${encodeURIComponent(id)}/contributions`}>View full contribution report →</Link></p>
-      {!loading && !error && activity.length===0 && <p>No contribution activity yet.</p>}
-      {focused&&!loading&&<div className="focusMobileRows">{activity.map(a=><ActivityRow key={a.id} title={a.guestName} amount={'₹'+(a.amountPaise/100).toLocaleString('en-IN')} status={a.verificationStatus==='VERIFIED'?'Payment verified':a.verificationStatus==='VERIFICATION_PENDING'?'Verification pending':a.verificationStatus.toLowerCase().replaceAll('_',' ')}><p>{a.giftName||'Celebration wallet'} · {a.method}</p><p>{new Date(a.createdAt).toLocaleString()}</p></ActivityRow>)}</div>}{!loading && !error && activity.length>0 && <div className={focused?'focusDesktopTable':undefined} style={{overflowX:'auto'}}><table style={{width:'100%'}}>
+      <h2>{localize("ui.8d0b5abe7179e452",{defaultValue:"Contribution activity"})}</h2>
+      <p>{localize("ui.db671cb7e8a1d542",{defaultValue:"These are in-app activity previews, not proof of email/SMS delivery or payment verification."})}</p>
+      <p><Link href={`/events/${encodeURIComponent(id)}/contributions`}>{localize("ui.0b55bbbd0968fe00",{defaultValue:"View full contribution report →"})}</Link></p>
+      {!loading && !error && activity.length===0 && <p>{localize("ui.8495cde7ded081d2",{defaultValue:"No contribution activity yet."})}</p>}
+      {focused&&!loading&&<div className="focusMobileRows">{activity.map(a=><ActivityRow key={a.id} title={a.guestName} amount={'₹'+(a.amountPaise/100).toLocaleString(activeLocale("en-IN"))} status={a.verificationStatus==='VERIFIED'?'Payment verified':a.verificationStatus==='VERIFICATION_PENDING'?'Verification pending':a.verificationStatus.toLowerCase().replaceAll('_',' ')}><p>{a.giftName||localize("ui.0ebda8b7a27b9d41",{defaultValue:"Celebration wallet"})} · {a.method}</p><p>{new Date(a.createdAt).toLocaleString()}</p></ActivityRow>)}</div>}{!loading && !error && activity.length>0 && <div className={focused?'focusDesktopTable':undefined} style={{overflowX:'auto'}}><table style={{width:'100%'}}>
         <thead><tr>{['Date','Guest','Gift / wallet','Method','Amount','Status'].map(t=><th key={t} style={{textAlign:'left'}}>{t}</th>)}</tr></thead>
-        <tbody>{activity.map(a=><tr key={a.id}><td>{new Date(a.createdAt).toLocaleString()}</td><td>{a.guestName}</td><td>{a.giftName||'Celebration wallet'}{a.giftPaise>0&&a.walletPaise>0?' + wallet excess':''}</td><td>{a.method}</td><td>{'₹'+(a.amountPaise/100).toLocaleString('en-IN')}</td><td>{a.verificationStatus.replaceAll('_',' ')}</td></tr>)}</tbody>
+        <tbody>{activity.map(a=><tr key={a.id}><td>{new Date(a.createdAt).toLocaleString()}</td><td>{a.guestName}</td><td>{a.giftName||localize("ui.0ebda8b7a27b9d41",{defaultValue:"Celebration wallet"})}{a.giftPaise>0&&a.walletPaise>0?localize("ui.bd5861888693e40d",{defaultValue:" + wallet excess"}):''}</td><td>{a.method}</td><td>{'₹'+(a.amountPaise/100).toLocaleString(activeLocale("en-IN"))}</td><td>{a.verificationStatus.replaceAll('_',' ')}</td></tr>)}</tbody>
       </table></div>}
-      <details open={focused?undefined:true}><summary>Notification delivery records</summary>
-      {loading && <p role="status">Loading notifications…</p>}
+      <details open={focused?undefined:true}><summary>{localize("ui.360fac9e19c804d3",{defaultValue:"Notification delivery records"})}</summary>
+      {loading && <p role="status">{localize("ui.eae12e0d3bab022d",{defaultValue:"Loading notifications…"})}</p>}
 
-      {error && <p role="alert">{error}</p>}
+      {error && <p role="alert">{localizeText(error)}</p>}
 
       {!loading && !error && history.length === 0 && (
-        <p>No notifications recorded for this event yet.</p>
+        <p>{localize("ui.eb09818fa808861c",{defaultValue:"No notifications recorded for this event yet."})}</p>
       )}
 
       {!loading && !error && history.length > 0 && (
@@ -145,13 +148,13 @@ export default function NotificationsPage() {
                   <td>{h.recipient_kind}</td>
                   <td>{h.channel}</td>
                   <td>{h.payment_evidence}</td>
-                  <td>{h.status}</td>
+                  <td>{localizeText(h.status)}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       )}
-    </details></main>
+    </details><EventInvitationEmail eventId={id}/></main>
   );
 }

@@ -35,6 +35,7 @@ class GroupCredentialRevocationTest {
         Event event = mock(Event.class);
         when(event.getId()).thenReturn(eventId);
         when(event.getStatus()).thenReturn(EventStatus.PUBLISHED);
+  org.mockito.Mockito.lenient().when(event.isGiftingEnabled()).thenReturn(true);
         when(events.findByPublicToken(token)).thenReturn(Optional.of(event));
     }
 

@@ -24,7 +24,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.hamcrest.Matchers.containsString;
 
-@SpringBootTest(properties="gift.otp.hmac-key-base64=${gift.otp.secret-base64}")
+@SpringBootTest(properties={"gift.otp.hmac-key-base64=${gift.otp.secret-base64}","gift.verification.email.enabled=true"})
 @AutoConfigureMockMvc
 @Testcontainers
 class ModulePrivilegesIntegrationTest {
@@ -47,6 +47,9 @@ class ModulePrivilegesIntegrationTest {
   db.update("INSERT INTO events(id,title,occasion_type,status,owner_id,host_display_name,public_token) VALUES (?,?,?,?,?,?,?)",event,"Privilege test","BIRTHDAY","PUBLISHED",host,"Host",token);
   db.update("INSERT INTO gift_group_accounts(id,event_id,username,password_hash,full_name) VALUES (?,?,?,?,?)",creator,event,"creator","hash","Creator");
   db.update("INSERT INTO gift_groups(id,event_id,admin_id,name,creator_name,creator_mobile,status) VALUES (?,?,?,?,?,?,?)",group,event,creator,"Group","Creator","+919876543210","PUBLISHED");
+  db.update("UPDATE gift_groups SET collection_published_at=now() WHERE id=?",group);
+  db.update("UPDATE gift_group_accounts SET email=?,email_verified_at=now() WHERE id=?",creator+"@example.test",creator);
+  db.update("INSERT INTO gift_group_payment_destinations(id,group_id,kind,label,account_ciphertext,account_fingerprint,ifsc_ciphertext,holder_ciphertext) VALUES(?,?,'BANK','Fixture destination','encrypted',?,'encrypted','encrypted')",UUID.randomUUID(),group,"b".repeat(64));
   grants(true,true);
  }
  void grants(boolean platform,boolean hostGrant){

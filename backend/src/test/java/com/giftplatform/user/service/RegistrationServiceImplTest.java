@@ -33,7 +33,7 @@ class RegistrationServiceImplTest {
     }
 
     private RegisterRequest request(String username,String email,String password){
-        return new RegisterRequest("Test Host",username,email,"+919876543210",password);
+        return new RegisterRequest("Test Host",username,email,"+919876543210",password,null,true);
     }
 
     private RegisterRequest validRequest() {
@@ -126,7 +126,7 @@ class RegistrationServiceImplTest {
     @Test
     void shouldAcceptMinimumPasswordLength() {
         var response = service.register(
-                request("customer123", "min@example.com", "123456789012")
+                request("customer123", "min@example.com", "Abcdef1!")
         );
 
         assertThat(response.id()).isNotNull();
@@ -139,7 +139,7 @@ class RegistrationServiceImplTest {
                 request(
                         "customer123",
                         "max@example.com",
-                        "A".repeat(72)
+                        "Aa1!" + "A".repeat(68)
                 )
         );
 
@@ -180,5 +180,23 @@ class RegistrationServiceImplTest {
         )).isInstanceOf(IllegalArgumentException.class);
 
         verify(repository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    void rejectsMissingConsentWithoutSaving() {
+        var request = new RegisterRequest("Test Host", "customer123", "valid@example.com", "+919876543210", "Abcdef1!", null, false);
+        assertThatThrownBy(() -> service.register(request)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("agree");
+        verify(repository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    void acceptsAlphanumericStartAndMixedCaseUsername() {
+        assertThat(service.register(request("1Host_name", "valid@example.com", "Abcdef1!")).username()).isEqualTo("1Host_name");
+    }
+
+    @Test
+    void reportsConcurrentDuplicateUsername() {
+        when(repository.saveAndFlush(any())).thenThrow(new org.springframework.dao.DataIntegrityViolationException("write", new RuntimeException("ux_users_username_normalized")));
+        assertThatThrownBy(() -> service.register(validRequest())).isInstanceOf(DuplicateUsernameException.class);
     }
 }

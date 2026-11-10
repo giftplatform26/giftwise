@@ -16,6 +16,7 @@ import java.util.Map;
 @Component
 @ConditionalOnProperty(prefix = "gift.sms", name = "provider", havingValue = "sns")
 public class AwsSnsSmsSender implements SmsSender {
+    @org.springframework.beans.factory.annotation.Autowired(required=false) private com.giftplatform.localization.LocalizationService localization;
     private final SnsClient sns;
     private final String senderId;
     private final String smsType;
@@ -44,7 +45,7 @@ public class AwsSnsSmsSender implements SmsSender {
         if (!senderId.isBlank()) attrs.put("AWS.SNS.SMS.SenderID", attr(senderId));
         PublishRequest request = PublishRequest.builder()
                 .phoneNumber(phoneNumber)
-                .message("Your Gift Platform verification code is " + otp + ". Do not share this code.")
+                .message(localization==null?"Your Gift Platform verification code is " + otp + ". Do not share this code.":localization.render("sms.sns.code",Map.of("code",otp),org.springframework.context.i18n.LocaleContextHolder.getLocale().toLanguageTag()))
                 .messageAttributes(attrs)
                 .build();
         try {

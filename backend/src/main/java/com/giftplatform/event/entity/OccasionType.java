@@ -6,5 +6,8 @@ public enum OccasionType {
     BABY_SHOWER,
     HOUSEWARMING,
     ANNIVERSARY,
+    FAREWELL,
+    RETIREMENT,
+    REUNION,
     OTHER
 }

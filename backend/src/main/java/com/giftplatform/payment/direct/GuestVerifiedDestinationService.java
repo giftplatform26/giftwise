@@ -34,7 +34,7 @@ public class GuestVerifiedDestinationService {
  public List<Destination> list(UUID token) {
   if(!active) return List.of();
   if(token==null) throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Invitation unavailable");
-  List<UUID[]> owners=jdbc.query("SELECT id,owner_id FROM events WHERE public_token=? AND status='PUBLISHED'",
+  List<UUID[]> owners=jdbc.query("SELECT id,owner_id FROM events WHERE public_token=? AND status='PUBLISHED' AND gifting_enabled",
    (rs,i)->new UUID[]{rs.getObject(1,UUID.class),rs.getObject(2,UUID.class)},token);
   if(owners.size()!=1) throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Invitation unavailable");
   UUID host=owners.get(0)[1];

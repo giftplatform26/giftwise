@@ -41,7 +41,7 @@ class EventDatabaseIntegrityIntegrationTest {
     }
     private UUID event(UUID owner) {
         UUID id = UUID.randomUUID();
-        jdbc.update("INSERT INTO events(id,title,occasion_type,status,owner_id) VALUES (?,?,?,?,?)",
+        jdbc.update("INSERT INTO events(id,title,occasion_type,status,owner_id,host_display_name) VALUES (?,?,?,?,?,'Fixture host')",
                 id, "Test", "BIRTHDAY", "DRAFT", owner);
         return id;
     }
@@ -76,7 +76,7 @@ class EventDatabaseIntegrityIntegrationTest {
     @Test void auditAndEventRollbackTogether() {
         UUID owner = user(); UUID id = UUID.randomUUID();
         new TransactionTemplate(txManager).execute(status -> {
-            jdbc.update("INSERT INTO events(id,title,occasion_type,status,owner_id) VALUES (?,?,?,?,?)",
+            jdbc.update("INSERT INTO events(id,title,occasion_type,status,owner_id,host_display_name) VALUES (?,?,?,?,?,'Fixture host')",
                     id, "Rollback", "BIRTHDAY", "DRAFT", owner);
             audit.recordChange(owner, AuditActorType.CUSTOMER, "EVENT", id,
                     AuditAction.CREATE, null, Map.of("title", "Rollback"), null);
@@ -90,7 +90,7 @@ class EventDatabaseIntegrityIntegrationTest {
     @Test void auditAndEventCommitTogether() {
         UUID owner = user(); UUID id = UUID.randomUUID();
         new TransactionTemplate(txManager).execute(status -> {
-            jdbc.update("INSERT INTO events(id,title,occasion_type,status,owner_id) VALUES (?,?,?,?,?)",
+            jdbc.update("INSERT INTO events(id,title,occasion_type,status,owner_id,host_display_name) VALUES (?,?,?,?,?,'Fixture host')",
                     id, "Commit", "BIRTHDAY", "DRAFT", owner);
             audit.recordChange(owner, AuditActorType.CUSTOMER, "EVENT", id,
                     AuditAction.CREATE, null, Map.of("title", "Commit"), null);

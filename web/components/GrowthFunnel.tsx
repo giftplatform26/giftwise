@@ -1,0 +1,9 @@
+'use client';
+import {useLocalizationRender} from './LocalizationProvider';
+import {useEffect,useState} from 'react';
+import {localizeText as t} from '../lib/localization.mjs';
+const stages=[['HOST_REGISTER','Hosts registered'],['EVENT_CREATE','Drafts created'],['EVENT_PUBLISH','Events published'],['INVITATION_LINK_COPY','Invitation links copied'],['INVITATION_SHARE','Native share handoffs'],['INVITATION_WHATSAPP','WhatsApp handoffs'],['INVITATION_OPEN','Invitation opens'],['GUEST_RSVP','Guest responses']];
+export default function GrowthFunnel(){useLocalizationRender();const [rows,setRows]=useState<Array<{action:string;visitors:number;occurrences:number}>>([]),[error,setError]=useState(''),[busy,setBusy]=useState(true);
+ async function load(){setBusy(true);setError('');try{const r=await fetch('/backend/api/admin/console/interactions/funnel',{credentials:'include',cache:'no-store'});if(!r.ok)throw Error();setRows(await r.json())}catch{setError('Unable to load journey activity. Please retry.')}finally{setBusy(false)}}
+ useEffect(()=>{void load()},[]);
+ return <section className="acPanel"><h2>{t('Journey activity over the last 30 days')}</h2><p>{t('Consented activity only. Counts are stage totals, not an ordered conversion funnel. Browser sessions are not unique people; sharing handoffs do not prove delivery. Missing activity does not mean no activity occurred.')}</p><button disabled={busy} onClick={()=>void load()}>{t('Refresh journey activity')}</button>{busy?<p role="status">{t('Loading journey activity…')}</p>:error?<p role="alert">{t(error)}</p>:<div className="acTable"><table><thead><tr><th>{t('Stage')}</th><th>{t('Browser sessions')}</th><th>{t('Occurrences')}</th></tr></thead><tbody>{stages.map(([key,label])=>{const row=rows.find(r=>r.action===key);return <tr key={key}><td>{t(label)}</td><td>{row?.visitors||0}</td><td>{row?.occurrences||0}</td></tr>})}</tbody></table></div>}</section>}

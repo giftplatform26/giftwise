@@ -105,8 +105,9 @@ public class EmailRecoveryController {
         if(value==null||!value.equals(confirmation)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Credentials do not match");
         if("RESET_PIN".equals(purpose)) {
             if(!value.matches("[0-9]{6}")) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"PIN must be six digits");
-        } else if(value.length()<8||value.length()>128||!value.matches("(?s).*\\p{L}.*")||!value.matches("(?s).*\\d.*")||!value.matches("(?s).*[\\p{Punct}].*")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Password must have 8–128 characters including a letter, number and symbol");
+        } else {
+            try { com.giftplatform.security.CredentialPolicy.validatePassword(value); }
+            catch (IllegalArgumentException ex) { throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage()); }
         }
     }
     @PostMapping("/complete") @Transactional

@@ -1,6 +1,6 @@
 # Complete API operation catalogue
 
-265 expanded source-declared operations. Runtime registration is recorded separately; conditional routes can be absent unless their property/profile is enabled. Backend paths below exclude the frontend `/backend` reverse-proxy prefix.
+325 expanded source-declared operations. Runtime registration is recorded separately; conditional routes can be absent unless their property/profile is enabled. Backend paths below exclude the frontend `/backend` reverse-proxy prefix.
 
 Examples are illustrative schema shapes, not fixture-backed execution transcripts. Placeholder identifiers must be replaced by owned, correctly scoped resources; business enum values and validation annotations are authoritative in [API models](API_MODELS.md). Dynamic maps and polymorphic responses are explicitly labelled rather than inventing a contract. Read [Document 1](01_TECHNICAL_SPECIFICATION.md) for common error, security, money and retry contracts.
 
@@ -9,268 +9,328 @@ Examples are illustrative schema shapes, not fixture-backed execution transcript
 | API-0001 | GET | `/api/admin/account-policies/{scope}/{id}` | AccountPolicyController.read | True |
 | API-0002 | PUT | `/api/admin/account-policies/{scope}/{id}` | AccountPolicyController.update | True |
 | API-0003 | GET | `/api/admin/audit` | AdminAuditController.byEntity | True |
-| API-0004 | GET | `/api/admin/console/audit` | PlatformAdminConsoleController.audit | True |
-| API-0005 | GET | `/api/admin/console/audit/page` | PlatformAdminAuditController.page | True |
-| API-0006 | GET | `/api/admin/console/events` | PlatformAdminConsoleController.events | True |
-| API-0007 | GET | `/api/admin/console/events/{eventId}/ai-design-settings` | AiInvitationAdminController.event | True |
-| API-0008 | POST | `/api/admin/console/events/{eventId}/ai-design-settings` | PlatformAdminConsoleController.aiDesignSettings | True |
-| API-0009 | POST | `/api/admin/console/events/{eventId}/album-settings` | PlatformAdminConsoleController.albumSettings | True |
-| API-0010 | POST | `/api/admin/console/experience` | ExperienceSettingsController.update | True |
-| API-0011 | GET | `/api/admin/console/hosts` | PlatformAdminConsoleController.hosts | True |
-| API-0012 | GET | `/api/admin/console/hosts/{hostId}/ai-design` | AiInvitationAdminController.host | True |
-| API-0013 | GET | `/api/admin/console/hosts/{hostId}/modules` | PlatformAdminConsoleController.hostModules | True |
-| API-0014 | POST | `/api/admin/console/hosts/{hostId}/modules/{code}` | PlatformAdminConsoleController.hostModule | True |
-| API-0015 | GET | `/api/admin/console/modules` | PlatformAdminConsoleController.modules | True |
-| API-0016 | POST | `/api/admin/console/modules/{code}` | PlatformAdminConsoleController.platformModule | True |
-| API-0017 | GET | `/api/admin/console/monetization` | MonetizationController.current | True |
-| API-0018 | PUT | `/api/admin/console/monetization` | MonetizationController.update | True |
-| API-0019 | GET | `/api/admin/console/monetization/commissions` | CommercialController.commissions | True |
-| API-0020 | PUT | `/api/admin/console/monetization/commissions` | CommercialController.commission | True |
-| API-0021 | GET | `/api/admin/console/monetization/history` | MonetizationController.history | True |
-| API-0022 | GET | `/api/admin/console/monetization/partners` | CommercialController.partners | True |
-| API-0023 | PUT | `/api/admin/console/monetization/partners` | CommercialController.partner | True |
-| API-0024 | GET | `/api/admin/console/monetization/placements` | CommercialController.adminPlacements | True |
-| API-0025 | POST | `/api/admin/console/monetization/placements/{id}` | CommercialController.moderate | True |
-| API-0026 | GET | `/api/admin/console/monetization/policy` | CommercialController.policy | True |
-| API-0027 | PUT | `/api/admin/console/monetization/policy` | CommercialController.policy | True |
-| API-0028 | GET | `/api/admin/console/monetization/revenue` | CommercialController.revenue | True |
-| API-0029 | GET | `/api/admin/console/monetization/setup-history` | CommercialController.history | True |
-| API-0030 | GET | `/api/admin/console/payments/controls` | PaymentControlController.read | True |
-| API-0031 | PUT | `/api/admin/console/payments/controls/{channel}` | PaymentControlController.change | True |
-| API-0032 | GET | `/api/admin/console/payments/history` | PaymentControlController.history | True |
-| API-0033 | GET | `/api/admin/console/payments/routing-commission` | PaymentControlController.commission | True |
-| API-0034 | PUT | `/api/admin/console/payments/routing-commission` | PaymentControlController.commission | True |
-| API-0035 | GET | `/api/admin/console/payments/routing-commission/history` | PaymentControlController.commissionHistory | True |
-| API-0036 | GET | `/api/admin/console/reports/group-transfers` | PlatformAdminConsoleController.groupTransferReport | True |
-| API-0037 | GET | `/api/admin/console/reports/guestbook` | PlatformAdminConsoleController.guestbookReport | True |
-| API-0038 | GET | `/api/admin/console/reports/notifications` | PlatformAdminConsoleController.notificationReport | True |
-| API-0039 | GET | `/api/admin/console/summary` | PlatformAdminConsoleController.summary | True |
-| API-0040 | POST | `/api/admin/group-payments/{groupId}/switching` | GroupCreatorPaymentController.adminSwitch | True |
-| API-0041 | GET | `/api/admin/hosts/{hostId}/group-member-email-policy` | GroupMemberEmailPolicyController.read | True |
-| API-0042 | PUT | `/api/admin/hosts/{hostId}/group-member-email-policy` | GroupMemberEmailPolicyController.update | True |
-| API-0043 | GET | `/api/admin/invitation-assets` | GalleryAssetController.all | True |
-| API-0044 | POST | `/api/admin/invitation-assets` | GalleryAssetController.upload | True |
-| API-0045 | GET | `/api/admin/invitation-assets/{id}/image` | GalleryAssetController.adminImage | True |
-| API-0046 | POST | `/api/admin/invitation-assets/{id}/publish` | GalleryAssetController.publish | True |
-| API-0047 | PUT | `/api/admin/invitation-assets/{id}/tier` | GalleryAssetController.tier | True |
-| API-0048 | POST | `/api/admin/invitation-assets/{id}/unpublish` | GalleryAssetController.unpublish | True |
-| API-0049 | GET | `/api/admin/verification-settings` | VerificationSettingsController.read | True |
-| API-0050 | PUT | `/api/admin/verification-settings` | VerificationSettingsController.update | True |
-| API-0051 | POST | `/api/auth/contact-mobile/complete` | AccountMobileVerificationController.complete | True |
-| API-0052 | POST | `/api/auth/contact-mobile/start` | AccountMobileVerificationController.start | True |
-| API-0053 | GET | `/api/auth/contact-mobile/status` | AccountMobileVerificationController.status | True |
-| API-0054 | GET | `/api/auth/csrf` | CsrfBootstrapController.csrf | True |
-| API-0055 | POST | `/api/auth/login` | AuthController.login | True |
-| API-0056 | GET | `/api/auth/me` | AuthController.currentUser | True |
-| API-0057 | GET | `/api/auth/profile-name` | ProfileNameController.get | True |
-| API-0058 | POST | `/api/auth/profile-name` | ProfileNameController.update | True |
-| API-0059 | POST | `/api/auth/recovery/complete` | EmailRecoveryController.complete | True |
-| API-0060 | GET | `/api/auth/recovery/email-status` | EmailRecoveryController.emailStatus | True |
-| API-0061 | POST | `/api/auth/recovery/enroll-email` | EmailRecoveryController.enroll | True |
-| API-0062 | POST | `/api/auth/recovery/request` | EmailRecoveryController.request | True |
-| API-0063 | POST | `/api/auth/recovery/update-email` | EmailRecoveryController.updateEmail | True |
-| API-0064 | POST | `/api/auth/recovery/username/request` | UsernameRecoveryController.request | True |
-| API-0065 | POST | `/api/auth/recovery/verify-email` | EmailRecoveryController.verifyEmail | True |
-| API-0066 | POST | `/api/auth/register` | RegistrationController.register | True |
-| API-0067 | POST | `/api/auth/signup-email/start` | SignupEmailVerificationController.start | True |
-| API-0068 | POST | `/api/auth/signup-email/verify` | SignupEmailVerificationController.verify | True |
-| API-0069 | GET | `/api/host/group-member-email-policy` | GroupMemberEmailPolicyController.mine | True |
-| API-0070 | PUT | `/api/host/group-member-email-policy` | GroupMemberEmailPolicyController.updateMine | True |
-| API-0071 | POST | `/api/public/celebrations/{token}/rsvp` | CelebrationController.rsvp | True |
-| API-0072 | GET | `/api/public/celebrations/{token}/wishes` | CelebrationController.publicWishes | True |
-| API-0073 | POST | `/api/public/celebrations/{token}/wishes` | CelebrationController.wish | True |
-| API-0074 | POST | `/api/public/celebrations/{token}/wishes/photo` | GuestbookPhotoController.submit | True |
-| API-0075 | GET | `/api/public/celebrations/{token}/wishes/{wishId}/photo` | GuestbookPhotoController.publicPhoto | True |
-| API-0076 | GET | `/api/public/commerce/affiliate/{token}/{giftId}` | CommercialController.affiliate | True |
-| API-0077 | GET | `/api/public/commerce/placements` | CommercialController.placements | True |
-| API-0078 | GET | `/api/public/commerce/placements/{id}/visit` | CommercialController.visit | True |
-| API-0079 | GET | `/api/public/events/{token}` | PublicEventController.view | True |
-| API-0080 | GET | `/api/public/events/{token}/features` | PublicEventController.features | True |
-| API-0081 | GET | `/api/public/events/{token}/gifts/{giftId}/photo` | GiftPhotoController.published | True |
-| API-0082 | GET | `/api/public/experience` | ExperienceSettingsController.current | True |
-| API-0083 | GET | `/api/public/gifts/progress/{token}` | PublicGiftProgressController.progress | True |
-| API-0084 | GET | `/api/public/groups/{token}/account-policy` | GroupContributionController.accountPolicy | True |
-| API-0085 | GET | `/api/public/groups/{token}/activity/{groupId}` | GroupGiftCollectionController.activity | True |
-| API-0086 | POST | `/api/public/groups/{token}/contact-email/complete` | GroupEmailEnrollmentController.complete | True |
-| API-0087 | POST | `/api/public/groups/{token}/contact-email/start` | GroupEmailEnrollmentController.start | True |
-| API-0088 | GET | `/api/public/groups/{token}/contact-email/status` | GroupEmailEnrollmentController.status | True |
-| API-0089 | POST | `/api/public/groups/{token}/contact-mobile/complete` | GroupMobileEnrollmentController.complete | True |
-| API-0090 | POST | `/api/public/groups/{token}/contact-mobile/start` | GroupMobileEnrollmentController.start | True |
-| API-0091 | GET | `/api/public/groups/{token}/contact-mobile/status` | GroupMobileEnrollmentController.status | True |
-| API-0092 | GET | `/api/public/groups/{token}/coordination/{groupId}` | GroupCoordinationPaymentController.offer | True |
-| API-0093 | POST | `/api/public/groups/{token}/coordination/{groupId}/checkout` | GroupCoordinationPaymentController.checkout | True |
-| API-0094 | POST | `/api/public/groups/{token}/coordination/{groupId}/confirm` | GroupCoordinationPaymentController.confirm | True |
-| API-0095 | GET | `/api/public/groups/{token}/dashboard` | GroupContributionController.dashboard | True |
-| API-0096 | GET | `/api/public/groups/{token}/gift-board` | GroupGiftCompletionController.board | True |
-| API-0097 | GET | `/api/public/groups/{token}/gift-delivery-address/{groupId}` | GroupGiftCompletionController.delivery | True |
-| API-0098 | POST | `/api/public/groups/{token}/gift-fulfilment/{groupId}` | GroupGiftCompletionController.fulfil | True |
-| API-0099 | POST | `/api/public/groups/{token}/gift-metadata` | IndependentGroupGiftController.lookup | True |
-| API-0100 | POST | `/api/public/groups/{token}/gift-plan/{groupId}` | IndependentGroupGiftController.plan | True |
-| API-0101 | GET | `/api/public/groups/{token}/gift-progress/{groupId}` | GroupGiftCompletionController.progress | True |
-| API-0102 | POST | `/api/public/groups/{token}/gift-publish/{groupId}` | GroupGiftCompletionController.publish | True |
-| API-0103 | POST | `/api/public/groups/{token}/gift-receipts/{groupId}/{reportId}` | GroupGiftCompletionController.acknowledgeReceipt | True |
-| API-0104 | POST | `/api/public/groups/{token}/gift-release/{groupId}` | GroupGiftCollectionController.release | True |
-| API-0105 | POST | `/api/public/groups/{token}/gift-reservation/{groupId}` | GroupGiftCollectionController.reserve | True |
-| API-0106 | GET | `/api/public/groups/{token}/guest-gifts` | GuestGiftController.list | True |
-| API-0107 | POST | `/api/public/groups/{token}/guest-gifts` | GuestGiftController.add | True |
-| API-0108 | POST | `/api/public/groups/{token}/guest-gifts/individual` | GuestGiftController.individual | True |
-| API-0109 | GET | `/api/public/groups/{token}/guest-gifts/individual-entry` | IndividualGuestGiftController.mine | True |
-| API-0110 | POST | `/api/public/groups/{token}/guest-gifts/individual-entry` | IndividualGuestGiftController.save | True |
-| API-0111 | POST | `/api/public/groups/{token}/guest-gifts/individual-entry/{id}/delivery` | IndividualGuestGiftController.tracking | True |
-| API-0112 | GET | `/api/public/groups/{token}/guest-gifts/individual-entry/{id}/delivery-address` | IndividualGuestGiftController.delivery | True |
-| API-0113 | GET | `/api/public/groups/{token}/guest-gifts/individual-entry/{id}/host-contribution` | IndividualGuestGiftController.payment | True |
-| API-0114 | POST | `/api/public/groups/{token}/guest-gifts/individual-entry/{id}/host-contribution` | IndividualGuestGiftController.contribute | True |
-| API-0115 | GET | `/api/public/groups/{token}/guest-gifts/mine` | GuestGiftController.mine | True |
-| API-0116 | POST | `/api/public/groups/{token}/guest-gifts/{id}/delivery` | GuestGiftController.updateDelivery | True |
-| API-0117 | GET | `/api/public/groups/{token}/guest-gifts/{id}/delivery-address` | GuestGiftController.delivery | True |
-| API-0118 | POST | `/api/public/groups/{token}/guest-gifts/{id}/publish` | GuestGiftController.publish | True |
-| API-0119 | POST | `/api/public/groups/{token}/guest-gifts/{id}/select` | GuestGiftController.select | True |
-| API-0120 | GET | `/api/public/groups/{token}/guest/{groupId}/creator-history` | GroupGuestContributionController.creatorHistory | True |
-| API-0121 | POST | `/api/public/groups/{token}/guest/{groupId}/creator-report` | GroupGuestContributionController.creatorReport | True |
-| API-0122 | GET | `/api/public/groups/{token}/guest/{groupId}/destination/{id}` | GroupGuestContributionController.destination | True |
-| API-0123 | GET | `/api/public/groups/{token}/guest/{groupId}/destination/{id}/qr` | GroupGuestContributionController.qr | True |
-| API-0124 | GET | `/api/public/groups/{token}/guest/{groupId}/history` | GroupGuestContributionController.history | True |
-| API-0125 | GET | `/api/public/groups/{token}/guest/{groupId}/invitation` | GroupGuestContributionController.invitation | True |
-| API-0126 | GET | `/api/public/groups/{token}/guest/{groupId}/member-history` | GroupGuestContributionController.memberHistory | True |
-| API-0127 | POST | `/api/public/groups/{token}/guest/{groupId}/member-report` | GroupGuestContributionController.memberReport | True |
-| API-0128 | POST | `/api/public/groups/{token}/guest/{groupId}/report` | GroupGuestContributionController.report | True |
-| API-0129 | GET | `/api/public/groups/{token}/guest/{groupId}/settings` | GroupGuestContributionController.settingsView | True |
-| API-0130 | POST | `/api/public/groups/{token}/guest/{groupId}/settings` | GroupGuestContributionController.settings | True |
-| API-0131 | GET | `/api/public/groups/{token}/join/{groupId}` | GroupContributionController.groupInvitation | True |
-| API-0132 | POST | `/api/public/groups/{token}/join/{groupId}` | GroupContributionController.join | True |
-| API-0133 | POST | `/api/public/groups/{token}/login` | GroupContributionController.login | True |
-| API-0134 | POST | `/api/public/groups/{token}/logout` | GroupContributionController.logout | True |
-| API-0135 | POST | `/api/public/groups/{token}/member-login/{groupId}` | GroupContributionController.memberLogin | True |
-| API-0136 | POST | `/api/public/groups/{token}/member-logout/{groupId}` | GroupContributionController.memberLogout | True |
-| API-0137 | POST | `/api/public/groups/{token}/member-pin/setup/{groupId}` | GroupContributionController.memberPinSetup | True |
-| API-0138 | GET | `/api/public/groups/{token}/member-view/{groupId}` | GroupContributionController.memberView | True |
-| API-0139 | GET | `/api/public/groups/{token}/members/{groupId}` | GroupContributionController.members | True |
-| API-0140 | POST | `/api/public/groups/{token}/members/{groupId}/review` | GroupContributionController.review | True |
-| API-0141 | GET | `/api/public/groups/{token}/payments/{groupId}/destinations` | GroupCreatorPaymentController.list | True |
-| API-0142 | POST | `/api/public/groups/{token}/payments/{groupId}/destinations` | GroupCreatorPaymentController.add | True |
-| API-0143 | POST | `/api/public/groups/{token}/payments/{groupId}/destinations/{id}/enabled` | GroupCreatorPaymentController.setEnabled | True |
-| API-0144 | GET | `/api/public/groups/{token}/payments/{groupId}/destinations/{id}/qr` | GroupCreatorPaymentController.qr | True |
-| API-0145 | POST | `/api/public/groups/{token}/payments/{groupId}/destinations/{id}/qr/generate` | GroupCreatorPaymentController.generateQr | True |
-| API-0146 | POST | `/api/public/groups/{token}/payments/{groupId}/destinations/{id}/qr/upload` | GroupCreatorPaymentController.uploadQr | True |
-| API-0147 | POST | `/api/public/groups/{token}/payments/{groupId}/destinations/{id}/verify-cashfree` | GroupCreatorCashfreeVerificationController.verify | True |
-| API-0148 | POST | `/api/public/groups/{token}/payments/{groupId}/preferred` | GroupCreatorPaymentController.select | True |
-| API-0149 | POST | `/api/public/groups/{token}/pin/setup` | GroupContributionController.adminPinSetup | True |
-| API-0150 | GET | `/api/public/groups/{token}/privacy` | GroupContributionController.privacy | True |
-| API-0151 | POST | `/api/public/groups/{token}/privacy` | GroupContributionController.privacyUpdate | True |
-| API-0152 | POST | `/api/public/groups/{token}/profile-name` | GroupContributionController.setAdminName | True |
-| API-0153 | POST | `/api/public/groups/{token}/publish/{groupId}` | GroupContributionController.publish | True |
-| API-0154 | POST | `/api/public/groups/{token}/register` | GroupContributionController.register | True |
-| API-0155 | POST | `/api/public/groups/{token}/setup` | GroupContributionController.setup | True |
-| API-0156 | GET | `/api/public/invitation-assets` | GalleryAssetController.published | True |
-| API-0157 | GET | `/api/public/invitation-assets/{id}/image` | GalleryAssetController.publishedImage | True |
-| API-0158 | POST | `/api/public/payments/checkout` | GuestCheckoutController.checkout | True |
-| API-0159 | POST | `/api/public/payments/confirm` | GuestPaymentConfirmationController.confirm | True |
-| API-0160 | GET | `/api/public/payments/context/{token}` | PublicPaymentContextController.context | True |
-| API-0161 | GET | `/api/public/payments/controls/{token}` | PaymentControlController.effective | True |
-| API-0162 | POST | `/api/public/payments/direct/{token}/claims` | GuestDirectTransferController.claim | True |
-| API-0163 | GET | `/api/public/payments/direct/{token}/destinations` | GuestDirectTransferController.destinations | True |
-| API-0164 | POST | `/api/public/payments/hybrid/quote` | HybridCheckoutQuoteController.quote | True |
-| API-0165 | GET | `/api/public/payments/verified-destinations/{token}` | GuestVerifiedDestinationController.list | False |
-| API-0166 | GET | `/api/public/verification-settings` | VerificationSettingsController.current | True |
-| API-0167 | GET | `/api/v1/commerce` | CommercialController.account | True |
-| API-0168 | GET | `/api/v1/commerce/analytics/{eventId}` | CommercialController.analytics | True |
-| API-0169 | POST | `/api/v1/commerce/checkout` | CommercialController.checkout | True |
-| API-0170 | POST | `/api/v1/commerce/confirm` | CommercialController.confirm | True |
-| API-0171 | GET | `/api/v1/commerce/offer` | CommercialController.offer | True |
-| API-0172 | GET | `/api/v1/commerce/placements` | CommercialController.own | True |
-| API-0173 | POST | `/api/v1/commerce/placements` | CommercialController.create | True |
-| API-0174 | GET | `/api/v1/commerce/templates` | CommercialController.templates | True |
-| API-0175 | GET | `/api/v1/commerce/templates/{id}/image` | GalleryAssetController.purchasedImage | True |
-| API-0176 | GET | `/api/v1/events` | EventController.list | True |
-| API-0177 | POST | `/api/v1/events` | EventController.create | True |
-| API-0178 | GET | `/api/v1/events/ai-design-options` | AiInvitationOptionsController.options | True |
-| API-0179 | GET | `/api/v1/events/{eventId}/contributions` | HostContributionReportController.report | True |
-| API-0180 | GET | `/api/v1/events/{eventId}/contributions/export.csv` | HostContributionReportController.export | True |
-| API-0181 | GET | `/api/v1/events/{eventId}/contributions/groups` | GroupGiftCollectionController.report | True |
-| API-0182 | GET | `/api/v1/events/{eventId}/contributions/groups/{groupId}` | GroupGiftCollectionController.details | True |
-| API-0183 | GET | `/api/v1/events/{eventId}/contributions/groups/{groupId}/activity` | GroupGiftCollectionController.hostActivity | True |
-| API-0184 | GET | `/api/v1/events/{eventId}/contributions/guest-gifts` | GuestGiftController.hostReport | True |
-| API-0185 | GET | `/api/v1/events/{eventId}/gifts` | GiftController.list | True |
-| API-0186 | POST | `/api/v1/events/{eventId}/gifts` | GiftController.create | True |
-| API-0187 | POST | `/api/v1/events/{eventId}/gifts/photos` | GiftPhotoController.upload | True |
-| API-0188 | GET | `/api/v1/events/{eventId}/gifts/photos/{photoId}` | GiftPhotoController.owned | True |
-| API-0189 | POST | `/api/v1/events/{eventId}/gifts/retailer-metadata` | RetailerMetadataController.lookup | True |
-| API-0190 | GET | `/api/v1/events/{eventId}/gifts/{giftId}` | GiftController.get | True |
-| API-0191 | PUT | `/api/v1/events/{eventId}/gifts/{giftId}` | GiftController.update | True |
-| API-0192 | POST | `/api/v1/events/{eventId}/gifts/{giftId}/cancel` | GiftController.cancel | True |
-| API-0193 | PUT | `/api/v1/events/{eventId}/gifts/{giftId}/product-link` | GiftController.productLink | True |
-| API-0194 | PUT | `/api/v1/events/{eventId}/gifts/{giftId}/publication` | GiftController.publication | True |
-| API-0195 | GET | `/api/v1/events/{eventId}/group-notifications` | GroupGiftCollectionController.notifications | True |
-| API-0196 | POST | `/api/v1/events/{eventId}/group-notifications/{id}/read` | GroupGiftCollectionController.read | True |
-| API-0197 | GET | `/api/v1/events/{eventId}/payment-breakdown` | PaymentControlController.breakdown | True |
-| API-0198 | GET | `/api/v1/events/{eventId}/qr` | EventQrController.details | True |
-| API-0199 | GET | `/api/v1/events/{eventId}/qr/ai-design` | AiInvitationController.settings | True |
-| API-0200 | POST | `/api/v1/events/{eventId}/qr/ai-design` | AiInvitationController.generate | True |
-| API-0201 | GET | `/api/v1/events/{eventId}/qr/ai-design/context` | AiInvitationController.context | True |
-| API-0202 | GET | `/api/v1/events/{eventId}/qr/invitations` | InvitationDesignController.list | True |
-| API-0203 | POST | `/api/v1/events/{eventId}/qr/invitations` | InvitationDesignController.create | True |
-| API-0204 | GET | `/api/v1/events/{eventId}/qr/invitations/{designId}/png` | InvitationDesignController.png | True |
-| API-0205 | GET | `/api/v1/events/{eventId}/qr/png` | EventQrController.png | True |
-| API-0206 | PUT | `/api/v1/events/{eventId}/qr/theme` | EventQrController.theme | True |
-| API-0207 | GET | `/api/v1/events/{eventId}/receiving-health` | ReceivingAccountHealthController.health | False |
-| API-0208 | GET | `/api/v1/events/{eventId}/thank-you` | HostThankYouController.get | True |
-| API-0209 | PUT | `/api/v1/events/{eventId}/thank-you` | HostThankYouController.put | True |
-| API-0210 | GET | `/api/v1/events/{eventId}/thank-you/history` | HostThankYouController.history | True |
-| API-0211 | GET | `/api/v1/events/{eventId}/transactions` | HostTransactionVerificationController.list | True |
-| API-0212 | POST | `/api/v1/events/{eventId}/transactions/{orderId}/verify` | HostTransactionVerificationController.verify | True |
-| API-0213 | GET | `/api/v1/events/{id}` | EventController.get | True |
-| API-0214 | PUT | `/api/v1/events/{id}` | EventController.update | True |
-| API-0215 | GET | `/api/v1/events/{id}/album` | MemoryAlbumController.album | True |
-| API-0216 | GET | `/api/v1/events/{id}/album/{wishId}/photo` | GuestbookPhotoController.albumPhoto | True |
-| API-0217 | POST | `/api/v1/events/{id}/cancel` | EventController.cancel | True |
-| API-0218 | POST | `/api/v1/events/{id}/complete` | EventController.complete | True |
-| API-0219 | GET | `/api/v1/events/{id}/features` | ExperienceSettingsController.features | True |
-| API-0220 | POST | `/api/v1/events/{id}/publish` | EventController.publish | True |
-| API-0221 | GET | `/api/v1/events/{id}/rsvps` | CelebrationController.rsvps | True |
-| API-0222 | GET | `/api/v1/events/{id}/rsvps/summary` | CelebrationController.summary | True |
-| API-0223 | POST | `/api/v1/events/{id}/unpublish` | EventController.unpublish | True |
-| API-0224 | GET | `/api/v1/events/{id}/wishes` | CelebrationController.hostWishes | True |
-| API-0225 | GET | `/api/v1/events/{id}/wishes/settings` | CelebrationController.guestbookSettings | True |
-| API-0226 | POST | `/api/v1/events/{id}/wishes/settings` | CelebrationController.setGuestbookSettings | True |
-| API-0227 | POST | `/api/v1/events/{id}/wishes/{wishId}/moderate` | CelebrationController.moderate | True |
-| API-0228 | GET | `/api/v1/events/{id}/wishes/{wishId}/photo` | GuestbookPhotoController.hostPhoto | True |
-| API-0229 | GET | `/api/v1/host/notifications` | HostInboxController.list | True |
-| API-0230 | POST | `/api/v1/host/notifications/{notificationId}/read` | HostInboxController.read | True |
-| API-0231 | GET | `/api/v1/host/payment-profiles/account-verification/settings` | AccountVerificationController.settings | False |
-| API-0232 | GET | `/api/v1/host/payment-profiles/account-verification/{kind}/{id}` | AccountVerificationController.history | False |
-| API-0233 | POST | `/api/v1/host/payment-profiles/account-verification/{kind}/{id}` | AccountVerificationController.verify | False |
-| API-0234 | GET | `/api/v1/host/payment-profiles/banks` | HostPaymentProfileController.banks | False |
-| API-0235 | POST | `/api/v1/host/payment-profiles/banks` | HostPaymentProfileController.addBank | False |
-| API-0236 | DELETE | `/api/v1/host/payment-profiles/banks/{id}` | HostPaymentProfileController.archiveBank | False |
-| API-0237 | POST | `/api/v1/host/payment-profiles/banks/{id}/disable` | HostPaymentProfileController.disableBank | False |
-| API-0238 | POST | `/api/v1/host/payment-profiles/banks/{id}/enable` | HostPaymentProfileController.enableBank | False |
-| API-0239 | POST | `/api/v1/host/payment-profiles/banks/{id}/host-confirm` | HostPaymentProfileController.confirmBank | False |
-| API-0240 | PATCH | `/api/v1/host/payment-profiles/banks/{id}/label` | HostPaymentProfileController.renameBank | False |
-| API-0241 | POST | `/api/v1/host/payment-profiles/banks/{id}/preferred` | HostPaymentProfileController.preferBank | False |
-| API-0242 | POST | `/api/v1/host/payment-profiles/event-links/{eventId}/{kind}/{id}/link` | EventAccountLinkController.link | False |
-| API-0243 | POST | `/api/v1/host/payment-profiles/event-links/{eventId}/{kind}/{id}/{action:preferred\|enable\|disable\|unlink}` | EventAccountLinkController.update | False |
-| API-0244 | GET | `/api/v1/host/payment-profiles/upi` | HostPaymentProfileController.upis | False |
-| API-0245 | POST | `/api/v1/host/payment-profiles/upi` | HostPaymentProfileController.addUpi | False |
-| API-0246 | POST | `/api/v1/host/payment-profiles/upi/{accountId}/qr/generate` | HostUpiQrController.generate | False |
-| API-0247 | POST | `/api/v1/host/payment-profiles/upi/{accountId}/qr/upload` | HostUpiQrController.upload | False |
-| API-0248 | GET | `/api/v1/host/payment-profiles/upi/{accountId}/qr/uploaded` | HostUpiQrController.uploaded | False |
-| API-0249 | GET | `/api/v1/host/payment-profiles/upi/{accountId}/qr/uploaded/status` | HostUpiQrController.uploadedStatus | False |
-| API-0250 | DELETE | `/api/v1/host/payment-profiles/upi/{id}` | HostPaymentProfileController.archiveUpi | False |
-| API-0251 | POST | `/api/v1/host/payment-profiles/upi/{id}/disable` | HostPaymentProfileController.disableUpi | False |
-| API-0252 | POST | `/api/v1/host/payment-profiles/upi/{id}/enable` | HostPaymentProfileController.enableUpi | False |
-| API-0253 | POST | `/api/v1/host/payment-profiles/upi/{id}/host-confirm` | HostPaymentProfileController.confirmUpi | False |
-| API-0254 | PATCH | `/api/v1/host/payment-profiles/upi/{id}/label` | HostPaymentProfileController.renameUpi | False |
-| API-0255 | POST | `/api/v1/host/payment-profiles/upi/{id}/preferred` | HostPaymentProfileController.preferUpi | False |
-| API-0256 | GET | `/api/v1/host/payment-profiles/verification/{kind}/{destinationId}/attempts` | HostDestinationVerificationInboxController.history | False |
-| API-0257 | POST | `/api/v1/host/payment-profiles/verification/{kind}/{destinationId}/request` | HostDestinationVerificationInboxController.request | False |
-| API-0258 | GET | `/api/v1/host/settlement/events/{eventId}/banks` | HostSettlementUiController.banks | False |
-| API-0259 | GET | `/api/v1/host/settlement/events/{eventId}/payouts` | HostSettlementUiController.payouts | False |
-| API-0260 | POST | `/api/v1/host/settlement/events/{eventId}/payouts` | HostSettlementUiController.request | False |
-| API-0261 | POST | `/api/v1/host/settlement/events/{eventId}/payouts/{requestId}/cancel` | HostSettlementUiController.cancel | False |
-| API-0262 | GET | `/api/v1/host/settlement/events/{eventId}/wallet` | HostSettlementUiController.wallet | False |
-| API-0263 | POST | `/api/v1/phone/otp/request` | PhoneOtpController.requestOtp | True |
-| API-0264 | POST | `/api/v1/phone/otp/verify` | PhoneOtpController.verifyOtp | True |
-| API-0265 | POST | `/api/webhooks/razorpay` | RazorpayWebhookController.receive | True |
+| API-0004 | GET | `/api/admin/audit/activity` | BusinessAuditController.list | True |
+| API-0005 | GET | `/api/admin/branding` | BrandingController.admin | True |
+| API-0006 | POST | `/api/admin/branding` | BrandingController.save | True |
+| API-0007 | DELETE | `/api/admin/branding/{kind}` | BrandingController.remove | True |
+| API-0008 | POST | `/api/admin/branding/{kind}` | BrandingController.upload | True |
+| API-0009 | GET | `/api/admin/console/audit` | PlatformAdminConsoleController.audit | True |
+| API-0010 | GET | `/api/admin/console/audit/page` | PlatformAdminAuditController.page | True |
+| API-0011 | GET | `/api/admin/console/events` | PlatformAdminConsoleController.events | True |
+| API-0012 | GET | `/api/admin/console/events/{eventId}/ai-design-settings` | AiInvitationAdminController.event | True |
+| API-0013 | POST | `/api/admin/console/events/{eventId}/ai-design-settings` | PlatformAdminConsoleController.aiDesignSettings | True |
+| API-0014 | POST | `/api/admin/console/events/{eventId}/album-settings` | PlatformAdminConsoleController.albumSettings | True |
+| API-0015 | GET | `/api/admin/console/events/{eventId}/modules` | EventModuleGrantsController.list | True |
+| API-0016 | POST | `/api/admin/console/events/{eventId}/modules/{code}` | EventModuleGrantsController.set | True |
+| API-0017 | POST | `/api/admin/console/experience` | ExperienceSettingsController.update | True |
+| API-0018 | PUT | `/api/admin/console/growth-settings` | GrowthSettingsController.save | True |
+| API-0019 | GET | `/api/admin/console/hosts` | PlatformAdminConsoleController.hosts | True |
+| API-0020 | GET | `/api/admin/console/hosts/{hostId}/ai-design` | AiInvitationAdminController.host | True |
+| API-0021 | GET | `/api/admin/console/hosts/{hostId}/invitation-uploads` | HostInvitationUploadController.adminAccess | True |
+| API-0022 | PUT | `/api/admin/console/hosts/{hostId}/invitation-uploads` | HostInvitationUploadController.configure | True |
+| API-0023 | GET | `/api/admin/console/hosts/{hostId}/modules` | PlatformAdminConsoleController.hostModules | True |
+| API-0024 | POST | `/api/admin/console/hosts/{hostId}/modules/{code}` | PlatformAdminConsoleController.hostModule | True |
+| API-0025 | GET | `/api/admin/console/interactions` | InteractionAdminController.report | True |
+| API-0026 | GET | `/api/admin/console/interactions/funnel` | InteractionAdminController.funnel | True |
+| API-0027 | GET | `/api/admin/console/interactions/{id}` | InteractionAdminController.timeline | True |
+| API-0028 | GET | `/api/admin/console/modules` | PlatformAdminConsoleController.modules | True |
+| API-0029 | POST | `/api/admin/console/modules/{code}` | PlatformAdminConsoleController.platformModule | True |
+| API-0030 | GET | `/api/admin/console/monetization` | MonetizationController.current | True |
+| API-0031 | PUT | `/api/admin/console/monetization` | MonetizationController.update | True |
+| API-0032 | GET | `/api/admin/console/monetization/commissions` | CommercialController.commissions | True |
+| API-0033 | PUT | `/api/admin/console/monetization/commissions` | CommercialController.commission | True |
+| API-0034 | GET | `/api/admin/console/monetization/history` | MonetizationController.history | True |
+| API-0035 | GET | `/api/admin/console/monetization/partners` | CommercialController.partners | True |
+| API-0036 | PUT | `/api/admin/console/monetization/partners` | CommercialController.partner | True |
+| API-0037 | GET | `/api/admin/console/monetization/placements` | CommercialController.adminPlacements | True |
+| API-0038 | POST | `/api/admin/console/monetization/placements/{id}` | CommercialController.moderate | True |
+| API-0039 | GET | `/api/admin/console/monetization/policy` | CommercialController.policy | True |
+| API-0040 | PUT | `/api/admin/console/monetization/policy` | CommercialController.policy | True |
+| API-0041 | GET | `/api/admin/console/monetization/revenue` | CommercialController.revenue | True |
+| API-0042 | GET | `/api/admin/console/monetization/setup-history` | CommercialController.history | True |
+| API-0043 | GET | `/api/admin/console/payments/controls` | PaymentControlController.read | True |
+| API-0044 | PUT | `/api/admin/console/payments/controls/{channel}` | PaymentControlController.change | True |
+| API-0045 | GET | `/api/admin/console/payments/history` | PaymentControlController.history | True |
+| API-0046 | GET | `/api/admin/console/payments/routing-commission` | PaymentControlController.commission | True |
+| API-0047 | PUT | `/api/admin/console/payments/routing-commission` | PaymentControlController.commission | True |
+| API-0048 | GET | `/api/admin/console/payments/routing-commission/history` | PaymentControlController.commissionHistory | True |
+| API-0049 | GET | `/api/admin/console/production-status` | ProductionStatusController.status | True |
+| API-0050 | GET | `/api/admin/console/reports/group-transfers` | PlatformAdminConsoleController.groupTransferReport | True |
+| API-0051 | GET | `/api/admin/console/reports/guestbook` | PlatformAdminConsoleController.guestbookReport | True |
+| API-0052 | GET | `/api/admin/console/reports/notifications` | PlatformAdminConsoleController.notificationReport | True |
+| API-0053 | GET | `/api/admin/console/summary` | PlatformAdminConsoleController.summary | True |
+| API-0054 | GET | `/api/admin/emails` | EmailAdminController.status | True |
+| API-0055 | POST | `/api/admin/group-payments/{groupId}/switching` | GroupCreatorPaymentController.adminSwitch | True |
+| API-0056 | GET | `/api/admin/hosts/{hostId}/group-member-email-policy` | GroupMemberEmailPolicyController.read | True |
+| API-0057 | PUT | `/api/admin/hosts/{hostId}/group-member-email-policy` | GroupMemberEmailPolicyController.update | True |
+| API-0058 | GET | `/api/admin/invitation-assets` | GalleryAssetController.all | True |
+| API-0059 | POST | `/api/admin/invitation-assets` | GalleryAssetController.upload | True |
+| API-0060 | GET | `/api/admin/invitation-assets/{id}/image` | GalleryAssetController.adminImage | True |
+| API-0061 | POST | `/api/admin/invitation-assets/{id}/publish` | GalleryAssetController.publish | True |
+| API-0062 | PUT | `/api/admin/invitation-assets/{id}/tier` | GalleryAssetController.tier | True |
+| API-0063 | POST | `/api/admin/invitation-assets/{id}/unpublish` | GalleryAssetController.unpublish | True |
+| API-0064 | GET | `/api/admin/localization` | LocalizationAdminController.settings | True |
+| API-0065 | PUT | `/api/admin/localization` | LocalizationAdminController.configure | True |
+| API-0066 | GET | `/api/admin/localization/delivery-templates` | LocalizationAdminController.deliveryTemplates | True |
+| API-0067 | PUT | `/api/admin/localization/delivery-templates/{language}` | LocalizationAdminController.deliveryTemplate | True |
+| API-0068 | PUT | `/api/admin/localization/languages/{code}` | LocalizationAdminController.language | True |
+| API-0069 | GET | `/api/admin/localization/scopes/{scope}/{id}` | LocalizationAdminController.scope | True |
+| API-0070 | PUT | `/api/admin/localization/scopes/{scope}/{id}` | LocalizationAdminController.scope | True |
+| API-0071 | POST | `/api/admin/localization/sources` | LocalizationAdminController.source | True |
+| API-0072 | GET | `/api/admin/localization/translations` | LocalizationAdminController.translations | True |
+| API-0073 | GET | `/api/admin/localization/translations/{language}/export` | LocalizationAdminController.export | True |
+| API-0074 | POST | `/api/admin/localization/translations/{language}/import` | LocalizationAdminController.importBatch | True |
+| API-0075 | PUT | `/api/admin/localization/translations/{language}/{key}` | LocalizationAdminController.translation | True |
+| API-0076 | GET | `/api/admin/verification-settings` | VerificationSettingsController.read | True |
+| API-0077 | PUT | `/api/admin/verification-settings` | VerificationSettingsController.update | True |
+| API-0078 | POST | `/api/auth/contact-mobile/complete` | AccountMobileVerificationController.complete | True |
+| API-0079 | POST | `/api/auth/contact-mobile/start` | AccountMobileVerificationController.start | True |
+| API-0080 | GET | `/api/auth/contact-mobile/status` | AccountMobileVerificationController.status | True |
+| API-0081 | GET | `/api/auth/csrf` | CsrfBootstrapController.csrf | True |
+| API-0082 | GET | `/api/auth/language` | LocalizationController.preference | True |
+| API-0083 | POST | `/api/auth/language` | LocalizationController.preference | True |
+| API-0084 | POST | `/api/auth/login` | AuthController.login | True |
+| API-0085 | GET | `/api/auth/me` | AuthController.currentUser | True |
+| API-0086 | GET | `/api/auth/profile` | ProfilePreferencesController.get | True |
+| API-0087 | POST | `/api/auth/profile` | ProfilePreferencesController.save | True |
+| API-0088 | GET | `/api/auth/profile-name` | ProfileNameController.get | True |
+| API-0089 | POST | `/api/auth/profile-name` | ProfileNameController.update | True |
+| API-0090 | DELETE | `/api/auth/profile/picture` | ProfilePreferencesController.remove | True |
+| API-0091 | GET | `/api/auth/profile/picture` | ProfilePreferencesController.picture | True |
+| API-0092 | POST | `/api/auth/profile/picture` | ProfilePreferencesController.picture | True |
+| API-0093 | POST | `/api/auth/recovery/complete` | EmailRecoveryController.complete | True |
+| API-0094 | GET | `/api/auth/recovery/email-status` | EmailRecoveryController.emailStatus | True |
+| API-0095 | POST | `/api/auth/recovery/enroll-email` | EmailRecoveryController.enroll | True |
+| API-0096 | POST | `/api/auth/recovery/request` | EmailRecoveryController.request | True |
+| API-0097 | POST | `/api/auth/recovery/update-email` | EmailRecoveryController.updateEmail | True |
+| API-0098 | POST | `/api/auth/recovery/username/request` | UsernameRecoveryController.request | True |
+| API-0099 | POST | `/api/auth/recovery/verify-email` | EmailRecoveryController.verifyEmail | True |
+| API-0100 | POST | `/api/auth/register` | RegistrationController.register | True |
+| API-0101 | POST | `/api/auth/signup-email/start` | SignupEmailVerificationController.start | True |
+| API-0102 | POST | `/api/auth/signup-email/verify` | SignupEmailVerificationController.verify | True |
+| API-0103 | GET | `/api/host/group-member-email-policy` | GroupMemberEmailPolicyController.mine | True |
+| API-0104 | PUT | `/api/host/group-member-email-policy` | GroupMemberEmailPolicyController.updateMine | True |
+| API-0105 | GET | `/api/localization/catalog` | LocalizationController.account | True |
+| API-0106 | GET | `/api/public/branding` | BrandingController.get | True |
+| API-0107 | GET | `/api/public/branding/assets/{id}` | BrandingController.image | True |
+| API-0108 | POST | `/api/public/celebrations/{token}/rsvp` | CelebrationController.rsvp | True |
+| API-0109 | GET | `/api/public/celebrations/{token}/wishes` | CelebrationController.publicWishes | True |
+| API-0110 | POST | `/api/public/celebrations/{token}/wishes` | CelebrationController.wish | True |
+| API-0111 | POST | `/api/public/celebrations/{token}/wishes/photo` | GuestbookPhotoController.submit | True |
+| API-0112 | GET | `/api/public/celebrations/{token}/wishes/{wishId}/photo` | GuestbookPhotoController.publicPhoto | True |
+| API-0113 | GET | `/api/public/commerce/affiliate/{token}/{giftId}` | CommercialController.affiliate | True |
+| API-0114 | GET | `/api/public/commerce/placements` | CommercialController.placements | True |
+| API-0115 | GET | `/api/public/commerce/placements/{id}/visit` | CommercialController.visit | True |
+| API-0116 | GET | `/api/public/events/{token}` | PublicEventController.view | True |
+| API-0117 | GET | `/api/public/events/{token}/calendar` | CelebrationPlanningController.calendar | True |
+| API-0118 | GET | `/api/public/events/{token}/celebration-details` | CelebrationPlanningController.details | True |
+| API-0119 | GET | `/api/public/events/{token}/features` | PublicEventController.features | True |
+| API-0120 | GET | `/api/public/events/{token}/gifts/{giftId}/photo` | GiftPhotoController.published | True |
+| API-0121 | GET | `/api/public/events/{token}/share-preview` | SharingPreviewController.metadata | True |
+| API-0122 | GET | `/api/public/events/{token}/share-preview.png` | SharingPreviewController.image | True |
+| API-0123 | GET | `/api/public/experience` | ExperienceSettingsController.current | True |
+| API-0124 | GET | `/api/public/gifts/progress/{token}` | PublicGiftProgressController.progress | True |
+| API-0125 | GET | `/api/public/groups/{token}/account-policy` | GroupContributionController.accountPolicy | True |
+| API-0126 | GET | `/api/public/groups/{token}/activity/{groupId}` | GroupGiftCollectionController.activity | True |
+| API-0127 | POST | `/api/public/groups/{token}/contact-email/complete` | GroupEmailEnrollmentController.complete | True |
+| API-0128 | POST | `/api/public/groups/{token}/contact-email/start` | GroupEmailEnrollmentController.start | True |
+| API-0129 | GET | `/api/public/groups/{token}/contact-email/status` | GroupEmailEnrollmentController.status | True |
+| API-0130 | POST | `/api/public/groups/{token}/contact-mobile/complete` | GroupMobileEnrollmentController.complete | True |
+| API-0131 | POST | `/api/public/groups/{token}/contact-mobile/start` | GroupMobileEnrollmentController.start | True |
+| API-0132 | GET | `/api/public/groups/{token}/contact-mobile/status` | GroupMobileEnrollmentController.status | True |
+| API-0133 | GET | `/api/public/groups/{token}/coordination/{groupId}` | GroupCoordinationPaymentController.offer | True |
+| API-0134 | POST | `/api/public/groups/{token}/coordination/{groupId}/checkout` | GroupCoordinationPaymentController.checkout | True |
+| API-0135 | POST | `/api/public/groups/{token}/coordination/{groupId}/confirm` | GroupCoordinationPaymentController.confirm | True |
+| API-0136 | GET | `/api/public/groups/{token}/dashboard` | GroupContributionController.dashboard | True |
+| API-0137 | GET | `/api/public/groups/{token}/gift-board` | GroupGiftCompletionController.board | True |
+| API-0138 | GET | `/api/public/groups/{token}/gift-delivery-address/{groupId}` | GroupGiftCompletionController.delivery | True |
+| API-0139 | POST | `/api/public/groups/{token}/gift-fulfilment/{groupId}` | GroupGiftCompletionController.fulfil | True |
+| API-0140 | POST | `/api/public/groups/{token}/gift-metadata` | IndependentGroupGiftController.lookup | True |
+| API-0141 | POST | `/api/public/groups/{token}/gift-plan/{groupId}` | IndependentGroupGiftController.plan | True |
+| API-0142 | GET | `/api/public/groups/{token}/gift-progress/{groupId}` | GroupGiftCompletionController.progress | True |
+| API-0143 | POST | `/api/public/groups/{token}/gift-publish/{groupId}` | GroupGiftCompletionController.publish | True |
+| API-0144 | POST | `/api/public/groups/{token}/gift-receipts/{groupId}/{reportId}` | GroupGiftCompletionController.acknowledgeReceipt | True |
+| API-0145 | POST | `/api/public/groups/{token}/gift-release/{groupId}` | GroupGiftCollectionController.release | True |
+| API-0146 | POST | `/api/public/groups/{token}/gift-reservation/{groupId}` | GroupGiftCollectionController.reserve | True |
+| API-0147 | GET | `/api/public/groups/{token}/guest-gifts` | GuestGiftController.list | True |
+| API-0148 | POST | `/api/public/groups/{token}/guest-gifts` | GuestGiftController.add | True |
+| API-0149 | POST | `/api/public/groups/{token}/guest-gifts/individual` | GuestGiftController.individual | True |
+| API-0150 | GET | `/api/public/groups/{token}/guest-gifts/individual-entry` | IndividualGuestGiftController.mine | True |
+| API-0151 | POST | `/api/public/groups/{token}/guest-gifts/individual-entry` | IndividualGuestGiftController.save | True |
+| API-0152 | POST | `/api/public/groups/{token}/guest-gifts/individual-entry/{id}/delivery` | IndividualGuestGiftController.tracking | True |
+| API-0153 | GET | `/api/public/groups/{token}/guest-gifts/individual-entry/{id}/delivery-address` | IndividualGuestGiftController.delivery | True |
+| API-0154 | GET | `/api/public/groups/{token}/guest-gifts/individual-entry/{id}/host-contribution` | IndividualGuestGiftController.payment | True |
+| API-0155 | POST | `/api/public/groups/{token}/guest-gifts/individual-entry/{id}/host-contribution` | IndividualGuestGiftController.contribute | True |
+| API-0156 | GET | `/api/public/groups/{token}/guest-gifts/mine` | GuestGiftController.mine | True |
+| API-0157 | POST | `/api/public/groups/{token}/guest-gifts/{id}/delivery` | GuestGiftController.updateDelivery | True |
+| API-0158 | GET | `/api/public/groups/{token}/guest-gifts/{id}/delivery-address` | GuestGiftController.delivery | True |
+| API-0159 | POST | `/api/public/groups/{token}/guest-gifts/{id}/publish` | GuestGiftController.publish | True |
+| API-0160 | POST | `/api/public/groups/{token}/guest-gifts/{id}/select` | GuestGiftController.select | True |
+| API-0161 | GET | `/api/public/groups/{token}/guest/{groupId}/creator-history` | GroupGuestContributionController.creatorHistory | True |
+| API-0162 | POST | `/api/public/groups/{token}/guest/{groupId}/creator-report` | GroupGuestContributionController.creatorReport | True |
+| API-0163 | GET | `/api/public/groups/{token}/guest/{groupId}/destination/{id}` | GroupGuestContributionController.destination | True |
+| API-0164 | GET | `/api/public/groups/{token}/guest/{groupId}/destination/{id}/qr` | GroupGuestContributionController.qr | True |
+| API-0165 | GET | `/api/public/groups/{token}/guest/{groupId}/history` | GroupGuestContributionController.history | True |
+| API-0166 | GET | `/api/public/groups/{token}/guest/{groupId}/invitation` | GroupGuestContributionController.invitation | True |
+| API-0167 | GET | `/api/public/groups/{token}/guest/{groupId}/member-history` | GroupGuestContributionController.memberHistory | True |
+| API-0168 | POST | `/api/public/groups/{token}/guest/{groupId}/member-report` | GroupGuestContributionController.memberReport | True |
+| API-0169 | POST | `/api/public/groups/{token}/guest/{groupId}/report` | GroupGuestContributionController.report | True |
+| API-0170 | GET | `/api/public/groups/{token}/guest/{groupId}/settings` | GroupGuestContributionController.settingsView | True |
+| API-0171 | POST | `/api/public/groups/{token}/guest/{groupId}/settings` | GroupGuestContributionController.settings | True |
+| API-0172 | GET | `/api/public/groups/{token}/join/{groupId}` | GroupContributionController.groupInvitation | True |
+| API-0173 | POST | `/api/public/groups/{token}/join/{groupId}` | GroupContributionController.join | True |
+| API-0174 | POST | `/api/public/groups/{token}/login` | GroupContributionController.login | True |
+| API-0175 | POST | `/api/public/groups/{token}/logout` | GroupContributionController.logout | True |
+| API-0176 | POST | `/api/public/groups/{token}/member-login/{groupId}` | GroupContributionController.memberLogin | True |
+| API-0177 | POST | `/api/public/groups/{token}/member-logout/{groupId}` | GroupContributionController.memberLogout | True |
+| API-0178 | POST | `/api/public/groups/{token}/member-pin/setup/{groupId}` | GroupContributionController.memberPinSetup | True |
+| API-0179 | GET | `/api/public/groups/{token}/member-view/{groupId}` | GroupContributionController.memberView | True |
+| API-0180 | GET | `/api/public/groups/{token}/members/{groupId}` | GroupContributionController.members | True |
+| API-0181 | POST | `/api/public/groups/{token}/members/{groupId}/review` | GroupContributionController.review | True |
+| API-0182 | GET | `/api/public/groups/{token}/payments/{groupId}/destinations` | GroupCreatorPaymentController.list | True |
+| API-0183 | POST | `/api/public/groups/{token}/payments/{groupId}/destinations` | GroupCreatorPaymentController.add | True |
+| API-0184 | POST | `/api/public/groups/{token}/payments/{groupId}/destinations/{id}/enabled` | GroupCreatorPaymentController.setEnabled | True |
+| API-0185 | GET | `/api/public/groups/{token}/payments/{groupId}/destinations/{id}/qr` | GroupCreatorPaymentController.qr | True |
+| API-0186 | POST | `/api/public/groups/{token}/payments/{groupId}/destinations/{id}/qr/generate` | GroupCreatorPaymentController.generateQr | True |
+| API-0187 | POST | `/api/public/groups/{token}/payments/{groupId}/destinations/{id}/qr/upload` | GroupCreatorPaymentController.uploadQr | True |
+| API-0188 | POST | `/api/public/groups/{token}/payments/{groupId}/destinations/{id}/verify-cashfree` | GroupCreatorCashfreeVerificationController.verify | True |
+| API-0189 | POST | `/api/public/groups/{token}/payments/{groupId}/preferred` | GroupCreatorPaymentController.select | True |
+| API-0190 | POST | `/api/public/groups/{token}/pin/setup` | GroupContributionController.adminPinSetup | True |
+| API-0191 | GET | `/api/public/groups/{token}/privacy` | GroupContributionController.privacy | True |
+| API-0192 | POST | `/api/public/groups/{token}/privacy` | GroupContributionController.privacyUpdate | True |
+| API-0193 | POST | `/api/public/groups/{token}/profile-name` | GroupContributionController.setAdminName | True |
+| API-0194 | POST | `/api/public/groups/{token}/publish/{groupId}` | GroupContributionController.publish | True |
+| API-0195 | POST | `/api/public/groups/{token}/register` | GroupContributionController.register | True |
+| API-0196 | POST | `/api/public/groups/{token}/setup` | GroupContributionController.setup | True |
+| API-0197 | GET | `/api/public/growth-settings` | GrowthSettingsController.current | True |
+| API-0198 | POST | `/api/public/interactions` | InteractionController.collect | True |
+| API-0199 | GET | `/api/public/invitation-assets` | GalleryAssetController.published | True |
+| API-0200 | GET | `/api/public/invitation-assets/{id}/image` | GalleryAssetController.publishedImage | True |
+| API-0201 | GET | `/api/public/keepsakes/{token}` | PublicKeepsakeController.view | True |
+| API-0202 | GET | `/api/public/localization/catalog` | LocalizationController.guest | True |
+| API-0203 | POST | `/api/public/payments/checkout` | GuestCheckoutController.checkout | True |
+| API-0204 | POST | `/api/public/payments/confirm` | GuestPaymentConfirmationController.confirm | True |
+| API-0205 | GET | `/api/public/payments/context/{token}` | PublicPaymentContextController.context | True |
+| API-0206 | GET | `/api/public/payments/controls/{token}` | PaymentControlController.effective | True |
+| API-0207 | POST | `/api/public/payments/direct/{token}/claims` | GuestDirectTransferController.claim | True |
+| API-0208 | GET | `/api/public/payments/direct/{token}/destinations` | GuestDirectTransferController.destinations | True |
+| API-0209 | POST | `/api/public/payments/hybrid/quote` | HybridCheckoutQuoteController.quote | True |
+| API-0210 | GET | `/api/public/payments/verified-destinations/{token}` | GuestVerifiedDestinationController.list | False |
+| API-0211 | GET | `/api/public/verification-settings` | VerificationSettingsController.current | True |
+| API-0212 | GET | `/api/v1/commerce` | CommercialController.account | True |
+| API-0213 | GET | `/api/v1/commerce/analytics/{eventId}` | CommercialController.analytics | True |
+| API-0214 | POST | `/api/v1/commerce/checkout` | CommercialController.checkout | True |
+| API-0215 | POST | `/api/v1/commerce/confirm` | CommercialController.confirm | True |
+| API-0216 | GET | `/api/v1/commerce/offer` | CommercialController.offer | True |
+| API-0217 | GET | `/api/v1/commerce/placements` | CommercialController.own | True |
+| API-0218 | POST | `/api/v1/commerce/placements` | CommercialController.create | True |
+| API-0219 | GET | `/api/v1/commerce/templates` | CommercialController.templates | True |
+| API-0220 | GET | `/api/v1/commerce/templates/{id}/image` | GalleryAssetController.purchasedImage | True |
+| API-0221 | GET | `/api/v1/commerce/templates/{id}/preview` | GalleryAssetController.preview | True |
+| API-0222 | GET | `/api/v1/events` | EventController.list | True |
+| API-0223 | POST | `/api/v1/events` | EventController.create | True |
+| API-0224 | GET | `/api/v1/events/ai-design-options` | AiInvitationOptionsController.options | True |
+| API-0225 | GET | `/api/v1/events/workspace-summary` | WorkspaceSummaryController.summary | True |
+| API-0226 | GET | `/api/v1/events/{eventId}/contributions` | HostContributionReportController.report | True |
+| API-0227 | GET | `/api/v1/events/{eventId}/contributions/export.csv` | HostContributionReportController.export | True |
+| API-0228 | GET | `/api/v1/events/{eventId}/contributions/groups` | GroupGiftCollectionController.report | True |
+| API-0229 | GET | `/api/v1/events/{eventId}/contributions/groups/{groupId}` | GroupGiftCollectionController.details | True |
+| API-0230 | GET | `/api/v1/events/{eventId}/contributions/groups/{groupId}/activity` | GroupGiftCollectionController.hostActivity | True |
+| API-0231 | GET | `/api/v1/events/{eventId}/contributions/guest-gifts` | GuestGiftController.hostReport | True |
+| API-0232 | GET | `/api/v1/events/{eventId}/gifts` | GiftController.list | True |
+| API-0233 | POST | `/api/v1/events/{eventId}/gifts` | GiftController.create | True |
+| API-0234 | POST | `/api/v1/events/{eventId}/gifts/photos` | GiftPhotoController.upload | True |
+| API-0235 | GET | `/api/v1/events/{eventId}/gifts/photos/{photoId}` | GiftPhotoController.owned | True |
+| API-0236 | POST | `/api/v1/events/{eventId}/gifts/retailer-metadata` | RetailerMetadataController.lookup | True |
+| API-0237 | GET | `/api/v1/events/{eventId}/gifts/{giftId}` | GiftController.get | True |
+| API-0238 | PUT | `/api/v1/events/{eventId}/gifts/{giftId}` | GiftController.update | True |
+| API-0239 | POST | `/api/v1/events/{eventId}/gifts/{giftId}/cancel` | GiftController.cancel | True |
+| API-0240 | PUT | `/api/v1/events/{eventId}/gifts/{giftId}/product-link` | GiftController.productLink | True |
+| API-0241 | PUT | `/api/v1/events/{eventId}/gifts/{giftId}/publication` | GiftController.publication | True |
+| API-0242 | GET | `/api/v1/events/{eventId}/group-notifications` | GroupGiftCollectionController.notifications | True |
+| API-0243 | POST | `/api/v1/events/{eventId}/group-notifications/{id}/read` | GroupGiftCollectionController.read | True |
+| API-0244 | POST | `/api/v1/events/{eventId}/invitation-email` | EventInvitationEmailController.send | True |
+| API-0245 | GET | `/api/v1/events/{eventId}/payment-breakdown` | PaymentControlController.breakdown | True |
+| API-0246 | GET | `/api/v1/events/{eventId}/qr` | EventQrController.details | True |
+| API-0247 | GET | `/api/v1/events/{eventId}/qr/ai-design` | AiInvitationController.settings | True |
+| API-0248 | POST | `/api/v1/events/{eventId}/qr/ai-design` | AiInvitationController.generate | True |
+| API-0249 | GET | `/api/v1/events/{eventId}/qr/ai-design/context` | AiInvitationController.context | True |
+| API-0250 | GET | `/api/v1/events/{eventId}/qr/invitations` | InvitationDesignController.list | True |
+| API-0251 | POST | `/api/v1/events/{eventId}/qr/invitations` | InvitationDesignController.create | True |
+| API-0252 | GET | `/api/v1/events/{eventId}/qr/invitations/{designId}/png` | InvitationDesignController.png | True |
+| API-0253 | GET | `/api/v1/events/{eventId}/qr/png` | EventQrController.png | True |
+| API-0254 | PUT | `/api/v1/events/{eventId}/qr/theme` | EventQrController.theme | True |
+| API-0255 | GET | `/api/v1/events/{eventId}/receiving-health` | ReceivingAccountHealthController.health | False |
+| API-0256 | GET | `/api/v1/events/{eventId}/thank-you` | HostThankYouController.get | True |
+| API-0257 | PUT | `/api/v1/events/{eventId}/thank-you` | HostThankYouController.put | True |
+| API-0258 | GET | `/api/v1/events/{eventId}/thank-you/history` | HostThankYouController.history | True |
+| API-0259 | GET | `/api/v1/events/{eventId}/transactions` | HostTransactionVerificationController.list | True |
+| API-0260 | POST | `/api/v1/events/{eventId}/transactions/{orderId}/verify` | HostTransactionVerificationController.verify | True |
+| API-0261 | GET | `/api/v1/events/{id}` | EventController.get | True |
+| API-0262 | PUT | `/api/v1/events/{id}` | EventController.update | True |
+| API-0263 | GET | `/api/v1/events/{id}/album` | MemoryAlbumController.album | True |
+| API-0264 | GET | `/api/v1/events/{id}/album/keepsake` | CelebrationKeepsakeController.download | True |
+| API-0265 | GET | `/api/v1/events/{id}/album/{wishId}/photo` | GuestbookPhotoController.albumPhoto | True |
+| API-0266 | POST | `/api/v1/events/{id}/cancel` | EventController.cancel | True |
+| API-0267 | GET | `/api/v1/events/{id}/celebration-settings` | CelebrationPlanningController.get | True |
+| API-0268 | PUT | `/api/v1/events/{id}/celebration-settings` | CelebrationPlanningController.save | True |
+| API-0269 | POST | `/api/v1/events/{id}/complete` | EventController.complete | True |
+| API-0270 | GET | `/api/v1/events/{id}/features` | ExperienceSettingsController.features | True |
+| API-0271 | GET | `/api/v1/events/{id}/keepsake-sharing` | PublicKeepsakeController.get | True |
+| API-0272 | PUT | `/api/v1/events/{id}/keepsake-sharing` | PublicKeepsakeController.save | True |
+| API-0273 | POST | `/api/v1/events/{id}/publish` | EventController.publish | True |
+| API-0274 | POST | `/api/v1/events/{id}/repeat` | CelebrationPlanningController.repeat | True |
+| API-0275 | GET | `/api/v1/events/{id}/rsvps` | CelebrationController.rsvps | True |
+| API-0276 | GET | `/api/v1/events/{id}/rsvps/summary` | CelebrationController.summary | True |
+| API-0277 | GET | `/api/v1/events/{id}/share-preview` | SharingPreviewController.preference | True |
+| API-0278 | PUT | `/api/v1/events/{id}/share-preview` | SharingPreviewController.consent | True |
+| API-0279 | POST | `/api/v1/events/{id}/unpublish` | EventController.unpublish | True |
+| API-0280 | GET | `/api/v1/events/{id}/wishes` | CelebrationController.hostWishes | True |
+| API-0281 | GET | `/api/v1/events/{id}/wishes/settings` | CelebrationController.guestbookSettings | True |
+| API-0282 | POST | `/api/v1/events/{id}/wishes/settings` | CelebrationController.setGuestbookSettings | True |
+| API-0283 | POST | `/api/v1/events/{id}/wishes/{wishId}/moderate` | CelebrationController.moderate | True |
+| API-0284 | GET | `/api/v1/events/{id}/wishes/{wishId}/photo` | GuestbookPhotoController.hostPhoto | True |
+| API-0285 | GET | `/api/v1/host/notifications` | HostInboxController.list | True |
+| API-0286 | POST | `/api/v1/host/notifications/{notificationId}/read` | HostInboxController.read | True |
+| API-0287 | GET | `/api/v1/host/payment-profiles/account-verification/settings` | AccountVerificationController.settings | False |
+| API-0288 | GET | `/api/v1/host/payment-profiles/account-verification/{kind}/{id}` | AccountVerificationController.history | False |
+| API-0289 | POST | `/api/v1/host/payment-profiles/account-verification/{kind}/{id}` | AccountVerificationController.verify | False |
+| API-0290 | GET | `/api/v1/host/payment-profiles/banks` | HostPaymentProfileController.banks | False |
+| API-0291 | POST | `/api/v1/host/payment-profiles/banks` | HostPaymentProfileController.addBank | False |
+| API-0292 | DELETE | `/api/v1/host/payment-profiles/banks/{id}` | HostPaymentProfileController.archiveBank | False |
+| API-0293 | POST | `/api/v1/host/payment-profiles/banks/{id}/disable` | HostPaymentProfileController.disableBank | False |
+| API-0294 | POST | `/api/v1/host/payment-profiles/banks/{id}/enable` | HostPaymentProfileController.enableBank | False |
+| API-0295 | POST | `/api/v1/host/payment-profiles/banks/{id}/host-confirm` | HostPaymentProfileController.confirmBank | False |
+| API-0296 | PATCH | `/api/v1/host/payment-profiles/banks/{id}/label` | HostPaymentProfileController.renameBank | False |
+| API-0297 | POST | `/api/v1/host/payment-profiles/banks/{id}/preferred` | HostPaymentProfileController.preferBank | False |
+| API-0298 | POST | `/api/v1/host/payment-profiles/event-links/{eventId}/{kind}/{id}/link` | EventAccountLinkController.link | False |
+| API-0299 | POST | `/api/v1/host/payment-profiles/event-links/{eventId}/{kind}/{id}/{action:preferred\|enable\|disable\|unlink}` | EventAccountLinkController.update | False |
+| API-0300 | GET | `/api/v1/host/payment-profiles/upi` | HostPaymentProfileController.upis | False |
+| API-0301 | POST | `/api/v1/host/payment-profiles/upi` | HostPaymentProfileController.addUpi | False |
+| API-0302 | POST | `/api/v1/host/payment-profiles/upi/{accountId}/qr/generate` | HostUpiQrController.generate | False |
+| API-0303 | POST | `/api/v1/host/payment-profiles/upi/{accountId}/qr/upload` | HostUpiQrController.upload | False |
+| API-0304 | GET | `/api/v1/host/payment-profiles/upi/{accountId}/qr/uploaded` | HostUpiQrController.uploaded | False |
+| API-0305 | GET | `/api/v1/host/payment-profiles/upi/{accountId}/qr/uploaded/status` | HostUpiQrController.uploadedStatus | False |
+| API-0306 | DELETE | `/api/v1/host/payment-profiles/upi/{id}` | HostPaymentProfileController.archiveUpi | False |
+| API-0307 | POST | `/api/v1/host/payment-profiles/upi/{id}/disable` | HostPaymentProfileController.disableUpi | False |
+| API-0308 | POST | `/api/v1/host/payment-profiles/upi/{id}/enable` | HostPaymentProfileController.enableUpi | False |
+| API-0309 | POST | `/api/v1/host/payment-profiles/upi/{id}/host-confirm` | HostPaymentProfileController.confirmUpi | False |
+| API-0310 | PATCH | `/api/v1/host/payment-profiles/upi/{id}/label` | HostPaymentProfileController.renameUpi | False |
+| API-0311 | POST | `/api/v1/host/payment-profiles/upi/{id}/preferred` | HostPaymentProfileController.preferUpi | False |
+| API-0312 | GET | `/api/v1/host/payment-profiles/verification/{kind}/{destinationId}/attempts` | HostDestinationVerificationInboxController.history | False |
+| API-0313 | POST | `/api/v1/host/payment-profiles/verification/{kind}/{destinationId}/request` | HostDestinationVerificationInboxController.request | False |
+| API-0314 | GET | `/api/v1/host/settlement/events/{eventId}/banks` | HostSettlementUiController.banks | False |
+| API-0315 | GET | `/api/v1/host/settlement/events/{eventId}/payouts` | HostSettlementUiController.payouts | False |
+| API-0316 | POST | `/api/v1/host/settlement/events/{eventId}/payouts` | HostSettlementUiController.request | False |
+| API-0317 | POST | `/api/v1/host/settlement/events/{eventId}/payouts/{requestId}/cancel` | HostSettlementUiController.cancel | False |
+| API-0318 | GET | `/api/v1/host/settlement/events/{eventId}/wallet` | HostSettlementUiController.wallet | False |
+| API-0319 | GET | `/api/v1/invitation-uploads` | HostInvitationUploadController.list | True |
+| API-0320 | POST | `/api/v1/invitation-uploads` | HostInvitationUploadController.upload | True |
+| API-0321 | GET | `/api/v1/invitation-uploads/access` | HostInvitationUploadController.access | True |
+| API-0322 | GET | `/api/v1/invitation-uploads/{id}/image` | HostInvitationUploadController.image | True |
+| API-0323 | POST | `/api/v1/phone/otp/request` | PhoneOtpController.requestOtp | True |
+| API-0324 | POST | `/api/v1/phone/otp/verify` | PhoneOtpController.verifyOtp | True |
+| API-0325 | POST | `/api/webhooks/razorpay` | RazorpayWebhookController.receive | True |
 
 
 ## API-0001 — GET /api/admin/account-policies/{scope}/{id}
@@ -442,7 +502,308 @@ Purpose: invoke the `byEntity` action in the `AdminAuditController` module; the 
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0004 — GET /api/admin/console/audit
+## API-0004 — GET /api/admin/audit/activity
+
+Handler: com.giftplatform.audit.api.BusinessAuditController.list. Source: [backend/src/main/java/com/giftplatform/audit/api/BusinessAuditController.java:13](../../src/main/java/com/giftplatform/audit/api/BusinessAuditController.java#L13).
+
+Purpose: invoke the `list` action in the `BusinessAuditController` module; the module workflow describes its business intent.
+
+**Access:** Authenticated PLATFORM_ADMIN; controller/service admin check and CSRF on mutations.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+| entityType | @org.springframework.web.bind.annotation.RequestParam(name="", value="", required=true, defaultValue="") | java.lang.String | As declared by the annotation; no additional undocumented default is asserted. |
+| page | @org.springframework.web.bind.annotation.RequestParam(name="", value="", required=true, defaultValue="0") | int | As declared by the annotation; no additional undocumented default is asserted. |
+
+
+**Request example / shape:**
+```json
+{
+  "pathAndQueryParameters": {
+    "entityType": "<entityType: validated value>",
+    "page": 1
+  }
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `org.springframework.http.ResponseEntity<java.util.Map<java.lang.String, java.lang.Object>>`. Produces: handler content type / negotiated JSON.
+```json
+{
+  "_contract": "Dynamic response keys: inspect linked handler and module narrative; no fixed schema is asserted."
+}
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/admin/audit/activity"
+  }
+}
+```
+
+**Database effects:** `audit_logs` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0005 — GET /api/admin/branding
+
+Handler: com.giftplatform.branding.BrandingController.admin. Source: [backend/src/main/java/com/giftplatform/branding/BrandingController.java:14](../../src/main/java/com/giftplatform/branding/BrandingController.java#L14).
+
+Purpose: invoke the `admin` action in the `BrandingController` module; the module workflow describes its business intent.
+
+**Access:** Authenticated PLATFORM_ADMIN; controller/service admin check and CSRF on mutations.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+
+
+**Request example / shape:**
+```json
+{
+  "pathAndQueryParameters": {}
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `com.giftplatform.branding.BrandingService$Settings`. Produces: handler content type / negotiated JSON.
+```json
+{
+  "applicationName": "<applicationName: validated value>",
+  "brandColor": "<brandColor: validated value>",
+  "footerText": "<footerText: validated value>",
+  "supportEmail": "guest@example.test",
+  "socialLinks": "https://shop.example.test/product",
+  "logoUrl": "https://shop.example.test/product",
+  "faviconUrl": "https://shop.example.test/product",
+  "revision": 1
+}
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/admin/branding"
+  }
+}
+```
+
+**Database effects:** The controller delegates to services or does not declare SQL; follow the linked handler into its injected services. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0006 — POST /api/admin/branding
+
+Handler: com.giftplatform.branding.BrandingController.save. Source: [backend/src/main/java/com/giftplatform/branding/BrandingController.java:15](../../src/main/java/com/giftplatform/branding/BrandingController.java#L15).
+
+Purpose: invoke the `save` action in the `BrandingController` module; the module workflow describes its business intent.
+
+**Access:** Authenticated PLATFORM_ADMIN; controller/service admin check and CSRF on mutations.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+| body | @org.springframework.web.bind.annotation.RequestBody(required=true) | com.giftplatform.branding.BrandingService$Update | As declared by the annotation; no additional undocumented default is asserted. |
+
+
+**Request example / shape:**
+```json
+{
+  "applicationName": "<applicationName: validated value>",
+  "brandColor": "<brandColor: validated value>",
+  "footerText": "<footerText: validated value>",
+  "supportEmail": "guest@example.test",
+  "socialLinks": "https://shop.example.test/product",
+  "revision": 1
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `com.giftplatform.branding.BrandingService$Settings`. Produces: handler content type / negotiated JSON.
+```json
+{
+  "applicationName": "<applicationName: validated value>",
+  "brandColor": "<brandColor: validated value>",
+  "footerText": "<footerText: validated value>",
+  "supportEmail": "guest@example.test",
+  "socialLinks": "https://shop.example.test/product",
+  "logoUrl": "https://shop.example.test/product",
+  "faviconUrl": "https://shop.example.test/product",
+  "revision": 1
+}
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/admin/branding"
+  }
+}
+```
+
+**Database effects:** The controller delegates to services or does not declare SQL; follow the linked handler into its injected services. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0007 — DELETE /api/admin/branding/{kind}
+
+Handler: com.giftplatform.branding.BrandingController.remove. Source: [backend/src/main/java/com/giftplatform/branding/BrandingController.java:18](../../src/main/java/com/giftplatform/branding/BrandingController.java#L18).
+
+Purpose: invoke the `remove` action in the `BrandingController` module; the module workflow describes its business intent.
+
+**Access:** Authenticated PLATFORM_ADMIN; controller/service admin check and CSRF on mutations.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+| kind | @org.springframework.web.bind.annotation.PathVariable(name="", value="", required=true) | java.lang.String | As declared by the annotation; no additional undocumented default is asserted. |
+| revision | @org.springframework.web.bind.annotation.RequestParam(name="", value="", required=true, defaultValue="\n\t\t\n\t\t\n\ue000\ue001\ue002\n\t\t\t\t\n") | long | As declared by the annotation; no additional undocumented default is asserted. |
+
+
+**Request example / shape:**
+```json
+{
+  "pathAndQueryParameters": {
+    "kind": "<kind: validated value>",
+    "revision": 1
+  }
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `com.giftplatform.branding.BrandingService$Settings`. Produces: handler content type / negotiated JSON.
+```json
+{
+  "applicationName": "<applicationName: validated value>",
+  "brandColor": "<brandColor: validated value>",
+  "footerText": "<footerText: validated value>",
+  "supportEmail": "guest@example.test",
+  "socialLinks": "https://shop.example.test/product",
+  "logoUrl": "https://shop.example.test/product",
+  "faviconUrl": "https://shop.example.test/product",
+  "revision": 1
+}
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/admin/branding/{kind}"
+  }
+}
+```
+
+**Database effects:** The controller delegates to services or does not declare SQL; follow the linked handler into its injected services. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0008 — POST /api/admin/branding/{kind}
+
+Handler: com.giftplatform.branding.BrandingController.upload. Source: [backend/src/main/java/com/giftplatform/branding/BrandingController.java:16](../../src/main/java/com/giftplatform/branding/BrandingController.java#L16).
+
+Purpose: invoke the `upload` action in the `BrandingController` module; the module workflow describes its business intent.
+
+**Access:** Authenticated PLATFORM_ADMIN; controller/service admin check and CSRF on mutations.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+| kind | @org.springframework.web.bind.annotation.PathVariable(name="", value="", required=true) | java.lang.String | As declared by the annotation; no additional undocumented default is asserted. |
+| revision | @org.springframework.web.bind.annotation.RequestParam(name="", value="", required=true, defaultValue="\n\t\t\n\t\t\n\ue000\ue001\ue002\n\t\t\t\t\n") | long | As declared by the annotation; no additional undocumented default is asserted. |
+| file | @org.springframework.web.bind.annotation.RequestPart(name="", value="file", required=true) | org.springframework.web.multipart.MultipartFile | As declared by the annotation; no additional undocumented default is asserted. |
+
+
+**Request example / shape:**
+```json
+{
+  "pathAndQueryParameters": {
+    "kind": "<kind: validated value>",
+    "revision": 1,
+    "file": "<file: validated value>"
+  }
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `com.giftplatform.branding.BrandingService$Settings`. Produces: handler content type / negotiated JSON.
+```json
+{
+  "applicationName": "<applicationName: validated value>",
+  "brandColor": "<brandColor: validated value>",
+  "footerText": "<footerText: validated value>",
+  "supportEmail": "guest@example.test",
+  "socialLinks": "https://shop.example.test/product",
+  "logoUrl": "https://shop.example.test/product",
+  "faviconUrl": "https://shop.example.test/product",
+  "revision": 1
+}
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/admin/branding/{kind}"
+  }
+}
+```
+
+**Database effects:** The controller delegates to services or does not declare SQL; follow the linked handler into its injected services. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0009 — GET /api/admin/console/audit
 
 Handler: com.giftplatform.admin.PlatformAdminConsoleController.audit. Source: [backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:78](../../src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java#L78).
 
@@ -494,7 +855,7 @@ Purpose: invoke the `audit` action in the `PlatformAdminConsoleController` modul
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0005 — GET /api/admin/console/audit/page
+## API-0010 — GET /api/admin/console/audit/page
 
 Handler: com.giftplatform.admin.PlatformAdminAuditController.page. Source: [backend/src/main/java/com/giftplatform/admin/PlatformAdminAuditController.java:24](../../src/main/java/com/giftplatform/admin/PlatformAdminAuditController.java#L24).
 
@@ -568,7 +929,7 @@ Purpose: invoke the `page` action in the `PlatformAdminAuditController` module; 
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0006 — GET /api/admin/console/events
+## API-0011 — GET /api/admin/console/events
 
 Handler: com.giftplatform.admin.PlatformAdminConsoleController.events. Source: [backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:39](../../src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java#L39).
 
@@ -623,7 +984,7 @@ Purpose: invoke the `events` action in the `PlatformAdminConsoleController` modu
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0007 — GET /api/admin/console/events/{eventId}/ai-design-settings
+## API-0012 — GET /api/admin/console/events/{eventId}/ai-design-settings
 
 Handler: com.giftplatform.admin.AiInvitationAdminController.event. Source: [backend/src/main/java/com/giftplatform/admin/AiInvitationAdminController.java:33](../../src/main/java/com/giftplatform/admin/AiInvitationAdminController.java#L33).
 
@@ -676,7 +1037,7 @@ Purpose: invoke the `event` action in the `AiInvitationAdminController` module; 
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0008 — POST /api/admin/console/events/{eventId}/ai-design-settings
+## API-0013 — POST /api/admin/console/events/{eventId}/ai-design-settings
 
 Handler: com.giftplatform.admin.PlatformAdminConsoleController.aiDesignSettings. Source: [backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:48](../../src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java#L48).
 
@@ -728,7 +1089,7 @@ Purpose: invoke the `aiDesignSettings` action in the `PlatformAdminConsoleContro
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0009 — POST /api/admin/console/events/{eventId}/album-settings
+## API-0014 — POST /api/admin/console/events/{eventId}/album-settings
 
 Handler: com.giftplatform.admin.PlatformAdminConsoleController.albumSettings. Source: [backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:41](../../src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java#L41).
 
@@ -780,7 +1141,117 @@ Purpose: invoke the `albumSettings` action in the `PlatformAdminConsoleControlle
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0010 — POST /api/admin/console/experience
+## API-0015 — GET /api/admin/console/events/{eventId}/modules
+
+Handler: com.giftplatform.admin.EventModuleGrantsController.list. Source: [backend/src/main/java/com/giftplatform/admin/EventModuleGrantsController.java:18](../../src/main/java/com/giftplatform/admin/EventModuleGrantsController.java#L18).
+
+Purpose: invoke the `list` action in the `EventModuleGrantsController` module; the module workflow describes its business intent.
+
+**Access:** Authenticated PLATFORM_ADMIN; controller/service admin check and CSRF on mutations.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+| eventId | @org.springframework.web.bind.annotation.PathVariable(name="", value="", required=true) | java.util.UUID | As declared by the annotation; no additional undocumented default is asserted. |
+
+
+**Request example / shape:**
+```json
+{
+  "pathAndQueryParameters": {
+    "eventId": "123e4567-e89b-42d3-a456-426614174000"
+  }
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `org.springframework.http.ResponseEntity<java.util.List<java.util.Map<java.lang.String, java.lang.Object>>>`. Produces: handler content type / negotiated JSON.
+```json
+[
+  [
+    {
+      "_contract": "Dynamic response keys: inspect linked handler and module narrative; no fixed schema is asserted."
+    }
+  ]
+]
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/admin/console/events/{eventId}/modules"
+  }
+}
+```
+
+**Database effects:** `events`, `platform_admin_action_audit`, `platform_event_module_grants` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0016 — POST /api/admin/console/events/{eventId}/modules/{code}
+
+Handler: com.giftplatform.admin.EventModuleGrantsController.set. Source: [backend/src/main/java/com/giftplatform/admin/EventModuleGrantsController.java:20](../../src/main/java/com/giftplatform/admin/EventModuleGrantsController.java#L20).
+
+Purpose: invoke the `set` action in the `EventModuleGrantsController` module; the module workflow describes its business intent.
+
+**Access:** Authenticated PLATFORM_ADMIN; controller/service admin check and CSRF on mutations.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+| eventId | @org.springframework.web.bind.annotation.PathVariable(name="", value="", required=true) | java.util.UUID | As declared by the annotation; no additional undocumented default is asserted. |
+| code | @org.springframework.web.bind.annotation.PathVariable(name="", value="", required=true) | java.lang.String | As declared by the annotation; no additional undocumented default is asserted. |
+| input | @jakarta.validation.Valid(); @org.springframework.web.bind.annotation.RequestBody(required=true) | com.giftplatform.admin.EventModuleGrantsController$GrantChange | As declared by the annotation; no additional undocumented default is asserted. |
+
+
+**Request example / shape:**
+```json
+{
+  "enabled": true
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `java.util.Map<java.lang.String, java.lang.Object>`. Produces: handler content type / negotiated JSON.
+```json
+{
+  "_contract": "Dynamic response keys: inspect linked handler and module narrative; no fixed schema is asserted."
+}
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/admin/console/events/{eventId}/modules/{code}"
+  }
+}
+```
+
+**Database effects:** `events`, `platform_admin_action_audit`, `platform_event_module_grants` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0017 — POST /api/admin/console/experience
 
 Handler: com.giftplatform.admin.ExperienceSettingsController.update. Source: [backend/src/main/java/com/giftplatform/admin/ExperienceSettingsController.java:18](../../src/main/java/com/giftplatform/admin/ExperienceSettingsController.java#L18).
 
@@ -831,7 +1302,64 @@ Purpose: invoke the `update` action in the `ExperienceSettingsController` module
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0011 — GET /api/admin/console/hosts
+## API-0018 — PUT /api/admin/console/growth-settings
+
+Handler: com.giftplatform.admin.GrowthSettingsController.save. Source: [backend/src/main/java/com/giftplatform/admin/GrowthSettingsController.java:12](../../src/main/java/com/giftplatform/admin/GrowthSettingsController.java#L12).
+
+Purpose: invoke the `save` action in the `GrowthSettingsController` module; the module workflow describes its business intent.
+
+**Access:** Authenticated PLATFORM_ADMIN; controller/service admin check and CSRF on mutations.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+| input | @org.springframework.web.bind.annotation.RequestBody(required=true) | com.giftplatform.admin.GrowthSettingsService$Settings | As declared by the annotation; no additional undocumented default is asserted. |
+
+
+**Request example / shape:**
+```json
+{
+  "features": {
+    "_contract": "Dynamic response keys: inspect linked handler and module narrative; no fixed schema is asserted."
+  },
+  "version": 1
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `com.giftplatform.admin.GrowthSettingsService$Settings`. Produces: handler content type / negotiated JSON.
+```json
+{
+  "features": {
+    "_contract": "Dynamic response keys: inspect linked handler and module narrative; no fixed schema is asserted."
+  },
+  "version": 1
+}
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/admin/console/growth-settings"
+  }
+}
+```
+
+**Database effects:** The controller delegates to services or does not declare SQL; follow the linked handler into its injected services. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0019 — GET /api/admin/console/hosts
 
 Handler: com.giftplatform.admin.PlatformAdminConsoleController.hosts. Source: [backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:29](../../src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java#L29).
 
@@ -886,7 +1414,7 @@ Purpose: invoke the `hosts` action in the `PlatformAdminConsoleController` modul
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0012 — GET /api/admin/console/hosts/{hostId}/ai-design
+## API-0020 — GET /api/admin/console/hosts/{hostId}/ai-design
 
 Handler: com.giftplatform.admin.AiInvitationAdminController.host. Source: [backend/src/main/java/com/giftplatform/admin/AiInvitationAdminController.java:26](../../src/main/java/com/giftplatform/admin/AiInvitationAdminController.java#L26).
 
@@ -939,7 +1467,121 @@ Purpose: invoke the `host` action in the `AiInvitationAdminController` module; t
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0013 — GET /api/admin/console/hosts/{hostId}/modules
+## API-0021 — GET /api/admin/console/hosts/{hostId}/invitation-uploads
+
+Handler: com.giftplatform.asset.HostInvitationUploadController.adminAccess. Source: [backend/src/main/java/com/giftplatform/asset/HostInvitationUploadController.java:19](../../src/main/java/com/giftplatform/asset/HostInvitationUploadController.java#L19).
+
+Purpose: invoke the `adminAccess` action in the `HostInvitationUploadController` module; the module workflow describes its business intent.
+
+**Access:** Authenticated PLATFORM_ADMIN; controller/service admin check and CSRF on mutations.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+| hostId | @org.springframework.web.bind.annotation.PathVariable(name="", value="", required=true) | java.util.UUID | As declared by the annotation; no additional undocumented default is asserted. |
+
+
+**Request example / shape:**
+```json
+{
+  "pathAndQueryParameters": {
+    "hostId": "123e4567-e89b-42d3-a456-426614174000"
+  }
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `org.springframework.http.ResponseEntity<com.giftplatform.asset.HostInvitationUploadService$Access>`. Produces: handler content type / negotiated JSON.
+```json
+{
+  "hostId": "123e4567-e89b-42d3-a456-426614174000",
+  "enabled": true,
+  "requiresPayment": true,
+  "paid": true,
+  "accessible": true
+}
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/admin/console/hosts/{hostId}/invitation-uploads"
+  }
+}
+```
+
+**Database effects:** The controller delegates to services or does not declare SQL; follow the linked handler into its injected services. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0022 — PUT /api/admin/console/hosts/{hostId}/invitation-uploads
+
+Handler: com.giftplatform.asset.HostInvitationUploadController.configure. Source: [backend/src/main/java/com/giftplatform/asset/HostInvitationUploadController.java:21](../../src/main/java/com/giftplatform/asset/HostInvitationUploadController.java#L21).
+
+Purpose: invoke the `configure` action in the `HostInvitationUploadController` module; the module workflow describes its business intent.
+
+**Access:** Authenticated PLATFORM_ADMIN; controller/service admin check and CSRF on mutations.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+| hostId | @org.springframework.web.bind.annotation.PathVariable(name="", value="", required=true) | java.util.UUID | As declared by the annotation; no additional undocumented default is asserted. |
+| controls | @jakarta.validation.Valid(); @org.springframework.web.bind.annotation.RequestBody(required=true) | com.giftplatform.asset.HostInvitationUploadController$Controls | As declared by the annotation; no additional undocumented default is asserted. |
+
+
+**Request example / shape:**
+```json
+{
+  "enabled": true,
+  "requiresPayment": true
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `com.giftplatform.asset.HostInvitationUploadService$Access`. Produces: handler content type / negotiated JSON.
+```json
+{
+  "hostId": "123e4567-e89b-42d3-a456-426614174000",
+  "enabled": true,
+  "requiresPayment": true,
+  "paid": true,
+  "accessible": true
+}
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/admin/console/hosts/{hostId}/invitation-uploads"
+  }
+}
+```
+
+**Database effects:** The controller delegates to services or does not declare SQL; follow the linked handler into its injected services. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0023 — GET /api/admin/console/hosts/{hostId}/modules
 
 Handler: com.giftplatform.admin.PlatformAdminConsoleController.hostModules. Source: [backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:35](../../src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java#L35).
 
@@ -994,7 +1636,7 @@ Purpose: invoke the `hostModules` action in the `PlatformAdminConsoleController`
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0014 — POST /api/admin/console/hosts/{hostId}/modules/{code}
+## API-0024 — POST /api/admin/console/hosts/{hostId}/modules/{code}
 
 Handler: com.giftplatform.admin.PlatformAdminConsoleController.hostModule. Source: [backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:37](../../src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java#L37).
 
@@ -1047,7 +1689,185 @@ Purpose: invoke the `hostModule` action in the `PlatformAdminConsoleController` 
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0015 — GET /api/admin/console/modules
+## API-0025 — GET /api/admin/console/interactions
+
+Handler: com.giftplatform.analytics.InteractionAdminController.report. Source: [backend/src/main/java/com/giftplatform/analytics/InteractionAdminController.java:17](../../src/main/java/com/giftplatform/analytics/InteractionAdminController.java#L17).
+
+Purpose: invoke the `report` action in the `InteractionAdminController` module; the module workflow describes its business intent.
+
+**Access:** Authenticated PLATFORM_ADMIN; controller/service admin check and CSRF on mutations.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+| hostId | @org.springframework.web.bind.annotation.RequestParam(name="", value="", required=false, defaultValue="\n\t\t\n\t\t\n\ue000\ue001\ue002\n\t\t\t\t\n") | java.util.UUID | As declared by the annotation; no additional undocumented default is asserted. |
+| eventId | @org.springframework.web.bind.annotation.RequestParam(name="", value="", required=false, defaultValue="\n\t\t\n\t\t\n\ue000\ue001\ue002\n\t\t\t\t\n") | java.util.UUID | As declared by the annotation; no additional undocumented default is asserted. |
+| from | @org.springframework.web.bind.annotation.RequestParam(name="", value="", required=false, defaultValue="\n\t\t\n\t\t\n\ue000\ue001\ue002\n\t\t\t\t\n") | java.time.LocalDate | As declared by the annotation; no additional undocumented default is asserted. |
+| to | @org.springframework.web.bind.annotation.RequestParam(name="", value="", required=false, defaultValue="\n\t\t\n\t\t\n\ue000\ue001\ue002\n\t\t\t\t\n") | java.time.LocalDate | As declared by the annotation; no additional undocumented default is asserted. |
+| action | @org.springframework.web.bind.annotation.RequestParam(name="", value="", required=true, defaultValue="") | java.lang.String | As declared by the annotation; no additional undocumented default is asserted. |
+| outcome | @org.springframework.web.bind.annotation.RequestParam(name="", value="", required=true, defaultValue="") | java.lang.String | As declared by the annotation; no additional undocumented default is asserted. |
+| kind | @org.springframework.web.bind.annotation.RequestParam(name="", value="", required=true, defaultValue="") | java.lang.String | As declared by the annotation; no additional undocumented default is asserted. |
+| page | @org.springframework.web.bind.annotation.RequestParam(name="", value="", required=true, defaultValue="0") | int | As declared by the annotation; no additional undocumented default is asserted. |
+
+
+**Request example / shape:**
+```json
+{
+  "pathAndQueryParameters": {
+    "hostId": "123e4567-e89b-42d3-a456-426614174000",
+    "eventId": "123e4567-e89b-42d3-a456-426614174000",
+    "from": "2027-02-14",
+    "to": "2027-02-14",
+    "action": "<action: validated value>",
+    "outcome": "<outcome: validated value>",
+    "kind": "<kind: validated value>",
+    "page": 1
+  }
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `org.springframework.http.ResponseEntity<java.util.Map<java.lang.String, java.lang.Object>>`. Produces: handler content type / negotiated JSON.
+```json
+{
+  "_contract": "Dynamic response keys: inspect linked handler and module narrative; no fixed schema is asserted."
+}
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/admin/console/interactions"
+  }
+}
+```
+
+**Database effects:** `application_interactions`, `events`, `localization_sources`, `users` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0026 — GET /api/admin/console/interactions/funnel
+
+Handler: com.giftplatform.analytics.InteractionAdminController.funnel. Source: [backend/src/main/java/com/giftplatform/analytics/InteractionAdminController.java:37](../../src/main/java/com/giftplatform/analytics/InteractionAdminController.java#L37).
+
+Purpose: invoke the `funnel` action in the `InteractionAdminController` module; the module workflow describes its business intent.
+
+**Access:** Authenticated PLATFORM_ADMIN; controller/service admin check and CSRF on mutations.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+
+
+**Request example / shape:**
+```json
+{
+  "pathAndQueryParameters": {}
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `org.springframework.http.ResponseEntity<java.util.List<java.util.Map<java.lang.String, java.lang.Object>>>`. Produces: handler content type / negotiated JSON.
+```json
+[
+  [
+    {
+      "_contract": "Dynamic response keys: inspect linked handler and module narrative; no fixed schema is asserted."
+    }
+  ]
+]
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/admin/console/interactions/funnel"
+  }
+}
+```
+
+**Database effects:** `application_interactions`, `events`, `localization_sources`, `users` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0027 — GET /api/admin/console/interactions/{id}
+
+Handler: com.giftplatform.analytics.InteractionAdminController.timeline. Source: [backend/src/main/java/com/giftplatform/analytics/InteractionAdminController.java:49](../../src/main/java/com/giftplatform/analytics/InteractionAdminController.java#L49).
+
+Purpose: invoke the `timeline` action in the `InteractionAdminController` module; the module workflow describes its business intent.
+
+**Access:** Authenticated PLATFORM_ADMIN; controller/service admin check and CSRF on mutations.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+| id | @org.springframework.web.bind.annotation.PathVariable(name="", value="", required=true) | java.util.UUID | As declared by the annotation; no additional undocumented default is asserted. |
+
+
+**Request example / shape:**
+```json
+{
+  "pathAndQueryParameters": {
+    "id": "123e4567-e89b-42d3-a456-426614174000"
+  }
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `org.springframework.http.ResponseEntity<java.util.List<java.util.Map<java.lang.String, java.lang.Object>>>`. Produces: handler content type / negotiated JSON.
+```json
+[
+  [
+    {
+      "_contract": "Dynamic response keys: inspect linked handler and module narrative; no fixed schema is asserted."
+    }
+  ]
+]
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/admin/console/interactions/{id}"
+  }
+}
+```
+
+**Database effects:** `application_interactions`, `events`, `localization_sources`, `users` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0028 — GET /api/admin/console/modules
 
 Handler: com.giftplatform.admin.PlatformAdminConsoleController.modules. Source: [backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:31](../../src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java#L31).
 
@@ -1099,7 +1919,7 @@ Purpose: invoke the `modules` action in the `PlatformAdminConsoleController` mod
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0016 — POST /api/admin/console/modules/{code}
+## API-0029 — POST /api/admin/console/modules/{code}
 
 Handler: com.giftplatform.admin.PlatformAdminConsoleController.platformModule. Source: [backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:33](../../src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java#L33).
 
@@ -1151,7 +1971,7 @@ Purpose: invoke the `platformModule` action in the `PlatformAdminConsoleControll
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0017 — GET /api/admin/console/monetization
+## API-0030 — GET /api/admin/console/monetization
 
 Handler: com.giftplatform.monetization.MonetizationController.current. Source: [backend/src/main/java/com/giftplatform/monetization/MonetizationController.java:12](../../src/main/java/com/giftplatform/monetization/MonetizationController.java#L12).
 
@@ -1214,7 +2034,7 @@ Purpose: invoke the `current` action in the `MonetizationController` module; the
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0018 — PUT /api/admin/console/monetization
+## API-0031 — PUT /api/admin/console/monetization
 
 Handler: com.giftplatform.monetization.MonetizationController.update. Source: [backend/src/main/java/com/giftplatform/monetization/MonetizationController.java:16](../../src/main/java/com/giftplatform/monetization/MonetizationController.java#L16).
 
@@ -1292,7 +2112,7 @@ Purpose: invoke the `update` action in the `MonetizationController` module; the 
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0019 — GET /api/admin/console/monetization/commissions
+## API-0032 — GET /api/admin/console/monetization/commissions
 
 Handler: com.giftplatform.monetization.CommercialController.commissions. Source: [backend/src/main/java/com/giftplatform/monetization/CommercialController.java:53](../../src/main/java/com/giftplatform/monetization/CommercialController.java#L53).
 
@@ -1344,7 +2164,7 @@ Purpose: invoke the `commissions` action in the `CommercialController` module; t
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0020 — PUT /api/admin/console/monetization/commissions
+## API-0033 — PUT /api/admin/console/monetization/commissions
 
 Handler: com.giftplatform.monetization.CommercialController.commission. Source: [backend/src/main/java/com/giftplatform/monetization/CommercialController.java:54](../../src/main/java/com/giftplatform/monetization/CommercialController.java#L54).
 
@@ -1402,7 +2222,7 @@ Purpose: invoke the `commission` action in the `CommercialController` module; th
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0021 — GET /api/admin/console/monetization/history
+## API-0034 — GET /api/admin/console/monetization/history
 
 Handler: com.giftplatform.monetization.MonetizationController.history. Source: [backend/src/main/java/com/giftplatform/monetization/MonetizationController.java:17](../../src/main/java/com/giftplatform/monetization/MonetizationController.java#L17).
 
@@ -1461,7 +2281,7 @@ Purpose: invoke the `history` action in the `MonetizationController` module; the
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0022 — GET /api/admin/console/monetization/partners
+## API-0035 — GET /api/admin/console/monetization/partners
 
 Handler: com.giftplatform.monetization.CommercialController.partners. Source: [backend/src/main/java/com/giftplatform/monetization/CommercialController.java:51](../../src/main/java/com/giftplatform/monetization/CommercialController.java#L51).
 
@@ -1513,7 +2333,7 @@ Purpose: invoke the `partners` action in the `CommercialController` module; the 
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0023 — PUT /api/admin/console/monetization/partners
+## API-0036 — PUT /api/admin/console/monetization/partners
 
 Handler: com.giftplatform.monetization.CommercialController.partner. Source: [backend/src/main/java/com/giftplatform/monetization/CommercialController.java:52](../../src/main/java/com/giftplatform/monetization/CommercialController.java#L52).
 
@@ -1573,7 +2393,7 @@ Purpose: invoke the `partner` action in the `CommercialController` module; the m
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0024 — GET /api/admin/console/monetization/placements
+## API-0037 — GET /api/admin/console/monetization/placements
 
 Handler: com.giftplatform.monetization.CommercialController.adminPlacements. Source: [backend/src/main/java/com/giftplatform/monetization/CommercialController.java:49](../../src/main/java/com/giftplatform/monetization/CommercialController.java#L49).
 
@@ -1625,7 +2445,7 @@ Purpose: invoke the `adminPlacements` action in the `CommercialController` modul
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0025 — POST /api/admin/console/monetization/placements/{id}
+## API-0038 — POST /api/admin/console/monetization/placements/{id}
 
 Handler: com.giftplatform.monetization.CommercialController.moderate. Source: [backend/src/main/java/com/giftplatform/monetization/CommercialController.java:50](../../src/main/java/com/giftplatform/monetization/CommercialController.java#L50).
 
@@ -1678,7 +2498,7 @@ Purpose: invoke the `moderate` action in the `CommercialController` module; the 
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0026 — GET /api/admin/console/monetization/policy
+## API-0039 — GET /api/admin/console/monetization/policy
 
 Handler: com.giftplatform.monetization.CommercialController.policy. Source: [backend/src/main/java/com/giftplatform/monetization/CommercialController.java:48](../../src/main/java/com/giftplatform/monetization/CommercialController.java#L48).
 
@@ -1728,7 +2548,7 @@ Purpose: invoke the `policy` action in the `CommercialController` module; the mo
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0027 — PUT /api/admin/console/monetization/policy
+## API-0040 — PUT /api/admin/console/monetization/policy
 
 Handler: com.giftplatform.monetization.CommercialController.policy. Source: [backend/src/main/java/com/giftplatform/monetization/CommercialController.java:48](../../src/main/java/com/giftplatform/monetization/CommercialController.java#L48).
 
@@ -1784,7 +2604,7 @@ Purpose: invoke the `policy` action in the `CommercialController` module; the mo
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0028 — GET /api/admin/console/monetization/revenue
+## API-0041 — GET /api/admin/console/monetization/revenue
 
 Handler: com.giftplatform.monetization.CommercialController.revenue. Source: [backend/src/main/java/com/giftplatform/monetization/CommercialController.java:56](../../src/main/java/com/giftplatform/monetization/CommercialController.java#L56).
 
@@ -1834,7 +2654,7 @@ Purpose: invoke the `revenue` action in the `CommercialController` module; the m
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0029 — GET /api/admin/console/monetization/setup-history
+## API-0042 — GET /api/admin/console/monetization/setup-history
 
 Handler: com.giftplatform.monetization.CommercialController.history. Source: [backend/src/main/java/com/giftplatform/monetization/CommercialController.java:55](../../src/main/java/com/giftplatform/monetization/CommercialController.java#L55).
 
@@ -1886,7 +2706,7 @@ Purpose: invoke the `history` action in the `CommercialController` module; the m
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0030 — GET /api/admin/console/payments/controls
+## API-0043 — GET /api/admin/console/payments/controls
 
 Handler: com.giftplatform.payment.control.PaymentControlController.read. Source: [backend/src/main/java/com/giftplatform/payment/control/PaymentControlController.java:15](../../src/main/java/com/giftplatform/payment/control/PaymentControlController.java#L15).
 
@@ -1953,7 +2773,7 @@ Purpose: invoke the `read` action in the `PaymentControlController` module; the 
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0031 — PUT /api/admin/console/payments/controls/{channel}
+## API-0044 — PUT /api/admin/console/payments/controls/{channel}
 
 Handler: com.giftplatform.payment.control.PaymentControlController.change. Source: [backend/src/main/java/com/giftplatform/payment/control/PaymentControlController.java:17](../../src/main/java/com/giftplatform/payment/control/PaymentControlController.java#L17).
 
@@ -2021,7 +2841,7 @@ Purpose: invoke the `change` action in the `PaymentControlController` module; th
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0032 — GET /api/admin/console/payments/history
+## API-0045 — GET /api/admin/console/payments/history
 
 Handler: com.giftplatform.payment.control.PaymentControlController.history. Source: [backend/src/main/java/com/giftplatform/payment/control/PaymentControlController.java:19](../../src/main/java/com/giftplatform/payment/control/PaymentControlController.java#L19).
 
@@ -2078,7 +2898,7 @@ Purpose: invoke the `history` action in the `PaymentControlController` module; t
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0033 — GET /api/admin/console/payments/routing-commission
+## API-0046 — GET /api/admin/console/payments/routing-commission
 
 Handler: com.giftplatform.payment.control.PaymentControlController.commission. Source: [backend/src/main/java/com/giftplatform/payment/control/PaymentControlController.java:23](../../src/main/java/com/giftplatform/payment/control/PaymentControlController.java#L23).
 
@@ -2131,7 +2951,7 @@ Purpose: invoke the `commission` action in the `PaymentControlController` module
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0034 — PUT /api/admin/console/payments/routing-commission
+## API-0047 — PUT /api/admin/console/payments/routing-commission
 
 Handler: com.giftplatform.payment.control.PaymentControlController.commission. Source: [backend/src/main/java/com/giftplatform/payment/control/PaymentControlController.java:23](../../src/main/java/com/giftplatform/payment/control/PaymentControlController.java#L23).
 
@@ -2187,7 +3007,7 @@ Purpose: invoke the `commission` action in the `PaymentControlController` module
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0035 — GET /api/admin/console/payments/routing-commission/history
+## API-0048 — GET /api/admin/console/payments/routing-commission/history
 
 Handler: com.giftplatform.payment.control.PaymentControlController.commissionHistory. Source: [backend/src/main/java/com/giftplatform/payment/control/PaymentControlController.java:25](../../src/main/java/com/giftplatform/payment/control/PaymentControlController.java#L25).
 
@@ -2244,7 +3064,57 @@ Purpose: invoke the `commissionHistory` action in the `PaymentControlController`
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0036 — GET /api/admin/console/reports/group-transfers
+## API-0049 — GET /api/admin/console/production-status
+
+Handler: com.giftplatform.operations.ProductionStatusController.status. Source: [backend/src/main/java/com/giftplatform/operations/ProductionStatusController.java:13](../../src/main/java/com/giftplatform/operations/ProductionStatusController.java#L13).
+
+Purpose: invoke the `status` action in the `ProductionStatusController` module; the module workflow describes its business intent.
+
+**Access:** Authenticated PLATFORM_ADMIN; controller/service admin check and CSRF on mutations.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+
+
+**Request example / shape:**
+```json
+{
+  "pathAndQueryParameters": {}
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `org.springframework.http.ResponseEntity<java.util.Map<java.lang.String, java.lang.Object>>`. Produces: handler content type / negotiated JSON.
+```json
+{
+  "_contract": "Dynamic response keys: inspect linked handler and module narrative; no fixed schema is asserted."
+}
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/admin/console/production-status"
+  }
+}
+```
+
+**Database effects:** The controller delegates to services or does not declare SQL; follow the linked handler into its injected services. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0050 — GET /api/admin/console/reports/group-transfers
 
 Handler: com.giftplatform.admin.PlatformAdminConsoleController.groupTransferReport. Source: [backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:56](../../src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java#L56).
 
@@ -2294,7 +3164,7 @@ Purpose: invoke the `groupTransferReport` action in the `PlatformAdminConsoleCon
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0037 — GET /api/admin/console/reports/guestbook
+## API-0051 — GET /api/admin/console/reports/guestbook
 
 Handler: com.giftplatform.admin.PlatformAdminConsoleController.guestbookReport. Source: [backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:65](../../src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java#L65).
 
@@ -2344,7 +3214,7 @@ Purpose: invoke the `guestbookReport` action in the `PlatformAdminConsoleControl
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0038 — GET /api/admin/console/reports/notifications
+## API-0052 — GET /api/admin/console/reports/notifications
 
 Handler: com.giftplatform.admin.PlatformAdminConsoleController.notificationReport. Source: [backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:73](../../src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java#L73).
 
@@ -2394,7 +3264,7 @@ Purpose: invoke the `notificationReport` action in the `PlatformAdminConsoleCont
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0039 — GET /api/admin/console/summary
+## API-0053 — GET /api/admin/console/summary
 
 Handler: com.giftplatform.admin.PlatformAdminConsoleController.summary. Source: [backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:23](../../src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java#L23).
 
@@ -2444,7 +3314,57 @@ Purpose: invoke the `summary` action in the `PlatformAdminConsoleController` mod
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0040 — POST /api/admin/group-payments/{groupId}/switching
+## API-0054 — GET /api/admin/emails
+
+Handler: com.giftplatform.notification.email.EmailAdminController.status. Source: [backend/src/main/java/com/giftplatform/notification/email/EmailAdminController.java:13](../../src/main/java/com/giftplatform/notification/email/EmailAdminController.java#L13).
+
+Purpose: invoke the `status` action in the `EmailAdminController` module; the module workflow describes its business intent.
+
+**Access:** Authenticated PLATFORM_ADMIN; controller/service admin check and CSRF on mutations.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+
+
+**Request example / shape:**
+```json
+{
+  "pathAndQueryParameters": {}
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `java.util.Map<java.lang.String, java.lang.Object>`. Produces: handler content type / negotiated JSON.
+```json
+{
+  "_contract": "Dynamic response keys: inspect linked handler and module narrative; no fixed schema is asserted."
+}
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/admin/emails"
+  }
+}
+```
+
+**Database effects:** `transactional_email_outbox` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0055 — POST /api/admin/group-payments/{groupId}/switching
 
 Handler: com.giftplatform.group.GroupCreatorPaymentController.adminSwitch. Source: [backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:133](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L133).
 
@@ -2496,7 +3416,7 @@ Purpose: invoke the `adminSwitch` action in the `GroupCreatorPaymentController` 
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0041 — GET /api/admin/hosts/{hostId}/group-member-email-policy
+## API-0056 — GET /api/admin/hosts/{hostId}/group-member-email-policy
 
 Handler: com.giftplatform.admin.GroupMemberEmailPolicyController.read. Source: [backend/src/main/java/com/giftplatform/admin/GroupMemberEmailPolicyController.java:19](../../src/main/java/com/giftplatform/admin/GroupMemberEmailPolicyController.java#L19).
 
@@ -2549,7 +3469,7 @@ Purpose: invoke the `read` action in the `GroupMemberEmailPolicyController` modu
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0042 — PUT /api/admin/hosts/{hostId}/group-member-email-policy
+## API-0057 — PUT /api/admin/hosts/{hostId}/group-member-email-policy
 
 Handler: com.giftplatform.admin.GroupMemberEmailPolicyController.update. Source: [backend/src/main/java/com/giftplatform/admin/GroupMemberEmailPolicyController.java:20](../../src/main/java/com/giftplatform/admin/GroupMemberEmailPolicyController.java#L20).
 
@@ -2601,9 +3521,9 @@ Purpose: invoke the `update` action in the `GroupMemberEmailPolicyController` mo
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0043 — GET /api/admin/invitation-assets
+## API-0058 — GET /api/admin/invitation-assets
 
-Handler: com.giftplatform.asset.GalleryAssetController.all. Source: [backend/src/main/java/com/giftplatform/asset/GalleryAssetController.java:21](../../src/main/java/com/giftplatform/asset/GalleryAssetController.java#L21).
+Handler: com.giftplatform.asset.GalleryAssetController.all. Source: [backend/src/main/java/com/giftplatform/asset/GalleryAssetController.java:23](../../src/main/java/com/giftplatform/asset/GalleryAssetController.java#L23).
 
 Purpose: invoke the `all` action in the `GalleryAssetController` module; the module workflow describes its business intent.
 
@@ -2660,9 +3580,9 @@ Purpose: invoke the `all` action in the `GalleryAssetController` module; the mod
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0044 — POST /api/admin/invitation-assets
+## API-0059 — POST /api/admin/invitation-assets
 
-Handler: com.giftplatform.asset.GalleryAssetController.upload. Source: [backend/src/main/java/com/giftplatform/asset/GalleryAssetController.java:25](../../src/main/java/com/giftplatform/asset/GalleryAssetController.java#L25).
+Handler: com.giftplatform.asset.GalleryAssetController.upload. Source: [backend/src/main/java/com/giftplatform/asset/GalleryAssetController.java:27](../../src/main/java/com/giftplatform/asset/GalleryAssetController.java#L27).
 
 Purpose: invoke the `upload` action in the `GalleryAssetController` module; the module workflow describes its business intent.
 
@@ -2678,6 +3598,7 @@ Purpose: invoke the `upload` action in the `GalleryAssetController` module; the 
 | occasion | @org.springframework.web.bind.annotation.RequestParam(name="", value="", required=true, defaultValue="\n\t\t\n\t\t\n\ue000\ue001\ue002\n\t\t\t\t\n") | java.lang.String | As declared by the annotation; no additional undocumented default is asserted. |
 | title | @org.springframework.web.bind.annotation.RequestParam(name="", value="", required=true, defaultValue="\n\t\t\n\t\t\n\ue000\ue001\ue002\n\t\t\t\t\n") | java.lang.String | As declared by the annotation; no additional undocumented default is asserted. |
 | file | @org.springframework.web.bind.annotation.RequestPart(name="", value="file", required=true) | org.springframework.web.multipart.MultipartFile | As declared by the annotation; no additional undocumented default is asserted. |
+| tier | @org.springframework.web.bind.annotation.RequestParam(name="", value="", required=true, defaultValue="FREE") | java.lang.String | As declared by the annotation; no additional undocumented default is asserted. |
 
 
 **Request example / shape:**
@@ -2687,7 +3608,8 @@ Purpose: invoke the `upload` action in the `GalleryAssetController` module; the 
     "category": "<category: validated value>",
     "occasion": "<occasion: validated value>",
     "title": "<title: validated value>",
-    "file": "<file: validated value>"
+    "file": "<file: validated value>",
+    "tier": "<tier: validated value>"
   }
 }
 ```
@@ -2726,9 +3648,9 @@ Purpose: invoke the `upload` action in the `GalleryAssetController` module; the 
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0045 — GET /api/admin/invitation-assets/{id}/image
+## API-0060 — GET /api/admin/invitation-assets/{id}/image
 
-Handler: com.giftplatform.asset.GalleryAssetController.adminImage. Source: [backend/src/main/java/com/giftplatform/asset/GalleryAssetController.java:23](../../src/main/java/com/giftplatform/asset/GalleryAssetController.java#L23).
+Handler: com.giftplatform.asset.GalleryAssetController.adminImage. Source: [backend/src/main/java/com/giftplatform/asset/GalleryAssetController.java:25](../../src/main/java/com/giftplatform/asset/GalleryAssetController.java#L25).
 
 Purpose: invoke the `adminImage` action in the `GalleryAssetController` module; the module workflow describes its business intent.
 
@@ -2777,9 +3699,9 @@ Purpose: invoke the `adminImage` action in the `GalleryAssetController` module; 
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0046 — POST /api/admin/invitation-assets/{id}/publish
+## API-0061 — POST /api/admin/invitation-assets/{id}/publish
 
-Handler: com.giftplatform.asset.GalleryAssetController.publish. Source: [backend/src/main/java/com/giftplatform/asset/GalleryAssetController.java:30](../../src/main/java/com/giftplatform/asset/GalleryAssetController.java#L30).
+Handler: com.giftplatform.asset.GalleryAssetController.publish. Source: [backend/src/main/java/com/giftplatform/asset/GalleryAssetController.java:32](../../src/main/java/com/giftplatform/asset/GalleryAssetController.java#L32).
 
 Purpose: invoke the `publish` action in the `GalleryAssetController` module; the module workflow describes its business intent.
 
@@ -2837,9 +3759,9 @@ Purpose: invoke the `publish` action in the `GalleryAssetController` module; the
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0047 — PUT /api/admin/invitation-assets/{id}/tier
+## API-0062 — PUT /api/admin/invitation-assets/{id}/tier
 
-Handler: com.giftplatform.asset.GalleryAssetController.tier. Source: [backend/src/main/java/com/giftplatform/asset/GalleryAssetController.java:19](../../src/main/java/com/giftplatform/asset/GalleryAssetController.java#L19).
+Handler: com.giftplatform.asset.GalleryAssetController.tier. Source: [backend/src/main/java/com/giftplatform/asset/GalleryAssetController.java:21](../../src/main/java/com/giftplatform/asset/GalleryAssetController.java#L21).
 
 Purpose: invoke the `tier` action in the `GalleryAssetController` module; the module workflow describes its business intent.
 
@@ -2896,9 +3818,9 @@ Purpose: invoke the `tier` action in the `GalleryAssetController` module; the mo
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0048 — POST /api/admin/invitation-assets/{id}/unpublish
+## API-0063 — POST /api/admin/invitation-assets/{id}/unpublish
 
-Handler: com.giftplatform.asset.GalleryAssetController.unpublish. Source: [backend/src/main/java/com/giftplatform/asset/GalleryAssetController.java:32](../../src/main/java/com/giftplatform/asset/GalleryAssetController.java#L32).
+Handler: com.giftplatform.asset.GalleryAssetController.unpublish. Source: [backend/src/main/java/com/giftplatform/asset/GalleryAssetController.java:34](../../src/main/java/com/giftplatform/asset/GalleryAssetController.java#L34).
 
 Purpose: invoke the `unpublish` action in the `GalleryAssetController` module; the module workflow describes its business intent.
 
@@ -2956,7 +3878,663 @@ Purpose: invoke the `unpublish` action in the `GalleryAssetController` module; t
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0049 — GET /api/admin/verification-settings
+## API-0064 — GET /api/admin/localization
+
+Handler: com.giftplatform.localization.LocalizationAdminController.settings. Source: [backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:24](../../src/main/java/com/giftplatform/localization/LocalizationAdminController.java#L24).
+
+Purpose: invoke the `settings` action in the `LocalizationAdminController` module; the module workflow describes its business intent.
+
+**Access:** Authenticated PLATFORM_ADMIN; controller/service admin check and CSRF on mutations.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+
+
+**Request example / shape:**
+```json
+{
+  "pathAndQueryParameters": {}
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `java.util.Map<java.lang.String, java.lang.Object>`. Produces: handler content type / negotiated JSON.
+```json
+{
+  "_contract": "Dynamic response keys: inspect linked handler and module narrative; no fixed schema is asserted."
+}
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/admin/localization"
+  }
+}
+```
+
+**Database effects:** `events`, `language_delivery_templates`, `localization_event_controls`, `localization_host_controls`, `localization_sources`, `localization_translations`, `platform_admin_action_audit`, `platform_languages`, `platform_localization_settings`, `users` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0065 — PUT /api/admin/localization
+
+Handler: com.giftplatform.localization.LocalizationAdminController.configure. Source: [backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:25](../../src/main/java/com/giftplatform/localization/LocalizationAdminController.java#L25).
+
+Purpose: invoke the `configure` action in the `LocalizationAdminController` module; the module workflow describes its business intent.
+
+**Access:** Authenticated PLATFORM_ADMIN; controller/service admin check and CSRF on mutations.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+| input | @jakarta.validation.Valid(); @org.springframework.web.bind.annotation.RequestBody(required=true) | com.giftplatform.localization.LocalizationAdminController$Configuration | As declared by the annotation; no additional undocumented default is asserted. |
+
+
+**Request example / shape:**
+```json
+{
+  "enabled": true,
+  "defaultLanguage": "<defaultLanguage: validated value>",
+  "fallbackLanguage": "<fallbackLanguage: validated value>",
+  "version": 1
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `com.giftplatform.localization.LocalizationService$Settings`. Produces: handler content type / negotiated JSON.
+```json
+{
+  "enabled": true,
+  "defaultLanguage": "<defaultLanguage: validated value>",
+  "fallbackLanguage": "<fallbackLanguage: validated value>",
+  "version": 1
+}
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/admin/localization"
+  }
+}
+```
+
+**Database effects:** `events`, `language_delivery_templates`, `localization_event_controls`, `localization_host_controls`, `localization_sources`, `localization_translations`, `platform_admin_action_audit`, `platform_languages`, `platform_localization_settings`, `users` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0066 — GET /api/admin/localization/delivery-templates
+
+Handler: com.giftplatform.localization.LocalizationAdminController.deliveryTemplates. Source: [backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:52](../../src/main/java/com/giftplatform/localization/LocalizationAdminController.java#L52).
+
+Purpose: invoke the `deliveryTemplates` action in the `LocalizationAdminController` module; the module workflow describes its business intent.
+
+**Access:** Authenticated PLATFORM_ADMIN; controller/service admin check and CSRF on mutations.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+
+
+**Request example / shape:**
+```json
+{
+  "pathAndQueryParameters": {}
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `java.util.List<java.util.Map<java.lang.String, java.lang.Object>>`. Produces: handler content type / negotiated JSON.
+```json
+[
+  {
+    "_contract": "Dynamic response keys: inspect linked handler and module narrative; no fixed schema is asserted."
+  }
+]
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/admin/localization/delivery-templates"
+  }
+}
+```
+
+**Database effects:** `events`, `language_delivery_templates`, `localization_event_controls`, `localization_host_controls`, `localization_sources`, `localization_translations`, `platform_admin_action_audit`, `platform_languages`, `platform_localization_settings`, `users` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0067 — PUT /api/admin/localization/delivery-templates/{language}
+
+Handler: com.giftplatform.localization.LocalizationAdminController.deliveryTemplate. Source: [backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:53](../../src/main/java/com/giftplatform/localization/LocalizationAdminController.java#L53).
+
+Purpose: invoke the `deliveryTemplate` action in the `LocalizationAdminController` module; the module workflow describes its business intent.
+
+**Access:** Authenticated PLATFORM_ADMIN; controller/service admin check and CSRF on mutations.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+| language | @org.springframework.web.bind.annotation.PathVariable(name="", value="", required=true) | java.lang.String | As declared by the annotation; no additional undocumented default is asserted. |
+| input | @jakarta.validation.Valid(); @org.springframework.web.bind.annotation.RequestBody(required=true) | com.giftplatform.localization.LocalizationAdminController$DeliveryTemplate | As declared by the annotation; no additional undocumented default is asserted. |
+
+
+**Request example / shape:**
+```json
+{
+  "templateId": "<templateId: validated value>",
+  "version": 1
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `java.util.Map<java.lang.String, java.lang.Object>`. Produces: handler content type / negotiated JSON.
+```json
+{
+  "_contract": "Dynamic response keys: inspect linked handler and module narrative; no fixed schema is asserted."
+}
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/admin/localization/delivery-templates/{language}"
+  }
+}
+```
+
+**Database effects:** `events`, `language_delivery_templates`, `localization_event_controls`, `localization_host_controls`, `localization_sources`, `localization_translations`, `platform_admin_action_audit`, `platform_languages`, `platform_localization_settings`, `users` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0068 — PUT /api/admin/localization/languages/{code}
+
+Handler: com.giftplatform.localization.LocalizationAdminController.language. Source: [backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:29](../../src/main/java/com/giftplatform/localization/LocalizationAdminController.java#L29).
+
+Purpose: invoke the `language` action in the `LocalizationAdminController` module; the module workflow describes its business intent.
+
+**Access:** Authenticated PLATFORM_ADMIN; controller/service admin check and CSRF on mutations.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+| code | @org.springframework.web.bind.annotation.PathVariable(name="", value="", required=true) | java.lang.String | As declared by the annotation; no additional undocumented default is asserted. |
+| input | @jakarta.validation.Valid(); @org.springframework.web.bind.annotation.RequestBody(required=true) | com.giftplatform.localization.LocalizationAdminController$LanguageInput | As declared by the annotation; no additional undocumented default is asserted. |
+
+
+**Request example / shape:**
+```json
+{
+  "nativeName": "<nativeName: validated value>",
+  "englishName": "<englishName: validated value>",
+  "direction": "<direction: validated value>",
+  "enabled": true,
+  "version": 1
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `java.util.List<com.giftplatform.localization.LocalizationService$Language>`. Produces: handler content type / negotiated JSON.
+```json
+[
+  {
+    "code": "<code: validated value>",
+    "nativeName": "<nativeName: validated value>",
+    "englishName": "<englishName: validated value>",
+    "direction": "<direction: validated value>",
+    "enabled": true,
+    "version": 1
+  }
+]
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/admin/localization/languages/{code}"
+  }
+}
+```
+
+**Database effects:** `events`, `language_delivery_templates`, `localization_event_controls`, `localization_host_controls`, `localization_sources`, `localization_translations`, `platform_admin_action_audit`, `platform_languages`, `platform_localization_settings`, `users` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0069 — GET /api/admin/localization/scopes/{scope}/{id}
+
+Handler: com.giftplatform.localization.LocalizationAdminController.scope. Source: [backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:48](../../src/main/java/com/giftplatform/localization/LocalizationAdminController.java#L48).
+
+Purpose: invoke the `scope` action in the `LocalizationAdminController` module; the module workflow describes its business intent.
+
+**Access:** Authenticated PLATFORM_ADMIN; controller/service admin check and CSRF on mutations.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+| scope | @org.springframework.web.bind.annotation.PathVariable(name="", value="", required=true) | java.lang.String | As declared by the annotation; no additional undocumented default is asserted. |
+| id | @org.springframework.web.bind.annotation.PathVariable(name="", value="", required=true) | java.util.UUID | As declared by the annotation; no additional undocumented default is asserted. |
+
+
+**Request example / shape:**
+```json
+{
+  "pathAndQueryParameters": {
+    "scope": "<scope: validated value>",
+    "id": "123e4567-e89b-42d3-a456-426614174000"
+  }
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `java.util.Map<java.lang.String, java.lang.Object>`. Produces: handler content type / negotiated JSON.
+```json
+{
+  "_contract": "Dynamic response keys: inspect linked handler and module narrative; no fixed schema is asserted."
+}
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/admin/localization/scopes/{scope}/{id}"
+  }
+}
+```
+
+**Database effects:** `events`, `language_delivery_templates`, `localization_event_controls`, `localization_host_controls`, `localization_sources`, `localization_translations`, `platform_admin_action_audit`, `platform_languages`, `platform_localization_settings`, `users` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0070 — PUT /api/admin/localization/scopes/{scope}/{id}
+
+Handler: com.giftplatform.localization.LocalizationAdminController.scope. Source: [backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:48](../../src/main/java/com/giftplatform/localization/LocalizationAdminController.java#L48).
+
+Purpose: invoke the `scope` action in the `LocalizationAdminController` module; the module workflow describes its business intent.
+
+**Access:** Authenticated PLATFORM_ADMIN; controller/service admin check and CSRF on mutations.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+| scope | @org.springframework.web.bind.annotation.PathVariable(name="", value="", required=true) | java.lang.String | As declared by the annotation; no additional undocumented default is asserted. |
+| id | @org.springframework.web.bind.annotation.PathVariable(name="", value="", required=true) | java.util.UUID | As declared by the annotation; no additional undocumented default is asserted. |
+| input | @jakarta.validation.Valid(); @org.springframework.web.bind.annotation.RequestBody(required=true) | com.giftplatform.localization.LocalizationAdminController$Scope | As declared by the annotation; no additional undocumented default is asserted. |
+
+
+**Request example / shape:**
+```json
+{
+  "state": "<state: validated value>"
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `java.util.Map<java.lang.String, java.lang.Object>`. Produces: handler content type / negotiated JSON.
+```json
+{
+  "_contract": "Dynamic response keys: inspect linked handler and module narrative; no fixed schema is asserted."
+}
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/admin/localization/scopes/{scope}/{id}"
+  }
+}
+```
+
+**Database effects:** `events`, `language_delivery_templates`, `localization_event_controls`, `localization_host_controls`, `localization_sources`, `localization_translations`, `platform_admin_action_audit`, `platform_languages`, `platform_localization_settings`, `users` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0071 — POST /api/admin/localization/sources
+
+Handler: com.giftplatform.localization.LocalizationAdminController.source. Source: [backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:57](../../src/main/java/com/giftplatform/localization/LocalizationAdminController.java#L57).
+
+Purpose: invoke the `source` action in the `LocalizationAdminController` module; the module workflow describes its business intent.
+
+**Access:** Authenticated PLATFORM_ADMIN; controller/service admin check and CSRF on mutations.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+| input | @jakarta.validation.Valid(); @org.springframework.web.bind.annotation.RequestBody(required=true) | com.giftplatform.localization.LocalizationAdminController$Source | As declared by the annotation; no additional undocumented default is asserted. |
+
+
+**Request example / shape:**
+```json
+{
+  "text": "<text: validated value>"
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `java.util.Map<java.lang.String, java.lang.String>`. Produces: handler content type / negotiated JSON.
+```json
+{
+  "_contract": "Dynamic response keys: inspect linked handler and module narrative; no fixed schema is asserted."
+}
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/admin/localization/sources"
+  }
+}
+```
+
+**Database effects:** `events`, `language_delivery_templates`, `localization_event_controls`, `localization_host_controls`, `localization_sources`, `localization_translations`, `platform_admin_action_audit`, `platform_languages`, `platform_localization_settings`, `users` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0072 — GET /api/admin/localization/translations
+
+Handler: com.giftplatform.localization.LocalizationAdminController.translations. Source: [backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:33](../../src/main/java/com/giftplatform/localization/LocalizationAdminController.java#L33).
+
+Purpose: invoke the `translations` action in the `LocalizationAdminController` module; the module workflow describes its business intent.
+
+**Access:** Authenticated PLATFORM_ADMIN; controller/service admin check and CSRF on mutations.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+| language | @org.springframework.web.bind.annotation.RequestParam(name="", value="", required=true, defaultValue="\n\t\t\n\t\t\n\ue000\ue001\ue002\n\t\t\t\t\n") | java.lang.String | As declared by the annotation; no additional undocumented default is asserted. |
+| search | @org.springframework.web.bind.annotation.RequestParam(name="", value="", required=true, defaultValue="") | java.lang.String | As declared by the annotation; no additional undocumented default is asserted. |
+| offset | @org.springframework.web.bind.annotation.RequestParam(name="", value="", required=true, defaultValue="0") | int | As declared by the annotation; no additional undocumented default is asserted. |
+| limit | @org.springframework.web.bind.annotation.RequestParam(name="", value="", required=true, defaultValue="50") | int | As declared by the annotation; no additional undocumented default is asserted. |
+
+
+**Request example / shape:**
+```json
+{
+  "pathAndQueryParameters": {
+    "language": "<language: validated value>",
+    "search": "<search: validated value>",
+    "offset": 1,
+    "limit": 1
+  }
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `java.util.Map<java.lang.String, java.lang.Object>`. Produces: handler content type / negotiated JSON.
+```json
+{
+  "_contract": "Dynamic response keys: inspect linked handler and module narrative; no fixed schema is asserted."
+}
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/admin/localization/translations"
+  }
+}
+```
+
+**Database effects:** `events`, `language_delivery_templates`, `localization_event_controls`, `localization_host_controls`, `localization_sources`, `localization_translations`, `platform_admin_action_audit`, `platform_languages`, `platform_localization_settings`, `users` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0073 — GET /api/admin/localization/translations/{language}/export
+
+Handler: com.giftplatform.localization.LocalizationAdminController.export. Source: [backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:43](../../src/main/java/com/giftplatform/localization/LocalizationAdminController.java#L43).
+
+Purpose: invoke the `export` action in the `LocalizationAdminController` module; the module workflow describes its business intent.
+
+**Access:** Authenticated PLATFORM_ADMIN; controller/service admin check and CSRF on mutations.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+| language | @org.springframework.web.bind.annotation.PathVariable(name="", value="", required=true) | java.lang.String | As declared by the annotation; no additional undocumented default is asserted. |
+
+
+**Request example / shape:**
+```json
+{
+  "pathAndQueryParameters": {
+    "language": "<language: validated value>"
+  }
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `java.util.Map<java.lang.String, java.lang.Object>`. Produces: handler content type / negotiated JSON.
+```json
+{
+  "_contract": "Dynamic response keys: inspect linked handler and module narrative; no fixed schema is asserted."
+}
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/admin/localization/translations/{language}/export"
+  }
+}
+```
+
+**Database effects:** `events`, `language_delivery_templates`, `localization_event_controls`, `localization_host_controls`, `localization_sources`, `localization_translations`, `platform_admin_action_audit`, `platform_languages`, `platform_localization_settings`, `users` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0074 — POST /api/admin/localization/translations/{language}/import
+
+Handler: com.giftplatform.localization.LocalizationAdminController.importBatch. Source: [backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:45](../../src/main/java/com/giftplatform/localization/LocalizationAdminController.java#L45).
+
+Purpose: invoke the `importBatch` action in the `LocalizationAdminController` module; the module workflow describes its business intent.
+
+**Access:** Authenticated PLATFORM_ADMIN; controller/service admin check and CSRF on mutations.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+| language | @org.springframework.web.bind.annotation.PathVariable(name="", value="", required=true) | java.lang.String | As declared by the annotation; no additional undocumented default is asserted. |
+| input | @jakarta.validation.Valid(); @org.springframework.web.bind.annotation.RequestBody(required=true) | com.giftplatform.localization.LocalizationAdminController$ImportBatch | As declared by the annotation; no additional undocumented default is asserted. |
+
+
+**Request example / shape:**
+```json
+{
+  "entries": {
+    "_contract": "Dynamic response keys: inspect linked handler and module narrative; no fixed schema is asserted."
+  },
+  "publish": true
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `java.util.Map<java.lang.String, java.lang.Object>`. Produces: handler content type / negotiated JSON.
+```json
+{
+  "_contract": "Dynamic response keys: inspect linked handler and module narrative; no fixed schema is asserted."
+}
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/admin/localization/translations/{language}/import"
+  }
+}
+```
+
+**Database effects:** `events`, `language_delivery_templates`, `localization_event_controls`, `localization_host_controls`, `localization_sources`, `localization_translations`, `platform_admin_action_audit`, `platform_languages`, `platform_localization_settings`, `users` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0075 — PUT /api/admin/localization/translations/{language}/{key}
+
+Handler: com.giftplatform.localization.LocalizationAdminController.translation. Source: [backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:35](../../src/main/java/com/giftplatform/localization/LocalizationAdminController.java#L35).
+
+Purpose: invoke the `translation` action in the `LocalizationAdminController` module; the module workflow describes its business intent.
+
+**Access:** Authenticated PLATFORM_ADMIN; controller/service admin check and CSRF on mutations.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+| language | @org.springframework.web.bind.annotation.PathVariable(name="", value="", required=true) | java.lang.String | As declared by the annotation; no additional undocumented default is asserted. |
+| key | @org.springframework.web.bind.annotation.PathVariable(name="", value="", required=true) | java.lang.String | As declared by the annotation; no additional undocumented default is asserted. |
+| input | @jakarta.validation.Valid(); @org.springframework.web.bind.annotation.RequestBody(required=true) | com.giftplatform.localization.LocalizationAdminController$Translation | As declared by the annotation; no additional undocumented default is asserted. |
+
+
+**Request example / shape:**
+```json
+{
+  "text": "<text: validated value>",
+  "published": true,
+  "version": 1
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `java.util.Map<java.lang.String, java.lang.Object>`. Produces: handler content type / negotiated JSON.
+```json
+{
+  "_contract": "Dynamic response keys: inspect linked handler and module narrative; no fixed schema is asserted."
+}
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/admin/localization/translations/{language}/{key}"
+  }
+}
+```
+
+**Database effects:** `events`, `language_delivery_templates`, `localization_event_controls`, `localization_host_controls`, `localization_sources`, `localization_translations`, `platform_admin_action_audit`, `platform_languages`, `platform_localization_settings`, `users` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0076 — GET /api/admin/verification-settings
 
 Handler: com.giftplatform.security.verification.VerificationSettingsController.read. Source: [backend/src/main/java/com/giftplatform/security/verification/VerificationSettingsController.java:31](../../src/main/java/com/giftplatform/security/verification/VerificationSettingsController.java#L31).
 
@@ -3006,7 +4584,7 @@ Purpose: invoke the `read` action in the `VerificationSettingsController` module
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0050 — PUT /api/admin/verification-settings
+## API-0077 — PUT /api/admin/verification-settings
 
 Handler: com.giftplatform.security.verification.VerificationSettingsController.update. Source: [backend/src/main/java/com/giftplatform/security/verification/VerificationSettingsController.java:34](../../src/main/java/com/giftplatform/security/verification/VerificationSettingsController.java#L34).
 
@@ -3058,7 +4636,7 @@ Purpose: invoke the `update` action in the `VerificationSettingsController` modu
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0051 — POST /api/auth/contact-mobile/complete
+## API-0078 — POST /api/auth/contact-mobile/complete
 
 Handler: com.giftplatform.security.verification.AccountMobileVerificationController.complete. Source: [backend/src/main/java/com/giftplatform/security/verification/AccountMobileVerificationController.java:19](../../src/main/java/com/giftplatform/security/verification/AccountMobileVerificationController.java#L19).
 
@@ -3110,7 +4688,7 @@ Purpose: invoke the `complete` action in the `AccountMobileVerificationControlle
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0052 — POST /api/auth/contact-mobile/start
+## API-0079 — POST /api/auth/contact-mobile/start
 
 Handler: com.giftplatform.security.verification.AccountMobileVerificationController.start. Source: [backend/src/main/java/com/giftplatform/security/verification/AccountMobileVerificationController.java:18](../../src/main/java/com/giftplatform/security/verification/AccountMobileVerificationController.java#L18).
 
@@ -3162,7 +4740,7 @@ Purpose: invoke the `start` action in the `AccountMobileVerificationController` 
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0053 — GET /api/auth/contact-mobile/status
+## API-0080 — GET /api/auth/contact-mobile/status
 
 Handler: com.giftplatform.security.verification.AccountMobileVerificationController.status. Source: [backend/src/main/java/com/giftplatform/security/verification/AccountMobileVerificationController.java:17](../../src/main/java/com/giftplatform/security/verification/AccountMobileVerificationController.java#L17).
 
@@ -3213,7 +4791,7 @@ Purpose: invoke the `status` action in the `AccountMobileVerificationController`
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0054 — GET /api/auth/csrf
+## API-0081 — GET /api/auth/csrf
 
 Handler: com.giftplatform.security.CsrfBootstrapController.csrf. Source: [backend/src/main/java/com/giftplatform/security/CsrfBootstrapController.java:11](../../src/main/java/com/giftplatform/security/CsrfBootstrapController.java#L11).
 
@@ -3261,7 +4839,108 @@ null
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0055 — POST /api/auth/login
+## API-0082 — GET /api/auth/language
+
+Handler: com.giftplatform.localization.LocalizationController.preference. Source: [backend/src/main/java/com/giftplatform/localization/LocalizationController.java:29](../../src/main/java/com/giftplatform/localization/LocalizationController.java#L29).
+
+Purpose: invoke the `preference` action in the `LocalizationController` module; the module workflow describes its business intent.
+
+**Access:** Authenticated principal; ownership/role is enforced by route filter and controller/service resource checks. An authenticated user cannot assume access to another host’s UUID.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+
+
+**Request example / shape:**
+```json
+{
+  "pathAndQueryParameters": {}
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `org.springframework.http.ResponseEntity<java.util.Map<java.lang.String, java.lang.Object>>`. Produces: handler content type / negotiated JSON.
+```json
+{
+  "_contract": "Dynamic response keys: inspect linked handler and module narrative; no fixed schema is asserted."
+}
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/auth/language"
+  }
+}
+```
+
+**Database effects:** `user_language_preferences` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0083 — POST /api/auth/language
+
+Handler: com.giftplatform.localization.LocalizationController.preference. Source: [backend/src/main/java/com/giftplatform/localization/LocalizationController.java:29](../../src/main/java/com/giftplatform/localization/LocalizationController.java#L29).
+
+Purpose: invoke the `preference` action in the `LocalizationController` module; the module workflow describes its business intent.
+
+**Access:** Authenticated principal; ownership/role is enforced by route filter and controller/service resource checks. An authenticated user cannot assume access to another host’s UUID.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+| input | @jakarta.validation.Valid(); @org.springframework.web.bind.annotation.RequestBody(required=true) | com.giftplatform.localization.LocalizationController$Preference | As declared by the annotation; no additional undocumented default is asserted. |
+
+
+**Request example / shape:**
+```json
+{
+  "language": "<language: validated value>"
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `java.util.Map<java.lang.String, java.lang.String>`. Produces: handler content type / negotiated JSON.
+```json
+{
+  "_contract": "Dynamic response keys: inspect linked handler and module narrative; no fixed schema is asserted."
+}
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/auth/language"
+  }
+}
+```
+
+**Database effects:** `user_language_preferences` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0084 — POST /api/auth/login
 
 Handler: com.giftplatform.security.AuthController.login. Source: [backend/src/main/java/com/giftplatform/security/AuthController.java:42](../../src/main/java/com/giftplatform/security/AuthController.java#L42).
 
@@ -3315,9 +4994,9 @@ Purpose: invoke the `login` action in the `AuthController` module; the module wo
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0056 — GET /api/auth/me
+## API-0085 — GET /api/auth/me
 
-Handler: com.giftplatform.security.AuthController.currentUser. Source: [backend/src/main/java/com/giftplatform/security/AuthController.java:94](../../src/main/java/com/giftplatform/security/AuthController.java#L94).
+Handler: com.giftplatform.security.AuthController.currentUser. Source: [backend/src/main/java/com/giftplatform/security/AuthController.java:95](../../src/main/java/com/giftplatform/security/AuthController.java#L95).
 
 Purpose: invoke the `currentUser` action in the `AuthController` module; the module workflow describes its business intent.
 
@@ -3370,9 +5049,113 @@ Purpose: invoke the `currentUser` action in the `AuthController` module; the mod
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0057 — GET /api/auth/profile-name
+## API-0086 — GET /api/auth/profile
 
-Handler: com.giftplatform.user.controller.ProfileNameController.get. Source: [backend/src/main/java/com/giftplatform/user/controller/ProfileNameController.java:22](../../src/main/java/com/giftplatform/user/controller/ProfileNameController.java#L22).
+Handler: com.giftplatform.user.controller.ProfilePreferencesController.get. Source: [backend/src/main/java/com/giftplatform/user/controller/ProfilePreferencesController.java:21](../../src/main/java/com/giftplatform/user/controller/ProfilePreferencesController.java#L21).
+
+Purpose: invoke the `get` action in the `ProfilePreferencesController` module; the module workflow describes its business intent.
+
+**Access:** Authenticated principal; ownership/role is enforced by route filter and controller/service resource checks. An authenticated user cannot assume access to another host’s UUID.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+
+
+**Request example / shape:**
+```json
+{
+  "pathAndQueryParameters": {}
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `org.springframework.http.ResponseEntity<java.util.Map<java.lang.String, java.lang.Object>>`. Produces: handler content type / negotiated JSON.
+```json
+{
+  "_contract": "Dynamic response keys: inspect linked handler and module narrative; no fixed schema is asserted."
+}
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/auth/profile"
+  }
+}
+```
+
+**Database effects:** `user_profile_preferences`, `users` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0087 — POST /api/auth/profile
+
+Handler: com.giftplatform.user.controller.ProfilePreferencesController.save. Source: [backend/src/main/java/com/giftplatform/user/controller/ProfilePreferencesController.java:26](../../src/main/java/com/giftplatform/user/controller/ProfilePreferencesController.java#L26).
+
+Purpose: invoke the `save` action in the `ProfilePreferencesController` module; the module workflow describes its business intent.
+
+**Access:** Authenticated principal; ownership/role is enforced by route filter and controller/service resource checks. An authenticated user cannot assume access to another host’s UUID.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+| input | @org.springframework.web.bind.annotation.RequestBody(required=true) | com.giftplatform.user.controller.ProfilePreferencesController$Input | As declared by the annotation; no additional undocumented default is asserted. |
+
+
+**Request example / shape:**
+```json
+{
+  "timezone": "<timezone: validated value>",
+  "eventNotifications": true,
+  "contributionNotifications": true,
+  "marketingNotifications": true
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `org.springframework.http.ResponseEntity<java.util.Map<java.lang.String, java.lang.Object>>`. Produces: handler content type / negotiated JSON.
+```json
+{
+  "_contract": "Dynamic response keys: inspect linked handler and module narrative; no fixed schema is asserted."
+}
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/auth/profile"
+  }
+}
+```
+
+**Database effects:** `user_profile_preferences`, `users` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0088 — GET /api/auth/profile-name
+
+Handler: com.giftplatform.user.controller.ProfileNameController.get. Source: [backend/src/main/java/com/giftplatform/user/controller/ProfileNameController.java:23](../../src/main/java/com/giftplatform/user/controller/ProfileNameController.java#L23).
 
 Purpose: invoke the `get` action in the `ProfileNameController` module; the module workflow describes its business intent.
 
@@ -3423,9 +5206,9 @@ Purpose: invoke the `get` action in the `ProfileNameController` module; the modu
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0058 — POST /api/auth/profile-name
+## API-0089 — POST /api/auth/profile-name
 
-Handler: com.giftplatform.user.controller.ProfileNameController.update. Source: [backend/src/main/java/com/giftplatform/user/controller/ProfileNameController.java:27](../../src/main/java/com/giftplatform/user/controller/ProfileNameController.java#L27).
+Handler: com.giftplatform.user.controller.ProfileNameController.update. Source: [backend/src/main/java/com/giftplatform/user/controller/ProfileNameController.java:28](../../src/main/java/com/giftplatform/user/controller/ProfileNameController.java#L28).
 
 Purpose: invoke the `update` action in the `ProfileNameController` module; the module workflow describes its business intent.
 
@@ -3475,9 +5258,158 @@ Purpose: invoke the `update` action in the `ProfileNameController` module; the m
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0059 — POST /api/auth/recovery/complete
+## API-0090 — DELETE /api/auth/profile/picture
 
-Handler: com.giftplatform.security.recovery.EmailRecoveryController.complete. Source: [backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:112](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L112).
+Handler: com.giftplatform.user.controller.ProfilePreferencesController.remove. Source: [backend/src/main/java/com/giftplatform/user/controller/ProfilePreferencesController.java:29](../../src/main/java/com/giftplatform/user/controller/ProfilePreferencesController.java#L29).
+
+Purpose: invoke the `remove` action in the `ProfilePreferencesController` module; the module workflow describes its business intent.
+
+**Access:** Authenticated principal; ownership/role is enforced by route filter and controller/service resource checks. An authenticated user cannot assume access to another host’s UUID.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+
+
+**Request example / shape:**
+```json
+{
+  "pathAndQueryParameters": {}
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `org.springframework.http.ResponseEntity<java.lang.Void>`. Produces: handler content type / negotiated JSON.
+```json
+null
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/auth/profile/picture"
+  }
+}
+```
+
+**Database effects:** `user_profile_preferences`, `users` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0091 — GET /api/auth/profile/picture
+
+Handler: com.giftplatform.user.controller.ProfilePreferencesController.picture. Source: [backend/src/main/java/com/giftplatform/user/controller/ProfilePreferencesController.java:28](../../src/main/java/com/giftplatform/user/controller/ProfilePreferencesController.java#L28).
+
+Purpose: invoke the `picture` action in the `ProfilePreferencesController` module; the module workflow describes its business intent.
+
+**Access:** Authenticated principal; ownership/role is enforced by route filter and controller/service resource checks. An authenticated user cannot assume access to another host’s UUID.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+
+
+**Request example / shape:**
+```json
+{
+  "pathAndQueryParameters": {}
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `org.springframework.http.ResponseEntity<byte[]>`. Produces: handler content type / negotiated JSON.
+```json
+"<binary bytes: use response Content-Type>"
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/auth/profile/picture"
+  }
+}
+```
+
+**Database effects:** `user_profile_preferences`, `users` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0092 — POST /api/auth/profile/picture
+
+Handler: com.giftplatform.user.controller.ProfilePreferencesController.picture. Source: [backend/src/main/java/com/giftplatform/user/controller/ProfilePreferencesController.java:28](../../src/main/java/com/giftplatform/user/controller/ProfilePreferencesController.java#L28).
+
+Purpose: invoke the `picture` action in the `ProfilePreferencesController` module; the module workflow describes its business intent.
+
+**Access:** Authenticated principal; ownership/role is enforced by route filter and controller/service resource checks. An authenticated user cannot assume access to another host’s UUID.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+| file | @org.springframework.web.bind.annotation.RequestPart(name="", value="file", required=true) | org.springframework.web.multipart.MultipartFile | As declared by the annotation; no additional undocumented default is asserted. |
+
+
+**Request example / shape:**
+```json
+{
+  "pathAndQueryParameters": {
+    "file": "<file: validated value>"
+  }
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `java.util.Map<java.lang.String, java.lang.String>`. Produces: handler content type / negotiated JSON.
+```json
+{
+  "_contract": "Dynamic response keys: inspect linked handler and module narrative; no fixed schema is asserted."
+}
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/auth/profile/picture"
+  }
+}
+```
+
+**Database effects:** `user_profile_preferences`, `users` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0093 — POST /api/auth/recovery/complete
+
+Handler: com.giftplatform.security.recovery.EmailRecoveryController.complete. Source: [backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:113](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L113).
 
 Purpose: invoke the `complete` action in the `EmailRecoveryController` module; the module workflow describes its business intent.
 
@@ -3532,9 +5464,9 @@ Purpose: invoke the `complete` action in the `EmailRecoveryController` module; t
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0060 — GET /api/auth/recovery/email-status
+## API-0094 — GET /api/auth/recovery/email-status
 
-Handler: com.giftplatform.security.recovery.EmailRecoveryController.emailStatus. Source: [backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:164](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L164).
+Handler: com.giftplatform.security.recovery.EmailRecoveryController.emailStatus. Source: [backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:165](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L165).
 
 Purpose: invoke the `emailStatus` action in the `EmailRecoveryController` module; the module workflow describes its business intent.
 
@@ -3586,9 +5518,9 @@ Purpose: invoke the `emailStatus` action in the `EmailRecoveryController` module
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0061 — POST /api/auth/recovery/enroll-email
+## API-0095 — POST /api/auth/recovery/enroll-email
 
-Handler: com.giftplatform.security.recovery.EmailRecoveryController.enroll. Source: [backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:169](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L169).
+Handler: com.giftplatform.security.recovery.EmailRecoveryController.enroll. Source: [backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:170](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L170).
 
 Purpose: invoke the `enroll` action in the `EmailRecoveryController` module; the module workflow describes its business intent.
 
@@ -3640,7 +5572,7 @@ Purpose: invoke the `enroll` action in the `EmailRecoveryController` module; the
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0062 — POST /api/auth/recovery/request
+## API-0096 — POST /api/auth/recovery/request
 
 Handler: com.giftplatform.security.recovery.EmailRecoveryController.request. Source: [backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:86](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L86).
 
@@ -3694,9 +5626,9 @@ Purpose: invoke the `request` action in the `EmailRecoveryController` module; th
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0063 — POST /api/auth/recovery/update-email
+## API-0097 — POST /api/auth/recovery/update-email
 
-Handler: com.giftplatform.security.recovery.EmailRecoveryController.updateEmail. Source: [backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:148](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L148).
+Handler: com.giftplatform.security.recovery.EmailRecoveryController.updateEmail. Source: [backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:149](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L149).
 
 Purpose: invoke the `updateEmail` action in the `EmailRecoveryController` module; the module workflow describes its business intent.
 
@@ -3746,7 +5678,7 @@ Purpose: invoke the `updateEmail` action in the `EmailRecoveryController` module
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0064 — POST /api/auth/recovery/username/request
+## API-0098 — POST /api/auth/recovery/username/request
 
 Handler: com.giftplatform.security.recovery.UsernameRecoveryController.request. Source: [backend/src/main/java/com/giftplatform/security/recovery/UsernameRecoveryController.java:80](../../src/main/java/com/giftplatform/security/recovery/UsernameRecoveryController.java#L80).
 
@@ -3800,9 +5732,9 @@ Purpose: invoke the `request` action in the `UsernameRecoveryController` module;
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0065 — POST /api/auth/recovery/verify-email
+## API-0099 — POST /api/auth/recovery/verify-email
 
-Handler: com.giftplatform.security.recovery.EmailRecoveryController.verifyEmail. Source: [backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:183](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L183).
+Handler: com.giftplatform.security.recovery.EmailRecoveryController.verifyEmail. Source: [backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:184](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L184).
 
 Purpose: invoke the `verifyEmail` action in the `EmailRecoveryController` module; the module workflow describes its business intent.
 
@@ -3853,7 +5785,7 @@ Purpose: invoke the `verifyEmail` action in the `EmailRecoveryController` module
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0066 — POST /api/auth/register
+## API-0100 — POST /api/auth/register
 
 Handler: com.giftplatform.user.controller.RegistrationController.register. Source: [backend/src/main/java/com/giftplatform/user/controller/RegistrationController.java:25](../../src/main/java/com/giftplatform/user/controller/RegistrationController.java#L25).
 
@@ -3878,7 +5810,8 @@ Purpose: invoke the `register` action in the `RegistrationController` module; th
   "email": "guest@example.test",
   "mobile": "+919000000001",
   "password": "ExamplePassword123!",
-  "emailVerificationToken": "guest@example.test"
+  "emailVerificationToken": "guest@example.test",
+  "termsAccepted": true
 }
 ```
 
@@ -3912,7 +5845,7 @@ Purpose: invoke the `register` action in the `RegistrationController` module; th
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0067 — POST /api/auth/signup-email/start
+## API-0101 — POST /api/auth/signup-email/start
 
 Handler: com.giftplatform.security.recovery.SignupEmailVerificationController.start. Source: [backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationController.java:14](../../src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationController.java#L14).
 
@@ -3967,7 +5900,7 @@ Purpose: invoke the `start` action in the `SignupEmailVerificationController` mo
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0068 — POST /api/auth/signup-email/verify
+## API-0102 — POST /api/auth/signup-email/verify
 
 Handler: com.giftplatform.security.recovery.SignupEmailVerificationController.verify. Source: [backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationController.java:18](../../src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationController.java#L18).
 
@@ -4021,7 +5954,7 @@ Purpose: invoke the `verify` action in the `SignupEmailVerificationController` m
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0069 — GET /api/host/group-member-email-policy
+## API-0103 — GET /api/host/group-member-email-policy
 
 Handler: com.giftplatform.admin.GroupMemberEmailPolicyController.mine. Source: [backend/src/main/java/com/giftplatform/admin/GroupMemberEmailPolicyController.java:22](../../src/main/java/com/giftplatform/admin/GroupMemberEmailPolicyController.java#L22).
 
@@ -4071,7 +6004,7 @@ Purpose: invoke the `mine` action in the `GroupMemberEmailPolicyController` modu
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0070 — PUT /api/host/group-member-email-policy
+## API-0104 — PUT /api/host/group-member-email-policy
 
 Handler: com.giftplatform.admin.GroupMemberEmailPolicyController.updateMine. Source: [backend/src/main/java/com/giftplatform/admin/GroupMemberEmailPolicyController.java:23](../../src/main/java/com/giftplatform/admin/GroupMemberEmailPolicyController.java#L23).
 
@@ -4122,7 +6055,186 @@ Purpose: invoke the `updateMine` action in the `GroupMemberEmailPolicyController
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0071 — POST /api/public/celebrations/{token}/rsvp
+## API-0105 — GET /api/localization/catalog
+
+Handler: com.giftplatform.localization.LocalizationController.account. Source: [backend/src/main/java/com/giftplatform/localization/LocalizationController.java:24](../../src/main/java/com/giftplatform/localization/LocalizationController.java#L24).
+
+Purpose: invoke the `account` action in the `LocalizationController` module; the module workflow describes its business intent.
+
+**Access:** Authenticated principal; ownership/role is enforced by route filter and controller/service resource checks. An authenticated user cannot assume access to another host’s UUID.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+
+
+**Request example / shape:**
+```json
+{
+  "pathAndQueryParameters": {}
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `org.springframework.http.ResponseEntity<com.giftplatform.localization.LocalizationService$Catalog>`. Produces: handler content type / negotiated JSON.
+```json
+{
+  "enabled": true,
+  "defaultLanguage": "<defaultLanguage: validated value>",
+  "fallbackLanguage": "<fallbackLanguage: validated value>",
+  "selectedLanguage": "<selectedLanguage: validated value>",
+  "direction": "<direction: validated value>",
+  "languages": [
+    {
+      "code": "<code: validated value>",
+      "nativeName": "<nativeName: validated value>",
+      "englishName": "<englishName: validated value>",
+      "direction": "<direction: validated value>",
+      "enabled": true,
+      "version": 1
+    }
+  ],
+  "resources": {
+    "_contract": "Dynamic response keys: inspect linked handler and module narrative; no fixed schema is asserted."
+  },
+  "sources": {
+    "_contract": "Dynamic response keys: inspect linked handler and module narrative; no fixed schema is asserted."
+  },
+  "version": 1
+}
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/localization/catalog"
+  }
+}
+```
+
+**Database effects:** `user_language_preferences` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0106 — GET /api/public/branding
+
+Handler: com.giftplatform.branding.BrandingController.get. Source: [backend/src/main/java/com/giftplatform/branding/BrandingController.java:13](../../src/main/java/com/giftplatform/branding/BrandingController.java#L13).
+
+Purpose: invoke the `get` action in the `BrandingController` module; the module workflow describes its business intent.
+
+**Access:** Public boundary subject to route-specific validation, published-event/module gates and rate limits. CSRF may still be required; public does not mean exempt.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+
+
+**Request example / shape:**
+```json
+{
+  "pathAndQueryParameters": {}
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `org.springframework.http.ResponseEntity<com.giftplatform.branding.BrandingService$Settings>`. Produces: handler content type / negotiated JSON.
+```json
+{
+  "applicationName": "<applicationName: validated value>",
+  "brandColor": "<brandColor: validated value>",
+  "footerText": "<footerText: validated value>",
+  "supportEmail": "guest@example.test",
+  "socialLinks": "https://shop.example.test/product",
+  "logoUrl": "https://shop.example.test/product",
+  "faviconUrl": "https://shop.example.test/product",
+  "revision": 1
+}
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/public/branding"
+  }
+}
+```
+
+**Database effects:** The controller delegates to services or does not declare SQL; follow the linked handler into its injected services. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0107 — GET /api/public/branding/assets/{id}
+
+Handler: com.giftplatform.branding.BrandingController.image. Source: [backend/src/main/java/com/giftplatform/branding/BrandingController.java:19](../../src/main/java/com/giftplatform/branding/BrandingController.java#L19).
+
+Purpose: invoke the `image` action in the `BrandingController` module; the module workflow describes its business intent.
+
+**Access:** Public boundary subject to route-specific validation, published-event/module gates and rate limits. CSRF may still be required; public does not mean exempt.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+| id | @org.springframework.web.bind.annotation.PathVariable(name="", value="", required=true) | java.util.UUID | As declared by the annotation; no additional undocumented default is asserted. |
+
+
+**Request example / shape:**
+```json
+{
+  "pathAndQueryParameters": {
+    "id": "123e4567-e89b-42d3-a456-426614174000"
+  }
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `org.springframework.http.ResponseEntity<byte[]>`. Produces: handler content type / negotiated JSON.
+```json
+"<binary bytes: use response Content-Type>"
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/public/branding/assets/{id}"
+  }
+}
+```
+
+**Database effects:** The controller delegates to services or does not declare SQL; follow the linked handler into its injected services. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0108 — POST /api/public/celebrations/{token}/rsvp
 
 Handler: com.giftplatform.celebration.CelebrationController.rsvp. Source: [backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:64](../../src/main/java/com/giftplatform/celebration/CelebrationController.java#L64).
 
@@ -4177,7 +6289,7 @@ Purpose: invoke the `rsvp` action in the `CelebrationController` module; the mod
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0072 — GET /api/public/celebrations/{token}/wishes
+## API-0109 — GET /api/public/celebrations/{token}/wishes
 
 Handler: com.giftplatform.celebration.CelebrationController.publicWishes. Source: [backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:100](../../src/main/java/com/giftplatform/celebration/CelebrationController.java#L100).
 
@@ -4235,7 +6347,7 @@ Purpose: invoke the `publicWishes` action in the `CelebrationController` module;
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0073 — POST /api/public/celebrations/{token}/wishes
+## API-0110 — POST /api/public/celebrations/{token}/wishes
 
 Handler: com.giftplatform.celebration.CelebrationController.wish. Source: [backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:86](../../src/main/java/com/giftplatform/celebration/CelebrationController.java#L86).
 
@@ -4288,7 +6400,7 @@ Purpose: invoke the `wish` action in the `CelebrationController` module; the mod
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0074 — POST /api/public/celebrations/{token}/wishes/photo
+## API-0111 — POST /api/public/celebrations/{token}/wishes/photo
 
 Handler: com.giftplatform.celebration.GuestbookPhotoController.submit. Source: [backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:88](../../src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java#L88).
 
@@ -4347,7 +6459,7 @@ Purpose: invoke the `submit` action in the `GuestbookPhotoController` module; th
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0075 — GET /api/public/celebrations/{token}/wishes/{wishId}/photo
+## API-0112 — GET /api/public/celebrations/{token}/wishes/{wishId}/photo
 
 Handler: com.giftplatform.celebration.GuestbookPhotoController.publicPhoto. Source: [backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:121](../../src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java#L121).
 
@@ -4400,7 +6512,7 @@ Purpose: invoke the `publicPhoto` action in the `GuestbookPhotoController` modul
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0076 — GET /api/public/commerce/affiliate/{token}/{giftId}
+## API-0113 — GET /api/public/commerce/affiliate/{token}/{giftId}
 
 Handler: com.giftplatform.monetization.CommercialController.affiliate. Source: [backend/src/main/java/com/giftplatform/monetization/CommercialController.java:45](../../src/main/java/com/giftplatform/monetization/CommercialController.java#L45).
 
@@ -4453,7 +6565,7 @@ null
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0077 — GET /api/public/commerce/placements
+## API-0114 — GET /api/public/commerce/placements
 
 Handler: com.giftplatform.monetization.CommercialController.placements. Source: [backend/src/main/java/com/giftplatform/monetization/CommercialController.java:43](../../src/main/java/com/giftplatform/monetization/CommercialController.java#L43).
 
@@ -4512,7 +6624,7 @@ Purpose: invoke the `placements` action in the `CommercialController` module; th
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0078 — GET /api/public/commerce/placements/{id}/visit
+## API-0115 — GET /api/public/commerce/placements/{id}/visit
 
 Handler: com.giftplatform.monetization.CommercialController.visit. Source: [backend/src/main/java/com/giftplatform/monetization/CommercialController.java:44](../../src/main/java/com/giftplatform/monetization/CommercialController.java#L44).
 
@@ -4563,7 +6675,7 @@ null
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0079 — GET /api/public/events/{token}
+## API-0116 — GET /api/public/events/{token}
 
 Handler: com.giftplatform.publicevent.PublicEventController.view. Source: [backend/src/main/java/com/giftplatform/publicevent/PublicEventController.java:44](../../src/main/java/com/giftplatform/publicevent/PublicEventController.java#L44).
 
@@ -4637,9 +6749,120 @@ Purpose: invoke the `view` action in the `PublicEventController` module; the mod
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0080 — GET /api/public/events/{token}/features
+## API-0117 — GET /api/public/events/{token}/calendar
 
-Handler: com.giftplatform.publicevent.PublicEventController.features. Source: [backend/src/main/java/com/giftplatform/publicevent/PublicEventController.java:66](../../src/main/java/com/giftplatform/publicevent/PublicEventController.java#L66).
+Handler: com.giftplatform.celebrationplanning.CelebrationPlanningController.calendar. Source: [backend/src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java:61](../../src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java#L61).
+
+Purpose: invoke the `calendar` action in the `CelebrationPlanningController` module; the module workflow describes its business intent.
+
+**Access:** Public boundary subject to route-specific validation, published-event/module gates and rate limits. CSRF may still be required; public does not mean exempt.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+| token | @org.springframework.web.bind.annotation.PathVariable(name="", value="", required=true) | java.util.UUID | As declared by the annotation; no additional undocumented default is asserted. |
+
+
+**Request example / shape:**
+```json
+{
+  "pathAndQueryParameters": {
+    "token": "123e4567-e89b-42d3-a456-426614174000"
+  }
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `org.springframework.http.ResponseEntity<java.lang.String>`. Produces: text/calendar.
+```json
+"<java.lang.String: validated value>"
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/public/events/{token}/calendar"
+  }
+}
+```
+
+**Database effects:** `event_celebration_settings`, `events`, `gift_groups`, `guest_direct_transfer_claims`, `guest_gifts`, `payment_orders`, `platform_admin_action_audit` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0118 — GET /api/public/events/{token}/celebration-details
+
+Handler: com.giftplatform.celebrationplanning.CelebrationPlanningController.details. Source: [backend/src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java:57](../../src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java#L57).
+
+Purpose: invoke the `details` action in the `CelebrationPlanningController` module; the module workflow describes its business intent.
+
+**Access:** Public boundary subject to route-specific validation, published-event/module gates and rate limits. CSRF may still be required; public does not mean exempt.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+| token | @org.springframework.web.bind.annotation.PathVariable(name="", value="", required=true) | java.util.UUID | As declared by the annotation; no additional undocumented default is asserted. |
+
+
+**Request example / shape:**
+```json
+{
+  "pathAndQueryParameters": {
+    "token": "123e4567-e89b-42d3-a456-426614174000"
+  }
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `org.springframework.http.ResponseEntity<com.giftplatform.celebrationplanning.CelebrationPlanningController$PublicDetails>`. Produces: handler content type / negotiated JSON.
+```json
+{
+  "giftingEnabled": true,
+  "welcomeMessage": "<welcomeMessage: validated value>",
+  "venue": "<venue: validated value>",
+  "arrivalNotes": "<arrivalNotes: validated value>",
+  "date": "2027-02-14",
+  "startTime": "<startTime: validated value>",
+  "timezone": "<timezone: validated value>",
+  "durationMinutes": 1
+}
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/public/events/{token}/celebration-details"
+  }
+}
+```
+
+**Database effects:** `event_celebration_settings`, `events`, `gift_groups`, `guest_direct_transfer_claims`, `guest_gifts`, `payment_orders`, `platform_admin_action_audit` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0119 — GET /api/public/events/{token}/features
+
+Handler: com.giftplatform.publicevent.PublicEventController.features. Source: [backend/src/main/java/com/giftplatform/publicevent/PublicEventController.java:67](../../src/main/java/com/giftplatform/publicevent/PublicEventController.java#L67).
 
 Purpose: invoke the `features` action in the `PublicEventController` module; the module workflow describes its business intent.
 
@@ -4690,7 +6913,7 @@ Purpose: invoke the `features` action in the `PublicEventController` module; the
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0081 — GET /api/public/events/{token}/gifts/{giftId}/photo
+## API-0120 — GET /api/public/events/{token}/gifts/{giftId}/photo
 
 Handler: com.giftplatform.gift.photo.GiftPhotoController.published. Source: [backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoController.java:21](../../src/main/java/com/giftplatform/gift/photo/GiftPhotoController.java#L21).
 
@@ -4706,6 +6929,7 @@ Purpose: invoke the `published` action in the `GiftPhotoController` module; the 
 | --- | --- | --- | --- |
 | token | @org.springframework.web.bind.annotation.PathVariable(name="", value="", required=true) | java.util.UUID | As declared by the annotation; no additional undocumented default is asserted. |
 | giftId | @org.springframework.web.bind.annotation.PathVariable(name="", value="", required=true) | java.util.UUID | As declared by the annotation; no additional undocumented default is asserted. |
+| thumbnail | @org.springframework.web.bind.annotation.RequestParam(name="", value="", required=true, defaultValue="false") | boolean | As declared by the annotation; no additional undocumented default is asserted. |
 
 
 **Request example / shape:**
@@ -4713,7 +6937,8 @@ Purpose: invoke the `published` action in the `GiftPhotoController` module; the 
 {
   "pathAndQueryParameters": {
     "token": "123e4567-e89b-42d3-a456-426614174000",
-    "giftId": "123e4567-e89b-42d3-a456-426614174000"
+    "giftId": "123e4567-e89b-42d3-a456-426614174000",
+    "thumbnail": true
   }
 }
 ```
@@ -4743,7 +6968,113 @@ Purpose: invoke the `published` action in the `GiftPhotoController` module; the 
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0082 — GET /api/public/experience
+## API-0121 — GET /api/public/events/{token}/share-preview
+
+Handler: com.giftplatform.publicevent.SharingPreviewController.metadata. Source: [backend/src/main/java/com/giftplatform/publicevent/SharingPreviewController.java:36](../../src/main/java/com/giftplatform/publicevent/SharingPreviewController.java#L36).
+
+Purpose: invoke the `metadata` action in the `SharingPreviewController` module; the module workflow describes its business intent.
+
+**Access:** Public boundary subject to route-specific validation, published-event/module gates and rate limits. CSRF may still be required; public does not mean exempt.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+| token | @org.springframework.web.bind.annotation.PathVariable(name="", value="", required=true) | java.util.UUID | As declared by the annotation; no additional undocumented default is asserted. |
+
+
+**Request example / shape:**
+```json
+{
+  "pathAndQueryParameters": {
+    "token": "123e4567-e89b-42d3-a456-426614174000"
+  }
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `org.springframework.http.ResponseEntity<com.giftplatform.publicevent.SharingPreviewController$Preview>`. Produces: handler content type / negotiated JSON.
+```json
+{
+  "title": "<title: validated value>",
+  "occasion": "<occasion: validated value>",
+  "date": "<date: validated value>"
+}
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/public/events/{token}/share-preview"
+  }
+}
+```
+
+**Database effects:** `events`, `platform_admin_action_audit` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0122 — GET /api/public/events/{token}/share-preview.png
+
+Handler: com.giftplatform.publicevent.SharingPreviewController.image. Source: [backend/src/main/java/com/giftplatform/publicevent/SharingPreviewController.java:38](../../src/main/java/com/giftplatform/publicevent/SharingPreviewController.java#L38).
+
+Purpose: invoke the `image` action in the `SharingPreviewController` module; the module workflow describes its business intent.
+
+**Access:** Public boundary subject to route-specific validation, published-event/module gates and rate limits. CSRF may still be required; public does not mean exempt.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+| token | @org.springframework.web.bind.annotation.PathVariable(name="", value="", required=true) | java.util.UUID | As declared by the annotation; no additional undocumented default is asserted. |
+
+
+**Request example / shape:**
+```json
+{
+  "pathAndQueryParameters": {
+    "token": "123e4567-e89b-42d3-a456-426614174000"
+  }
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `org.springframework.http.ResponseEntity<byte[]>`. Produces: image/png.
+```json
+"<binary bytes: use response Content-Type>"
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/public/events/{token}/share-preview.png"
+  }
+}
+```
+
+**Database effects:** `events`, `platform_admin_action_audit` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0123 — GET /api/public/experience
 
 Handler: com.giftplatform.admin.ExperienceSettingsController.current. Source: [backend/src/main/java/com/giftplatform/admin/ExperienceSettingsController.java:16](../../src/main/java/com/giftplatform/admin/ExperienceSettingsController.java#L16).
 
@@ -4793,7 +7124,7 @@ Purpose: invoke the `current` action in the `ExperienceSettingsController` modul
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0083 — GET /api/public/gifts/progress/{token}
+## API-0124 — GET /api/public/gifts/progress/{token}
 
 Handler: com.giftplatform.payment.controller.PublicGiftProgressController.progress. Source: [backend/src/main/java/com/giftplatform/payment/controller/PublicGiftProgressController.java:17](../../src/main/java/com/giftplatform/payment/controller/PublicGiftProgressController.java#L17).
 
@@ -4850,9 +7181,9 @@ Purpose: invoke the `progress` action in the `PublicGiftProgressController` modu
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0084 — GET /api/public/groups/{token}/account-policy
+## API-0125 — GET /api/public/groups/{token}/account-policy
 
-Handler: com.giftplatform.group.GroupContributionController.accountPolicy. Source: [backend/src/main/java/com/giftplatform/group/GroupContributionController.java:66](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L66).
+Handler: com.giftplatform.group.GroupContributionController.accountPolicy. Source: [backend/src/main/java/com/giftplatform/group/GroupContributionController.java:67](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L67).
 
 Purpose: invoke the `accountPolicy` action in the `GroupContributionController` module; the module workflow describes its business intent.
 
@@ -4899,11 +7230,11 @@ Purpose: invoke the `accountPolicy` action in the `GroupContributionController` 
 }
 ```
 
-**Database effects:** `events`, `gift_group_accounts`, `gift_group_members`, `gift_groups`, `group_collection_notifications` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+**Database effects:** `account_legal_consents`, `events`, `gift_group_accounts`, `gift_group_members`, `gift_groups`, `group_collection_notifications` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0085 — GET /api/public/groups/{token}/activity/{groupId}
+## API-0126 — GET /api/public/groups/{token}/activity/{groupId}
 
 Handler: com.giftplatform.group.GroupGiftCollectionController.activity. Source: [backend/src/main/java/com/giftplatform/group/GroupGiftCollectionController.java:29](../../src/main/java/com/giftplatform/group/GroupGiftCollectionController.java#L29).
 
@@ -4962,7 +7293,7 @@ Purpose: invoke the `activity` action in the `GroupGiftCollectionController` mod
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0086 — POST /api/public/groups/{token}/contact-email/complete
+## API-0127 — POST /api/public/groups/{token}/contact-email/complete
 
 Handler: com.giftplatform.security.recovery.GroupEmailEnrollmentController.complete. Source: [backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:113](../../src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java#L113).
 
@@ -5016,7 +7347,7 @@ Purpose: invoke the `complete` action in the `GroupEmailEnrollmentController` mo
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0087 — POST /api/public/groups/{token}/contact-email/start
+## API-0128 — POST /api/public/groups/{token}/contact-email/start
 
 Handler: com.giftplatform.security.recovery.GroupEmailEnrollmentController.start. Source: [backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:92](../../src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java#L92).
 
@@ -5070,7 +7401,7 @@ Purpose: invoke the `start` action in the `GroupEmailEnrollmentController` modul
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0088 — GET /api/public/groups/{token}/contact-email/status
+## API-0129 — GET /api/public/groups/{token}/contact-email/status
 
 Handler: com.giftplatform.security.recovery.GroupEmailEnrollmentController.status. Source: [backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:86](../../src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java#L86).
 
@@ -5126,7 +7457,7 @@ Purpose: invoke the `status` action in the `GroupEmailEnrollmentController` modu
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0089 — POST /api/public/groups/{token}/contact-mobile/complete
+## API-0130 — POST /api/public/groups/{token}/contact-mobile/complete
 
 Handler: com.giftplatform.security.recovery.GroupMobileEnrollmentController.complete. Source: [backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:125](../../src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java#L125).
 
@@ -5180,7 +7511,7 @@ Purpose: invoke the `complete` action in the `GroupMobileEnrollmentController` m
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0090 — POST /api/public/groups/{token}/contact-mobile/start
+## API-0131 — POST /api/public/groups/{token}/contact-mobile/start
 
 Handler: com.giftplatform.security.recovery.GroupMobileEnrollmentController.start. Source: [backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:102](../../src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java#L102).
 
@@ -5234,7 +7565,7 @@ Purpose: invoke the `start` action in the `GroupMobileEnrollmentController` modu
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0091 — GET /api/public/groups/{token}/contact-mobile/status
+## API-0132 — GET /api/public/groups/{token}/contact-mobile/status
 
 Handler: com.giftplatform.security.recovery.GroupMobileEnrollmentController.status. Source: [backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:90](../../src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java#L90).
 
@@ -5290,7 +7621,7 @@ Purpose: invoke the `status` action in the `GroupMobileEnrollmentController` mod
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0092 — GET /api/public/groups/{token}/coordination/{groupId}
+## API-0133 — GET /api/public/groups/{token}/coordination/{groupId}
 
 Handler: com.giftplatform.group.GroupCoordinationPaymentController.offer. Source: [backend/src/main/java/com/giftplatform/group/GroupCoordinationPaymentController.java:16](../../src/main/java/com/giftplatform/group/GroupCoordinationPaymentController.java#L16).
 
@@ -5352,7 +7683,7 @@ Purpose: invoke the `offer` action in the `GroupCoordinationPaymentController` m
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0093 — POST /api/public/groups/{token}/coordination/{groupId}/checkout
+## API-0134 — POST /api/public/groups/{token}/coordination/{groupId}/checkout
 
 Handler: com.giftplatform.group.GroupCoordinationPaymentController.checkout. Source: [backend/src/main/java/com/giftplatform/group/GroupCoordinationPaymentController.java:17](../../src/main/java/com/giftplatform/group/GroupCoordinationPaymentController.java#L17).
 
@@ -5415,7 +7746,7 @@ Purpose: invoke the `checkout` action in the `GroupCoordinationPaymentController
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0094 — POST /api/public/groups/{token}/coordination/{groupId}/confirm
+## API-0135 — POST /api/public/groups/{token}/coordination/{groupId}/confirm
 
 Handler: com.giftplatform.group.GroupCoordinationPaymentController.confirm. Source: [backend/src/main/java/com/giftplatform/group/GroupCoordinationPaymentController.java:22](../../src/main/java/com/giftplatform/group/GroupCoordinationPaymentController.java#L22).
 
@@ -5478,9 +7809,9 @@ Purpose: invoke the `confirm` action in the `GroupCoordinationPaymentController`
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0095 — GET /api/public/groups/{token}/dashboard
+## API-0136 — GET /api/public/groups/{token}/dashboard
 
-Handler: com.giftplatform.group.GroupContributionController.dashboard. Source: [backend/src/main/java/com/giftplatform/group/GroupContributionController.java:156](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L156).
+Handler: com.giftplatform.group.GroupContributionController.dashboard. Source: [backend/src/main/java/com/giftplatform/group/GroupContributionController.java:157](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L157).
 
 Purpose: invoke the `dashboard` action in the `GroupContributionController` module; the module workflow describes its business intent.
 
@@ -5527,11 +7858,11 @@ Purpose: invoke the `dashboard` action in the `GroupContributionController` modu
 }
 ```
 
-**Database effects:** `events`, `gift_group_accounts`, `gift_group_members`, `gift_groups`, `group_collection_notifications` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+**Database effects:** `account_legal_consents`, `events`, `gift_group_accounts`, `gift_group_members`, `gift_groups`, `group_collection_notifications` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0096 — GET /api/public/groups/{token}/gift-board
+## API-0137 — GET /api/public/groups/{token}/gift-board
 
 Handler: com.giftplatform.group.GroupGiftCompletionController.board. Source: [backend/src/main/java/com/giftplatform/group/GroupGiftCompletionController.java:24](../../src/main/java/com/giftplatform/group/GroupGiftCompletionController.java#L24).
 
@@ -5586,7 +7917,7 @@ Purpose: invoke the `board` action in the `GroupGiftCompletionController` module
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0097 — GET /api/public/groups/{token}/gift-delivery-address/{groupId}
+## API-0138 — GET /api/public/groups/{token}/gift-delivery-address/{groupId}
 
 Handler: com.giftplatform.group.GroupGiftCompletionController.delivery. Source: [backend/src/main/java/com/giftplatform/group/GroupGiftCompletionController.java:96](../../src/main/java/com/giftplatform/group/GroupGiftCompletionController.java#L96).
 
@@ -5645,7 +7976,7 @@ Purpose: invoke the `delivery` action in the `GroupGiftCompletionController` mod
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0098 — POST /api/public/groups/{token}/gift-fulfilment/{groupId}
+## API-0139 — POST /api/public/groups/{token}/gift-fulfilment/{groupId}
 
 Handler: com.giftplatform.group.GroupGiftCompletionController.fulfil. Source: [backend/src/main/java/com/giftplatform/group/GroupGiftCompletionController.java:80](../../src/main/java/com/giftplatform/group/GroupGiftCompletionController.java#L80).
 
@@ -5699,7 +8030,7 @@ Purpose: invoke the `fulfil` action in the `GroupGiftCompletionController` modul
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0099 — POST /api/public/groups/{token}/gift-metadata
+## API-0140 — POST /api/public/groups/{token}/gift-metadata
 
 Handler: com.giftplatform.group.IndependentGroupGiftController.lookup. Source: [backend/src/main/java/com/giftplatform/group/IndependentGroupGiftController.java:29](../../src/main/java/com/giftplatform/group/IndependentGroupGiftController.java#L29).
 
@@ -5751,7 +8082,7 @@ Purpose: invoke the `lookup` action in the `IndependentGroupGiftController` modu
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0100 — POST /api/public/groups/{token}/gift-plan/{groupId}
+## API-0141 — POST /api/public/groups/{token}/gift-plan/{groupId}
 
 Handler: com.giftplatform.group.IndependentGroupGiftController.plan. Source: [backend/src/main/java/com/giftplatform/group/IndependentGroupGiftController.java:52](../../src/main/java/com/giftplatform/group/IndependentGroupGiftController.java#L52).
 
@@ -5807,7 +8138,7 @@ Purpose: invoke the `plan` action in the `IndependentGroupGiftController` module
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0101 — GET /api/public/groups/{token}/gift-progress/{groupId}
+## API-0142 — GET /api/public/groups/{token}/gift-progress/{groupId}
 
 Handler: com.giftplatform.group.GroupGiftCompletionController.progress. Source: [backend/src/main/java/com/giftplatform/group/GroupGiftCompletionController.java:42](../../src/main/java/com/giftplatform/group/GroupGiftCompletionController.java#L42).
 
@@ -5862,7 +8193,7 @@ Purpose: invoke the `progress` action in the `GroupGiftCompletionController` mod
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0102 — POST /api/public/groups/{token}/gift-publish/{groupId}
+## API-0143 — POST /api/public/groups/{token}/gift-publish/{groupId}
 
 Handler: com.giftplatform.group.GroupGiftCompletionController.publish. Source: [backend/src/main/java/com/giftplatform/group/GroupGiftCompletionController.java:59](../../src/main/java/com/giftplatform/group/GroupGiftCompletionController.java#L59).
 
@@ -5917,7 +8248,7 @@ Purpose: invoke the `publish` action in the `GroupGiftCompletionController` modu
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0103 — POST /api/public/groups/{token}/gift-receipts/{groupId}/{reportId}
+## API-0144 — POST /api/public/groups/{token}/gift-receipts/{groupId}/{reportId}
 
 Handler: com.giftplatform.group.GroupGiftCompletionController.acknowledgeReceipt. Source: [backend/src/main/java/com/giftplatform/group/GroupGiftCompletionController.java:69](../../src/main/java/com/giftplatform/group/GroupGiftCompletionController.java#L69).
 
@@ -5974,7 +8305,7 @@ Purpose: invoke the `acknowledgeReceipt` action in the `GroupGiftCompletionContr
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0104 — POST /api/public/groups/{token}/gift-release/{groupId}
+## API-0145 — POST /api/public/groups/{token}/gift-release/{groupId}
 
 Handler: com.giftplatform.group.GroupGiftCollectionController.release. Source: [backend/src/main/java/com/giftplatform/group/GroupGiftCollectionController.java:27](../../src/main/java/com/giftplatform/group/GroupGiftCollectionController.java#L27).
 
@@ -6029,7 +8360,7 @@ Purpose: invoke the `release` action in the `GroupGiftCollectionController` modu
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0105 — POST /api/public/groups/{token}/gift-reservation/{groupId}
+## API-0146 — POST /api/public/groups/{token}/gift-reservation/{groupId}
 
 Handler: com.giftplatform.group.GroupGiftCollectionController.reserve. Source: [backend/src/main/java/com/giftplatform/group/GroupGiftCollectionController.java:22](../../src/main/java/com/giftplatform/group/GroupGiftCollectionController.java#L22).
 
@@ -6082,7 +8413,7 @@ Purpose: invoke the `reserve` action in the `GroupGiftCollectionController` modu
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0106 — GET /api/public/groups/{token}/guest-gifts
+## API-0147 — GET /api/public/groups/{token}/guest-gifts
 
 Handler: com.giftplatform.group.GuestGiftController.list. Source: [backend/src/main/java/com/giftplatform/group/GuestGiftController.java:29](../../src/main/java/com/giftplatform/group/GuestGiftController.java#L29).
 
@@ -6137,7 +8468,7 @@ Purpose: invoke the `list` action in the `GuestGiftController` module; the modul
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0107 — POST /api/public/groups/{token}/guest-gifts
+## API-0148 — POST /api/public/groups/{token}/guest-gifts
 
 Handler: com.giftplatform.group.GuestGiftController.add. Source: [backend/src/main/java/com/giftplatform/group/GuestGiftController.java:46](../../src/main/java/com/giftplatform/group/GuestGiftController.java#L46).
 
@@ -6191,7 +8522,7 @@ Purpose: invoke the `add` action in the `GuestGiftController` module; the module
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0108 — POST /api/public/groups/{token}/guest-gifts/individual
+## API-0149 — POST /api/public/groups/{token}/guest-gifts/individual
 
 Handler: com.giftplatform.group.GuestGiftController.individual. Source: [backend/src/main/java/com/giftplatform/group/GuestGiftController.java:101](../../src/main/java/com/giftplatform/group/GuestGiftController.java#L101).
 
@@ -6249,7 +8580,7 @@ Purpose: invoke the `individual` action in the `GuestGiftController` module; the
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0109 — GET /api/public/groups/{token}/guest-gifts/individual-entry
+## API-0150 — GET /api/public/groups/{token}/guest-gifts/individual-entry
 
 Handler: com.giftplatform.group.IndividualGuestGiftController.mine. Source: [backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:79](../../src/main/java/com/giftplatform/group/IndividualGuestGiftController.java#L79).
 
@@ -6304,7 +8635,7 @@ Purpose: invoke the `mine` action in the `IndividualGuestGiftController` module;
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0110 — POST /api/public/groups/{token}/guest-gifts/individual-entry
+## API-0151 — POST /api/public/groups/{token}/guest-gifts/individual-entry
 
 Handler: com.giftplatform.group.IndividualGuestGiftController.save. Source: [backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:44](../../src/main/java/com/giftplatform/group/IndividualGuestGiftController.java#L44).
 
@@ -6364,7 +8695,7 @@ Purpose: invoke the `save` action in the `IndividualGuestGiftController` module;
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0111 — POST /api/public/groups/{token}/guest-gifts/individual-entry/{id}/delivery
+## API-0152 — POST /api/public/groups/{token}/guest-gifts/individual-entry/{id}/delivery
 
 Handler: com.giftplatform.group.IndividualGuestGiftController.tracking. Source: [backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:127](../../src/main/java/com/giftplatform/group/IndividualGuestGiftController.java#L127).
 
@@ -6418,7 +8749,7 @@ Purpose: invoke the `tracking` action in the `IndividualGuestGiftController` mod
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0112 — GET /api/public/groups/{token}/guest-gifts/individual-entry/{id}/delivery-address
+## API-0153 — GET /api/public/groups/{token}/guest-gifts/individual-entry/{id}/delivery-address
 
 Handler: com.giftplatform.group.IndividualGuestGiftController.delivery. Source: [backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:122](../../src/main/java/com/giftplatform/group/IndividualGuestGiftController.java#L122).
 
@@ -6477,7 +8808,7 @@ Purpose: invoke the `delivery` action in the `IndividualGuestGiftController` mod
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0113 — GET /api/public/groups/{token}/guest-gifts/individual-entry/{id}/host-contribution
+## API-0154 — GET /api/public/groups/{token}/guest-gifts/individual-entry/{id}/host-contribution
 
 Handler: com.giftplatform.group.IndividualGuestGiftController.payment. Source: [backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:92](../../src/main/java/com/giftplatform/group/IndividualGuestGiftController.java#L92).
 
@@ -6532,7 +8863,7 @@ Purpose: invoke the `payment` action in the `IndividualGuestGiftController` modu
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0114 — POST /api/public/groups/{token}/guest-gifts/individual-entry/{id}/host-contribution
+## API-0155 — POST /api/public/groups/{token}/guest-gifts/individual-entry/{id}/host-contribution
 
 Handler: com.giftplatform.group.IndividualGuestGiftController.contribute. Source: [backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:104](../../src/main/java/com/giftplatform/group/IndividualGuestGiftController.java#L104).
 
@@ -6589,7 +8920,7 @@ Purpose: invoke the `contribute` action in the `IndividualGuestGiftController` m
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0115 — GET /api/public/groups/{token}/guest-gifts/mine
+## API-0156 — GET /api/public/groups/{token}/guest-gifts/mine
 
 Handler: com.giftplatform.group.GuestGiftController.mine. Source: [backend/src/main/java/com/giftplatform/group/GuestGiftController.java:65](../../src/main/java/com/giftplatform/group/GuestGiftController.java#L65).
 
@@ -6644,7 +8975,7 @@ Purpose: invoke the `mine` action in the `GuestGiftController` module; the modul
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0116 — POST /api/public/groups/{token}/guest-gifts/{id}/delivery
+## API-0157 — POST /api/public/groups/{token}/guest-gifts/{id}/delivery
 
 Handler: com.giftplatform.group.GuestGiftController.updateDelivery. Source: [backend/src/main/java/com/giftplatform/group/GuestGiftController.java:115](../../src/main/java/com/giftplatform/group/GuestGiftController.java#L115).
 
@@ -6698,7 +9029,7 @@ Purpose: invoke the `updateDelivery` action in the `GuestGiftController` module;
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0117 — GET /api/public/groups/{token}/guest-gifts/{id}/delivery-address
+## API-0158 — GET /api/public/groups/{token}/guest-gifts/{id}/delivery-address
 
 Handler: com.giftplatform.group.GuestGiftController.delivery. Source: [backend/src/main/java/com/giftplatform/group/GuestGiftController.java:89](../../src/main/java/com/giftplatform/group/GuestGiftController.java#L89).
 
@@ -6757,7 +9088,7 @@ Purpose: invoke the `delivery` action in the `GuestGiftController` module; the m
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0118 — POST /api/public/groups/{token}/guest-gifts/{id}/publish
+## API-0159 — POST /api/public/groups/{token}/guest-gifts/{id}/publish
 
 Handler: com.giftplatform.group.GuestGiftController.publish. Source: [backend/src/main/java/com/giftplatform/group/GuestGiftController.java:81](../../src/main/java/com/giftplatform/group/GuestGiftController.java#L81).
 
@@ -6812,7 +9143,7 @@ Purpose: invoke the `publish` action in the `GuestGiftController` module; the mo
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0119 — POST /api/public/groups/{token}/guest-gifts/{id}/select
+## API-0160 — POST /api/public/groups/{token}/guest-gifts/{id}/select
 
 Handler: com.giftplatform.group.GuestGiftController.select. Source: [backend/src/main/java/com/giftplatform/group/GuestGiftController.java:53](../../src/main/java/com/giftplatform/group/GuestGiftController.java#L53).
 
@@ -6866,7 +9197,7 @@ Purpose: invoke the `select` action in the `GuestGiftController` module; the mod
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0120 — GET /api/public/groups/{token}/guest/{groupId}/creator-history
+## API-0161 — GET /api/public/groups/{token}/guest/{groupId}/creator-history
 
 Handler: com.giftplatform.group.GroupGuestContributionController.creatorHistory. Source: [backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:75](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L75).
 
@@ -6923,7 +9254,7 @@ Purpose: invoke the `creatorHistory` action in the `GroupGuestContributionContro
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0121 — POST /api/public/groups/{token}/guest/{groupId}/creator-report
+## API-0162 — POST /api/public/groups/{token}/guest/{groupId}/creator-report
 
 Handler: com.giftplatform.group.GroupGuestContributionController.creatorReport. Source: [backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:80](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L80).
 
@@ -6981,7 +9312,7 @@ Purpose: invoke the `creatorReport` action in the `GroupGuestContributionControl
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0122 — GET /api/public/groups/{token}/guest/{groupId}/destination/{id}
+## API-0163 — GET /api/public/groups/{token}/guest/{groupId}/destination/{id}
 
 Handler: com.giftplatform.group.GroupGuestContributionController.destination. Source: [backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:49](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L49).
 
@@ -7038,7 +9369,7 @@ Purpose: invoke the `destination` action in the `GroupGuestContributionControlle
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0123 — GET /api/public/groups/{token}/guest/{groupId}/destination/{id}/qr
+## API-0164 — GET /api/public/groups/{token}/guest/{groupId}/destination/{id}/qr
 
 Handler: com.giftplatform.group.GroupGuestContributionController.qr. Source: [backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:60](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L60).
 
@@ -7093,7 +9424,7 @@ Purpose: invoke the `qr` action in the `GroupGuestContributionController` module
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0124 — GET /api/public/groups/{token}/guest/{groupId}/history
+## API-0165 — GET /api/public/groups/{token}/guest/{groupId}/history
 
 Handler: com.giftplatform.group.GroupGuestContributionController.history. Source: [backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:124](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L124).
 
@@ -7150,7 +9481,7 @@ Purpose: invoke the `history` action in the `GroupGuestContributionController` m
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0125 — GET /api/public/groups/{token}/guest/{groupId}/invitation
+## API-0166 — GET /api/public/groups/{token}/guest/{groupId}/invitation
 
 Handler: com.giftplatform.group.GroupGuestContributionController.invitation. Source: [backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:42](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L42).
 
@@ -7205,7 +9536,7 @@ Purpose: invoke the `invitation` action in the `GroupGuestContributionController
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0126 — GET /api/public/groups/{token}/guest/{groupId}/member-history
+## API-0167 — GET /api/public/groups/{token}/guest/{groupId}/member-history
 
 Handler: com.giftplatform.group.GroupGuestContributionController.memberHistory. Source: [backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:67](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L67).
 
@@ -7262,7 +9593,7 @@ Purpose: invoke the `memberHistory` action in the `GroupGuestContributionControl
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0127 — POST /api/public/groups/{token}/guest/{groupId}/member-report
+## API-0168 — POST /api/public/groups/{token}/guest/{groupId}/member-report
 
 Handler: com.giftplatform.group.GroupGuestContributionController.memberReport. Source: [backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:69](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L69).
 
@@ -7320,7 +9651,7 @@ Purpose: invoke the `memberReport` action in the `GroupGuestContributionControll
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0128 — POST /api/public/groups/{token}/guest/{groupId}/report
+## API-0169 — POST /api/public/groups/{token}/guest/{groupId}/report
 
 Handler: com.giftplatform.group.GroupGuestContributionController.report. Source: [backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:71](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L71).
 
@@ -7378,7 +9709,7 @@ Purpose: invoke the `report` action in the `GroupGuestContributionController` mo
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0129 — GET /api/public/groups/{token}/guest/{groupId}/settings
+## API-0170 — GET /api/public/groups/{token}/guest/{groupId}/settings
 
 Handler: com.giftplatform.group.GroupGuestContributionController.settingsView. Source: [backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:122](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L122).
 
@@ -7433,7 +9764,7 @@ Purpose: invoke the `settingsView` action in the `GroupGuestContributionControll
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0130 — POST /api/public/groups/{token}/guest/{groupId}/settings
+## API-0171 — POST /api/public/groups/{token}/guest/{groupId}/settings
 
 Handler: com.giftplatform.group.GroupGuestContributionController.settings. Source: [backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:111](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L111).
 
@@ -7490,9 +9821,9 @@ Purpose: invoke the `settings` action in the `GroupGuestContributionController` 
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0131 — GET /api/public/groups/{token}/join/{groupId}
+## API-0172 — GET /api/public/groups/{token}/join/{groupId}
 
-Handler: com.giftplatform.group.GroupContributionController.groupInvitation. Source: [backend/src/main/java/com/giftplatform/group/GroupContributionController.java:220](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L220).
+Handler: com.giftplatform.group.GroupContributionController.groupInvitation. Source: [backend/src/main/java/com/giftplatform/group/GroupContributionController.java:225](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L225).
 
 Purpose: invoke the `groupInvitation` action in the `GroupContributionController` module; the module workflow describes its business intent.
 
@@ -7541,13 +9872,13 @@ Purpose: invoke the `groupInvitation` action in the `GroupContributionController
 }
 ```
 
-**Database effects:** `events`, `gift_group_accounts`, `gift_group_members`, `gift_groups`, `group_collection_notifications` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+**Database effects:** `account_legal_consents`, `events`, `gift_group_accounts`, `gift_group_members`, `gift_groups`, `group_collection_notifications` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0132 — POST /api/public/groups/{token}/join/{groupId}
+## API-0173 — POST /api/public/groups/{token}/join/{groupId}
 
-Handler: com.giftplatform.group.GroupContributionController.join. Source: [backend/src/main/java/com/giftplatform/group/GroupContributionController.java:236](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L236).
+Handler: com.giftplatform.group.GroupContributionController.join. Source: [backend/src/main/java/com/giftplatform/group/GroupContributionController.java:241](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L241).
 
 Purpose: invoke the `join` action in the `GroupContributionController` module; the module workflow describes its business intent.
 
@@ -7574,7 +9905,8 @@ Purpose: invoke the `join` action in the `GroupContributionController` module; t
   "pin": "<pin: validated value>",
   "confirmPin": "<confirmPin: validated value>",
   "email": "guest@example.test",
-  "emailVerificationToken": "guest@example.test"
+  "emailVerificationToken": "guest@example.test",
+  "termsAccepted": true
 }
 ```
 
@@ -7601,13 +9933,13 @@ Purpose: invoke the `join` action in the `GroupContributionController` module; t
 }
 ```
 
-**Database effects:** `events`, `gift_group_accounts`, `gift_group_members`, `gift_groups`, `group_collection_notifications` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+**Database effects:** `account_legal_consents`, `events`, `gift_group_accounts`, `gift_group_members`, `gift_groups`, `group_collection_notifications` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0133 — POST /api/public/groups/{token}/login
+## API-0174 — POST /api/public/groups/{token}/login
 
-Handler: com.giftplatform.group.GroupContributionController.login. Source: [backend/src/main/java/com/giftplatform/group/GroupContributionController.java:115](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L115).
+Handler: com.giftplatform.group.GroupContributionController.login. Source: [backend/src/main/java/com/giftplatform/group/GroupContributionController.java:116](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L116).
 
 Purpose: invoke the `login` action in the `GroupContributionController` module; the module workflow describes its business intent.
 
@@ -7633,7 +9965,8 @@ Purpose: invoke the `login` action in the `GroupContributionController` module; 
   "fullName": "<fullName: validated value>",
   "email": "guest@example.test",
   "mobile": "+919000000001",
-  "emailVerificationToken": "guest@example.test"
+  "emailVerificationToken": "guest@example.test",
+  "termsAccepted": true
 }
 ```
 
@@ -7660,13 +9993,13 @@ Purpose: invoke the `login` action in the `GroupContributionController` module; 
 }
 ```
 
-**Database effects:** `events`, `gift_group_accounts`, `gift_group_members`, `gift_groups`, `group_collection_notifications` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+**Database effects:** `account_legal_consents`, `events`, `gift_group_accounts`, `gift_group_members`, `gift_groups`, `group_collection_notifications` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0134 — POST /api/public/groups/{token}/logout
+## API-0175 — POST /api/public/groups/{token}/logout
 
-Handler: com.giftplatform.group.GroupContributionController.logout. Source: [backend/src/main/java/com/giftplatform/group/GroupContributionController.java:145](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L145).
+Handler: com.giftplatform.group.GroupContributionController.logout. Source: [backend/src/main/java/com/giftplatform/group/GroupContributionController.java:146](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L146).
 
 Purpose: invoke the `logout` action in the `GroupContributionController` module; the module workflow describes its business intent.
 
@@ -7711,13 +10044,13 @@ null
 }
 ```
 
-**Database effects:** `events`, `gift_group_accounts`, `gift_group_members`, `gift_groups`, `group_collection_notifications` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+**Database effects:** `account_legal_consents`, `events`, `gift_group_accounts`, `gift_group_members`, `gift_groups`, `group_collection_notifications` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0135 — POST /api/public/groups/{token}/member-login/{groupId}
+## API-0176 — POST /api/public/groups/{token}/member-login/{groupId}
 
-Handler: com.giftplatform.group.GroupContributionController.memberLogin. Source: [backend/src/main/java/com/giftplatform/group/GroupContributionController.java:262](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L262).
+Handler: com.giftplatform.group.GroupContributionController.memberLogin. Source: [backend/src/main/java/com/giftplatform/group/GroupContributionController.java:270](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L270).
 
 Purpose: invoke the `memberLogin` action in the `GroupContributionController` module; the module workflow describes its business intent.
 
@@ -7767,13 +10100,13 @@ Purpose: invoke the `memberLogin` action in the `GroupContributionController` mo
 }
 ```
 
-**Database effects:** `events`, `gift_group_accounts`, `gift_group_members`, `gift_groups`, `group_collection_notifications` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+**Database effects:** `account_legal_consents`, `events`, `gift_group_accounts`, `gift_group_members`, `gift_groups`, `group_collection_notifications` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0136 — POST /api/public/groups/{token}/member-logout/{groupId}
+## API-0177 — POST /api/public/groups/{token}/member-logout/{groupId}
 
-Handler: com.giftplatform.group.GroupContributionController.memberLogout. Source: [backend/src/main/java/com/giftplatform/group/GroupContributionController.java:295](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L295).
+Handler: com.giftplatform.group.GroupContributionController.memberLogout. Source: [backend/src/main/java/com/giftplatform/group/GroupContributionController.java:306](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L306).
 
 Purpose: invoke the `memberLogout` action in the `GroupContributionController` module; the module workflow describes its business intent.
 
@@ -7822,13 +10155,13 @@ Purpose: invoke the `memberLogout` action in the `GroupContributionController` m
 }
 ```
 
-**Database effects:** `events`, `gift_group_accounts`, `gift_group_members`, `gift_groups`, `group_collection_notifications` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+**Database effects:** `account_legal_consents`, `events`, `gift_group_accounts`, `gift_group_members`, `gift_groups`, `group_collection_notifications` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0137 — POST /api/public/groups/{token}/member-pin/setup/{groupId}
+## API-0178 — POST /api/public/groups/{token}/member-pin/setup/{groupId}
 
-Handler: com.giftplatform.group.GroupContributionController.memberPinSetup. Source: [backend/src/main/java/com/giftplatform/group/GroupContributionController.java:135](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L135).
+Handler: com.giftplatform.group.GroupContributionController.memberPinSetup. Source: [backend/src/main/java/com/giftplatform/group/GroupContributionController.java:136](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L136).
 
 Purpose: invoke the `memberPinSetup` action in the `GroupContributionController` module; the module workflow describes its business intent.
 
@@ -7877,13 +10210,13 @@ Purpose: invoke the `memberPinSetup` action in the `GroupContributionController`
 }
 ```
 
-**Database effects:** `events`, `gift_group_accounts`, `gift_group_members`, `gift_groups`, `group_collection_notifications` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+**Database effects:** `account_legal_consents`, `events`, `gift_group_accounts`, `gift_group_members`, `gift_groups`, `group_collection_notifications` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0138 — GET /api/public/groups/{token}/member-view/{groupId}
+## API-0179 — GET /api/public/groups/{token}/member-view/{groupId}
 
-Handler: com.giftplatform.group.GroupContributionController.memberView. Source: [backend/src/main/java/com/giftplatform/group/GroupContributionController.java:302](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L302).
+Handler: com.giftplatform.group.GroupContributionController.memberView. Source: [backend/src/main/java/com/giftplatform/group/GroupContributionController.java:313](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L313).
 
 Purpose: invoke the `memberView` action in the `GroupContributionController` module; the module workflow describes its business intent.
 
@@ -7932,13 +10265,13 @@ Purpose: invoke the `memberView` action in the `GroupContributionController` mod
 }
 ```
 
-**Database effects:** `events`, `gift_group_accounts`, `gift_group_members`, `gift_groups`, `group_collection_notifications` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+**Database effects:** `account_legal_consents`, `events`, `gift_group_accounts`, `gift_group_members`, `gift_groups`, `group_collection_notifications` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0139 — GET /api/public/groups/{token}/members/{groupId}
+## API-0180 — GET /api/public/groups/{token}/members/{groupId}
 
-Handler: com.giftplatform.group.GroupContributionController.members. Source: [backend/src/main/java/com/giftplatform/group/GroupContributionController.java:314](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L314).
+Handler: com.giftplatform.group.GroupContributionController.members. Source: [backend/src/main/java/com/giftplatform/group/GroupContributionController.java:325](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L325).
 
 Purpose: invoke the `members` action in the `GroupContributionController` module; the module workflow describes its business intent.
 
@@ -7989,13 +10322,13 @@ Purpose: invoke the `members` action in the `GroupContributionController` module
 }
 ```
 
-**Database effects:** `events`, `gift_group_accounts`, `gift_group_members`, `gift_groups`, `group_collection_notifications` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+**Database effects:** `account_legal_consents`, `events`, `gift_group_accounts`, `gift_group_members`, `gift_groups`, `group_collection_notifications` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0140 — POST /api/public/groups/{token}/members/{groupId}/review
+## API-0181 — POST /api/public/groups/{token}/members/{groupId}/review
 
-Handler: com.giftplatform.group.GroupContributionController.review. Source: [backend/src/main/java/com/giftplatform/group/GroupContributionController.java:319](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L319).
+Handler: com.giftplatform.group.GroupContributionController.review. Source: [backend/src/main/java/com/giftplatform/group/GroupContributionController.java:330](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L330).
 
 Purpose: invoke the `review` action in the `GroupContributionController` module; the module workflow describes its business intent.
 
@@ -8043,11 +10376,11 @@ Purpose: invoke the `review` action in the `GroupContributionController` module;
 }
 ```
 
-**Database effects:** `events`, `gift_group_accounts`, `gift_group_members`, `gift_groups`, `group_collection_notifications` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+**Database effects:** `account_legal_consents`, `events`, `gift_group_accounts`, `gift_group_members`, `gift_groups`, `group_collection_notifications` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0141 — GET /api/public/groups/{token}/payments/{groupId}/destinations
+## API-0182 — GET /api/public/groups/{token}/payments/{groupId}/destinations
 
 Handler: com.giftplatform.group.GroupCreatorPaymentController.list. Source: [backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:99](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L99).
 
@@ -8102,7 +10435,7 @@ Purpose: invoke the `list` action in the `GroupCreatorPaymentController` module;
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0142 — POST /api/public/groups/{token}/payments/{groupId}/destinations
+## API-0183 — POST /api/public/groups/{token}/payments/{groupId}/destinations
 
 Handler: com.giftplatform.group.GroupCreatorPaymentController.add. Source: [backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:105](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L105).
 
@@ -8160,7 +10493,7 @@ Purpose: invoke the `add` action in the `GroupCreatorPaymentController` module; 
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0143 — POST /api/public/groups/{token}/payments/{groupId}/destinations/{id}/enabled
+## API-0184 — POST /api/public/groups/{token}/payments/{groupId}/destinations/{id}/enabled
 
 Handler: com.giftplatform.group.GroupCreatorPaymentController.setEnabled. Source: [backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:42](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L42).
 
@@ -8214,7 +10547,7 @@ Purpose: invoke the `setEnabled` action in the `GroupCreatorPaymentController` m
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0144 — GET /api/public/groups/{token}/payments/{groupId}/destinations/{id}/qr
+## API-0185 — GET /api/public/groups/{token}/payments/{groupId}/destinations/{id}/qr
 
 Handler: com.giftplatform.group.GroupCreatorPaymentController.qr. Source: [backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:85](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L85).
 
@@ -8269,7 +10602,7 @@ Purpose: invoke the `qr` action in the `GroupCreatorPaymentController` module; t
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0145 — POST /api/public/groups/{token}/payments/{groupId}/destinations/{id}/qr/generate
+## API-0186 — POST /api/public/groups/{token}/payments/{groupId}/destinations/{id}/qr/generate
 
 Handler: com.giftplatform.group.GroupCreatorPaymentController.generateQr. Source: [backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:75](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L75).
 
@@ -8326,7 +10659,7 @@ Purpose: invoke the `generateQr` action in the `GroupCreatorPaymentController` m
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0146 — POST /api/public/groups/{token}/payments/{groupId}/destinations/{id}/qr/upload
+## API-0187 — POST /api/public/groups/{token}/payments/{groupId}/destinations/{id}/qr/upload
 
 Handler: com.giftplatform.group.GroupCreatorPaymentController.uploadQr. Source: [backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:50](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L50).
 
@@ -8385,7 +10718,7 @@ Purpose: invoke the `uploadQr` action in the `GroupCreatorPaymentController` mod
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0147 — POST /api/public/groups/{token}/payments/{groupId}/destinations/{id}/verify-cashfree
+## API-0188 — POST /api/public/groups/{token}/payments/{groupId}/destinations/{id}/verify-cashfree
 
 Handler: com.giftplatform.group.GroupCreatorCashfreeVerificationController.verify. Source: [backend/src/main/java/com/giftplatform/group/GroupCreatorCashfreeVerificationController.java:15](../../src/main/java/com/giftplatform/group/GroupCreatorCashfreeVerificationController.java#L15).
 
@@ -8442,7 +10775,7 @@ Purpose: invoke the `verify` action in the `GroupCreatorCashfreeVerificationCont
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0148 — POST /api/public/groups/{token}/payments/{groupId}/preferred
+## API-0189 — POST /api/public/groups/{token}/payments/{groupId}/preferred
 
 Handler: com.giftplatform.group.GroupCreatorPaymentController.select. Source: [backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:120](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L120).
 
@@ -8495,9 +10828,9 @@ Purpose: invoke the `select` action in the `GroupCreatorPaymentController` modul
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0149 — POST /api/public/groups/{token}/pin/setup
+## API-0190 — POST /api/public/groups/{token}/pin/setup
 
-Handler: com.giftplatform.group.GroupContributionController.adminPinSetup. Source: [backend/src/main/java/com/giftplatform/group/GroupContributionController.java:125](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L125).
+Handler: com.giftplatform.group.GroupContributionController.adminPinSetup. Source: [backend/src/main/java/com/giftplatform/group/GroupContributionController.java:126](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L126).
 
 Purpose: invoke the `adminPinSetup` action in the `GroupContributionController` module; the module workflow describes its business intent.
 
@@ -8545,13 +10878,13 @@ Purpose: invoke the `adminPinSetup` action in the `GroupContributionController` 
 }
 ```
 
-**Database effects:** `events`, `gift_group_accounts`, `gift_group_members`, `gift_groups`, `group_collection_notifications` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+**Database effects:** `account_legal_consents`, `events`, `gift_group_accounts`, `gift_group_members`, `gift_groups`, `group_collection_notifications` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0150 — GET /api/public/groups/{token}/privacy
+## API-0191 — GET /api/public/groups/{token}/privacy
 
-Handler: com.giftplatform.group.GroupContributionController.privacy. Source: [backend/src/main/java/com/giftplatform/group/GroupContributionController.java:172](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L172).
+Handler: com.giftplatform.group.GroupContributionController.privacy. Source: [backend/src/main/java/com/giftplatform/group/GroupContributionController.java:173](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L173).
 
 Purpose: invoke the `privacy` action in the `GroupContributionController` module; the module workflow describes its business intent.
 
@@ -8598,13 +10931,13 @@ Purpose: invoke the `privacy` action in the `GroupContributionController` module
 }
 ```
 
-**Database effects:** `events`, `gift_group_accounts`, `gift_group_members`, `gift_groups`, `group_collection_notifications` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+**Database effects:** `account_legal_consents`, `events`, `gift_group_accounts`, `gift_group_members`, `gift_groups`, `group_collection_notifications` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0151 — POST /api/public/groups/{token}/privacy
+## API-0192 — POST /api/public/groups/{token}/privacy
 
-Handler: com.giftplatform.group.GroupContributionController.privacyUpdate. Source: [backend/src/main/java/com/giftplatform/group/GroupContributionController.java:173](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L173).
+Handler: com.giftplatform.group.GroupContributionController.privacyUpdate. Source: [backend/src/main/java/com/giftplatform/group/GroupContributionController.java:174](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L174).
 
 Purpose: invoke the `privacyUpdate` action in the `GroupContributionController` module; the module workflow describes its business intent.
 
@@ -8653,13 +10986,13 @@ Purpose: invoke the `privacyUpdate` action in the `GroupContributionController` 
 }
 ```
 
-**Database effects:** `events`, `gift_group_accounts`, `gift_group_members`, `gift_groups`, `group_collection_notifications` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+**Database effects:** `account_legal_consents`, `events`, `gift_group_accounts`, `gift_group_members`, `gift_groups`, `group_collection_notifications` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0152 — POST /api/public/groups/{token}/profile-name
+## API-0193 — POST /api/public/groups/{token}/profile-name
 
-Handler: com.giftplatform.group.GroupContributionController.setAdminName. Source: [backend/src/main/java/com/giftplatform/group/GroupContributionController.java:149](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L149).
+Handler: com.giftplatform.group.GroupContributionController.setAdminName. Source: [backend/src/main/java/com/giftplatform/group/GroupContributionController.java:150](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L150).
 
 Purpose: invoke the `setAdminName` action in the `GroupContributionController` module; the module workflow describes its business intent.
 
@@ -8705,13 +11038,13 @@ Purpose: invoke the `setAdminName` action in the `GroupContributionController` m
 }
 ```
 
-**Database effects:** `events`, `gift_group_accounts`, `gift_group_members`, `gift_groups`, `group_collection_notifications` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+**Database effects:** `account_legal_consents`, `events`, `gift_group_accounts`, `gift_group_members`, `gift_groups`, `group_collection_notifications` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0153 — POST /api/public/groups/{token}/publish/{groupId}
+## API-0194 — POST /api/public/groups/{token}/publish/{groupId}
 
-Handler: com.giftplatform.group.GroupContributionController.publish. Source: [backend/src/main/java/com/giftplatform/group/GroupContributionController.java:328](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L328).
+Handler: com.giftplatform.group.GroupContributionController.publish. Source: [backend/src/main/java/com/giftplatform/group/GroupContributionController.java:339](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L339).
 
 Purpose: invoke the `publish` action in the `GroupContributionController` module; the module workflow describes its business intent.
 
@@ -8760,13 +11093,13 @@ Purpose: invoke the `publish` action in the `GroupContributionController` module
 }
 ```
 
-**Database effects:** `events`, `gift_group_accounts`, `gift_group_members`, `gift_groups`, `group_collection_notifications` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+**Database effects:** `account_legal_consents`, `events`, `gift_group_accounts`, `gift_group_members`, `gift_groups`, `group_collection_notifications` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0154 — POST /api/public/groups/{token}/register
+## API-0195 — POST /api/public/groups/{token}/register
 
-Handler: com.giftplatform.group.GroupContributionController.register. Source: [backend/src/main/java/com/giftplatform/group/GroupContributionController.java:107](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L107).
+Handler: com.giftplatform.group.GroupContributionController.register. Source: [backend/src/main/java/com/giftplatform/group/GroupContributionController.java:108](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L108).
 
 Purpose: invoke the `register` action in the `GroupContributionController` module; the module workflow describes its business intent.
 
@@ -8792,7 +11125,8 @@ Purpose: invoke the `register` action in the `GroupContributionController` modul
   "fullName": "<fullName: validated value>",
   "email": "guest@example.test",
   "mobile": "+919000000001",
-  "emailVerificationToken": "guest@example.test"
+  "emailVerificationToken": "guest@example.test",
+  "termsAccepted": true
 }
 ```
 
@@ -8819,13 +11153,13 @@ Purpose: invoke the `register` action in the `GroupContributionController` modul
 }
 ```
 
-**Database effects:** `events`, `gift_group_accounts`, `gift_group_members`, `gift_groups`, `group_collection_notifications` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+**Database effects:** `account_legal_consents`, `events`, `gift_group_accounts`, `gift_group_members`, `gift_groups`, `group_collection_notifications` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0155 — POST /api/public/groups/{token}/setup
+## API-0196 — POST /api/public/groups/{token}/setup
 
-Handler: com.giftplatform.group.GroupContributionController.setup. Source: [backend/src/main/java/com/giftplatform/group/GroupContributionController.java:177](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L177).
+Handler: com.giftplatform.group.GroupContributionController.setup. Source: [backend/src/main/java/com/giftplatform/group/GroupContributionController.java:178](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L178).
 
 Purpose: invoke the `setup` action in the `GroupContributionController` module; the module workflow describes its business intent.
 
@@ -8889,11 +11223,128 @@ Purpose: invoke the `setup` action in the `GroupContributionController` module; 
 }
 ```
 
-**Database effects:** `events`, `gift_group_accounts`, `gift_group_members`, `gift_groups`, `group_collection_notifications` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+**Database effects:** `account_legal_consents`, `events`, `gift_group_accounts`, `gift_group_members`, `gift_groups`, `group_collection_notifications` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0156 — GET /api/public/invitation-assets
+## API-0197 — GET /api/public/growth-settings
+
+Handler: com.giftplatform.admin.GrowthSettingsController.current. Source: [backend/src/main/java/com/giftplatform/admin/GrowthSettingsController.java:10](../../src/main/java/com/giftplatform/admin/GrowthSettingsController.java#L10).
+
+Purpose: invoke the `current` action in the `GrowthSettingsController` module; the module workflow describes its business intent.
+
+**Access:** Public boundary subject to route-specific validation, published-event/module gates and rate limits. CSRF may still be required; public does not mean exempt.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+
+
+**Request example / shape:**
+```json
+{
+  "pathAndQueryParameters": {}
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `org.springframework.http.ResponseEntity<com.giftplatform.admin.GrowthSettingsService$Settings>`. Produces: handler content type / negotiated JSON.
+```json
+{
+  "features": {
+    "_contract": "Dynamic response keys: inspect linked handler and module narrative; no fixed schema is asserted."
+  },
+  "version": 1
+}
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/public/growth-settings"
+  }
+}
+```
+
+**Database effects:** The controller delegates to services or does not declare SQL; follow the linked handler into its injected services. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0198 — POST /api/public/interactions
+
+Handler: com.giftplatform.analytics.InteractionController.collect. Source: [backend/src/main/java/com/giftplatform/analytics/InteractionController.java:16](../../src/main/java/com/giftplatform/analytics/InteractionController.java#L16).
+
+Purpose: invoke the `collect` action in the `InteractionController` module; the module workflow describes its business intent.
+
+**Access:** Public boundary subject to route-specific validation, published-event/module gates and rate limits. CSRF may still be required; public does not mean exempt.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+| batch | @jakarta.validation.Valid(); @org.springframework.web.bind.annotation.RequestBody(required=true) | com.giftplatform.analytics.InteractionController$Batch | As declared by the annotation; no additional undocumented default is asserted. |
+
+
+**Request example / shape:**
+```json
+{
+  "events": [
+    {
+      "id": "123e4567-e89b-42d3-a456-426614174000",
+      "parentId": "123e4567-e89b-42d3-a456-426614174000",
+      "kind": "<kind: validated value>",
+      "action": "<action: validated value>",
+      "page": "<page: validated value>",
+      "control": "<control: validated value>",
+      "destination": "<destination: validated value>",
+      "outcome": "<outcome: validated value>",
+      "detail": "<detail: validated value>",
+      "eventId": "123e4567-e89b-42d3-a456-426614174000",
+      "token": "123e4567-e89b-42d3-a456-426614174000",
+      "durationMs": 1
+    }
+  ]
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `org.springframework.http.ResponseEntity<java.lang.Void>`. Produces: handler content type / negotiated JSON.
+```json
+null
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/public/interactions"
+  }
+}
+```
+
+**Database effects:** `events` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0199 — GET /api/public/invitation-assets
 
 Handler: com.giftplatform.asset.GalleryAssetController.published. Source: [backend/src/main/java/com/giftplatform/asset/GalleryAssetController.java:12](../../src/main/java/com/giftplatform/asset/GalleryAssetController.java#L12).
 
@@ -8952,7 +11403,7 @@ Purpose: invoke the `published` action in the `GalleryAssetController` module; t
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0157 — GET /api/public/invitation-assets/{id}/image
+## API-0200 — GET /api/public/invitation-assets/{id}/image
 
 Handler: com.giftplatform.asset.GalleryAssetController.publishedImage. Source: [backend/src/main/java/com/giftplatform/asset/GalleryAssetController.java:14](../../src/main/java/com/giftplatform/asset/GalleryAssetController.java#L14).
 
@@ -9003,7 +11454,138 @@ Purpose: invoke the `publishedImage` action in the `GalleryAssetController` modu
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0158 — POST /api/public/payments/checkout
+## API-0201 — GET /api/public/keepsakes/{token}
+
+Handler: com.giftplatform.publicevent.PublicKeepsakeController.view. Source: [backend/src/main/java/com/giftplatform/publicevent/PublicKeepsakeController.java:33](../../src/main/java/com/giftplatform/publicevent/PublicKeepsakeController.java#L33).
+
+Purpose: invoke the `view` action in the `PublicKeepsakeController` module; the module workflow describes its business intent.
+
+**Access:** Public boundary subject to route-specific validation, published-event/module gates and rate limits. CSRF may still be required; public does not mean exempt.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+| token | @org.springframework.web.bind.annotation.PathVariable(name="", value="", required=true) | java.util.UUID | As declared by the annotation; no additional undocumented default is asserted. |
+| page | @org.springframework.web.bind.annotation.RequestParam(name="", value="", required=true, defaultValue="0") | int | As declared by the annotation; no additional undocumented default is asserted. |
+
+
+**Request example / shape:**
+```json
+{
+  "pathAndQueryParameters": {
+    "token": "123e4567-e89b-42d3-a456-426614174000",
+    "page": 1
+  }
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `org.springframework.http.ResponseEntity<java.util.Map<java.lang.String, java.lang.Object>>`. Produces: handler content type / negotiated JSON.
+```json
+{
+  "_contract": "Dynamic response keys: inspect linked handler and module narrative; no fixed schema is asserted."
+}
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/public/keepsakes/{token}"
+  }
+}
+```
+
+**Database effects:** `event_guestbook`, `events`, `platform_admin_action_audit` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0202 — GET /api/public/localization/catalog
+
+Handler: com.giftplatform.localization.LocalizationController.guest. Source: [backend/src/main/java/com/giftplatform/localization/LocalizationController.java:18](../../src/main/java/com/giftplatform/localization/LocalizationController.java#L18).
+
+Purpose: invoke the `guest` action in the `LocalizationController` module; the module workflow describes its business intent.
+
+**Access:** Public boundary subject to route-specific validation, published-event/module gates and rate limits. CSRF may still be required; public does not mean exempt.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+| token | @org.springframework.web.bind.annotation.RequestParam(name="", value="", required=false, defaultValue="\n\t\t\n\t\t\n\ue000\ue001\ue002\n\t\t\t\t\n") | java.util.UUID | As declared by the annotation; no additional undocumented default is asserted. |
+| language | @org.springframework.web.bind.annotation.RequestParam(name="", value="", required=false, defaultValue="\n\t\t\n\t\t\n\ue000\ue001\ue002\n\t\t\t\t\n") | java.lang.String | As declared by the annotation; no additional undocumented default is asserted. |
+
+
+**Request example / shape:**
+```json
+{
+  "pathAndQueryParameters": {
+    "token": "123e4567-e89b-42d3-a456-426614174000",
+    "language": "<language: validated value>"
+  }
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `org.springframework.http.ResponseEntity<com.giftplatform.localization.LocalizationService$Catalog>`. Produces: handler content type / negotiated JSON.
+```json
+{
+  "enabled": true,
+  "defaultLanguage": "<defaultLanguage: validated value>",
+  "fallbackLanguage": "<fallbackLanguage: validated value>",
+  "selectedLanguage": "<selectedLanguage: validated value>",
+  "direction": "<direction: validated value>",
+  "languages": [
+    {
+      "code": "<code: validated value>",
+      "nativeName": "<nativeName: validated value>",
+      "englishName": "<englishName: validated value>",
+      "direction": "<direction: validated value>",
+      "enabled": true,
+      "version": 1
+    }
+  ],
+  "resources": {
+    "_contract": "Dynamic response keys: inspect linked handler and module narrative; no fixed schema is asserted."
+  },
+  "sources": {
+    "_contract": "Dynamic response keys: inspect linked handler and module narrative; no fixed schema is asserted."
+  },
+  "version": 1
+}
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/public/localization/catalog"
+  }
+}
+```
+
+**Database effects:** `user_language_preferences` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0203 — POST /api/public/payments/checkout
 
 Handler: com.giftplatform.payment.controller.GuestCheckoutController.checkout. Source: [backend/src/main/java/com/giftplatform/payment/controller/GuestCheckoutController.java:18](../../src/main/java/com/giftplatform/payment/controller/GuestCheckoutController.java#L18).
 
@@ -9071,7 +11653,7 @@ Purpose: invoke the `checkout` action in the `GuestCheckoutController` module; t
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0159 — POST /api/public/payments/confirm
+## API-0204 — POST /api/public/payments/confirm
 
 Handler: com.giftplatform.payment.controller.GuestPaymentConfirmationController.confirm. Source: [backend/src/main/java/com/giftplatform/payment/controller/GuestPaymentConfirmationController.java:17](../../src/main/java/com/giftplatform/payment/controller/GuestPaymentConfirmationController.java#L17).
 
@@ -9130,7 +11712,7 @@ Purpose: invoke the `confirm` action in the `GuestPaymentConfirmationController`
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0160 — GET /api/public/payments/context/{token}
+## API-0205 — GET /api/public/payments/context/{token}
 
 Handler: com.giftplatform.payment.controller.PublicPaymentContextController.context. Source: [backend/src/main/java/com/giftplatform/payment/controller/PublicPaymentContextController.java:16](../../src/main/java/com/giftplatform/payment/controller/PublicPaymentContextController.java#L16).
 
@@ -9183,7 +11765,7 @@ Purpose: invoke the `context` action in the `PublicPaymentContextController` mod
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0161 — GET /api/public/payments/controls/{token}
+## API-0206 — GET /api/public/payments/controls/{token}
 
 Handler: com.giftplatform.payment.control.PaymentControlController.effective. Source: [backend/src/main/java/com/giftplatform/payment/control/PaymentControlController.java:43](../../src/main/java/com/giftplatform/payment/control/PaymentControlController.java#L43).
 
@@ -9236,7 +11818,7 @@ Purpose: invoke the `effective` action in the `PaymentControlController` module;
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0162 — POST /api/public/payments/direct/{token}/claims
+## API-0207 — POST /api/public/payments/direct/{token}/claims
 
 Handler: com.giftplatform.payment.direct.GuestDirectTransferController.claim. Source: [backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferController.java:18](../../src/main/java/com/giftplatform/payment/direct/GuestDirectTransferController.java#L18).
 
@@ -9298,7 +11880,7 @@ Purpose: invoke the `claim` action in the `GuestDirectTransferController` module
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0163 — GET /api/public/payments/direct/{token}/destinations
+## API-0208 — GET /api/public/payments/direct/{token}/destinations
 
 Handler: com.giftplatform.payment.direct.GuestDirectTransferController.destinations. Source: [backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferController.java:14](../../src/main/java/com/giftplatform/payment/direct/GuestDirectTransferController.java#L14).
 
@@ -9358,7 +11940,7 @@ Purpose: invoke the `destinations` action in the `GuestDirectTransferController`
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0164 — POST /api/public/payments/hybrid/quote
+## API-0209 — POST /api/public/payments/hybrid/quote
 
 Handler: com.giftplatform.payment.hybrid.HybridCheckoutQuoteController.quote. Source: [backend/src/main/java/com/giftplatform/payment/hybrid/HybridCheckoutQuoteController.java:12](../../src/main/java/com/giftplatform/payment/hybrid/HybridCheckoutQuoteController.java#L12).
 
@@ -9422,7 +12004,7 @@ Purpose: invoke the `quote` action in the `HybridCheckoutQuoteController` module
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0165 — GET /api/public/payments/verified-destinations/{token}
+## API-0210 — GET /api/public/payments/verified-destinations/{token}
 
 Handler: com.giftplatform.payment.direct.GuestVerifiedDestinationController.list. Source: [backend/src/main/java/com/giftplatform/payment/direct/GuestVerifiedDestinationController.java:14](../../src/main/java/com/giftplatform/payment/direct/GuestVerifiedDestinationController.java#L14).
 
@@ -9487,7 +12069,7 @@ Purpose: invoke the `list` action in the `GuestVerifiedDestinationController` mo
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0166 — GET /api/public/verification-settings
+## API-0211 — GET /api/public/verification-settings
 
 Handler: com.giftplatform.security.verification.VerificationSettingsController.current. Source: [backend/src/main/java/com/giftplatform/security/verification/VerificationSettingsController.java:29](../../src/main/java/com/giftplatform/security/verification/VerificationSettingsController.java#L29).
 
@@ -9538,7 +12120,7 @@ Purpose: invoke the `current` action in the `VerificationSettingsController` mod
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0167 — GET /api/v1/commerce
+## API-0212 — GET /api/v1/commerce
 
 Handler: com.giftplatform.monetization.CommercialController.account. Source: [backend/src/main/java/com/giftplatform/monetization/CommercialController.java:19](../../src/main/java/com/giftplatform/monetization/CommercialController.java#L19).
 
@@ -9588,7 +12170,7 @@ Purpose: invoke the `account` action in the `CommercialController` module; the m
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0168 — GET /api/v1/commerce/analytics/{eventId}
+## API-0213 — GET /api/v1/commerce/analytics/{eventId}
 
 Handler: com.giftplatform.monetization.CommercialController.analytics. Source: [backend/src/main/java/com/giftplatform/monetization/CommercialController.java:36](../../src/main/java/com/giftplatform/monetization/CommercialController.java#L36).
 
@@ -9641,7 +12223,7 @@ Purpose: invoke the `analytics` action in the `CommercialController` module; the
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0169 — POST /api/v1/commerce/checkout
+## API-0214 — POST /api/v1/commerce/checkout
 
 Handler: com.giftplatform.monetization.CommercialController.checkout. Source: [backend/src/main/java/com/giftplatform/monetization/CommercialController.java:26](../../src/main/java/com/giftplatform/monetization/CommercialController.java#L26).
 
@@ -9702,7 +12284,7 @@ Purpose: invoke the `checkout` action in the `CommercialController` module; the 
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0170 — POST /api/v1/commerce/confirm
+## API-0215 — POST /api/v1/commerce/confirm
 
 Handler: com.giftplatform.monetization.CommercialController.confirm. Source: [backend/src/main/java/com/giftplatform/monetization/CommercialController.java:27](../../src/main/java/com/giftplatform/monetization/CommercialController.java#L27).
 
@@ -9763,7 +12345,7 @@ Purpose: invoke the `confirm` action in the `CommercialController` module; the m
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0171 — GET /api/v1/commerce/offer
+## API-0216 — GET /api/v1/commerce/offer
 
 Handler: com.giftplatform.monetization.CommercialController.offer. Source: [backend/src/main/java/com/giftplatform/monetization/CommercialController.java:25](../../src/main/java/com/giftplatform/monetization/CommercialController.java#L25).
 
@@ -9825,7 +12407,7 @@ Purpose: invoke the `offer` action in the `CommercialController` module; the mod
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0172 — GET /api/v1/commerce/placements
+## API-0217 — GET /api/v1/commerce/placements
 
 Handler: com.giftplatform.monetization.CommercialController.own. Source: [backend/src/main/java/com/giftplatform/monetization/CommercialController.java:34](../../src/main/java/com/giftplatform/monetization/CommercialController.java#L34).
 
@@ -9877,7 +12459,7 @@ Purpose: invoke the `own` action in the `CommercialController` module; the modul
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0173 — POST /api/v1/commerce/placements
+## API-0218 — POST /api/v1/commerce/placements
 
 Handler: com.giftplatform.monetization.CommercialController.create. Source: [backend/src/main/java/com/giftplatform/monetization/CommercialController.java:35](../../src/main/java/com/giftplatform/monetization/CommercialController.java#L35).
 
@@ -9933,7 +12515,7 @@ Purpose: invoke the `create` action in the `CommercialController` module; the mo
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0174 — GET /api/v1/commerce/templates
+## API-0219 — GET /api/v1/commerce/templates
 
 Handler: com.giftplatform.monetization.CommercialController.templates. Source: [backend/src/main/java/com/giftplatform/monetization/CommercialController.java:28](../../src/main/java/com/giftplatform/monetization/CommercialController.java#L28).
 
@@ -9985,7 +12567,7 @@ Purpose: invoke the `templates` action in the `CommercialController` module; the
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0175 — GET /api/v1/commerce/templates/{id}/image
+## API-0220 — GET /api/v1/commerce/templates/{id}/image
 
 Handler: com.giftplatform.asset.GalleryAssetController.purchasedImage. Source: [backend/src/main/java/com/giftplatform/asset/GalleryAssetController.java:16](../../src/main/java/com/giftplatform/asset/GalleryAssetController.java#L16).
 
@@ -10036,7 +12618,58 @@ Purpose: invoke the `purchasedImage` action in the `GalleryAssetController` modu
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0176 — GET /api/v1/events
+## API-0221 — GET /api/v1/commerce/templates/{id}/preview
+
+Handler: com.giftplatform.asset.GalleryAssetController.preview. Source: [backend/src/main/java/com/giftplatform/asset/GalleryAssetController.java:18](../../src/main/java/com/giftplatform/asset/GalleryAssetController.java#L18).
+
+Purpose: invoke the `preview` action in the `GalleryAssetController` module; the module workflow describes its business intent.
+
+**Access:** Authenticated principal; ownership/role is enforced by route filter and controller/service resource checks. An authenticated user cannot assume access to another host’s UUID.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+| id | @org.springframework.web.bind.annotation.PathVariable(name="", value="", required=true) | java.util.UUID | As declared by the annotation; no additional undocumented default is asserted. |
+
+
+**Request example / shape:**
+```json
+{
+  "pathAndQueryParameters": {
+    "id": "123e4567-e89b-42d3-a456-426614174000"
+  }
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `org.springframework.http.ResponseEntity<byte[]>`. Produces: handler content type / negotiated JSON.
+```json
+"<binary bytes: use response Content-Type>"
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/v1/commerce/templates/{id}/preview"
+  }
+}
+```
+
+**Database effects:** The controller delegates to services or does not declare SQL; follow the linked handler into its injected services. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0222 — GET /api/v1/events
 
 Handler: com.giftplatform.event.Controller.EventController.list. Source: [backend/src/main/java/com/giftplatform/event/Controller/EventController.java:20](../../src/main/java/com/giftplatform/event/Controller/EventController.java#L20).
 
@@ -10115,7 +12748,7 @@ Purpose: invoke the `list` action in the `EventController` module; the module wo
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0177 — POST /api/v1/events
+## API-0223 — POST /api/v1/events
 
 Handler: com.giftplatform.event.Controller.EventController.create. Source: [backend/src/main/java/com/giftplatform/event/Controller/EventController.java:16](../../src/main/java/com/giftplatform/event/Controller/EventController.java#L16).
 
@@ -10213,7 +12846,7 @@ Purpose: invoke the `create` action in the `EventController` module; the module 
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0178 — GET /api/v1/events/ai-design-options
+## API-0224 — GET /api/v1/events/ai-design-options
 
 Handler: com.giftplatform.qr.design.ai.AiInvitationOptionsController.options. Source: [backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationOptionsController.java:11](../../src/main/java/com/giftplatform/qr/design/ai/AiInvitationOptionsController.java#L11).
 
@@ -10268,7 +12901,61 @@ Purpose: invoke the `options` action in the `AiInvitationOptionsController` modu
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0179 — GET /api/v1/events/{eventId}/contributions
+## API-0225 — GET /api/v1/events/workspace-summary
+
+Handler: com.giftplatform.event.Controller.WorkspaceSummaryController.summary. Source: [backend/src/main/java/com/giftplatform/event/Controller/WorkspaceSummaryController.java:15](../../src/main/java/com/giftplatform/event/Controller/WorkspaceSummaryController.java#L15).
+
+Purpose: invoke the `summary` action in the `WorkspaceSummaryController` module; the module workflow describes its business intent.
+
+**Access:** Authenticated principal; ownership/role is enforced by route filter and controller/service resource checks. An authenticated user cannot assume access to another host’s UUID.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+
+
+**Request example / shape:**
+```json
+{
+  "pathAndQueryParameters": {}
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `org.springframework.http.ResponseEntity<java.util.List<java.util.Map<java.lang.String, java.lang.Object>>>`. Produces: handler content type / negotiated JSON.
+```json
+[
+  [
+    {
+      "_contract": "Dynamic response keys: inspect linked handler and module narrative; no fixed schema is asserted."
+    }
+  ]
+]
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/v1/events/workspace-summary"
+  }
+}
+```
+
+**Database effects:** `event_rsvps`, `events`, `gifts` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0226 — GET /api/v1/events/{eventId}/contributions
 
 Handler: com.giftplatform.payment.report.HostContributionReportController.report. Source: [backend/src/main/java/com/giftplatform/payment/report/HostContributionReportController.java:16](../../src/main/java/com/giftplatform/payment/report/HostContributionReportController.java#L16).
 
@@ -10371,7 +13058,7 @@ Purpose: invoke the `report` action in the `HostContributionReportController` mo
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0180 — GET /api/v1/events/{eventId}/contributions/export.csv
+## API-0227 — GET /api/v1/events/{eventId}/contributions/export.csv
 
 Handler: com.giftplatform.payment.report.HostContributionReportController.export. Source: [backend/src/main/java/com/giftplatform/payment/report/HostContributionReportController.java:26](../../src/main/java/com/giftplatform/payment/report/HostContributionReportController.java#L26).
 
@@ -10434,7 +13121,7 @@ Purpose: invoke the `export` action in the `HostContributionReportController` mo
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0181 — GET /api/v1/events/{eventId}/contributions/groups
+## API-0228 — GET /api/v1/events/{eventId}/contributions/groups
 
 Handler: com.giftplatform.group.GroupGiftCollectionController.report. Source: [backend/src/main/java/com/giftplatform/group/GroupGiftCollectionController.java:36](../../src/main/java/com/giftplatform/group/GroupGiftCollectionController.java#L36).
 
@@ -10489,7 +13176,7 @@ Purpose: invoke the `report` action in the `GroupGiftCollectionController` modul
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0182 — GET /api/v1/events/{eventId}/contributions/groups/{groupId}
+## API-0229 — GET /api/v1/events/{eventId}/contributions/groups/{groupId}
 
 Handler: com.giftplatform.group.GroupGiftCollectionController.details. Source: [backend/src/main/java/com/giftplatform/group/GroupGiftCollectionController.java:50](../../src/main/java/com/giftplatform/group/GroupGiftCollectionController.java#L50).
 
@@ -10546,7 +13233,7 @@ Purpose: invoke the `details` action in the `GroupGiftCollectionController` modu
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0183 — GET /api/v1/events/{eventId}/contributions/groups/{groupId}/activity
+## API-0230 — GET /api/v1/events/{eventId}/contributions/groups/{groupId}/activity
 
 Handler: com.giftplatform.group.GroupGiftCollectionController.hostActivity. Source: [backend/src/main/java/com/giftplatform/group/GroupGiftCollectionController.java:56](../../src/main/java/com/giftplatform/group/GroupGiftCollectionController.java#L56).
 
@@ -10605,7 +13292,7 @@ Purpose: invoke the `hostActivity` action in the `GroupGiftCollectionController`
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0184 — GET /api/v1/events/{eventId}/contributions/guest-gifts
+## API-0231 — GET /api/v1/events/{eventId}/contributions/guest-gifts
 
 Handler: com.giftplatform.group.GuestGiftController.hostReport. Source: [backend/src/main/java/com/giftplatform/group/GuestGiftController.java:125](../../src/main/java/com/giftplatform/group/GuestGiftController.java#L125).
 
@@ -10660,7 +13347,7 @@ Purpose: invoke the `hostReport` action in the `GuestGiftController` module; the
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0185 — GET /api/v1/events/{eventId}/gifts
+## API-0232 — GET /api/v1/events/{eventId}/gifts
 
 Handler: com.giftplatform.gift.controller.GiftController.list. Source: [backend/src/main/java/com/giftplatform/gift/controller/GiftController.java:25](../../src/main/java/com/giftplatform/gift/controller/GiftController.java#L25).
 
@@ -10727,7 +13414,7 @@ Purpose: invoke the `list` action in the `GiftController` module; the module wor
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0186 — POST /api/v1/events/{eventId}/gifts
+## API-0233 — POST /api/v1/events/{eventId}/gifts
 
 Handler: com.giftplatform.gift.controller.GiftController.create. Source: [backend/src/main/java/com/giftplatform/gift/controller/GiftController.java:21](../../src/main/java/com/giftplatform/gift/controller/GiftController.java#L21).
 
@@ -10798,7 +13485,7 @@ Purpose: invoke the `create` action in the `GiftController` module; the module w
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0187 — POST /api/v1/events/{eventId}/gifts/photos
+## API-0234 — POST /api/v1/events/{eventId}/gifts/photos
 
 Handler: com.giftplatform.gift.photo.GiftPhotoController.upload. Source: [backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoController.java:14](../../src/main/java/com/giftplatform/gift/photo/GiftPhotoController.java#L14).
 
@@ -10855,7 +13542,7 @@ Purpose: invoke the `upload` action in the `GiftPhotoController` module; the mod
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0188 — GET /api/v1/events/{eventId}/gifts/photos/{photoId}
+## API-0235 — GET /api/v1/events/{eventId}/gifts/photos/{photoId}
 
 Handler: com.giftplatform.gift.photo.GiftPhotoController.owned. Source: [backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoController.java:19](../../src/main/java/com/giftplatform/gift/photo/GiftPhotoController.java#L19).
 
@@ -10908,7 +13595,7 @@ Purpose: invoke the `owned` action in the `GiftPhotoController` module; the modu
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0189 — POST /api/v1/events/{eventId}/gifts/retailer-metadata
+## API-0236 — POST /api/v1/events/{eventId}/gifts/retailer-metadata
 
 Handler: com.giftplatform.gift.retailer.RetailerMetadataController.lookup. Source: [backend/src/main/java/com/giftplatform/gift/retailer/RetailerMetadataController.java:23](../../src/main/java/com/giftplatform/gift/retailer/RetailerMetadataController.java#L23).
 
@@ -10967,7 +13654,7 @@ Purpose: invoke the `lookup` action in the `RetailerMetadataController` module; 
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0190 — GET /api/v1/events/{eventId}/gifts/{giftId}
+## API-0237 — GET /api/v1/events/{eventId}/gifts/{giftId}
 
 Handler: com.giftplatform.gift.controller.GiftController.get. Source: [backend/src/main/java/com/giftplatform/gift/controller/GiftController.java:27](../../src/main/java/com/giftplatform/gift/controller/GiftController.java#L27).
 
@@ -11034,7 +13721,7 @@ Purpose: invoke the `get` action in the `GiftController` module; the module work
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0191 — PUT /api/v1/events/{eventId}/gifts/{giftId}
+## API-0238 — PUT /api/v1/events/{eventId}/gifts/{giftId}
 
 Handler: com.giftplatform.gift.controller.GiftController.update. Source: [backend/src/main/java/com/giftplatform/gift/controller/GiftController.java:29](../../src/main/java/com/giftplatform/gift/controller/GiftController.java#L29).
 
@@ -11106,7 +13793,7 @@ Purpose: invoke the `update` action in the `GiftController` module; the module w
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0192 — POST /api/v1/events/{eventId}/gifts/{giftId}/cancel
+## API-0239 — POST /api/v1/events/{eventId}/gifts/{giftId}/cancel
 
 Handler: com.giftplatform.gift.controller.GiftController.cancel. Source: [backend/src/main/java/com/giftplatform/gift/controller/GiftController.java:44](../../src/main/java/com/giftplatform/gift/controller/GiftController.java#L44).
 
@@ -11173,7 +13860,7 @@ Purpose: invoke the `cancel` action in the `GiftController` module; the module w
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0193 — PUT /api/v1/events/{eventId}/gifts/{giftId}/product-link
+## API-0240 — PUT /api/v1/events/{eventId}/gifts/{giftId}/product-link
 
 Handler: com.giftplatform.gift.controller.GiftController.productLink. Source: [backend/src/main/java/com/giftplatform/gift/controller/GiftController.java:40](../../src/main/java/com/giftplatform/gift/controller/GiftController.java#L40).
 
@@ -11238,7 +13925,7 @@ Purpose: invoke the `productLink` action in the `GiftController` module; the mod
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0194 — PUT /api/v1/events/{eventId}/gifts/{giftId}/publication
+## API-0241 — PUT /api/v1/events/{eventId}/gifts/{giftId}/publication
 
 Handler: com.giftplatform.gift.controller.GiftController.publication. Source: [backend/src/main/java/com/giftplatform/gift/controller/GiftController.java:35](../../src/main/java/com/giftplatform/gift/controller/GiftController.java#L35).
 
@@ -11303,7 +13990,7 @@ Purpose: invoke the `publication` action in the `GiftController` module; the mod
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0195 — GET /api/v1/events/{eventId}/group-notifications
+## API-0242 — GET /api/v1/events/{eventId}/group-notifications
 
 Handler: com.giftplatform.group.GroupGiftCollectionController.notifications. Source: [backend/src/main/java/com/giftplatform/group/GroupGiftCollectionController.java:63](../../src/main/java/com/giftplatform/group/GroupGiftCollectionController.java#L63).
 
@@ -11358,7 +14045,7 @@ Purpose: invoke the `notifications` action in the `GroupGiftCollectionController
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0196 — POST /api/v1/events/{eventId}/group-notifications/{id}/read
+## API-0243 — POST /api/v1/events/{eventId}/group-notifications/{id}/read
 
 Handler: com.giftplatform.group.GroupGiftCollectionController.read. Source: [backend/src/main/java/com/giftplatform/group/GroupGiftCollectionController.java:65](../../src/main/java/com/giftplatform/group/GroupGiftCollectionController.java#L65).
 
@@ -11413,7 +14100,60 @@ Purpose: invoke the `read` action in the `GroupGiftCollectionController` module;
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0197 — GET /api/v1/events/{eventId}/payment-breakdown
+## API-0244 — POST /api/v1/events/{eventId}/invitation-email
+
+Handler: com.giftplatform.notification.email.EventInvitationEmailController.send. Source: [backend/src/main/java/com/giftplatform/notification/email/EventInvitationEmailController.java:15](../../src/main/java/com/giftplatform/notification/email/EventInvitationEmailController.java#L15).
+
+Purpose: invoke the `send` action in the `EventInvitationEmailController` module; the module workflow describes its business intent.
+
+**Access:** Authenticated principal; ownership/role is enforced by route filter and controller/service resource checks. An authenticated user cannot assume access to another host’s UUID.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+| eventId | @org.springframework.web.bind.annotation.PathVariable(name="", value="", required=true) | java.util.UUID | As declared by the annotation; no additional undocumented default is asserted. |
+| input | @org.springframework.web.bind.annotation.RequestBody(required=true) | com.giftplatform.notification.email.EventInvitationEmailController$Invitation | As declared by the annotation; no additional undocumented default is asserted. |
+
+
+**Request example / shape:**
+```json
+{
+  "email": "guest@example.test",
+  "requestId": "123e4567-e89b-42d3-a456-426614174000"
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `java.util.Map<java.lang.String, java.lang.String>`. Produces: handler content type / negotiated JSON.
+```json
+{
+  "_contract": "Dynamic response keys: inspect linked handler and module narrative; no fixed schema is asserted."
+}
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/v1/events/{eventId}/invitation-email"
+  }
+}
+```
+
+**Database effects:** `events`, `transactional_email_outbox` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0245 — GET /api/v1/events/{eventId}/payment-breakdown
 
 Handler: com.giftplatform.payment.control.PaymentControlController.breakdown. Source: [backend/src/main/java/com/giftplatform/payment/control/PaymentControlController.java:27](../../src/main/java/com/giftplatform/payment/control/PaymentControlController.java#L27).
 
@@ -11474,7 +14214,7 @@ Purpose: invoke the `breakdown` action in the `PaymentControlController` module;
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0198 — GET /api/v1/events/{eventId}/qr
+## API-0246 — GET /api/v1/events/{eventId}/qr
 
 Handler: com.giftplatform.qr.EventQrController.details. Source: [backend/src/main/java/com/giftplatform/qr/EventQrController.java:13](../../src/main/java/com/giftplatform/qr/EventQrController.java#L13).
 
@@ -11530,7 +14270,7 @@ Purpose: invoke the `details` action in the `EventQrController` module; the modu
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0199 — GET /api/v1/events/{eventId}/qr/ai-design
+## API-0247 — GET /api/v1/events/{eventId}/qr/ai-design
 
 Handler: com.giftplatform.qr.design.ai.AiInvitationController.settings. Source: [backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationController.java:19](../../src/main/java/com/giftplatform/qr/design/ai/AiInvitationController.java#L19).
 
@@ -11585,7 +14325,7 @@ Purpose: invoke the `settings` action in the `AiInvitationController` module; th
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0200 — POST /api/v1/events/{eventId}/qr/ai-design
+## API-0248 — POST /api/v1/events/{eventId}/qr/ai-design
 
 Handler: com.giftplatform.qr.design.ai.AiInvitationController.generate. Source: [backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationController.java:20](../../src/main/java/com/giftplatform/qr/design/ai/AiInvitationController.java#L20).
 
@@ -11658,7 +14398,7 @@ Purpose: invoke the `generate` action in the `AiInvitationController` module; th
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0201 — GET /api/v1/events/{eventId}/qr/ai-design/context
+## API-0249 — GET /api/v1/events/{eventId}/qr/ai-design/context
 
 Handler: com.giftplatform.qr.design.ai.AiInvitationController.context. Source: [backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationController.java:18](../../src/main/java/com/giftplatform/qr/design/ai/AiInvitationController.java#L18).
 
@@ -11718,7 +14458,7 @@ Purpose: invoke the `context` action in the `AiInvitationController` module; the
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0202 — GET /api/v1/events/{eventId}/qr/invitations
+## API-0250 — GET /api/v1/events/{eventId}/qr/invitations
 
 Handler: com.giftplatform.qr.design.InvitationDesignController.list. Source: [backend/src/main/java/com/giftplatform/qr/design/InvitationDesignController.java:24](../../src/main/java/com/giftplatform/qr/design/InvitationDesignController.java#L24).
 
@@ -11778,7 +14518,7 @@ Purpose: invoke the `list` action in the `InvitationDesignController` module; th
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0203 — POST /api/v1/events/{eventId}/qr/invitations
+## API-0251 — POST /api/v1/events/{eventId}/qr/invitations
 
 Handler: com.giftplatform.qr.design.InvitationDesignController.create. Source: [backend/src/main/java/com/giftplatform/qr/design/InvitationDesignController.java:16](../../src/main/java/com/giftplatform/qr/design/InvitationDesignController.java#L16).
 
@@ -11844,7 +14584,7 @@ Purpose: invoke the `create` action in the `InvitationDesignController` module; 
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0204 — GET /api/v1/events/{eventId}/qr/invitations/{designId}/png
+## API-0252 — GET /api/v1/events/{eventId}/qr/invitations/{designId}/png
 
 Handler: com.giftplatform.qr.design.InvitationDesignController.png. Source: [backend/src/main/java/com/giftplatform/qr/design/InvitationDesignController.java:25](../../src/main/java/com/giftplatform/qr/design/InvitationDesignController.java#L25).
 
@@ -11897,7 +14637,7 @@ Purpose: invoke the `png` action in the `InvitationDesignController` module; the
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0205 — GET /api/v1/events/{eventId}/qr/png
+## API-0253 — GET /api/v1/events/{eventId}/qr/png
 
 Handler: com.giftplatform.qr.EventQrController.png. Source: [backend/src/main/java/com/giftplatform/qr/EventQrController.java:14](../../src/main/java/com/giftplatform/qr/EventQrController.java#L14).
 
@@ -11948,7 +14688,7 @@ Purpose: invoke the `png` action in the `EventQrController` module; the module w
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0206 — PUT /api/v1/events/{eventId}/qr/theme
+## API-0254 — PUT /api/v1/events/{eventId}/qr/theme
 
 Handler: com.giftplatform.qr.EventQrController.theme. Source: [backend/src/main/java/com/giftplatform/qr/EventQrController.java:18](../../src/main/java/com/giftplatform/qr/EventQrController.java#L18).
 
@@ -12003,7 +14743,7 @@ Purpose: invoke the `theme` action in the `EventQrController` module; the module
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0207 — GET /api/v1/events/{eventId}/receiving-health
+## API-0255 — GET /api/v1/events/{eventId}/receiving-health
 
 Handler: com.giftplatform.hostpayment.controller.ReceivingAccountHealthController.health. Source: [backend/src/main/java/com/giftplatform/hostpayment/controller/ReceivingAccountHealthController.java:19](../../src/main/java/com/giftplatform/hostpayment/controller/ReceivingAccountHealthController.java#L19).
 
@@ -12065,7 +14805,7 @@ Purpose: invoke the `health` action in the `ReceivingAccountHealthController` mo
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0208 — GET /api/v1/events/{eventId}/thank-you
+## API-0256 — GET /api/v1/events/{eventId}/thank-you
 
 Handler: com.giftplatform.notification.HostThankYouController.get. Source: [backend/src/main/java/com/giftplatform/notification/HostThankYouController.java:11](../../src/main/java/com/giftplatform/notification/HostThankYouController.java#L11).
 
@@ -12126,7 +14866,7 @@ Purpose: invoke the `get` action in the `HostThankYouController` module; the mod
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0209 — PUT /api/v1/events/{eventId}/thank-you
+## API-0257 — PUT /api/v1/events/{eventId}/thank-you
 
 Handler: com.giftplatform.notification.HostThankYouController.put. Source: [backend/src/main/java/com/giftplatform/notification/HostThankYouController.java:14](../../src/main/java/com/giftplatform/notification/HostThankYouController.java#L14).
 
@@ -12194,7 +14934,7 @@ Purpose: invoke the `put` action in the `HostThankYouController` module; the mod
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0210 — GET /api/v1/events/{eventId}/thank-you/history
+## API-0258 — GET /api/v1/events/{eventId}/thank-you/history
 
 Handler: com.giftplatform.notification.HostThankYouController.history. Source: [backend/src/main/java/com/giftplatform/notification/HostThankYouController.java:17](../../src/main/java/com/giftplatform/notification/HostThankYouController.java#L17).
 
@@ -12251,7 +14991,7 @@ Purpose: invoke the `history` action in the `HostThankYouController` module; the
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0211 — GET /api/v1/events/{eventId}/transactions
+## API-0259 — GET /api/v1/events/{eventId}/transactions
 
 Handler: com.giftplatform.payment.verification.HostTransactionVerificationController.list. Source: [backend/src/main/java/com/giftplatform/payment/verification/HostTransactionVerificationController.java:23](../../src/main/java/com/giftplatform/payment/verification/HostTransactionVerificationController.java#L23).
 
@@ -12327,7 +15067,7 @@ Purpose: invoke the `list` action in the `HostTransactionVerificationController`
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0212 — POST /api/v1/events/{eventId}/transactions/{orderId}/verify
+## API-0260 — POST /api/v1/events/{eventId}/transactions/{orderId}/verify
 
 Handler: com.giftplatform.payment.verification.HostTransactionVerificationController.verify. Source: [backend/src/main/java/com/giftplatform/payment/verification/HostTransactionVerificationController.java:42](../../src/main/java/com/giftplatform/payment/verification/HostTransactionVerificationController.java#L42).
 
@@ -12387,7 +15127,7 @@ Purpose: invoke the `verify` action in the `HostTransactionVerificationControlle
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0213 — GET /api/v1/events/{id}
+## API-0261 — GET /api/v1/events/{id}
 
 Handler: com.giftplatform.event.Controller.EventController.get. Source: [backend/src/main/java/com/giftplatform/event/Controller/EventController.java:21](../../src/main/java/com/giftplatform/event/Controller/EventController.java#L21).
 
@@ -12467,7 +15207,7 @@ Purpose: invoke the `get` action in the `EventController` module; the module wor
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0214 — PUT /api/v1/events/{id}
+## API-0262 — PUT /api/v1/events/{id}
 
 Handler: com.giftplatform.event.Controller.EventController.update. Source: [backend/src/main/java/com/giftplatform/event/Controller/EventController.java:22](../../src/main/java/com/giftplatform/event/Controller/EventController.java#L22).
 
@@ -12566,7 +15306,7 @@ Purpose: invoke the `update` action in the `EventController` module; the module 
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0215 — GET /api/v1/events/{id}/album
+## API-0263 — GET /api/v1/events/{id}/album
 
 Handler: com.giftplatform.celebration.MemoryAlbumController.album. Source: [backend/src/main/java/com/giftplatform/celebration/MemoryAlbumController.java:23](../../src/main/java/com/giftplatform/celebration/MemoryAlbumController.java#L23).
 
@@ -12640,7 +15380,58 @@ Purpose: invoke the `album` action in the `MemoryAlbumController` module; the mo
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0216 — GET /api/v1/events/{id}/album/{wishId}/photo
+## API-0264 — GET /api/v1/events/{id}/album/keepsake
+
+Handler: com.giftplatform.celebrationplanning.CelebrationKeepsakeController.download. Source: [backend/src/main/java/com/giftplatform/celebrationplanning/CelebrationKeepsakeController.java:15](../../src/main/java/com/giftplatform/celebrationplanning/CelebrationKeepsakeController.java#L15).
+
+Purpose: invoke the `download` action in the `CelebrationKeepsakeController` module; the module workflow describes its business intent.
+
+**Access:** Authenticated principal; ownership/role is enforced by route filter and controller/service resource checks. An authenticated user cannot assume access to another host’s UUID.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+| id | @org.springframework.web.bind.annotation.PathVariable(name="", value="", required=true) | java.util.UUID | As declared by the annotation; no additional undocumented default is asserted. |
+
+
+**Request example / shape:**
+```json
+{
+  "pathAndQueryParameters": {
+    "id": "123e4567-e89b-42d3-a456-426614174000"
+  }
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `org.springframework.http.ResponseEntity<java.lang.String>`. Produces: text/html;charset=UTF-8.
+```json
+"<java.lang.String: validated value>"
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/v1/events/{id}/album/keepsake"
+  }
+}
+```
+
+**Database effects:** `event_guestbook`, `events` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0265 — GET /api/v1/events/{id}/album/{wishId}/photo
 
 Handler: com.giftplatform.celebration.GuestbookPhotoController.albumPhoto. Source: [backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:125](../../src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java#L125).
 
@@ -12693,7 +15484,7 @@ Purpose: invoke the `albumPhoto` action in the `GuestbookPhotoController` module
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0217 — POST /api/v1/events/{id}/cancel
+## API-0266 — POST /api/v1/events/{id}/cancel
 
 Handler: com.giftplatform.event.Controller.EventController.cancel. Source: [backend/src/main/java/com/giftplatform/event/Controller/EventController.java:25](../../src/main/java/com/giftplatform/event/Controller/EventController.java#L25).
 
@@ -12773,7 +15564,133 @@ Purpose: invoke the `cancel` action in the `EventController` module; the module 
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0218 — POST /api/v1/events/{id}/complete
+## API-0267 — GET /api/v1/events/{id}/celebration-settings
+
+Handler: com.giftplatform.celebrationplanning.CelebrationPlanningController.get. Source: [backend/src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java:35](../../src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java#L35).
+
+Purpose: invoke the `get` action in the `CelebrationPlanningController` module; the module workflow describes its business intent.
+
+**Access:** Authenticated principal; ownership/role is enforced by route filter and controller/service resource checks. An authenticated user cannot assume access to another host’s UUID.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+| id | @org.springframework.web.bind.annotation.PathVariable(name="", value="", required=true) | java.util.UUID | As declared by the annotation; no additional undocumented default is asserted. |
+
+
+**Request example / shape:**
+```json
+{
+  "pathAndQueryParameters": {
+    "id": "123e4567-e89b-42d3-a456-426614174000"
+  }
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `org.springframework.http.ResponseEntity<com.giftplatform.celebrationplanning.CelebrationPlanningController$Settings>`. Produces: handler content type / negotiated JSON.
+```json
+{
+  "giftingEnabled": true,
+  "welcomeMessage": "<welcomeMessage: validated value>",
+  "shareVenue": true,
+  "startTime": "<startTime: validated value>",
+  "timezone": "<timezone: validated value>",
+  "durationMinutes": 1,
+  "arrivalNotes": "<arrivalNotes: validated value>",
+  "version": 1
+}
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/v1/events/{id}/celebration-settings"
+  }
+}
+```
+
+**Database effects:** `event_celebration_settings`, `events`, `gift_groups`, `guest_direct_transfer_claims`, `guest_gifts`, `payment_orders`, `platform_admin_action_audit` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0268 — PUT /api/v1/events/{id}/celebration-settings
+
+Handler: com.giftplatform.celebrationplanning.CelebrationPlanningController.save. Source: [backend/src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java:38](../../src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java#L38).
+
+Purpose: invoke the `save` action in the `CelebrationPlanningController` module; the module workflow describes its business intent.
+
+**Access:** Authenticated principal; ownership/role is enforced by route filter and controller/service resource checks. An authenticated user cannot assume access to another host’s UUID.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+| id | @org.springframework.web.bind.annotation.PathVariable(name="", value="", required=true) | java.util.UUID | As declared by the annotation; no additional undocumented default is asserted. |
+| input | @jakarta.validation.Valid(); @org.springframework.web.bind.annotation.RequestBody(required=true) | com.giftplatform.celebrationplanning.CelebrationPlanningController$Settings | As declared by the annotation; no additional undocumented default is asserted. |
+
+
+**Request example / shape:**
+```json
+{
+  "giftingEnabled": true,
+  "welcomeMessage": "<welcomeMessage: validated value>",
+  "shareVenue": true,
+  "startTime": "<startTime: validated value>",
+  "timezone": "<timezone: validated value>",
+  "durationMinutes": 1,
+  "arrivalNotes": "<arrivalNotes: validated value>",
+  "version": 1
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `com.giftplatform.celebrationplanning.CelebrationPlanningController$Settings`. Produces: handler content type / negotiated JSON.
+```json
+{
+  "giftingEnabled": true,
+  "welcomeMessage": "<welcomeMessage: validated value>",
+  "shareVenue": true,
+  "startTime": "<startTime: validated value>",
+  "timezone": "<timezone: validated value>",
+  "durationMinutes": 1,
+  "arrivalNotes": "<arrivalNotes: validated value>",
+  "version": 1
+}
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/v1/events/{id}/celebration-settings"
+  }
+}
+```
+
+**Database effects:** `event_celebration_settings`, `events`, `gift_groups`, `guest_direct_transfer_claims`, `guest_gifts`, `payment_orders`, `platform_admin_action_audit` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0269 — POST /api/v1/events/{id}/complete
 
 Handler: com.giftplatform.event.Controller.EventController.complete. Source: [backend/src/main/java/com/giftplatform/event/Controller/EventController.java:24](../../src/main/java/com/giftplatform/event/Controller/EventController.java#L24).
 
@@ -12853,7 +15770,7 @@ Purpose: invoke the `complete` action in the `EventController` module; the modul
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0219 — GET /api/v1/events/{id}/features
+## API-0270 — GET /api/v1/events/{id}/features
 
 Handler: com.giftplatform.admin.ExperienceSettingsController.features. Source: [backend/src/main/java/com/giftplatform/admin/ExperienceSettingsController.java:20](../../src/main/java/com/giftplatform/admin/ExperienceSettingsController.java#L20).
 
@@ -12906,7 +15823,112 @@ Purpose: invoke the `features` action in the `ExperienceSettingsController` modu
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0220 — POST /api/v1/events/{id}/publish
+## API-0271 — GET /api/v1/events/{id}/keepsake-sharing
+
+Handler: com.giftplatform.publicevent.PublicKeepsakeController.get. Source: [backend/src/main/java/com/giftplatform/publicevent/PublicKeepsakeController.java:22](../../src/main/java/com/giftplatform/publicevent/PublicKeepsakeController.java#L22).
+
+Purpose: invoke the `get` action in the `PublicKeepsakeController` module; the module workflow describes its business intent.
+
+**Access:** Authenticated principal; ownership/role is enforced by route filter and controller/service resource checks. An authenticated user cannot assume access to another host’s UUID.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+| id | @org.springframework.web.bind.annotation.PathVariable(name="", value="", required=true) | java.util.UUID | As declared by the annotation; no additional undocumented default is asserted. |
+
+
+**Request example / shape:**
+```json
+{
+  "pathAndQueryParameters": {
+    "id": "123e4567-e89b-42d3-a456-426614174000"
+  }
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `org.springframework.http.ResponseEntity<java.util.Map<java.lang.String, java.lang.Object>>`. Produces: handler content type / negotiated JSON.
+```json
+{
+  "_contract": "Dynamic response keys: inspect linked handler and module narrative; no fixed schema is asserted."
+}
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/v1/events/{id}/keepsake-sharing"
+  }
+}
+```
+
+**Database effects:** `event_guestbook`, `events`, `platform_admin_action_audit` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0272 — PUT /api/v1/events/{id}/keepsake-sharing
+
+Handler: com.giftplatform.publicevent.PublicKeepsakeController.save. Source: [backend/src/main/java/com/giftplatform/publicevent/PublicKeepsakeController.java:24](../../src/main/java/com/giftplatform/publicevent/PublicKeepsakeController.java#L24).
+
+Purpose: invoke the `save` action in the `PublicKeepsakeController` module; the module workflow describes its business intent.
+
+**Access:** Authenticated principal; ownership/role is enforced by route filter and controller/service resource checks. An authenticated user cannot assume access to another host’s UUID.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+| id | @org.springframework.web.bind.annotation.PathVariable(name="", value="", required=true) | java.util.UUID | As declared by the annotation; no additional undocumented default is asserted. |
+| input | @jakarta.validation.Valid(); @org.springframework.web.bind.annotation.RequestBody(required=true) | com.giftplatform.publicevent.PublicKeepsakeController$Consent | As declared by the annotation; no additional undocumented default is asserted. |
+
+
+**Request example / shape:**
+```json
+{
+  "enabled": true
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `java.util.Map<java.lang.String, java.lang.Object>`. Produces: handler content type / negotiated JSON.
+```json
+{
+  "_contract": "Dynamic response keys: inspect linked handler and module narrative; no fixed schema is asserted."
+}
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/v1/events/{id}/keepsake-sharing"
+  }
+}
+```
+
+**Database effects:** `event_guestbook`, `events`, `platform_admin_action_audit` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0273 — POST /api/v1/events/{id}/publish
 
 Handler: com.giftplatform.event.Controller.EventController.publish. Source: [backend/src/main/java/com/giftplatform/event/Controller/EventController.java:23](../../src/main/java/com/giftplatform/event/Controller/EventController.java#L23).
 
@@ -12986,7 +16008,59 @@ Purpose: invoke the `publish` action in the `EventController` module; the module
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0221 — GET /api/v1/events/{id}/rsvps
+## API-0274 — POST /api/v1/events/{id}/repeat
+
+Handler: com.giftplatform.celebrationplanning.CelebrationPlanningController.repeat. Source: [backend/src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java:64](../../src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java#L64).
+
+Purpose: invoke the `repeat` action in the `CelebrationPlanningController` module; the module workflow describes its business intent.
+
+**Access:** Authenticated principal; ownership/role is enforced by route filter and controller/service resource checks. An authenticated user cannot assume access to another host’s UUID.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+| id | @org.springframework.web.bind.annotation.PathVariable(name="", value="", required=true) | java.util.UUID | As declared by the annotation; no additional undocumented default is asserted. |
+| input | @jakarta.validation.Valid(); @org.springframework.web.bind.annotation.RequestBody(required=true) | com.giftplatform.celebrationplanning.CelebrationPlanningController$RepeatRequest | As declared by the annotation; no additional undocumented default is asserted. |
+
+
+**Request example / shape:**
+```json
+{
+  "title": "<title: validated value>"
+}
+```
+
+**Success:** 201. Declared response `java.util.Map<java.lang.String, java.util.UUID>`. Produces: handler content type / negotiated JSON.
+```json
+{
+  "_contract": "Dynamic response keys: inspect linked handler and module narrative; no fixed schema is asserted."
+}
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/v1/events/{id}/repeat"
+  }
+}
+```
+
+**Database effects:** `event_celebration_settings`, `events`, `gift_groups`, `guest_direct_transfer_claims`, `guest_gifts`, `payment_orders`, `platform_admin_action_audit` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0275 — GET /api/v1/events/{id}/rsvps
 
 Handler: com.giftplatform.celebration.CelebrationController.rsvps. Source: [backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:107](../../src/main/java/com/giftplatform/celebration/CelebrationController.java#L107).
 
@@ -13045,7 +16119,7 @@ Purpose: invoke the `rsvps` action in the `CelebrationController` module; the mo
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0222 — GET /api/v1/events/{id}/rsvps/summary
+## API-0276 — GET /api/v1/events/{id}/rsvps/summary
 
 Handler: com.giftplatform.celebration.CelebrationController.summary. Source: [backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:113](../../src/main/java/com/giftplatform/celebration/CelebrationController.java#L113).
 
@@ -13101,7 +16175,114 @@ Purpose: invoke the `summary` action in the `CelebrationController` module; the 
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0223 — POST /api/v1/events/{id}/unpublish
+## API-0277 — GET /api/v1/events/{id}/share-preview
+
+Handler: com.giftplatform.publicevent.SharingPreviewController.preference. Source: [backend/src/main/java/com/giftplatform/publicevent/SharingPreviewController.java:27](../../src/main/java/com/giftplatform/publicevent/SharingPreviewController.java#L27).
+
+Purpose: invoke the `preference` action in the `SharingPreviewController` module; the module workflow describes its business intent.
+
+**Access:** Authenticated principal; ownership/role is enforced by route filter and controller/service resource checks. An authenticated user cannot assume access to another host’s UUID.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+| id | @org.springframework.web.bind.annotation.PathVariable(name="", value="", required=true) | java.util.UUID | As declared by the annotation; no additional undocumented default is asserted. |
+
+
+**Request example / shape:**
+```json
+{
+  "pathAndQueryParameters": {
+    "id": "123e4567-e89b-42d3-a456-426614174000"
+  }
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `org.springframework.http.ResponseEntity<com.giftplatform.publicevent.SharingPreviewController$Preference>`. Produces: handler content type / negotiated JSON.
+```json
+{
+  "enabled": true,
+  "platformEnabled": true
+}
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/v1/events/{id}/share-preview"
+  }
+}
+```
+
+**Database effects:** `events`, `platform_admin_action_audit` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0278 — PUT /api/v1/events/{id}/share-preview
+
+Handler: com.giftplatform.publicevent.SharingPreviewController.consent. Source: [backend/src/main/java/com/giftplatform/publicevent/SharingPreviewController.java:29](../../src/main/java/com/giftplatform/publicevent/SharingPreviewController.java#L29).
+
+Purpose: invoke the `consent` action in the `SharingPreviewController` module; the module workflow describes its business intent.
+
+**Access:** Authenticated principal; ownership/role is enforced by route filter and controller/service resource checks. An authenticated user cannot assume access to another host’s UUID.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+| id | @org.springframework.web.bind.annotation.PathVariable(name="", value="", required=true) | java.util.UUID | As declared by the annotation; no additional undocumented default is asserted. |
+| input | @jakarta.validation.Valid(); @org.springframework.web.bind.annotation.RequestBody(required=true) | com.giftplatform.publicevent.SharingPreviewController$Consent | As declared by the annotation; no additional undocumented default is asserted. |
+
+
+**Request example / shape:**
+```json
+{
+  "enabled": true
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `com.giftplatform.publicevent.SharingPreviewController$Preference`. Produces: handler content type / negotiated JSON.
+```json
+{
+  "enabled": true,
+  "platformEnabled": true
+}
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/v1/events/{id}/share-preview"
+  }
+}
+```
+
+**Database effects:** `events`, `platform_admin_action_audit` are directly referenced in this controller source; delegated services may reference additional objects. GET must not be assumed side-effect-free solely from its name; inspect the handler and service. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0279 — POST /api/v1/events/{id}/unpublish
 
 Handler: com.giftplatform.event.Controller.EventController.unpublish. Source: [backend/src/main/java/com/giftplatform/event/Controller/EventController.java:26](../../src/main/java/com/giftplatform/event/Controller/EventController.java#L26).
 
@@ -13181,7 +16362,7 @@ Purpose: invoke the `unpublish` action in the `EventController` module; the modu
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0224 — GET /api/v1/events/{id}/wishes
+## API-0280 — GET /api/v1/events/{id}/wishes
 
 Handler: com.giftplatform.celebration.CelebrationController.hostWishes. Source: [backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:120](../../src/main/java/com/giftplatform/celebration/CelebrationController.java#L120).
 
@@ -13240,7 +16421,7 @@ Purpose: invoke the `hostWishes` action in the `CelebrationController` module; t
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0225 — GET /api/v1/events/{id}/wishes/settings
+## API-0281 — GET /api/v1/events/{id}/wishes/settings
 
 Handler: com.giftplatform.celebration.CelebrationController.guestbookSettings. Source: [backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:126](../../src/main/java/com/giftplatform/celebration/CelebrationController.java#L126).
 
@@ -13293,7 +16474,7 @@ Purpose: invoke the `guestbookSettings` action in the `CelebrationController` mo
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0226 — POST /api/v1/events/{id}/wishes/settings
+## API-0282 — POST /api/v1/events/{id}/wishes/settings
 
 Handler: com.giftplatform.celebration.CelebrationController.setGuestbookSettings. Source: [backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:132](../../src/main/java/com/giftplatform/celebration/CelebrationController.java#L132).
 
@@ -13345,7 +16526,7 @@ Purpose: invoke the `setGuestbookSettings` action in the `CelebrationController`
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0227 — POST /api/v1/events/{id}/wishes/{wishId}/moderate
+## API-0283 — POST /api/v1/events/{id}/wishes/{wishId}/moderate
 
 Handler: com.giftplatform.celebration.CelebrationController.moderate. Source: [backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:141](../../src/main/java/com/giftplatform/celebration/CelebrationController.java#L141).
 
@@ -13402,7 +16583,7 @@ Purpose: invoke the `moderate` action in the `CelebrationController` module; the
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0228 — GET /api/v1/events/{id}/wishes/{wishId}/photo
+## API-0284 — GET /api/v1/events/{id}/wishes/{wishId}/photo
 
 Handler: com.giftplatform.celebration.GuestbookPhotoController.hostPhoto. Source: [backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:123](../../src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java#L123).
 
@@ -13455,7 +16636,7 @@ Purpose: invoke the `hostPhoto` action in the `GuestbookPhotoController` module;
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0229 — GET /api/v1/host/notifications
+## API-0285 — GET /api/v1/host/notifications
 
 Handler: com.giftplatform.notification.HostInboxController.list. Source: [backend/src/main/java/com/giftplatform/notification/HostInboxController.java:24](../../src/main/java/com/giftplatform/notification/HostInboxController.java#L24).
 
@@ -13523,7 +16704,7 @@ Purpose: invoke the `list` action in the `HostInboxController` module; the modul
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0230 — POST /api/v1/host/notifications/{notificationId}/read
+## API-0286 — POST /api/v1/host/notifications/{notificationId}/read
 
 Handler: com.giftplatform.notification.HostInboxController.read. Source: [backend/src/main/java/com/giftplatform/notification/HostInboxController.java:47](../../src/main/java/com/giftplatform/notification/HostInboxController.java#L47).
 
@@ -13574,7 +16755,7 @@ null
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0231 — GET /api/v1/host/payment-profiles/account-verification/settings
+## API-0287 — GET /api/v1/host/payment-profiles/account-verification/settings
 
 Handler: com.giftplatform.hostpayment.verification.account.AccountVerificationController.settings. Source: [backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java:31](../../src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java#L31).
 
@@ -13627,7 +16808,7 @@ Purpose: invoke the `settings` action in the `AccountVerificationController` mod
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0232 — GET /api/v1/host/payment-profiles/account-verification/{kind}/{id}
+## API-0288 — GET /api/v1/host/payment-profiles/account-verification/{kind}/{id}
 
 Handler: com.giftplatform.hostpayment.verification.account.AccountVerificationController.history. Source: [backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java:47](../../src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java#L47).
 
@@ -13693,7 +16874,7 @@ Purpose: invoke the `history` action in the `AccountVerificationController` modu
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0233 — POST /api/v1/host/payment-profiles/account-verification/{kind}/{id}
+## API-0289 — POST /api/v1/host/payment-profiles/account-verification/{kind}/{id}
 
 Handler: com.giftplatform.hostpayment.verification.account.AccountVerificationController.verify. Source: [backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java:51](../../src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java#L51).
 
@@ -13754,7 +16935,7 @@ Purpose: invoke the `verify` action in the `AccountVerificationController` modul
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0234 — GET /api/v1/host/payment-profiles/banks
+## API-0290 — GET /api/v1/host/payment-profiles/banks
 
 Handler: com.giftplatform.hostpayment.controller.HostPaymentProfileController.banks. Source: [backend/src/main/java/com/giftplatform/hostpayment/controller/HostPaymentProfileController.java:15](../../src/main/java/com/giftplatform/hostpayment/controller/HostPaymentProfileController.java#L15).
 
@@ -13818,7 +16999,7 @@ Purpose: invoke the `banks` action in the `HostPaymentProfileController` module;
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0235 — POST /api/v1/host/payment-profiles/banks
+## API-0291 — POST /api/v1/host/payment-profiles/banks
 
 Handler: com.giftplatform.hostpayment.controller.HostPaymentProfileController.addBank. Source: [backend/src/main/java/com/giftplatform/hostpayment/controller/HostPaymentProfileController.java:17](../../src/main/java/com/giftplatform/hostpayment/controller/HostPaymentProfileController.java#L17).
 
@@ -13882,7 +17063,7 @@ Purpose: invoke the `addBank` action in the `HostPaymentProfileController` modul
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0236 — DELETE /api/v1/host/payment-profiles/banks/{id}
+## API-0292 — DELETE /api/v1/host/payment-profiles/banks/{id}
 
 Handler: com.giftplatform.hostpayment.controller.HostPaymentProfileController.archiveBank. Source: [backend/src/main/java/com/giftplatform/hostpayment/controller/HostPaymentProfileController.java:30](../../src/main/java/com/giftplatform/hostpayment/controller/HostPaymentProfileController.java#L30).
 
@@ -13933,7 +17114,7 @@ null
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0237 — POST /api/v1/host/payment-profiles/banks/{id}/disable
+## API-0293 — POST /api/v1/host/payment-profiles/banks/{id}/disable
 
 Handler: com.giftplatform.hostpayment.controller.HostPaymentProfileController.disableBank. Source: [backend/src/main/java/com/giftplatform/hostpayment/controller/HostPaymentProfileController.java:23](../../src/main/java/com/giftplatform/hostpayment/controller/HostPaymentProfileController.java#L23).
 
@@ -13995,7 +17176,7 @@ Purpose: invoke the `disableBank` action in the `HostPaymentProfileController` m
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0238 — POST /api/v1/host/payment-profiles/banks/{id}/enable
+## API-0294 — POST /api/v1/host/payment-profiles/banks/{id}/enable
 
 Handler: com.giftplatform.hostpayment.controller.HostPaymentProfileController.enableBank. Source: [backend/src/main/java/com/giftplatform/hostpayment/controller/HostPaymentProfileController.java:22](../../src/main/java/com/giftplatform/hostpayment/controller/HostPaymentProfileController.java#L22).
 
@@ -14057,7 +17238,7 @@ Purpose: invoke the `enableBank` action in the `HostPaymentProfileController` mo
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0239 — POST /api/v1/host/payment-profiles/banks/{id}/host-confirm
+## API-0295 — POST /api/v1/host/payment-profiles/banks/{id}/host-confirm
 
 Handler: com.giftplatform.hostpayment.controller.HostPaymentProfileController.confirmBank. Source: [backend/src/main/java/com/giftplatform/hostpayment/controller/HostPaymentProfileController.java:19](../../src/main/java/com/giftplatform/hostpayment/controller/HostPaymentProfileController.java#L19).
 
@@ -14119,7 +17300,7 @@ Purpose: invoke the `confirmBank` action in the `HostPaymentProfileController` m
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0240 — PATCH /api/v1/host/payment-profiles/banks/{id}/label
+## API-0296 — PATCH /api/v1/host/payment-profiles/banks/{id}/label
 
 Handler: com.giftplatform.hostpayment.controller.HostPaymentProfileController.renameBank. Source: [backend/src/main/java/com/giftplatform/hostpayment/controller/HostPaymentProfileController.java:28](../../src/main/java/com/giftplatform/hostpayment/controller/HostPaymentProfileController.java#L28).
 
@@ -14180,7 +17361,7 @@ Purpose: invoke the `renameBank` action in the `HostPaymentProfileController` mo
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0241 — POST /api/v1/host/payment-profiles/banks/{id}/preferred
+## API-0297 — POST /api/v1/host/payment-profiles/banks/{id}/preferred
 
 Handler: com.giftplatform.hostpayment.controller.HostPaymentProfileController.preferBank. Source: [backend/src/main/java/com/giftplatform/hostpayment/controller/HostPaymentProfileController.java:25](../../src/main/java/com/giftplatform/hostpayment/controller/HostPaymentProfileController.java#L25).
 
@@ -14242,7 +17423,7 @@ Purpose: invoke the `preferBank` action in the `HostPaymentProfileController` mo
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0242 — POST /api/v1/host/payment-profiles/event-links/{eventId}/{kind}/{id}/link
+## API-0298 — POST /api/v1/host/payment-profiles/event-links/{eventId}/{kind}/{id}/link
 
 Handler: com.giftplatform.hostpayment.controller.EventAccountLinkController.link. Source: [backend/src/main/java/com/giftplatform/hostpayment/controller/EventAccountLinkController.java:15](../../src/main/java/com/giftplatform/hostpayment/controller/EventAccountLinkController.java#L15).
 
@@ -14297,7 +17478,7 @@ null
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0243 — POST /api/v1/host/payment-profiles/event-links/{eventId}/{kind}/{id}/{action:preferred|enable|disable|unlink}
+## API-0299 — POST /api/v1/host/payment-profiles/event-links/{eventId}/{kind}/{id}/{action:preferred|enable|disable|unlink}
 
 Handler: com.giftplatform.hostpayment.controller.EventAccountLinkController.update. Source: [backend/src/main/java/com/giftplatform/hostpayment/controller/EventAccountLinkController.java:17](../../src/main/java/com/giftplatform/hostpayment/controller/EventAccountLinkController.java#L17).
 
@@ -14354,7 +17535,7 @@ null
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0244 — GET /api/v1/host/payment-profiles/upi
+## API-0300 — GET /api/v1/host/payment-profiles/upi
 
 Handler: com.giftplatform.hostpayment.controller.HostPaymentProfileController.upis. Source: [backend/src/main/java/com/giftplatform/hostpayment/controller/HostPaymentProfileController.java:14](../../src/main/java/com/giftplatform/hostpayment/controller/HostPaymentProfileController.java#L14).
 
@@ -14418,7 +17599,7 @@ Purpose: invoke the `upis` action in the `HostPaymentProfileController` module; 
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0245 — POST /api/v1/host/payment-profiles/upi
+## API-0301 — POST /api/v1/host/payment-profiles/upi
 
 Handler: com.giftplatform.hostpayment.controller.HostPaymentProfileController.addUpi. Source: [backend/src/main/java/com/giftplatform/hostpayment/controller/HostPaymentProfileController.java:16](../../src/main/java/com/giftplatform/hostpayment/controller/HostPaymentProfileController.java#L16).
 
@@ -14480,7 +17661,7 @@ Purpose: invoke the `addUpi` action in the `HostPaymentProfileController` module
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0246 — POST /api/v1/host/payment-profiles/upi/{accountId}/qr/generate
+## API-0302 — POST /api/v1/host/payment-profiles/upi/{accountId}/qr/generate
 
 Handler: com.giftplatform.hostpayment.qr.HostUpiQrController.generate. Source: [backend/src/main/java/com/giftplatform/hostpayment/qr/HostUpiQrController.java:45](../../src/main/java/com/giftplatform/hostpayment/qr/HostUpiQrController.java#L45).
 
@@ -14531,7 +17712,7 @@ Purpose: invoke the `generate` action in the `HostUpiQrController` module; the m
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0247 — POST /api/v1/host/payment-profiles/upi/{accountId}/qr/upload
+## API-0303 — POST /api/v1/host/payment-profiles/upi/{accountId}/qr/upload
 
 Handler: com.giftplatform.hostpayment.qr.HostUpiQrController.upload. Source: [backend/src/main/java/com/giftplatform/hostpayment/qr/HostUpiQrController.java:23](../../src/main/java/com/giftplatform/hostpayment/qr/HostUpiQrController.java#L23).
 
@@ -14584,7 +17765,7 @@ null
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0248 — GET /api/v1/host/payment-profiles/upi/{accountId}/qr/uploaded
+## API-0304 — GET /api/v1/host/payment-profiles/upi/{accountId}/qr/uploaded
 
 Handler: com.giftplatform.hostpayment.qr.HostUpiQrController.uploaded. Source: [backend/src/main/java/com/giftplatform/hostpayment/qr/HostUpiQrController.java:54](../../src/main/java/com/giftplatform/hostpayment/qr/HostUpiQrController.java#L54).
 
@@ -14635,7 +17816,7 @@ Purpose: invoke the `uploaded` action in the `HostUpiQrController` module; the m
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0249 — GET /api/v1/host/payment-profiles/upi/{accountId}/qr/uploaded/status
+## API-0305 — GET /api/v1/host/payment-profiles/upi/{accountId}/qr/uploaded/status
 
 Handler: com.giftplatform.hostpayment.qr.HostUpiQrController.uploadedStatus. Source: [backend/src/main/java/com/giftplatform/hostpayment/qr/HostUpiQrController.java:50](../../src/main/java/com/giftplatform/hostpayment/qr/HostUpiQrController.java#L50).
 
@@ -14688,7 +17869,7 @@ Purpose: invoke the `uploadedStatus` action in the `HostUpiQrController` module;
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0250 — DELETE /api/v1/host/payment-profiles/upi/{id}
+## API-0306 — DELETE /api/v1/host/payment-profiles/upi/{id}
 
 Handler: com.giftplatform.hostpayment.controller.HostPaymentProfileController.archiveUpi. Source: [backend/src/main/java/com/giftplatform/hostpayment/controller/HostPaymentProfileController.java:29](../../src/main/java/com/giftplatform/hostpayment/controller/HostPaymentProfileController.java#L29).
 
@@ -14739,7 +17920,7 @@ null
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0251 — POST /api/v1/host/payment-profiles/upi/{id}/disable
+## API-0307 — POST /api/v1/host/payment-profiles/upi/{id}/disable
 
 Handler: com.giftplatform.hostpayment.controller.HostPaymentProfileController.disableUpi. Source: [backend/src/main/java/com/giftplatform/hostpayment/controller/HostPaymentProfileController.java:21](../../src/main/java/com/giftplatform/hostpayment/controller/HostPaymentProfileController.java#L21).
 
@@ -14801,7 +17982,7 @@ Purpose: invoke the `disableUpi` action in the `HostPaymentProfileController` mo
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0252 — POST /api/v1/host/payment-profiles/upi/{id}/enable
+## API-0308 — POST /api/v1/host/payment-profiles/upi/{id}/enable
 
 Handler: com.giftplatform.hostpayment.controller.HostPaymentProfileController.enableUpi. Source: [backend/src/main/java/com/giftplatform/hostpayment/controller/HostPaymentProfileController.java:20](../../src/main/java/com/giftplatform/hostpayment/controller/HostPaymentProfileController.java#L20).
 
@@ -14863,7 +18044,7 @@ Purpose: invoke the `enableUpi` action in the `HostPaymentProfileController` mod
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0253 — POST /api/v1/host/payment-profiles/upi/{id}/host-confirm
+## API-0309 — POST /api/v1/host/payment-profiles/upi/{id}/host-confirm
 
 Handler: com.giftplatform.hostpayment.controller.HostPaymentProfileController.confirmUpi. Source: [backend/src/main/java/com/giftplatform/hostpayment/controller/HostPaymentProfileController.java:18](../../src/main/java/com/giftplatform/hostpayment/controller/HostPaymentProfileController.java#L18).
 
@@ -14925,7 +18106,7 @@ Purpose: invoke the `confirmUpi` action in the `HostPaymentProfileController` mo
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0254 — PATCH /api/v1/host/payment-profiles/upi/{id}/label
+## API-0310 — PATCH /api/v1/host/payment-profiles/upi/{id}/label
 
 Handler: com.giftplatform.hostpayment.controller.HostPaymentProfileController.renameUpi. Source: [backend/src/main/java/com/giftplatform/hostpayment/controller/HostPaymentProfileController.java:27](../../src/main/java/com/giftplatform/hostpayment/controller/HostPaymentProfileController.java#L27).
 
@@ -14986,7 +18167,7 @@ Purpose: invoke the `renameUpi` action in the `HostPaymentProfileController` mod
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0255 — POST /api/v1/host/payment-profiles/upi/{id}/preferred
+## API-0311 — POST /api/v1/host/payment-profiles/upi/{id}/preferred
 
 Handler: com.giftplatform.hostpayment.controller.HostPaymentProfileController.preferUpi. Source: [backend/src/main/java/com/giftplatform/hostpayment/controller/HostPaymentProfileController.java:24](../../src/main/java/com/giftplatform/hostpayment/controller/HostPaymentProfileController.java#L24).
 
@@ -15048,7 +18229,7 @@ Purpose: invoke the `preferUpi` action in the `HostPaymentProfileController` mod
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0256 — GET /api/v1/host/payment-profiles/verification/{kind}/{destinationId}/attempts
+## API-0312 — GET /api/v1/host/payment-profiles/verification/{kind}/{destinationId}/attempts
 
 Handler: com.giftplatform.hostpayment.verification.HostDestinationVerificationInboxController.history. Source: [backend/src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationInboxController.java:39](../../src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationInboxController.java#L39).
 
@@ -15117,7 +18298,7 @@ Purpose: invoke the `history` action in the `HostDestinationVerificationInboxCon
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0257 — POST /api/v1/host/payment-profiles/verification/{kind}/{destinationId}/request
+## API-0313 — POST /api/v1/host/payment-profiles/verification/{kind}/{destinationId}/request
 
 Handler: com.giftplatform.hostpayment.verification.HostDestinationVerificationInboxController.request. Source: [backend/src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationInboxController.java:61](../../src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationInboxController.java#L61).
 
@@ -15174,7 +18355,7 @@ Purpose: invoke the `request` action in the `HostDestinationVerificationInboxCon
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0258 — GET /api/v1/host/settlement/events/{eventId}/banks
+## API-0314 — GET /api/v1/host/settlement/events/{eventId}/banks
 
 Handler: com.giftplatform.payment.settlement.HostSettlementUiController.banks. Source: [backend/src/main/java/com/giftplatform/payment/settlement/HostSettlementUiController.java:22](../../src/main/java/com/giftplatform/payment/settlement/HostSettlementUiController.java#L22).
 
@@ -15234,7 +18415,7 @@ Purpose: invoke the `banks` action in the `HostSettlementUiController` module; t
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0259 — GET /api/v1/host/settlement/events/{eventId}/payouts
+## API-0315 — GET /api/v1/host/settlement/events/{eventId}/payouts
 
 Handler: com.giftplatform.payment.settlement.HostSettlementUiController.payouts. Source: [backend/src/main/java/com/giftplatform/payment/settlement/HostSettlementUiController.java:26](../../src/main/java/com/giftplatform/payment/settlement/HostSettlementUiController.java#L26).
 
@@ -15297,7 +18478,7 @@ Purpose: invoke the `payouts` action in the `HostSettlementUiController` module;
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0260 — POST /api/v1/host/settlement/events/{eventId}/payouts
+## API-0316 — POST /api/v1/host/settlement/events/{eventId}/payouts
 
 Handler: com.giftplatform.payment.settlement.HostSettlementUiController.request. Source: [backend/src/main/java/com/giftplatform/payment/settlement/HostSettlementUiController.java:30](../../src/main/java/com/giftplatform/payment/settlement/HostSettlementUiController.java#L30).
 
@@ -15353,7 +18534,7 @@ Purpose: invoke the `request` action in the `HostSettlementUiController` module;
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0261 — POST /api/v1/host/settlement/events/{eventId}/payouts/{requestId}/cancel
+## API-0317 — POST /api/v1/host/settlement/events/{eventId}/payouts/{requestId}/cancel
 
 Handler: com.giftplatform.payment.settlement.HostSettlementUiController.cancel. Source: [backend/src/main/java/com/giftplatform/payment/settlement/HostSettlementUiController.java:36](../../src/main/java/com/giftplatform/payment/settlement/HostSettlementUiController.java#L36).
 
@@ -15410,7 +18591,7 @@ Purpose: invoke the `cancel` action in the `HostSettlementUiController` module; 
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0262 — GET /api/v1/host/settlement/events/{eventId}/wallet
+## API-0318 — GET /api/v1/host/settlement/events/{eventId}/wallet
 
 Handler: com.giftplatform.payment.settlement.HostSettlementUiController.wallet. Source: [backend/src/main/java/com/giftplatform/payment/settlement/HostSettlementUiController.java:18](../../src/main/java/com/giftplatform/payment/settlement/HostSettlementUiController.java#L18).
 
@@ -15467,7 +18648,231 @@ Purpose: invoke the `wallet` action in the `HostSettlementUiController` module; 
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0263 — POST /api/v1/phone/otp/request
+## API-0319 — GET /api/v1/invitation-uploads
+
+Handler: com.giftplatform.asset.HostInvitationUploadController.list. Source: [backend/src/main/java/com/giftplatform/asset/HostInvitationUploadController.java:16](../../src/main/java/com/giftplatform/asset/HostInvitationUploadController.java#L16).
+
+Purpose: invoke the `list` action in the `HostInvitationUploadController` module; the module workflow describes its business intent.
+
+**Access:** Authenticated principal; ownership/role is enforced by route filter and controller/service resource checks. An authenticated user cannot assume access to another host’s UUID.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+
+
+**Request example / shape:**
+```json
+{
+  "pathAndQueryParameters": {}
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `org.springframework.http.ResponseEntity<java.util.List<com.giftplatform.asset.HostInvitationUploadService$Upload>>`. Produces: handler content type / negotiated JSON.
+```json
+[
+  [
+    {
+      "id": "123e4567-e89b-42d3-a456-426614174000",
+      "category": "<category: validated value>",
+      "title": "<title: validated value>",
+      "width": 1,
+      "height": 1
+    }
+  ]
+]
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/v1/invitation-uploads"
+  }
+}
+```
+
+**Database effects:** The controller delegates to services or does not declare SQL; follow the linked handler into its injected services. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0320 — POST /api/v1/invitation-uploads
+
+Handler: com.giftplatform.asset.HostInvitationUploadController.upload. Source: [backend/src/main/java/com/giftplatform/asset/HostInvitationUploadController.java:17](../../src/main/java/com/giftplatform/asset/HostInvitationUploadController.java#L17).
+
+Purpose: invoke the `upload` action in the `HostInvitationUploadController` module; the module workflow describes its business intent.
+
+**Access:** Authenticated principal; ownership/role is enforced by route filter and controller/service resource checks. An authenticated user cannot assume access to another host’s UUID.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+| category | @org.springframework.web.bind.annotation.RequestParam(name="", value="", required=true, defaultValue="\n\t\t\n\t\t\n\ue000\ue001\ue002\n\t\t\t\t\n") | java.lang.String | As declared by the annotation; no additional undocumented default is asserted. |
+| title | @org.springframework.web.bind.annotation.RequestParam(name="", value="", required=true, defaultValue="\n\t\t\n\t\t\n\ue000\ue001\ue002\n\t\t\t\t\n") | java.lang.String | As declared by the annotation; no additional undocumented default is asserted. |
+| file | @org.springframework.web.bind.annotation.RequestPart(name="", value="file", required=true) | org.springframework.web.multipart.MultipartFile | As declared by the annotation; no additional undocumented default is asserted. |
+
+
+**Request example / shape:**
+```json
+{
+  "pathAndQueryParameters": {
+    "category": "<category: validated value>",
+    "title": "<title: validated value>",
+    "file": "<file: validated value>"
+  }
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `com.giftplatform.asset.HostInvitationUploadService$Upload`. Produces: handler content type / negotiated JSON.
+```json
+{
+  "id": "123e4567-e89b-42d3-a456-426614174000",
+  "category": "<category: validated value>",
+  "title": "<title: validated value>",
+  "width": 1,
+  "height": 1
+}
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/v1/invitation-uploads"
+  }
+}
+```
+
+**Database effects:** The controller delegates to services or does not declare SQL; follow the linked handler into its injected services. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0321 — GET /api/v1/invitation-uploads/access
+
+Handler: com.giftplatform.asset.HostInvitationUploadController.access. Source: [backend/src/main/java/com/giftplatform/asset/HostInvitationUploadController.java:15](../../src/main/java/com/giftplatform/asset/HostInvitationUploadController.java#L15).
+
+Purpose: invoke the `access` action in the `HostInvitationUploadController` module; the module workflow describes its business intent.
+
+**Access:** Authenticated principal; ownership/role is enforced by route filter and controller/service resource checks. An authenticated user cannot assume access to another host’s UUID.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+
+
+**Request example / shape:**
+```json
+{
+  "pathAndQueryParameters": {}
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `org.springframework.http.ResponseEntity<com.giftplatform.asset.HostInvitationUploadService$Access>`. Produces: handler content type / negotiated JSON.
+```json
+{
+  "hostId": "123e4567-e89b-42d3-a456-426614174000",
+  "enabled": true,
+  "requiresPayment": true,
+  "paid": true,
+  "accessible": true
+}
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/v1/invitation-uploads/access"
+  }
+}
+```
+
+**Database effects:** The controller delegates to services or does not declare SQL; follow the linked handler into its injected services. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0322 — GET /api/v1/invitation-uploads/{id}/image
+
+Handler: com.giftplatform.asset.HostInvitationUploadController.image. Source: [backend/src/main/java/com/giftplatform/asset/HostInvitationUploadController.java:18](../../src/main/java/com/giftplatform/asset/HostInvitationUploadController.java#L18).
+
+Purpose: invoke the `image` action in the `HostInvitationUploadController` module; the module workflow describes its business intent.
+
+**Access:** Authenticated principal; ownership/role is enforced by route filter and controller/service resource checks. An authenticated user cannot assume access to another host’s UUID.
+
+**Registration:** registered in isolated snapshot. Conditional registration: No class-level conditional declaration found; service-level gates can still apply.
+
+**Headers:** `Accept` appropriate to the response; `Content-Type: application/json` for JSON bodies; multipart uses a browser-generated boundary. Send the same-origin session cookie where required. For protected mutations bootstrap `/api/auth/csrf`, send `X-XSRF-TOKEN`; creator sessions additionally require `X-Group-Page-Id`. Never place API keys in browser requests.
+
+| Parameter | Location / annotation | Type | Required / default |
+| --- | --- | --- | --- |
+| id | @org.springframework.web.bind.annotation.PathVariable(name="", value="", required=true) | java.util.UUID | As declared by the annotation; no additional undocumented default is asserted. |
+
+
+**Request example / shape:**
+```json
+{
+  "pathAndQueryParameters": {
+    "id": "123e4567-e89b-42d3-a456-426614174000"
+  }
+}
+```
+
+**Success:** 200 unless the handler constructs another ResponseEntity status. Declared response `org.springframework.http.ResponseEntity<byte[]>`. Produces: handler content type / negotiated JSON.
+```json
+"<binary bytes: use response Content-Type>"
+```
+
+**Validation/business/server errors:** 400 malformed/binding/validation input; 401 no authenticated session where required; 403 CSRF/role policy; 404 absent or inaccessible resource/disabled feature; 409 conflicting state/idempotency/revision; 413/415 upload size/type where used; 422 AI refusal where used; 429 explicit limits; 5xx unavailable provider/configuration/storage. These are a common catalogue, not a claim that every handler returns every code. Exact guard conditions and messages are linked by handler source and [guard catalogue](BUSINESS_RULE_CATALOGUE.md). Error envelopes are not globally standardized; representative shapes follow.
+```json
+{
+  "problemDetailExample": {
+    "status": 409,
+    "title": "Conflict",
+    "detail": "<safe handler-defined reason>"
+  },
+  "springErrorExample": {
+    "status": 400,
+    "error": "Bad Request",
+    "path": "/api/v1/invitation-uploads/{id}/image"
+  }
+}
+```
+
+**Database effects:** The controller delegates to services or does not declare SQL; follow the linked handler into its injected services. Use idempotency, status checks and transactions exactly as implemented; object presence is not proof of payment or notification delivery.
+
+**Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
+
+## API-0323 — POST /api/v1/phone/otp/request
 
 Handler: com.giftplatform.otp.controller.PhoneOtpController.requestOtp. Source: [backend/src/main/java/com/giftplatform/otp/controller/PhoneOtpController.java:37](../../src/main/java/com/giftplatform/otp/controller/PhoneOtpController.java#L37).
 
@@ -15521,7 +18926,7 @@ Purpose: invoke the `requestOtp` action in the `PhoneOtpController` module; the 
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0264 — POST /api/v1/phone/otp/verify
+## API-0324 — POST /api/v1/phone/otp/verify
 
 Handler: com.giftplatform.otp.controller.PhoneOtpController.verifyOtp. Source: [backend/src/main/java/com/giftplatform/otp/controller/PhoneOtpController.java:102](../../src/main/java/com/giftplatform/otp/controller/PhoneOtpController.java#L102).
 
@@ -15575,7 +18980,7 @@ Purpose: invoke the `verifyOtp` action in the `PhoneOtpController` module; the m
 
 **Rate / timeout / retry:** consult the request limiter/HTTP client in the source call chain and the full [configuration catalogue](CONFIGURATION_CATALOGUE.md). No universal per-endpoint rate, timeout or retry policy exists. Retry reads conservatively; never replay a write or payment with a new idempotency key after an uncertain result.
 
-## API-0265 — POST /api/webhooks/razorpay
+## API-0325 — POST /api/webhooks/razorpay
 
 Handler: com.giftplatform.payment.controller.RazorpayWebhookController.receive. Source: [backend/src/main/java/com/giftplatform/payment/controller/RazorpayWebhookController.java:17](../../src/main/java/com/giftplatform/payment/controller/RazorpayWebhookController.java#L17).
 

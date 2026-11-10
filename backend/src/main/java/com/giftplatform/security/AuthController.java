@@ -71,6 +71,7 @@ public class AuthController {
                 servletRequest,
                 servletResponse
         );
+        HostSessionActivity.start(servletRequest.getSession(true));
         GiftUserPrincipal signedIn = (GiftUserPrincipal) authentication.getPrincipal();
         String accountKind = signedIn.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_PLATFORM_ADMIN")) ? "PLATFORM_ADMIN" : "HOST";
         servletRequest.getSession(true).setAttribute("gift.credential.epoch", versions.current(accountKind, signedIn.getUserId()));

@@ -1,6 +1,12 @@
 # Document 1 — Technical Design & Specification
 
-**Application:** Gift Platform / Gift Invitation Studio. **Baseline:** the inspected working tree, including Flyway V1–V95 and uncommitted application changes; not merely the committed revision. **Authority:** executable source and migrated schema win over earlier design notes. See [coverage and evidence](README.md), [machine-readable baseline](catalogue/backend-source.json), and [migration catalogue](MIGRATION_CATALOGUE.md). No production environment or customer data was inspected.
+**Growth and performance update — 6 November 2026:** [Current implementation and rollout](releases/2026-11-06_GROWTH_AND_PERFORMANCE.md) covers the public home/demo, guided creation in both views, mobile invitations, consented sharing previews, bounded dashboard insights, approved-wishes keepsakes, image delivery and admin controls. Current schema head is V107. This update supersedes older route/default descriptions for the changed screens; it does not certify production deployment or live payments.
+
+**Localisation update:** [Platform localisation](releases/2026-11-02_LOCALIZATION.md) documents language hierarchy, all settings/fields/APIs, fallback, RTL, communication boundaries and validation evidence.
+
+**Implementation update:** [2026-11-02 controlled rollout](releases/2026-11-02_CELEBRATIONS_AND_SAFEGUARDS.md) documents new family/office occasions, three-level grants, invitation-only publishing, arrival/calendar details, repeat drafts, approved-wishes keepsakes and production safeguards. Read this with the refreshed source catalogues.
+
+**Application:** Gift Platform / Gift Invitation Studio. **Baseline:** the inspected working tree, including Flyway migrations through V107 and uncommitted application changes; not merely the committed revision. **Authority:** executable source and migrated schema win over earlier design notes. See [coverage and evidence](README.md), [machine-readable baseline](catalogue/backend-source.json), and [migration catalogue](MIGRATION_CATALOGUE.md). No production environment or customer data was inspected.
 
 This document and its linked catalogues form one specification. Every discovered page/control declaration, API operation, schema object, configuration declaration and source guard is indexed. Formal product intent, runtime-generated fields, deployed infrastructure and unspecified response contracts cannot be certified as 100% complete from code alone. Those omissions are explicit in the final gap register in Document 3; they must not be silently treated as implemented defaults.
 
@@ -96,7 +102,7 @@ Every row identifies business purpose, roles, dependencies, surfaces, success an
 
 ## 3. Screen, field, button and navigation contracts
 
-The complete screen-by-screen route documentation is [SCREEN_CATALOGUE.md](SCREEN_CATALOGUE.md). It includes all 27 page routes, their route composition, access, navigation, pre/postconditions, wireframe sections, controls and actions. The following are also screens even though they have no independent route: AI designer dialog, Special Gift chooser/individual form, group creator workspace, checkout/QR dialog, image/gallery/editor tools, verification/recovery controls, placement purchase/moderation panels, album slideshow/fullscreen and admin details panels. Their fields/buttons are covered by [UI_CONTROLS.md](UI_CONTROLS.md) and their source conditions.
+The complete screen-by-screen route documentation is [SCREEN_CATALOGUE.md](SCREEN_CATALOGUE.md). It includes all 28 page routes, their route composition, access, navigation, pre/postconditions, wireframe sections, controls and actions. The following are also screens even though they have no independent route: AI designer dialog, Special Gift chooser/individual form, group creator workspace, checkout/QR dialog, image/gallery/editor tools, verification/recovery controls, placement purchase/moderation panels, album slideshow/fullscreen and admin details panels. Their fields/buttons are covered by [UI_CONTROLS.md](UI_CONTROLS.md) and their source conditions.
 
 Each control catalogue entry records its label, HTML/control type, state binding, native validation, length/range/default declarations, allowed select values, visibility/editability conditions, submit/click/change actions, component API references, security notes and source location. A repeated database-driven dropdown is described by its control declaration and source collection, not by inventing future runtime options.
 
@@ -169,11 +175,11 @@ Every discovered source guard, exact failure and declarative validation is expan
 
 ## 5. Database design and lifecycle
 
-The fresh V95 schema has 87 base tables (including Flyway infrastructure) and 3 views. The physical inventory includes 790 columns across tables/views, 459 constraints, 220 indexes, 139 foreign-key column relationships, 21 user/application triggers and 10 schema routines. Complete per-table column types, SQL defaults, nullability, constraints, indexes, consumers, view definitions, triggers and routines are in [DATABASE_CATALOGUE.md](DATABASE_CATALOGUE.md).
+The fresh V97 schema has 97 base tables (including Flyway infrastructure) and 3 views. The physical inventory includes 849 columns across tables/views, 496 constraints, 231 indexes, 159 foreign-key column relationships, 25 user/application triggers and 11 schema routines. Complete per-table column types, SQL defaults, nullability, constraints, indexes, consumers, view definitions, triggers and routines are in [DATABASE_CATALOGUE.md](DATABASE_CATALOGUE.md).
 
 - [Complete ER diagram source](complete-er.mmd): all base tables and columns with FK associations. The parent-child glyph is navigational, not a substitute for each column's nullable/unique rules.
 - [Relationship matrix](RELATIONSHIP_MATRIX.md): exact FK column pairs and ON DELETE/UPDATE behavior, including composite relationships.
-- [Migration catalogue](MIGRATION_CATALOGUE.md): all V1–V95 inputs with source hashes and altered/created object names.
+- [Migration catalogue](MIGRATION_CATALOGUE.md): all V1–V97 inputs with source hashes and altered/created object names.
 
 ```mermaid
 erDiagram
@@ -197,7 +203,7 @@ Lifecycle distinctions: drafts and media may be edited under owner rules; immuta
 
 ## 6. API architecture and contracts
 
-[API_CATALOGUE.md](API_CATALOGUE.md) enumerates all 265 discovered source-declared operation mappings, including 34 not registered under the export configuration. It records the actual 231 runtime handler registrations separately. [API_MODELS.md](API_MODELS.md) lists reflected request/response records, class fields, annotations and enum values from registered and conditional controllers. Examples are schema illustrations, not claims that invented IDs or enum placeholders produce a valid business operation.
+[API_CATALOGUE.md](API_CATALOGUE.md) enumerates all 290 discovered source-declared operation mappings, including 34 not registered under the export configuration. It records the actual 256 runtime handler registrations separately. [API_MODELS.md](API_MODELS.md) lists reflected request/response records, class fields, annotations and enum values from registered and conditional controllers. Examples are schema illustrations, not claims that invented IDs or enum placeholders produce a valid business operation.
 
 ### 6.1 Common request patterns
 
@@ -215,6 +221,10 @@ Lifecycle distinctions: drafts and media may be edited under owner rules; immuta
 There is no single global stable error envelope. Some controllers emit ProblemDetail, others framework errors or explicit maps. Exact per-endpoint body guarantees require contract tests/OpenAPI completion; this is a documented gap. Never parse every failure as a successful data model.
 
 No universal API rate/timeout/retry policy exists. Per-feature rate limiters, DB quotas, in-memory windows, provider timeouts and upload execution limits are authoritative at their source declarations. Most mutations must not be retried blindly; direct claims/provider confirmation/webhooks have their own idempotency semantics. The profile-name CSRF-cookie retry helper is not permission to replay event creation or payment requests.
+
+### Framework and implicit HTTP endpoints
+
+The API catalogue counts source-declared application operations. Spring additionally serves minimal GET health paths `/actuator/health`, `/actuator/health/liveness` and `/actuator/health/readiness` (public; probe groups configured in production), and admin-only `/actuator/metrics` / `/actuator/metrics/{name}` when exposed. Production health responses hide component/details; readiness includes DB connectivity. `/error` is framework error dispatch, not a business API. Spring can supply implicit HEAD for GET handlers and OPTIONS method discovery; these do not bypass authentication, CSRF or owner/module checks. See [operations tooling](../../ops/README.md) for release/profile requirements.
 
 ## 7. External integrations and storage
 
@@ -254,3 +264,11 @@ The DB snapshot has no RLS policies and does not prove production DB role/networ
 For a feature change: update the page/component action and its request model; validate source guards and DB constraints; preserve event/host/session scope; add a forward migration when required; cover failure and replay behavior; update relevant journeys, APIs, configuration, tests and production gaps. Changes to payment recognition, publication, payout dispatch, verification ownership or delivery status require finance/security review criteria to be defined before production activation.
 
 Rebuild commands and validation workflow are in [Document 3](03_PRODUCTION_OPERATIONS.md) and [documentation tooling](tooling/README.md). The catalogues are reproducible snapshots; regenerate after code/migration changes rather than editing generated field/index/API tables by hand.
+
+## Growth experience architecture and controls
+
+The new public discovery routes are `/` and `/demo`; the authenticated general-purpose designer is `/studio`. Public invitations use a server metadata wrapper and the existing client experience. A shared `GrowthProvider` reads nonsecret, no-store flags and refreshes on focus/visibility/broadcast without blocking unrelated page content. Admin saves use versioned optimistic concurrency and audit records. Server gates independently protect insights, rich previews, keepsakes and analytics writes.
+
+Migration V107 introduces platform growth flags and revision metadata, two opt-in event sharing fields and a reusable thumbnail column. Private/public projections are explicit: preview services receive only title/occasion/date; keepsakes receive only approved guestbook names/messages with 20-row pagination. Private album media, contacts, RSVP identities and payment records are excluded. The event must remain in an eligible state and the underlying Guestbook permission remains authoritative.
+
+See the [release contract](releases/2026-11-06_GROWTH_AND_PERFORMANCE.md#api-contracts) for all new operations, environment variables, errors, defaults, privacy rules and compatibility limits. Existing full-list API contracts remain compatible; the dashboard summary is bounded independently.

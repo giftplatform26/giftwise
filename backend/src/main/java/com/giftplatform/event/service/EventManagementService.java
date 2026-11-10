@@ -17,6 +17,7 @@ public class EventManagementService {
     @org.springframework.beans.factory.annotation.Autowired private com.giftplatform.monetization.CommercialAccessService commerce;
     private final EventRepository repository;
     private final ActorContext actors;
+    @org.springframework.beans.factory.annotation.Autowired(required=false) private com.giftplatform.notification.email.TransactionalEmailOutbox emails;
     private final AuditService audit;
     public EventManagementService(EventRepository repository, ActorContext actors, AuditService audit, EventPublishReadiness readiness) {
         this.readiness=readiness; this.repository=repository; this.actors=actors; this.audit=audit;
@@ -74,6 +75,7 @@ public class EventManagementService {
         catch (IllegalStateException ex) { throw new ResponseStatusException(HttpStatus.CONFLICT,"Invalid status transition"); }
         repository.saveAndFlush(event);
         log(actors.requireAuthenticatedUserId(),event,AuditAction.STATUS_CHANGE,before,snapshot(event));
+        if(next==EventStatus.COMPLETED&&emails!=null)emails.completed(event.getId());
         return response(event);
     }
     private void applyDelivery(Event event,EventRequest input){

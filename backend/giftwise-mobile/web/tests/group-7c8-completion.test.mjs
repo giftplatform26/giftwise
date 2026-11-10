@@ -1,0 +1,6 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';
+const read=p=>readFileSync(new URL(p,import.meta.url),'utf8');
+test('guest payment methods use radio controls and do not print UPI ID',()=>{const s=read('../components/GroupGuestCheckout.tsx');assert.match(s,/role=\{focused\?undefined:'dialog'\}/);assert.ok(!s.includes('details.upiId'));assert.ok(s.includes("aria-modal={focused?undefined:true}"));assert.ok(s.includes('I have done the payment'))});
+test('creator controls guest/member/both link modes',()=>{const s=read('../components/GroupGuestCreatorSettings.tsx');for(const v of ['GUESTS_ONLY','MEMBERS_ONLY','BOTH','accessMode'])assert.ok(s.includes(v),v)});
+test('member submission uses session identity and separate history',()=>{const s=read('../../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java');for(const v of ['approvedMember','/member-report','/member-history','member_id','REPORTED_UNVERIFIED'])assert.ok(s.includes(v),v)});
+test('migration defines backend-enforced invitation mode and member identity',()=>{const s=read('../../../src/main/resources/db/migration/V60__group_contribution_access_member_reports.sql');assert.ok(s.includes('contribution_access_mode'));assert.ok(s.includes('member_id'))});

@@ -42,7 +42,7 @@ public class GuestDirectTransferService {
  }
  private UUID event(UUID token) {
   if(token==null) throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Invitation unavailable");
-  List<UUID> rows=jdbc.query("SELECT id FROM events WHERE public_token=? AND status='PUBLISHED'",
+  List<UUID> rows=jdbc.query("SELECT id FROM events WHERE public_token=? AND status='PUBLISHED' AND gifting_enabled",
    (rs,i)->rs.getObject(1,UUID.class),token);
   if(rows.size()!=1) throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Invitation unavailable");
   return rows.get(0);

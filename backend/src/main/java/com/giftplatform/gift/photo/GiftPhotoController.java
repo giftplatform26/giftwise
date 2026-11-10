@@ -19,7 +19,7 @@ public class GiftPhotoController {
     @GetMapping("/api/v1/events/{eventId}/gifts/photos/{photoId}")
     public ResponseEntity<byte[]> owned(@PathVariable UUID eventId,@PathVariable UUID photoId){return image(photos.owned(eventId,photoId));}
     @GetMapping("/api/public/events/{token}/gifts/{giftId}/photo")
-    public ResponseEntity<byte[]> published(@PathVariable UUID token,@PathVariable UUID giftId){return image(photos.publicPhoto(token,giftId));}
+    public ResponseEntity<byte[]> published(@PathVariable UUID token,@PathVariable UUID giftId,@RequestParam(defaultValue="false") boolean thumbnail){return image(photos.publicPhoto(token,giftId,thumbnail));}
     private ResponseEntity<byte[]> image(byte[] bytes){return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).cacheControl(CacheControl.noStore()).header("X-Content-Type-Options","nosniff").body(bytes);}
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<ProblemDetail> error(ResponseStatusException e){return ResponseEntity.status(e.getStatusCode()).body(ProblemDetail.forStatusAndDetail(e.getStatusCode(),e.getReason()==null?"Photo unavailable":e.getReason()));}

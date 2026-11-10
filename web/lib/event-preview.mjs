@@ -1,3 +1,5 @@
+
+import {activeLocale} from './localization.mjs';
 export const OCCASION_STYLE = Object.freeze({
   WEDDING: { icon: '💍', eyebrow: 'A LOVE STORY', greeting: 'Together is a beautiful place to be', theme: 'wedding' },
   BIRTHDAY: { icon: '🎂', eyebrow: 'MAKE A WISH', greeting: 'A little more joy, a lot more magic', theme: 'birthday' },
@@ -19,10 +21,10 @@ export function eventDateLabel(date) {
   const [year, month, day] = date.split('-').map(Number);
   const parsed = new Date(Date.UTC(year, month - 1, day));
   if (parsed.getUTCFullYear() !== year || parsed.getUTCMonth() !== month - 1 || parsed.getUTCDate() !== day) return 'Date to be announced';
-  return new Intl.DateTimeFormat('en-IN', { timeZone: 'UTC', day: 'numeric', month: 'long', year: 'numeric' }).format(parsed);
+  return new Intl.DateTimeFormat(activeLocale("en-IN"), { timeZone: 'UTC', day: 'numeric', month: 'long', year: 'numeric' }).format(parsed);
 }
 export function moneyLabel(amount) {
   const n = Number(amount);
   if (!Number.isFinite(n) || n < 0) return 'Amount unavailable';
-  return new Intl.NumberFormat('en-IN', {style: 'currency', currency: 'INR', maximumFractionDigits: 2}).format(n);
+  return new Intl.NumberFormat(activeLocale("en-IN"), {style: 'currency', currency: 'INR', maximumFractionDigits: 2}).format(n);
 }

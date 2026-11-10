@@ -1,0 +1,50 @@
+{
+  "files": [
+    {
+      "file": "components/TranslationSupportTools.tsx",
+      "edits": 11
+    }
+  ],
+  "unresolvedServerAttributes": [],
+  "componentSubscriptions": 1,
+  "sourceMessages": 2465,
+  "applied": true,
+  "locations": {
+    "ui.efe8be09e8067008": [
+      "components/TranslationSupportTools.tsx"
+    ],
+    "ui.8d0d8f93d1542bc3": [
+      "components/TranslationSupportTools.tsx"
+    ],
+    "ui.8f0cf350f67a19d8": [
+      "components/TranslationSupportTools.tsx"
+    ],
+    "ui.a85fc758dfc3501a": [
+      "components/TranslationSupportTools.tsx"
+    ],
+    "ui.014d2e3bf4c99118": [
+      "components/TranslationSupportTools.tsx"
+    ],
+    "ui.15f20916edf5d894": [
+      "components/TranslationSupportTools.tsx"
+    ],
+    "ui.8294fa0efe37068e": [
+      "components/TranslationSupportTools.tsx"
+    ],
+    "ui.ca49cf8e2ce8a794": [
+      "components/TranslationSupportTools.tsx"
+    ],
+    "ui.6b7a9135ff4be7af": [
+      "components/TranslationSupportTools.tsx"
+    ],
+    "ui.4f4139d4fb9697b7": [
+      "components/TranslationSupportTools.tsx"
+    ],
+    "ui.0a7fb024beadb185": [
+      "components/TranslationSupportTools.tsx"
+    ],
+    "ui.6d9d3b03d9930e66": [
+      "components/TranslationSupportTools.tsx"
+    ]
+  }
+}

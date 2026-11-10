@@ -12,6 +12,14 @@ erDiagram
     int4 attempt_count
     timestamptz created_at
   }
+  account_legal_consents {
+    uuid id
+    varchar account_kind
+    uuid account_id
+    varchar terms_version
+    varchar privacy_version
+    timestamptz accepted_at
+  }
   account_pending_email_verifications {
     uuid challenge_id
     varchar account_kind
@@ -76,6 +84,27 @@ erDiagram
     varchar click_parameter
     varchar redirect_template
     int8 revision
+  }
+  application_interactions {
+    uuid id
+    uuid parent_id
+    varchar visitor_key
+    varchar kind
+    varchar source
+    uuid actor_id
+    varchar actor_role
+    uuid host_id
+    uuid event_id
+    varchar action
+    varchar page
+    varchar control
+    varchar destination
+    varchar outcome
+    varchar detail
+    int4 http_status
+    int8 duration_ms
+    timestamptz created_at
+    timestamptz updated_at
   }
   audit_logs {
     uuid id
@@ -182,11 +211,33 @@ erDiagram
     varchar allocation_status
     timestamptz created_at
   }
+  coupon_redemptions {
+    uuid id
+    uuid coupon_id
+    uuid user_id
+    varchar source_reference
+    int8 discount_minor
+    varchar currency
+    varchar status
+    timestamptz created_at
+    timestamptz expires_at
+  }
   credential_session_versions {
     varchar account_kind
     uuid account_id
     int8 version
     timestamptz updated_at
+  }
+  event_celebration_settings {
+    uuid event_id
+    varchar welcome_message
+    bool share_venue
+    time start_time
+    varchar timezone
+    int4 duration_minutes
+    varchar arrival_notes
+    int8 version
+    timestamptz changed_at
   }
   event_guest_submission_limits {
     uuid event_id
@@ -267,6 +318,9 @@ erDiagram
     varchar delivery_state
     varchar delivery_postal_code
     varchar delivery_country
+    bool gifting_enabled
+    bool share_preview_enabled
+    bool keepsake_enabled
   }
   flyway_schema_history {
     int4 installed_rank
@@ -443,6 +497,16 @@ erDiagram
     int4 width
     int4 height
     timestamptz created_at
+    bytea thumbnail
+  }
+  gift_recommendations {
+    uuid id
+    uuid event_id
+    uuid requested_by
+    varchar model_reference
+    jsonb recommendations
+    varchar status
+    timestamptz created_at
   }
   gift_retailer_metadata_audit {
     uuid id
@@ -577,6 +641,23 @@ erDiagram
     varchar request_reference
     varchar request_fund_account_id
   }
+  host_invitation_upload_controls {
+    uuid host_id
+    bool enabled
+    bool requires_payment
+    uuid changed_by
+    timestamptz changed_at
+  }
+  host_invitation_uploads {
+    uuid id
+    uuid host_id
+    varchar category
+    varchar title
+    bytea image_png
+    int4 width
+    int4 height
+    timestamptz created_at
+  }
   host_payout_requests {
     uuid id
     uuid host_id
@@ -659,6 +740,41 @@ erDiagram
     timestamptz updated_at
     varchar tier
   }
+  language_delivery_templates {
+    varchar language_code
+    varchar provider
+    varchar template_id
+    int8 version
+    uuid changed_by
+    timestamptz changed_at
+  }
+  localization_event_controls {
+    uuid event_id
+    bool enabled
+    uuid changed_by
+    timestamptz changed_at
+  }
+  localization_host_controls {
+    uuid host_id
+    bool enabled
+    uuid changed_by
+    timestamptz changed_at
+  }
+  localization_sources {
+    varchar message_key
+    text source_text
+    varchar category
+    timestamptz created_at
+  }
+  localization_translations {
+    varchar language_code
+    varchar message_key
+    text translated_text
+    bool published
+    int8 version
+    uuid changed_by
+    timestamptz changed_at
+  }
   notification_outbox {
     uuid id
     uuid event_id
@@ -679,6 +795,7 @@ erDiagram
     timestamptz sent_at
     varchar last_error_code
     timestamptz read_at
+    varchar language_code
   }
   otp_request_rate_limits {
     varchar scope
@@ -806,6 +923,25 @@ erDiagram
     varchar module_code
     timestamptz created_at
   }
+  platform_brand_assets {
+    uuid id
+    bytea image_bytes
+    uuid created_by
+    timestamptz created_at
+  }
+  platform_branding {
+    int4 id
+    varchar application_name
+    varchar brand_color
+    varchar footer_text
+    varchar support_email
+    text social_links
+    uuid logo_id
+    uuid favicon_id
+    int8 revision
+    uuid updated_by
+    timestamptz updated_at
+  }
   platform_event_ai_design_settings {
     uuid event_id
     bool enabled
@@ -823,9 +959,26 @@ erDiagram
     varchar display_mode
     timestamptz changed_at
   }
+  platform_event_module_grants {
+    uuid event_id
+    varchar module_code
+    bool enabled
+    uuid changed_by
+    timestamptz changed_at
+  }
   platform_experience_settings {
     int2 id
     varchar view_mode
+    uuid changed_by
+    timestamptz changed_at
+  }
+  platform_growth_features {
+    varchar code
+    bool enabled
+  }
+  platform_growth_settings {
+    int4 id
+    int8 version
     uuid changed_by
     timestamptz changed_at
   }
@@ -833,6 +986,25 @@ erDiagram
     uuid host_id
     varchar module_code
     bool enabled
+    uuid changed_by
+    timestamptz changed_at
+  }
+  platform_languages {
+    varchar code
+    varchar native_name
+    varchar english_name
+    varchar direction
+    bool enabled
+    int8 version
+    uuid changed_by
+    timestamptz changed_at
+  }
+  platform_localization_settings {
+    int4 id
+    bool enabled
+    varchar default_language
+    varchar fallback_language
+    int8 version
     uuid changed_by
     timestamptz changed_at
   }
@@ -866,12 +1038,34 @@ erDiagram
     int8 cap_paise
     varchar fee_bearer
   }
+  platform_tenants {
+    uuid id
+    varchar slug
+    varchar display_name
+    bool enabled
+    timestamptz created_at
+  }
   platform_verification_settings {
     int4 id
     bool mobile_otp_enabled
     bool email_verification_enabled
     uuid changed_by
     timestamptz changed_at
+  }
+  promotional_coupons {
+    uuid id
+    uuid tenant_id
+    varchar code
+    varchar discount_kind
+    int2 percentage
+    int8 amount_minor
+    varchar currency
+    timestamptz starts_at
+    timestamptz ends_at
+    int4 max_redemptions
+    int4 per_user_limit
+    bool enabled
+    uuid created_by
   }
   qr_invitation_designs {
     uuid id
@@ -880,6 +1074,14 @@ erDiagram
     varchar style
     varchar greeting
     bytea image_png
+    timestamptz created_at
+  }
+  referral_codes {
+    uuid id
+    uuid tenant_id
+    uuid referrer_id
+    varchar code
+    bool enabled
     timestamptz created_at
   }
   routing_commission_history {
@@ -910,6 +1112,101 @@ erDiagram
     timestamptz expires_at
     timestamptz verified_at
     timestamptz consumed_at
+  }
+  subscription_plans {
+    uuid id
+    varchar code
+    varchar name
+    int8 price_minor
+    varchar currency
+    varchar billing_period
+    jsonb entitlements
+    bool enabled
+    int8 version
+  }
+  supported_currencies {
+    varchar code
+    int2 minor_units
+    bool checkout_enabled
+  }
+  tenant_branding {
+    uuid tenant_id
+    varchar application_name
+    varchar brand_color
+    uuid logo_id
+    uuid favicon_id
+    varchar support_email
+    varchar footer_text
+    int8 revision
+  }
+  tenant_events {
+    uuid event_id
+    uuid tenant_id
+  }
+  tenant_memberships {
+    uuid tenant_id
+    uuid user_id
+    varchar role
+    timestamptz created_at
+  }
+  transactional_email_outbox {
+    uuid id
+    varchar source_key
+    varchar template_key
+    varchar recipient
+    jsonb variables
+    jsonb rendered_email
+    varchar language_code
+    varchar status
+    int4 attempts
+    timestamptz next_attempt_at
+    timestamptz created_at
+    timestamptz sent_at
+    varchar last_error_code
+  }
+  user_language_preferences {
+    uuid user_id
+    varchar language_code
+    timestamptz changed_at
+  }
+  user_legal_consents {
+    uuid id
+    uuid user_id
+    varchar terms_version
+    varchar privacy_version
+    timestamptz accepted_at
+  }
+  user_profile_preferences {
+    uuid user_id
+    varchar timezone
+    bool event_notifications
+    bool contribution_notifications
+    bool marketing_notifications
+    bytea picture_png
+    timestamptz updated_at
+  }
+  user_referrals {
+    uuid id
+    uuid referral_code_id
+    uuid referrer_id
+    uuid referred_user_id
+    varchar status
+    timestamptz created_at
+  }
+  user_subscriptions {
+    uuid id
+    uuid user_id
+    uuid tenant_id
+    uuid plan_id
+    varchar provider
+    varchar provider_subscription_id
+    varchar status
+    timestamptz period_start
+    timestamptz period_end
+    int8 price_minor
+    varchar currency
+    jsonb entitlement_snapshot
+    timestamptz created_at
   }
   username_recovery_attempts {
     uuid id
@@ -966,6 +1263,10 @@ erDiagram
   gifts ||--o{ contributions : "contributions_gift_id_fkey"
   payment_orders ||--o{ contributions : "contributions_payment_order_id_fkey"
   gifts ||--o{ contributions : "fk_contribution_gift_event"
+  promotional_coupons ||--o{ coupon_redemptions : "coupon_redemptions_coupon_id_fkey"
+  supported_currencies ||--o{ coupon_redemptions : "coupon_redemptions_currency_fkey"
+  users ||--o{ coupon_redemptions : "coupon_redemptions_user_id_fkey"
+  events ||--o{ event_celebration_settings : "event_celebration_settings_event_id_fkey"
   events ||--o{ event_guest_submission_limits : "event_guest_submission_limits_event_id_fkey"
   events ||--o{ event_guestbook : "event_guestbook_event_id_fkey"
   host_bank_accounts ||--o{ event_payment_account_links : "event_payment_account_links_bank_account_id_host_id_fkey"
@@ -1002,6 +1303,8 @@ erDiagram
   gift_group_payment_destinations ||--o{ gift_groups : "gift_groups_guest_upi_destination_id_fkey"
   users ||--o{ gift_photos : "gift_photos_actor_id_fkey"
   events ||--o{ gift_photos : "gift_photos_event_id_fkey"
+  events ||--o{ gift_recommendations : "gift_recommendations_event_id_fkey"
+  users ||--o{ gift_recommendations : "gift_recommendations_requested_by_fkey"
   users ||--o{ gift_retailer_metadata_audit : "gift_retailer_metadata_audit_actor_id_fkey"
   events ||--o{ gift_retailer_metadata_audit : "gift_retailer_metadata_audit_event_id_fkey"
   gifts ||--o{ gift_retailer_metadata_audit : "gift_retailer_metadata_audit_gift_id_fkey"
@@ -1024,6 +1327,9 @@ erDiagram
   events ||--o{ host_bank_accounts : "fk_bank_event_owner"
   users ||--o{ host_bank_accounts : "host_bank_accounts_host_id_fkey"
   users ||--o{ host_destination_verification_attempts : "host_destination_verification_attempts_host_id_fkey"
+  users ||--o{ host_invitation_upload_controls : "host_invitation_upload_controls_changed_by_fkey"
+  users ||--o{ host_invitation_upload_controls : "host_invitation_upload_controls_host_id_fkey"
+  users ||--o{ host_invitation_uploads : "host_invitation_uploads_host_id_fkey"
   host_bank_accounts ||--o{ host_payout_requests : "host_payout_requests_destination_id_fkey"
   events ||--o{ host_payout_requests : "host_payout_requests_event_id_fkey"
   users ||--o{ host_payout_requests : "host_payout_requests_host_id_fkey"
@@ -1037,7 +1343,17 @@ erDiagram
   gifts ||--o{ hybrid_checkout_quotes : "hybrid_checkout_quotes_gift_id_fkey"
   events ||--o{ invitation_ai_requests : "invitation_ai_requests_event_id_fkey"
   users ||--o{ invitation_ai_requests : "invitation_ai_requests_host_id_fkey"
+  users ||--o{ language_delivery_templates : "language_delivery_templates_changed_by_fkey"
+  platform_languages ||--o{ language_delivery_templates : "language_delivery_templates_language_code_fkey"
+  users ||--o{ localization_event_controls : "localization_event_controls_changed_by_fkey"
+  events ||--o{ localization_event_controls : "localization_event_controls_event_id_fkey"
+  users ||--o{ localization_host_controls : "localization_host_controls_changed_by_fkey"
+  users ||--o{ localization_host_controls : "localization_host_controls_host_id_fkey"
+  users ||--o{ localization_translations : "localization_translations_changed_by_fkey"
+  platform_languages ||--o{ localization_translations : "localization_translations_language_code_fkey"
+  localization_sources ||--o{ localization_translations : "localization_translations_message_key_fkey"
   events ||--o{ notification_outbox : "notification_outbox_event_id_fkey"
+  platform_languages ||--o{ notification_outbox : "notification_outbox_language_code_fkey"
   users ||--o{ payment_channel_controls : "payment_channel_controls_changed_by_fkey"
   users ||--o{ payment_control_history : "payment_control_history_actor_id_fkey"
   contributions ||--o{ payment_notifications : "payment_notifications_contribution_id_fkey"
@@ -1052,21 +1368,58 @@ erDiagram
   host_payout_requests ||--o{ payout_reservations : "payout_reservations_payout_request_id_fkey"
   users ||--o{ phone_otp_challenges : "phone_otp_challenges_user_id_fkey"
   users ||--o{ platform_admin_action_audit : "platform_admin_action_audit_actor_id_fkey"
+  users ||--o{ platform_brand_assets : "platform_brand_assets_created_by_fkey"
+  platform_brand_assets ||--o{ platform_branding : "platform_branding_favicon_id_fkey"
+  platform_brand_assets ||--o{ platform_branding : "platform_branding_logo_id_fkey"
+  users ||--o{ platform_branding : "platform_branding_updated_by_fkey"
   users ||--o{ platform_event_ai_design_settings : "platform_event_ai_design_settings_changed_by_fkey"
   events ||--o{ platform_event_ai_design_settings : "platform_event_ai_design_settings_event_id_fkey"
   users ||--o{ platform_event_album_settings : "platform_event_album_settings_changed_by_fkey"
   events ||--o{ platform_event_album_settings : "platform_event_album_settings_event_id_fkey"
   events ||--o{ platform_event_message_settings : "platform_event_message_settings_event_id_fkey"
+  users ||--o{ platform_event_module_grants : "platform_event_module_grants_changed_by_fkey"
+  events ||--o{ platform_event_module_grants : "platform_event_module_grants_event_id_fkey"
+  platform_module_controls ||--o{ platform_event_module_grants : "platform_event_module_grants_module_code_fkey"
   users ||--o{ platform_experience_settings : "platform_experience_settings_changed_by_fkey"
+  users ||--o{ platform_growth_settings : "platform_growth_settings_changed_by_fkey"
   users ||--o{ platform_host_module_grants : "platform_host_module_grants_changed_by_fkey"
   users ||--o{ platform_host_module_grants : "platform_host_module_grants_host_id_fkey"
   platform_module_controls ||--o{ platform_host_module_grants : "platform_host_module_grants_module_code_fkey"
+  users ||--o{ platform_languages : "platform_languages_changed_by_fkey"
+  users ||--o{ platform_localization_settings : "platform_localization_settings_changed_by_fkey"
+  platform_languages ||--o{ platform_localization_settings : "platform_localization_settings_default_language_fkey"
+  platform_languages ||--o{ platform_localization_settings : "platform_localization_settings_fallback_language_fkey"
   users ||--o{ platform_module_controls : "platform_module_controls_changed_by_fkey"
   users ||--o{ platform_monetization_history : "platform_monetization_history_actor_id_fkey"
   users ||--o{ platform_monetization_settings : "platform_monetization_settings_changed_by_fkey"
   users ||--o{ platform_verification_settings : "platform_verification_settings_changed_by_fkey"
+  users ||--o{ promotional_coupons : "promotional_coupons_created_by_fkey"
+  supported_currencies ||--o{ promotional_coupons : "promotional_coupons_currency_fkey"
+  platform_tenants ||--o{ promotional_coupons : "promotional_coupons_tenant_id_fkey"
   events ||--o{ qr_invitation_designs : "qr_invitation_designs_event_id_fkey"
+  users ||--o{ referral_codes : "referral_codes_referrer_id_fkey"
+  platform_tenants ||--o{ referral_codes : "referral_codes_tenant_id_fkey"
   users ||--o{ routing_commission_history : "routing_commission_history_actor_id_fkey"
   users ||--o{ routing_commission_settings : "routing_commission_settings_changed_by_fkey"
+  supported_currencies ||--o{ subscription_plans : "subscription_plans_currency_fkey"
+  platform_brand_assets ||--o{ tenant_branding : "tenant_branding_favicon_id_fkey"
+  platform_brand_assets ||--o{ tenant_branding : "tenant_branding_logo_id_fkey"
+  platform_tenants ||--o{ tenant_branding : "tenant_branding_tenant_id_fkey"
+  events ||--o{ tenant_events : "tenant_events_event_id_fkey"
+  platform_tenants ||--o{ tenant_events : "tenant_events_tenant_id_fkey"
+  platform_tenants ||--o{ tenant_memberships : "tenant_memberships_tenant_id_fkey"
+  users ||--o{ tenant_memberships : "tenant_memberships_user_id_fkey"
+  platform_languages ||--o{ user_language_preferences : "user_language_preferences_language_code_fkey"
+  users ||--o{ user_language_preferences : "user_language_preferences_user_id_fkey"
+  users ||--o{ user_legal_consents : "user_legal_consents_user_id_fkey"
+  users ||--o{ user_profile_preferences : "user_profile_preferences_user_id_fkey"
+  referral_codes ||--o{ user_referrals : "user_referrals_referral_code_id_referrer_id_fkey"
+  users ||--o{ user_referrals : "user_referrals_referred_user_id_fkey"
+  users ||--o{ user_referrals : "user_referrals_referrer_id_fkey"
+  supported_currencies ||--o{ user_subscriptions : "user_subscriptions_currency_fkey"
+  subscription_plans ||--o{ user_subscriptions : "user_subscriptions_plan_id_fkey"
+  platform_tenants ||--o{ user_subscriptions : "user_subscriptions_tenant_id_fkey"
+  tenant_memberships ||--o{ user_subscriptions : "user_subscriptions_tenant_id_user_id_fkey"
+  users ||--o{ user_subscriptions : "user_subscriptions_user_id_fkey"
   contributions ||--o{ wallet_ledger_entries : "wallet_ledger_entries_contribution_id_fkey"
   events ||--o{ wallet_ledger_entries : "wallet_ledger_entries_event_id_fkey"

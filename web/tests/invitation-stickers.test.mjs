@@ -5,7 +5,7 @@ import {validateSafeLayout,safeUpdateElement,protectedQrRect,intersects} from '.
 import {validateExport} from '../lib/invitation-export.mjs';
 import {initialDesign} from '../lib/design.mjs';
 const base=()=>structuredClone(initialDesign);
-test('12 free decorative assets with unique ids and local SVG URLs',()=>{assert.equal(STICKERS.length,12);assert.equal(new Set(STICKERS.map(s=>s.id)).size,12);assert.ok(STICKERS.every(s=>s.src.startsWith('/invitation-stickers/')&&s.src.endsWith('.svg')))});
+test('decorative collection has unique ids and local SVG URLs',()=>{assert.ok(STICKERS.length>=36);assert.equal(new Set(STICKERS.map(s=>s.id)).size,STICKERS.length);assert.ok(STICKERS.every(s=>s.src.startsWith('/invitation-stickers/')&&s.src.endsWith('.svg')))});
 test('all assets can be looked up',()=>{for(const s of STICKERS)assert.equal(stickerById(s.id)?.src,s.src)});
 test('unknown decoration is rejected',()=>{const d=base();assert.equal(addSticker(d,'invalid'),d)});
 test('adding a sticker preserves QR and validates geometry',()=>{const d=addSticker(base(),'flower');assert.equal(d.elements.length,6);assert.ok(validateSafeLayout(d));assert.ok(validStickerElement(d.elements.at(-1)))});
@@ -17,3 +17,5 @@ test('too-small sticker resize is blocked',()=>{const d=addSticker(base(),'flowe
 test('sticker can be deleted',()=>{const d=addSticker(base(),'flower');const id=d.elements.at(-1).id;const next={...d,elements:d.elements.filter(e=>e.id!==id)};assert.ok(validateSafeLayout(next));assert.equal(next.elements.length,5)});
 test('PNG validation accepts safe stickers',()=>{const d=addSticker(base(),'ribbon');assert.equal(validateExport(d,'blob:test'),true)});
 test('PNG validation rejects unsafe sticker src',()=>{const d=addSticker(base(),'ribbon');d.elements.at(-1).src='data:image/svg+xml,bad';assert.throws(()=>validateExport(d,'blob:test'))});
+
+test('private uploaded stickers use only the authenticated upload endpoint',()=>{const id='11111111-1111-1111-1111-111111111111';const design=addSticker(base(),`upload:${id}`);assert.ok(validateSafeLayout(design));const sticker=design.elements.at(-1);assert.equal(sticker.src,`/backend/api/v1/invitation-uploads/${id}/image`);assert.ok(validStickerElement(sticker));assert.equal(validStickerElement({...sticker,src:`https://example.org/${id}`}),false);});

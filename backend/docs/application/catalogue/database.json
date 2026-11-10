@@ -3,6 +3,9 @@
     "table_name" : "account_contact_challenges",
     "table_type" : "BASE TABLE"
   }, {
+    "table_name" : "account_legal_consents",
+    "table_type" : "BASE TABLE"
+  }, {
     "table_name" : "account_pending_email_verifications",
     "table_type" : "BASE TABLE"
   }, {
@@ -22,6 +25,9 @@
     "table_type" : "BASE TABLE"
   }, {
     "table_name" : "affiliate_partners",
+    "table_type" : "BASE TABLE"
+  }, {
+    "table_name" : "application_interactions",
     "table_type" : "BASE TABLE"
   }, {
     "table_name" : "audit_logs",
@@ -57,7 +63,13 @@
     "table_name" : "contributions",
     "table_type" : "BASE TABLE"
   }, {
+    "table_name" : "coupon_redemptions",
+    "table_type" : "BASE TABLE"
+  }, {
     "table_name" : "credential_session_versions",
+    "table_type" : "BASE TABLE"
+  }, {
+    "table_name" : "event_celebration_settings",
     "table_type" : "BASE TABLE"
   }, {
     "table_name" : "event_guest_submission_limits",
@@ -117,6 +129,9 @@
     "table_name" : "gift_photos",
     "table_type" : "BASE TABLE"
   }, {
+    "table_name" : "gift_recommendations",
+    "table_type" : "BASE TABLE"
+  }, {
     "table_name" : "gift_retailer_metadata_audit",
     "table_type" : "BASE TABLE"
   }, {
@@ -159,6 +174,12 @@
     "table_name" : "host_destination_verification_attempts",
     "table_type" : "BASE TABLE"
   }, {
+    "table_name" : "host_invitation_upload_controls",
+    "table_type" : "BASE TABLE"
+  }, {
+    "table_name" : "host_invitation_uploads",
+    "table_type" : "BASE TABLE"
+  }, {
     "table_name" : "host_payout_requests",
     "table_type" : "BASE TABLE"
   }, {
@@ -178,6 +199,21 @@
     "table_type" : "BASE TABLE"
   }, {
     "table_name" : "invitation_gallery_assets",
+    "table_type" : "BASE TABLE"
+  }, {
+    "table_name" : "language_delivery_templates",
+    "table_type" : "BASE TABLE"
+  }, {
+    "table_name" : "localization_event_controls",
+    "table_type" : "BASE TABLE"
+  }, {
+    "table_name" : "localization_host_controls",
+    "table_type" : "BASE TABLE"
+  }, {
+    "table_name" : "localization_sources",
+    "table_type" : "BASE TABLE"
+  }, {
+    "table_name" : "localization_translations",
     "table_type" : "BASE TABLE"
   }, {
     "table_name" : "notification_outbox",
@@ -219,6 +255,12 @@
     "table_name" : "platform_admin_action_audit",
     "table_type" : "BASE TABLE"
   }, {
+    "table_name" : "platform_brand_assets",
+    "table_type" : "BASE TABLE"
+  }, {
+    "table_name" : "platform_branding",
+    "table_type" : "BASE TABLE"
+  }, {
     "table_name" : "platform_event_ai_design_settings",
     "table_type" : "BASE TABLE"
   }, {
@@ -228,10 +270,25 @@
     "table_name" : "platform_event_message_settings",
     "table_type" : "BASE TABLE"
   }, {
+    "table_name" : "platform_event_module_grants",
+    "table_type" : "BASE TABLE"
+  }, {
     "table_name" : "platform_experience_settings",
     "table_type" : "BASE TABLE"
   }, {
+    "table_name" : "platform_growth_features",
+    "table_type" : "BASE TABLE"
+  }, {
+    "table_name" : "platform_growth_settings",
+    "table_type" : "BASE TABLE"
+  }, {
     "table_name" : "platform_host_module_grants",
+    "table_type" : "BASE TABLE"
+  }, {
+    "table_name" : "platform_languages",
+    "table_type" : "BASE TABLE"
+  }, {
+    "table_name" : "platform_localization_settings",
     "table_type" : "BASE TABLE"
   }, {
     "table_name" : "platform_module_controls",
@@ -246,10 +303,19 @@
     "table_name" : "platform_monetization_streams",
     "table_type" : "BASE TABLE"
   }, {
+    "table_name" : "platform_tenants",
+    "table_type" : "BASE TABLE"
+  }, {
     "table_name" : "platform_verification_settings",
     "table_type" : "BASE TABLE"
   }, {
+    "table_name" : "promotional_coupons",
+    "table_type" : "BASE TABLE"
+  }, {
     "table_name" : "qr_invitation_designs",
+    "table_type" : "BASE TABLE"
+  }, {
+    "table_name" : "referral_codes",
     "table_type" : "BASE TABLE"
   }, {
     "table_name" : "routing_commission_history",
@@ -259,6 +325,39 @@
     "table_type" : "BASE TABLE"
   }, {
     "table_name" : "signup_email_verifications",
+    "table_type" : "BASE TABLE"
+  }, {
+    "table_name" : "subscription_plans",
+    "table_type" : "BASE TABLE"
+  }, {
+    "table_name" : "supported_currencies",
+    "table_type" : "BASE TABLE"
+  }, {
+    "table_name" : "tenant_branding",
+    "table_type" : "BASE TABLE"
+  }, {
+    "table_name" : "tenant_events",
+    "table_type" : "BASE TABLE"
+  }, {
+    "table_name" : "tenant_memberships",
+    "table_type" : "BASE TABLE"
+  }, {
+    "table_name" : "transactional_email_outbox",
+    "table_type" : "BASE TABLE"
+  }, {
+    "table_name" : "user_language_preferences",
+    "table_type" : "BASE TABLE"
+  }, {
+    "table_name" : "user_legal_consents",
+    "table_type" : "BASE TABLE"
+  }, {
+    "table_name" : "user_profile_preferences",
+    "table_type" : "BASE TABLE"
+  }, {
+    "table_name" : "user_referrals",
+    "table_type" : "BASE TABLE"
+  }, {
+    "table_name" : "user_subscriptions",
     "table_type" : "BASE TABLE"
   }, {
     "table_name" : "username_recovery_attempts",
@@ -384,6 +483,72 @@
     "table_name" : "account_contact_challenges",
     "column_name" : "created_at",
     "ordinal_position" : 11,
+    "data_type" : "timestamp with time zone",
+    "udt_name" : "timestamptz",
+    "is_nullable" : "NO",
+    "column_default" : "now()",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "account_legal_consents",
+    "column_name" : "id",
+    "ordinal_position" : 1,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "account_legal_consents",
+    "column_name" : "account_kind",
+    "ordinal_position" : 2,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : 30,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "account_legal_consents",
+    "column_name" : "account_id",
+    "ordinal_position" : 3,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "account_legal_consents",
+    "column_name" : "terms_version",
+    "ordinal_position" : 4,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : 40,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "account_legal_consents",
+    "column_name" : "privacy_version",
+    "ordinal_position" : 5,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : 40,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "account_legal_consents",
+    "column_name" : "accepted_at",
+    "ordinal_position" : 6,
     "data_type" : "timestamp with time zone",
     "udt_name" : "timestamptz",
     "is_nullable" : "NO",
@@ -952,6 +1117,215 @@
     "character_maximum_length" : null,
     "numeric_precision" : 64,
     "numeric_scale" : 0
+  }, {
+    "table_name" : "application_interactions",
+    "column_name" : "id",
+    "ordinal_position" : 1,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "application_interactions",
+    "column_name" : "parent_id",
+    "ordinal_position" : 2,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "YES",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "application_interactions",
+    "column_name" : "visitor_key",
+    "ordinal_position" : 3,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : 64,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "application_interactions",
+    "column_name" : "kind",
+    "ordinal_position" : 4,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : 16,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "application_interactions",
+    "column_name" : "source",
+    "ordinal_position" : 5,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : 16,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "application_interactions",
+    "column_name" : "actor_id",
+    "ordinal_position" : 6,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "YES",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "application_interactions",
+    "column_name" : "actor_role",
+    "ordinal_position" : 7,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : 16,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "application_interactions",
+    "column_name" : "host_id",
+    "ordinal_position" : 8,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "YES",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "application_interactions",
+    "column_name" : "event_id",
+    "ordinal_position" : 9,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "YES",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "application_interactions",
+    "column_name" : "action",
+    "ordinal_position" : 10,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : 64,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "application_interactions",
+    "column_name" : "page",
+    "ordinal_position" : 11,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : 240,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "application_interactions",
+    "column_name" : "control",
+    "ordinal_position" : 12,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : "''::character varying",
+    "character_maximum_length" : 160,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "application_interactions",
+    "column_name" : "destination",
+    "ordinal_position" : 13,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : "''::character varying",
+    "character_maximum_length" : 240,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "application_interactions",
+    "column_name" : "outcome",
+    "ordinal_position" : 14,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : 32,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "application_interactions",
+    "column_name" : "detail",
+    "ordinal_position" : 15,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : "''::character varying",
+    "character_maximum_length" : 120,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "application_interactions",
+    "column_name" : "http_status",
+    "ordinal_position" : 16,
+    "data_type" : "integer",
+    "udt_name" : "int4",
+    "is_nullable" : "YES",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : 32,
+    "numeric_scale" : 0
+  }, {
+    "table_name" : "application_interactions",
+    "column_name" : "duration_ms",
+    "ordinal_position" : 17,
+    "data_type" : "bigint",
+    "udt_name" : "int8",
+    "is_nullable" : "YES",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : 64,
+    "numeric_scale" : 0
+  }, {
+    "table_name" : "application_interactions",
+    "column_name" : "created_at",
+    "ordinal_position" : 18,
+    "data_type" : "timestamp with time zone",
+    "udt_name" : "timestamptz",
+    "is_nullable" : "NO",
+    "column_default" : "now()",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "application_interactions",
+    "column_name" : "updated_at",
+    "ordinal_position" : 19,
+    "data_type" : "timestamp with time zone",
+    "udt_name" : "timestamptz",
+    "is_nullable" : "NO",
+    "column_default" : "now()",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
   }, {
     "table_name" : "audit_logs",
     "column_name" : "id",
@@ -1866,6 +2240,105 @@
     "numeric_precision" : null,
     "numeric_scale" : null
   }, {
+    "table_name" : "coupon_redemptions",
+    "column_name" : "id",
+    "ordinal_position" : 1,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "NO",
+    "column_default" : "gen_random_uuid()",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "coupon_redemptions",
+    "column_name" : "coupon_id",
+    "ordinal_position" : 2,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "coupon_redemptions",
+    "column_name" : "user_id",
+    "ordinal_position" : 3,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "coupon_redemptions",
+    "column_name" : "source_reference",
+    "ordinal_position" : 4,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : 180,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "coupon_redemptions",
+    "column_name" : "discount_minor",
+    "ordinal_position" : 5,
+    "data_type" : "bigint",
+    "udt_name" : "int8",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : 64,
+    "numeric_scale" : 0
+  }, {
+    "table_name" : "coupon_redemptions",
+    "column_name" : "currency",
+    "ordinal_position" : 6,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : 3,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "coupon_redemptions",
+    "column_name" : "status",
+    "ordinal_position" : 7,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : 16,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "coupon_redemptions",
+    "column_name" : "created_at",
+    "ordinal_position" : 8,
+    "data_type" : "timestamp with time zone",
+    "udt_name" : "timestamptz",
+    "is_nullable" : "NO",
+    "column_default" : "now()",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "coupon_redemptions",
+    "column_name" : "expires_at",
+    "ordinal_position" : 9,
+    "data_type" : "timestamp with time zone",
+    "udt_name" : "timestamptz",
+    "is_nullable" : "YES",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
     "table_name" : "credential_session_versions",
     "column_name" : "account_kind",
     "ordinal_position" : 1,
@@ -1902,6 +2375,105 @@
     "table_name" : "credential_session_versions",
     "column_name" : "updated_at",
     "ordinal_position" : 4,
+    "data_type" : "timestamp with time zone",
+    "udt_name" : "timestamptz",
+    "is_nullable" : "NO",
+    "column_default" : "now()",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "event_celebration_settings",
+    "column_name" : "event_id",
+    "ordinal_position" : 1,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "event_celebration_settings",
+    "column_name" : "welcome_message",
+    "ordinal_position" : 2,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : "''::character varying",
+    "character_maximum_length" : 500,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "event_celebration_settings",
+    "column_name" : "share_venue",
+    "ordinal_position" : 3,
+    "data_type" : "boolean",
+    "udt_name" : "bool",
+    "is_nullable" : "NO",
+    "column_default" : "false",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "event_celebration_settings",
+    "column_name" : "start_time",
+    "ordinal_position" : 4,
+    "data_type" : "time without time zone",
+    "udt_name" : "time",
+    "is_nullable" : "YES",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "event_celebration_settings",
+    "column_name" : "timezone",
+    "ordinal_position" : 5,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : "'Asia/Kolkata'::character varying",
+    "character_maximum_length" : 80,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "event_celebration_settings",
+    "column_name" : "duration_minutes",
+    "ordinal_position" : 6,
+    "data_type" : "integer",
+    "udt_name" : "int4",
+    "is_nullable" : "NO",
+    "column_default" : "120",
+    "character_maximum_length" : null,
+    "numeric_precision" : 32,
+    "numeric_scale" : 0
+  }, {
+    "table_name" : "event_celebration_settings",
+    "column_name" : "arrival_notes",
+    "ordinal_position" : 7,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : "''::character varying",
+    "character_maximum_length" : 1000,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "event_celebration_settings",
+    "column_name" : "version",
+    "ordinal_position" : 8,
+    "data_type" : "bigint",
+    "udt_name" : "int8",
+    "is_nullable" : "NO",
+    "column_default" : "0",
+    "character_maximum_length" : null,
+    "numeric_precision" : 64,
+    "numeric_scale" : 0
+  }, {
+    "table_name" : "event_celebration_settings",
+    "column_name" : "changed_at",
+    "ordinal_position" : 9,
     "data_type" : "timestamp with time zone",
     "udt_name" : "timestamptz",
     "is_nullable" : "NO",
@@ -2655,6 +3227,39 @@
     "is_nullable" : "YES",
     "column_default" : null,
     "character_maximum_length" : 80,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "events",
+    "column_name" : "gifting_enabled",
+    "ordinal_position" : 29,
+    "data_type" : "boolean",
+    "udt_name" : "bool",
+    "is_nullable" : "NO",
+    "column_default" : "true",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "events",
+    "column_name" : "share_preview_enabled",
+    "ordinal_position" : 30,
+    "data_type" : "boolean",
+    "udt_name" : "bool",
+    "is_nullable" : "NO",
+    "column_default" : "false",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "events",
+    "column_name" : "keepsake_enabled",
+    "ordinal_position" : 31,
+    "data_type" : "boolean",
+    "udt_name" : "bool",
+    "is_nullable" : "NO",
+    "column_default" : "false",
+    "character_maximum_length" : null,
     "numeric_precision" : null,
     "numeric_scale" : null
   }, {
@@ -4308,6 +4913,94 @@
     "numeric_precision" : null,
     "numeric_scale" : null
   }, {
+    "table_name" : "gift_photos",
+    "column_name" : "thumbnail",
+    "ordinal_position" : 8,
+    "data_type" : "bytea",
+    "udt_name" : "bytea",
+    "is_nullable" : "YES",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "gift_recommendations",
+    "column_name" : "id",
+    "ordinal_position" : 1,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "NO",
+    "column_default" : "gen_random_uuid()",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "gift_recommendations",
+    "column_name" : "event_id",
+    "ordinal_position" : 2,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "gift_recommendations",
+    "column_name" : "requested_by",
+    "ordinal_position" : 3,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "gift_recommendations",
+    "column_name" : "model_reference",
+    "ordinal_position" : 4,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : 120,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "gift_recommendations",
+    "column_name" : "recommendations",
+    "ordinal_position" : 5,
+    "data_type" : "jsonb",
+    "udt_name" : "jsonb",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "gift_recommendations",
+    "column_name" : "status",
+    "ordinal_position" : 6,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : "'DRAFT'::character varying",
+    "character_maximum_length" : 16,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "gift_recommendations",
+    "column_name" : "created_at",
+    "ordinal_position" : 7,
+    "data_type" : "timestamp with time zone",
+    "udt_name" : "timestamptz",
+    "is_nullable" : "NO",
+    "column_default" : "now()",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
     "table_name" : "gift_retailer_metadata_audit",
     "column_name" : "id",
     "ordinal_position" : 1,
@@ -5749,6 +6442,149 @@
     "numeric_precision" : null,
     "numeric_scale" : null
   }, {
+    "table_name" : "host_invitation_upload_controls",
+    "column_name" : "host_id",
+    "ordinal_position" : 1,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "host_invitation_upload_controls",
+    "column_name" : "enabled",
+    "ordinal_position" : 2,
+    "data_type" : "boolean",
+    "udt_name" : "bool",
+    "is_nullable" : "NO",
+    "column_default" : "false",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "host_invitation_upload_controls",
+    "column_name" : "requires_payment",
+    "ordinal_position" : 3,
+    "data_type" : "boolean",
+    "udt_name" : "bool",
+    "is_nullable" : "NO",
+    "column_default" : "true",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "host_invitation_upload_controls",
+    "column_name" : "changed_by",
+    "ordinal_position" : 4,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "host_invitation_upload_controls",
+    "column_name" : "changed_at",
+    "ordinal_position" : 5,
+    "data_type" : "timestamp with time zone",
+    "udt_name" : "timestamptz",
+    "is_nullable" : "NO",
+    "column_default" : "now()",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "host_invitation_uploads",
+    "column_name" : "id",
+    "ordinal_position" : 1,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "host_invitation_uploads",
+    "column_name" : "host_id",
+    "ordinal_position" : 2,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "host_invitation_uploads",
+    "column_name" : "category",
+    "ordinal_position" : 3,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : 20,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "host_invitation_uploads",
+    "column_name" : "title",
+    "ordinal_position" : 4,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : 120,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "host_invitation_uploads",
+    "column_name" : "image_png",
+    "ordinal_position" : 5,
+    "data_type" : "bytea",
+    "udt_name" : "bytea",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "host_invitation_uploads",
+    "column_name" : "width",
+    "ordinal_position" : 6,
+    "data_type" : "integer",
+    "udt_name" : "int4",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : 32,
+    "numeric_scale" : 0
+  }, {
+    "table_name" : "host_invitation_uploads",
+    "column_name" : "height",
+    "ordinal_position" : 7,
+    "data_type" : "integer",
+    "udt_name" : "int4",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : 32,
+    "numeric_scale" : 0
+  }, {
+    "table_name" : "host_invitation_uploads",
+    "column_name" : "created_at",
+    "ordinal_position" : 8,
+    "data_type" : "timestamp with time zone",
+    "udt_name" : "timestamptz",
+    "is_nullable" : "NO",
+    "column_default" : "now()",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
     "table_name" : "host_payout_requests",
     "column_name" : "id",
     "ordinal_position" : 1,
@@ -6497,6 +7333,281 @@
     "numeric_precision" : null,
     "numeric_scale" : null
   }, {
+    "table_name" : "language_delivery_templates",
+    "column_name" : "language_code",
+    "ordinal_position" : 1,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : 63,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "language_delivery_templates",
+    "column_name" : "provider",
+    "ordinal_position" : 2,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : 16,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "language_delivery_templates",
+    "column_name" : "template_id",
+    "ordinal_position" : 3,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : 120,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "language_delivery_templates",
+    "column_name" : "version",
+    "ordinal_position" : 4,
+    "data_type" : "bigint",
+    "udt_name" : "int8",
+    "is_nullable" : "NO",
+    "column_default" : "0",
+    "character_maximum_length" : null,
+    "numeric_precision" : 64,
+    "numeric_scale" : 0
+  }, {
+    "table_name" : "language_delivery_templates",
+    "column_name" : "changed_by",
+    "ordinal_position" : 5,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "YES",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "language_delivery_templates",
+    "column_name" : "changed_at",
+    "ordinal_position" : 6,
+    "data_type" : "timestamp with time zone",
+    "udt_name" : "timestamptz",
+    "is_nullable" : "NO",
+    "column_default" : "now()",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "localization_event_controls",
+    "column_name" : "event_id",
+    "ordinal_position" : 1,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "localization_event_controls",
+    "column_name" : "enabled",
+    "ordinal_position" : 2,
+    "data_type" : "boolean",
+    "udt_name" : "bool",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "localization_event_controls",
+    "column_name" : "changed_by",
+    "ordinal_position" : 3,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "YES",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "localization_event_controls",
+    "column_name" : "changed_at",
+    "ordinal_position" : 4,
+    "data_type" : "timestamp with time zone",
+    "udt_name" : "timestamptz",
+    "is_nullable" : "NO",
+    "column_default" : "now()",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "localization_host_controls",
+    "column_name" : "host_id",
+    "ordinal_position" : 1,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "localization_host_controls",
+    "column_name" : "enabled",
+    "ordinal_position" : 2,
+    "data_type" : "boolean",
+    "udt_name" : "bool",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "localization_host_controls",
+    "column_name" : "changed_by",
+    "ordinal_position" : 3,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "YES",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "localization_host_controls",
+    "column_name" : "changed_at",
+    "ordinal_position" : 4,
+    "data_type" : "timestamp with time zone",
+    "udt_name" : "timestamptz",
+    "is_nullable" : "NO",
+    "column_default" : "now()",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "localization_sources",
+    "column_name" : "message_key",
+    "ordinal_position" : 1,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : 120,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "localization_sources",
+    "column_name" : "source_text",
+    "ordinal_position" : 2,
+    "data_type" : "text",
+    "udt_name" : "text",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "localization_sources",
+    "column_name" : "category",
+    "ordinal_position" : 3,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : "'UI'::character varying",
+    "character_maximum_length" : 16,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "localization_sources",
+    "column_name" : "created_at",
+    "ordinal_position" : 4,
+    "data_type" : "timestamp with time zone",
+    "udt_name" : "timestamptz",
+    "is_nullable" : "NO",
+    "column_default" : "now()",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "localization_translations",
+    "column_name" : "language_code",
+    "ordinal_position" : 1,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : 63,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "localization_translations",
+    "column_name" : "message_key",
+    "ordinal_position" : 2,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : 120,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "localization_translations",
+    "column_name" : "translated_text",
+    "ordinal_position" : 3,
+    "data_type" : "text",
+    "udt_name" : "text",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "localization_translations",
+    "column_name" : "published",
+    "ordinal_position" : 4,
+    "data_type" : "boolean",
+    "udt_name" : "bool",
+    "is_nullable" : "NO",
+    "column_default" : "false",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "localization_translations",
+    "column_name" : "version",
+    "ordinal_position" : 5,
+    "data_type" : "bigint",
+    "udt_name" : "int8",
+    "is_nullable" : "NO",
+    "column_default" : "0",
+    "character_maximum_length" : null,
+    "numeric_precision" : 64,
+    "numeric_scale" : 0
+  }, {
+    "table_name" : "localization_translations",
+    "column_name" : "changed_by",
+    "ordinal_position" : 6,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "YES",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "localization_translations",
+    "column_name" : "changed_at",
+    "ordinal_position" : 7,
+    "data_type" : "timestamp with time zone",
+    "udt_name" : "timestamptz",
+    "is_nullable" : "NO",
+    "column_default" : "now()",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
     "table_name" : "notification_outbox",
     "column_name" : "id",
     "ordinal_position" : 1,
@@ -6703,6 +7814,17 @@
     "is_nullable" : "YES",
     "column_default" : null,
     "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "notification_outbox",
+    "column_name" : "language_code",
+    "ordinal_position" : 20,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : "'en'::character varying",
+    "character_maximum_length" : 63,
     "numeric_precision" : null,
     "numeric_scale" : null
   }, {
@@ -7828,6 +8950,171 @@
     "numeric_precision" : null,
     "numeric_scale" : null
   }, {
+    "table_name" : "platform_brand_assets",
+    "column_name" : "id",
+    "ordinal_position" : 1,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "platform_brand_assets",
+    "column_name" : "image_bytes",
+    "ordinal_position" : 2,
+    "data_type" : "bytea",
+    "udt_name" : "bytea",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "platform_brand_assets",
+    "column_name" : "created_by",
+    "ordinal_position" : 3,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "platform_brand_assets",
+    "column_name" : "created_at",
+    "ordinal_position" : 4,
+    "data_type" : "timestamp with time zone",
+    "udt_name" : "timestamptz",
+    "is_nullable" : "NO",
+    "column_default" : "now()",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "platform_branding",
+    "column_name" : "id",
+    "ordinal_position" : 1,
+    "data_type" : "integer",
+    "udt_name" : "int4",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : 32,
+    "numeric_scale" : 0
+  }, {
+    "table_name" : "platform_branding",
+    "column_name" : "application_name",
+    "ordinal_position" : 2,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : "'GiftWise'::character varying",
+    "character_maximum_length" : 80,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "platform_branding",
+    "column_name" : "brand_color",
+    "ordinal_position" : 3,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : "'#5b21b6'::character varying",
+    "character_maximum_length" : 7,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "platform_branding",
+    "column_name" : "footer_text",
+    "ordinal_position" : 4,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : "'© 2026 GiftWise. All rights reserved.'::character varying",
+    "character_maximum_length" : 240,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "platform_branding",
+    "column_name" : "support_email",
+    "ordinal_position" : 5,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : "''::character varying",
+    "character_maximum_length" : 254,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "platform_branding",
+    "column_name" : "social_links",
+    "ordinal_position" : 6,
+    "data_type" : "text",
+    "udt_name" : "text",
+    "is_nullable" : "NO",
+    "column_default" : "''::text",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "platform_branding",
+    "column_name" : "logo_id",
+    "ordinal_position" : 7,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "YES",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "platform_branding",
+    "column_name" : "favicon_id",
+    "ordinal_position" : 8,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "YES",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "platform_branding",
+    "column_name" : "revision",
+    "ordinal_position" : 9,
+    "data_type" : "bigint",
+    "udt_name" : "int8",
+    "is_nullable" : "NO",
+    "column_default" : "0",
+    "character_maximum_length" : null,
+    "numeric_precision" : 64,
+    "numeric_scale" : 0
+  }, {
+    "table_name" : "platform_branding",
+    "column_name" : "updated_by",
+    "ordinal_position" : 10,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "YES",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "platform_branding",
+    "column_name" : "updated_at",
+    "ordinal_position" : 11,
+    "data_type" : "timestamp with time zone",
+    "udt_name" : "timestamptz",
+    "is_nullable" : "NO",
+    "column_default" : "now()",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
     "table_name" : "platform_event_ai_design_settings",
     "column_name" : "event_id",
     "ordinal_position" : 1,
@@ -7949,6 +9236,61 @@
     "numeric_precision" : null,
     "numeric_scale" : null
   }, {
+    "table_name" : "platform_event_module_grants",
+    "column_name" : "event_id",
+    "ordinal_position" : 1,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "platform_event_module_grants",
+    "column_name" : "module_code",
+    "ordinal_position" : 2,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : 40,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "platform_event_module_grants",
+    "column_name" : "enabled",
+    "ordinal_position" : 3,
+    "data_type" : "boolean",
+    "udt_name" : "bool",
+    "is_nullable" : "NO",
+    "column_default" : "false",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "platform_event_module_grants",
+    "column_name" : "changed_by",
+    "ordinal_position" : 4,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "YES",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "platform_event_module_grants",
+    "column_name" : "changed_at",
+    "ordinal_position" : 5,
+    "data_type" : "timestamp with time zone",
+    "udt_name" : "timestamptz",
+    "is_nullable" : "NO",
+    "column_default" : "now()",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
     "table_name" : "platform_experience_settings",
     "column_name" : "id",
     "ordinal_position" : 1,
@@ -7983,6 +9325,72 @@
     "numeric_scale" : null
   }, {
     "table_name" : "platform_experience_settings",
+    "column_name" : "changed_at",
+    "ordinal_position" : 4,
+    "data_type" : "timestamp with time zone",
+    "udt_name" : "timestamptz",
+    "is_nullable" : "NO",
+    "column_default" : "now()",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "platform_growth_features",
+    "column_name" : "code",
+    "ordinal_position" : 1,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : 40,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "platform_growth_features",
+    "column_name" : "enabled",
+    "ordinal_position" : 2,
+    "data_type" : "boolean",
+    "udt_name" : "bool",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "platform_growth_settings",
+    "column_name" : "id",
+    "ordinal_position" : 1,
+    "data_type" : "integer",
+    "udt_name" : "int4",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : 32,
+    "numeric_scale" : 0
+  }, {
+    "table_name" : "platform_growth_settings",
+    "column_name" : "version",
+    "ordinal_position" : 2,
+    "data_type" : "bigint",
+    "udt_name" : "int8",
+    "is_nullable" : "NO",
+    "column_default" : "0",
+    "character_maximum_length" : null,
+    "numeric_precision" : 64,
+    "numeric_scale" : 0
+  }, {
+    "table_name" : "platform_growth_settings",
+    "column_name" : "changed_by",
+    "ordinal_position" : 3,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "YES",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "platform_growth_settings",
     "column_name" : "changed_at",
     "ordinal_position" : 4,
     "data_type" : "timestamp with time zone",
@@ -8040,6 +9448,171 @@
     "table_name" : "platform_host_module_grants",
     "column_name" : "changed_at",
     "ordinal_position" : 5,
+    "data_type" : "timestamp with time zone",
+    "udt_name" : "timestamptz",
+    "is_nullable" : "NO",
+    "column_default" : "now()",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "platform_languages",
+    "column_name" : "code",
+    "ordinal_position" : 1,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : 63,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "platform_languages",
+    "column_name" : "native_name",
+    "ordinal_position" : 2,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : 120,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "platform_languages",
+    "column_name" : "english_name",
+    "ordinal_position" : 3,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : 120,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "platform_languages",
+    "column_name" : "direction",
+    "ordinal_position" : 4,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : 3,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "platform_languages",
+    "column_name" : "enabled",
+    "ordinal_position" : 5,
+    "data_type" : "boolean",
+    "udt_name" : "bool",
+    "is_nullable" : "NO",
+    "column_default" : "true",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "platform_languages",
+    "column_name" : "version",
+    "ordinal_position" : 6,
+    "data_type" : "bigint",
+    "udt_name" : "int8",
+    "is_nullable" : "NO",
+    "column_default" : "0",
+    "character_maximum_length" : null,
+    "numeric_precision" : 64,
+    "numeric_scale" : 0
+  }, {
+    "table_name" : "platform_languages",
+    "column_name" : "changed_by",
+    "ordinal_position" : 7,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "YES",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "platform_languages",
+    "column_name" : "changed_at",
+    "ordinal_position" : 8,
+    "data_type" : "timestamp with time zone",
+    "udt_name" : "timestamptz",
+    "is_nullable" : "NO",
+    "column_default" : "now()",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "platform_localization_settings",
+    "column_name" : "id",
+    "ordinal_position" : 1,
+    "data_type" : "integer",
+    "udt_name" : "int4",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : 32,
+    "numeric_scale" : 0
+  }, {
+    "table_name" : "platform_localization_settings",
+    "column_name" : "enabled",
+    "ordinal_position" : 2,
+    "data_type" : "boolean",
+    "udt_name" : "bool",
+    "is_nullable" : "NO",
+    "column_default" : "false",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "platform_localization_settings",
+    "column_name" : "default_language",
+    "ordinal_position" : 3,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : 63,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "platform_localization_settings",
+    "column_name" : "fallback_language",
+    "ordinal_position" : 4,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : 63,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "platform_localization_settings",
+    "column_name" : "version",
+    "ordinal_position" : 5,
+    "data_type" : "bigint",
+    "udt_name" : "int8",
+    "is_nullable" : "NO",
+    "column_default" : "0",
+    "character_maximum_length" : null,
+    "numeric_precision" : 64,
+    "numeric_scale" : 0
+  }, {
+    "table_name" : "platform_localization_settings",
+    "column_name" : "changed_by",
+    "ordinal_position" : 6,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "YES",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "platform_localization_settings",
+    "column_name" : "changed_at",
+    "ordinal_position" : 7,
     "data_type" : "timestamp with time zone",
     "udt_name" : "timestamptz",
     "is_nullable" : "NO",
@@ -8290,6 +9863,61 @@
     "numeric_precision" : null,
     "numeric_scale" : null
   }, {
+    "table_name" : "platform_tenants",
+    "column_name" : "id",
+    "ordinal_position" : 1,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "NO",
+    "column_default" : "gen_random_uuid()",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "platform_tenants",
+    "column_name" : "slug",
+    "ordinal_position" : 2,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : 63,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "platform_tenants",
+    "column_name" : "display_name",
+    "ordinal_position" : 3,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : 120,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "platform_tenants",
+    "column_name" : "enabled",
+    "ordinal_position" : 4,
+    "data_type" : "boolean",
+    "udt_name" : "bool",
+    "is_nullable" : "NO",
+    "column_default" : "false",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "platform_tenants",
+    "column_name" : "created_at",
+    "ordinal_position" : 5,
+    "data_type" : "timestamp with time zone",
+    "udt_name" : "timestamptz",
+    "is_nullable" : "NO",
+    "column_default" : "now()",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
     "table_name" : "platform_verification_settings",
     "column_name" : "id",
     "ordinal_position" : 1,
@@ -8341,6 +9969,149 @@
     "udt_name" : "timestamptz",
     "is_nullable" : "NO",
     "column_default" : "now()",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "promotional_coupons",
+    "column_name" : "id",
+    "ordinal_position" : 1,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "NO",
+    "column_default" : "gen_random_uuid()",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "promotional_coupons",
+    "column_name" : "tenant_id",
+    "ordinal_position" : 2,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "YES",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "promotional_coupons",
+    "column_name" : "code",
+    "ordinal_position" : 3,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : 40,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "promotional_coupons",
+    "column_name" : "discount_kind",
+    "ordinal_position" : 4,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : 16,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "promotional_coupons",
+    "column_name" : "percentage",
+    "ordinal_position" : 5,
+    "data_type" : "smallint",
+    "udt_name" : "int2",
+    "is_nullable" : "YES",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : 16,
+    "numeric_scale" : 0
+  }, {
+    "table_name" : "promotional_coupons",
+    "column_name" : "amount_minor",
+    "ordinal_position" : 6,
+    "data_type" : "bigint",
+    "udt_name" : "int8",
+    "is_nullable" : "YES",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : 64,
+    "numeric_scale" : 0
+  }, {
+    "table_name" : "promotional_coupons",
+    "column_name" : "currency",
+    "ordinal_position" : 7,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "YES",
+    "column_default" : null,
+    "character_maximum_length" : 3,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "promotional_coupons",
+    "column_name" : "starts_at",
+    "ordinal_position" : 8,
+    "data_type" : "timestamp with time zone",
+    "udt_name" : "timestamptz",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "promotional_coupons",
+    "column_name" : "ends_at",
+    "ordinal_position" : 9,
+    "data_type" : "timestamp with time zone",
+    "udt_name" : "timestamptz",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "promotional_coupons",
+    "column_name" : "max_redemptions",
+    "ordinal_position" : 10,
+    "data_type" : "integer",
+    "udt_name" : "int4",
+    "is_nullable" : "YES",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : 32,
+    "numeric_scale" : 0
+  }, {
+    "table_name" : "promotional_coupons",
+    "column_name" : "per_user_limit",
+    "ordinal_position" : 11,
+    "data_type" : "integer",
+    "udt_name" : "int4",
+    "is_nullable" : "NO",
+    "column_default" : "1",
+    "character_maximum_length" : null,
+    "numeric_precision" : 32,
+    "numeric_scale" : 0
+  }, {
+    "table_name" : "promotional_coupons",
+    "column_name" : "enabled",
+    "ordinal_position" : 12,
+    "data_type" : "boolean",
+    "udt_name" : "bool",
+    "is_nullable" : "NO",
+    "column_default" : "false",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "promotional_coupons",
+    "column_name" : "created_by",
+    "ordinal_position" : 13,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "YES",
+    "column_default" : null,
     "character_maximum_length" : null,
     "numeric_precision" : null,
     "numeric_scale" : null
@@ -8418,6 +10189,72 @@
     "udt_name" : "timestamptz",
     "is_nullable" : "NO",
     "column_default" : "CURRENT_TIMESTAMP",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "referral_codes",
+    "column_name" : "id",
+    "ordinal_position" : 1,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "NO",
+    "column_default" : "gen_random_uuid()",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "referral_codes",
+    "column_name" : "tenant_id",
+    "ordinal_position" : 2,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "YES",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "referral_codes",
+    "column_name" : "referrer_id",
+    "ordinal_position" : 3,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "referral_codes",
+    "column_name" : "code",
+    "ordinal_position" : 4,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : 40,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "referral_codes",
+    "column_name" : "enabled",
+    "ordinal_position" : 5,
+    "data_type" : "boolean",
+    "udt_name" : "bool",
+    "is_nullable" : "NO",
+    "column_default" : "false",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "referral_codes",
+    "column_name" : "created_at",
+    "ordinal_position" : 6,
+    "data_type" : "timestamp with time zone",
+    "udt_name" : "timestamptz",
+    "is_nullable" : "NO",
+    "column_default" : "now()",
     "character_maximum_length" : null,
     "numeric_precision" : null,
     "numeric_scale" : null
@@ -8671,6 +10508,809 @@
     "udt_name" : "timestamptz",
     "is_nullable" : "YES",
     "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "subscription_plans",
+    "column_name" : "id",
+    "ordinal_position" : 1,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "NO",
+    "column_default" : "gen_random_uuid()",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "subscription_plans",
+    "column_name" : "code",
+    "ordinal_position" : 2,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : 50,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "subscription_plans",
+    "column_name" : "name",
+    "ordinal_position" : 3,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : 120,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "subscription_plans",
+    "column_name" : "price_minor",
+    "ordinal_position" : 4,
+    "data_type" : "bigint",
+    "udt_name" : "int8",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : 64,
+    "numeric_scale" : 0
+  }, {
+    "table_name" : "subscription_plans",
+    "column_name" : "currency",
+    "ordinal_position" : 5,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : 3,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "subscription_plans",
+    "column_name" : "billing_period",
+    "ordinal_position" : 6,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : 10,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "subscription_plans",
+    "column_name" : "entitlements",
+    "ordinal_position" : 7,
+    "data_type" : "jsonb",
+    "udt_name" : "jsonb",
+    "is_nullable" : "NO",
+    "column_default" : "'{}'::jsonb",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "subscription_plans",
+    "column_name" : "enabled",
+    "ordinal_position" : 8,
+    "data_type" : "boolean",
+    "udt_name" : "bool",
+    "is_nullable" : "NO",
+    "column_default" : "false",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "subscription_plans",
+    "column_name" : "version",
+    "ordinal_position" : 9,
+    "data_type" : "bigint",
+    "udt_name" : "int8",
+    "is_nullable" : "NO",
+    "column_default" : "1",
+    "character_maximum_length" : null,
+    "numeric_precision" : 64,
+    "numeric_scale" : 0
+  }, {
+    "table_name" : "supported_currencies",
+    "column_name" : "code",
+    "ordinal_position" : 1,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : 3,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "supported_currencies",
+    "column_name" : "minor_units",
+    "ordinal_position" : 2,
+    "data_type" : "smallint",
+    "udt_name" : "int2",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : 16,
+    "numeric_scale" : 0
+  }, {
+    "table_name" : "supported_currencies",
+    "column_name" : "checkout_enabled",
+    "ordinal_position" : 3,
+    "data_type" : "boolean",
+    "udt_name" : "bool",
+    "is_nullable" : "NO",
+    "column_default" : "false",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "tenant_branding",
+    "column_name" : "tenant_id",
+    "ordinal_position" : 1,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "tenant_branding",
+    "column_name" : "application_name",
+    "ordinal_position" : 2,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : 80,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "tenant_branding",
+    "column_name" : "brand_color",
+    "ordinal_position" : 3,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : "'#5b21b6'::character varying",
+    "character_maximum_length" : 7,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "tenant_branding",
+    "column_name" : "logo_id",
+    "ordinal_position" : 4,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "YES",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "tenant_branding",
+    "column_name" : "favicon_id",
+    "ordinal_position" : 5,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "YES",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "tenant_branding",
+    "column_name" : "support_email",
+    "ordinal_position" : 6,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "YES",
+    "column_default" : null,
+    "character_maximum_length" : 254,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "tenant_branding",
+    "column_name" : "footer_text",
+    "ordinal_position" : 7,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "YES",
+    "column_default" : null,
+    "character_maximum_length" : 240,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "tenant_branding",
+    "column_name" : "revision",
+    "ordinal_position" : 8,
+    "data_type" : "bigint",
+    "udt_name" : "int8",
+    "is_nullable" : "NO",
+    "column_default" : "0",
+    "character_maximum_length" : null,
+    "numeric_precision" : 64,
+    "numeric_scale" : 0
+  }, {
+    "table_name" : "tenant_events",
+    "column_name" : "event_id",
+    "ordinal_position" : 1,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "tenant_events",
+    "column_name" : "tenant_id",
+    "ordinal_position" : 2,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "tenant_memberships",
+    "column_name" : "tenant_id",
+    "ordinal_position" : 1,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "tenant_memberships",
+    "column_name" : "user_id",
+    "ordinal_position" : 2,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "tenant_memberships",
+    "column_name" : "role",
+    "ordinal_position" : 3,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : 20,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "tenant_memberships",
+    "column_name" : "created_at",
+    "ordinal_position" : 4,
+    "data_type" : "timestamp with time zone",
+    "udt_name" : "timestamptz",
+    "is_nullable" : "NO",
+    "column_default" : "now()",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "transactional_email_outbox",
+    "column_name" : "id",
+    "ordinal_position" : 1,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "transactional_email_outbox",
+    "column_name" : "source_key",
+    "ordinal_position" : 2,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : 180,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "transactional_email_outbox",
+    "column_name" : "template_key",
+    "ordinal_position" : 3,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : 40,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "transactional_email_outbox",
+    "column_name" : "recipient",
+    "ordinal_position" : 4,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : 254,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "transactional_email_outbox",
+    "column_name" : "variables",
+    "ordinal_position" : 5,
+    "data_type" : "jsonb",
+    "udt_name" : "jsonb",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "transactional_email_outbox",
+    "column_name" : "rendered_email",
+    "ordinal_position" : 6,
+    "data_type" : "jsonb",
+    "udt_name" : "jsonb",
+    "is_nullable" : "YES",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "transactional_email_outbox",
+    "column_name" : "language_code",
+    "ordinal_position" : 7,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : "'en'::character varying",
+    "character_maximum_length" : 63,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "transactional_email_outbox",
+    "column_name" : "status",
+    "ordinal_position" : 8,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : "'PENDING'::character varying",
+    "character_maximum_length" : 20,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "transactional_email_outbox",
+    "column_name" : "attempts",
+    "ordinal_position" : 9,
+    "data_type" : "integer",
+    "udt_name" : "int4",
+    "is_nullable" : "NO",
+    "column_default" : "0",
+    "character_maximum_length" : null,
+    "numeric_precision" : 32,
+    "numeric_scale" : 0
+  }, {
+    "table_name" : "transactional_email_outbox",
+    "column_name" : "next_attempt_at",
+    "ordinal_position" : 10,
+    "data_type" : "timestamp with time zone",
+    "udt_name" : "timestamptz",
+    "is_nullable" : "NO",
+    "column_default" : "now()",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "transactional_email_outbox",
+    "column_name" : "created_at",
+    "ordinal_position" : 11,
+    "data_type" : "timestamp with time zone",
+    "udt_name" : "timestamptz",
+    "is_nullable" : "NO",
+    "column_default" : "now()",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "transactional_email_outbox",
+    "column_name" : "sent_at",
+    "ordinal_position" : 12,
+    "data_type" : "timestamp with time zone",
+    "udt_name" : "timestamptz",
+    "is_nullable" : "YES",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "transactional_email_outbox",
+    "column_name" : "last_error_code",
+    "ordinal_position" : 13,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "YES",
+    "column_default" : null,
+    "character_maximum_length" : 50,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "user_language_preferences",
+    "column_name" : "user_id",
+    "ordinal_position" : 1,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "user_language_preferences",
+    "column_name" : "language_code",
+    "ordinal_position" : 2,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : 63,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "user_language_preferences",
+    "column_name" : "changed_at",
+    "ordinal_position" : 3,
+    "data_type" : "timestamp with time zone",
+    "udt_name" : "timestamptz",
+    "is_nullable" : "NO",
+    "column_default" : "now()",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "user_legal_consents",
+    "column_name" : "id",
+    "ordinal_position" : 1,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "NO",
+    "column_default" : "gen_random_uuid()",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "user_legal_consents",
+    "column_name" : "user_id",
+    "ordinal_position" : 2,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "user_legal_consents",
+    "column_name" : "terms_version",
+    "ordinal_position" : 3,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : 40,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "user_legal_consents",
+    "column_name" : "privacy_version",
+    "ordinal_position" : 4,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : 40,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "user_legal_consents",
+    "column_name" : "accepted_at",
+    "ordinal_position" : 5,
+    "data_type" : "timestamp with time zone",
+    "udt_name" : "timestamptz",
+    "is_nullable" : "NO",
+    "column_default" : "now()",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "user_profile_preferences",
+    "column_name" : "user_id",
+    "ordinal_position" : 1,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "user_profile_preferences",
+    "column_name" : "timezone",
+    "ordinal_position" : 2,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : "'Asia/Kolkata'::character varying",
+    "character_maximum_length" : 80,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "user_profile_preferences",
+    "column_name" : "event_notifications",
+    "ordinal_position" : 3,
+    "data_type" : "boolean",
+    "udt_name" : "bool",
+    "is_nullable" : "NO",
+    "column_default" : "true",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "user_profile_preferences",
+    "column_name" : "contribution_notifications",
+    "ordinal_position" : 4,
+    "data_type" : "boolean",
+    "udt_name" : "bool",
+    "is_nullable" : "NO",
+    "column_default" : "true",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "user_profile_preferences",
+    "column_name" : "marketing_notifications",
+    "ordinal_position" : 5,
+    "data_type" : "boolean",
+    "udt_name" : "bool",
+    "is_nullable" : "NO",
+    "column_default" : "false",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "user_profile_preferences",
+    "column_name" : "picture_png",
+    "ordinal_position" : 6,
+    "data_type" : "bytea",
+    "udt_name" : "bytea",
+    "is_nullable" : "YES",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "user_profile_preferences",
+    "column_name" : "updated_at",
+    "ordinal_position" : 7,
+    "data_type" : "timestamp with time zone",
+    "udt_name" : "timestamptz",
+    "is_nullable" : "NO",
+    "column_default" : "now()",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "user_referrals",
+    "column_name" : "id",
+    "ordinal_position" : 1,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "NO",
+    "column_default" : "gen_random_uuid()",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "user_referrals",
+    "column_name" : "referral_code_id",
+    "ordinal_position" : 2,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "user_referrals",
+    "column_name" : "referrer_id",
+    "ordinal_position" : 3,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "user_referrals",
+    "column_name" : "referred_user_id",
+    "ordinal_position" : 4,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "user_referrals",
+    "column_name" : "status",
+    "ordinal_position" : 5,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : "'ATTRIBUTED'::character varying",
+    "character_maximum_length" : 20,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "user_referrals",
+    "column_name" : "created_at",
+    "ordinal_position" : 6,
+    "data_type" : "timestamp with time zone",
+    "udt_name" : "timestamptz",
+    "is_nullable" : "NO",
+    "column_default" : "now()",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "user_subscriptions",
+    "column_name" : "id",
+    "ordinal_position" : 1,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "NO",
+    "column_default" : "gen_random_uuid()",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "user_subscriptions",
+    "column_name" : "user_id",
+    "ordinal_position" : 2,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "user_subscriptions",
+    "column_name" : "tenant_id",
+    "ordinal_position" : 3,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "YES",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "user_subscriptions",
+    "column_name" : "plan_id",
+    "ordinal_position" : 4,
+    "data_type" : "uuid",
+    "udt_name" : "uuid",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "user_subscriptions",
+    "column_name" : "provider",
+    "ordinal_position" : 5,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : 40,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "user_subscriptions",
+    "column_name" : "provider_subscription_id",
+    "ordinal_position" : 6,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : 180,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "user_subscriptions",
+    "column_name" : "status",
+    "ordinal_position" : 7,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : 20,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "user_subscriptions",
+    "column_name" : "period_start",
+    "ordinal_position" : 8,
+    "data_type" : "timestamp with time zone",
+    "udt_name" : "timestamptz",
+    "is_nullable" : "YES",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "user_subscriptions",
+    "column_name" : "period_end",
+    "ordinal_position" : 9,
+    "data_type" : "timestamp with time zone",
+    "udt_name" : "timestamptz",
+    "is_nullable" : "YES",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "user_subscriptions",
+    "column_name" : "price_minor",
+    "ordinal_position" : 10,
+    "data_type" : "bigint",
+    "udt_name" : "int8",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : null,
+    "numeric_precision" : 64,
+    "numeric_scale" : 0
+  }, {
+    "table_name" : "user_subscriptions",
+    "column_name" : "currency",
+    "ordinal_position" : 11,
+    "data_type" : "character varying",
+    "udt_name" : "varchar",
+    "is_nullable" : "NO",
+    "column_default" : null,
+    "character_maximum_length" : 3,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "user_subscriptions",
+    "column_name" : "entitlement_snapshot",
+    "ordinal_position" : 12,
+    "data_type" : "jsonb",
+    "udt_name" : "jsonb",
+    "is_nullable" : "NO",
+    "column_default" : "'{}'::jsonb",
+    "character_maximum_length" : null,
+    "numeric_precision" : null,
+    "numeric_scale" : null
+  }, {
+    "table_name" : "user_subscriptions",
+    "column_name" : "created_at",
+    "ordinal_position" : 13,
+    "data_type" : "timestamp with time zone",
+    "udt_name" : "timestamptz",
+    "is_nullable" : "NO",
+    "column_default" : "now()",
     "character_maximum_length" : null,
     "numeric_precision" : null,
     "numeric_scale" : null
@@ -8992,6 +11632,18 @@
     "definition" : "CHECK (((purpose)::text = ANY ((ARRAY['VERIFY_CONTACT'::character varying, 'RESET_PASSWORD'::character varying, 'RESET_PIN'::character varying])::text[])))",
     "referenced_table" : null
   }, {
+    "table_name" : "account_legal_consents",
+    "name" : "account_legal_consents_account_kind_check",
+    "type" : "c",
+    "definition" : "CHECK (((account_kind)::text = ANY ((ARRAY['GROUP_ADMIN'::character varying, 'GROUP_MEMBER'::character varying])::text[])))",
+    "referenced_table" : null
+  }, {
+    "table_name" : "account_legal_consents",
+    "name" : "account_legal_consents_pkey",
+    "type" : "p",
+    "definition" : "PRIMARY KEY (id)",
+    "referenced_table" : null
+  }, {
     "table_name" : "account_pending_email_verifications",
     "name" : "account_pending_email_verifications_account_kind_check",
     "type" : "c",
@@ -9134,6 +11786,24 @@
     "name" : "affiliate_partners_product_domain_key",
     "type" : "u",
     "definition" : "UNIQUE (product_domain)",
+    "referenced_table" : null
+  }, {
+    "table_name" : "application_interactions",
+    "name" : "application_interactions_kind_check",
+    "type" : "c",
+    "definition" : "CHECK (((kind)::text = ANY ((ARRAY['CLICK'::character varying, 'PAGE_VIEW'::character varying, 'REQUEST'::character varying, 'OPERATION'::character varying])::text[])))",
+    "referenced_table" : null
+  }, {
+    "table_name" : "application_interactions",
+    "name" : "application_interactions_pkey",
+    "type" : "p",
+    "definition" : "PRIMARY KEY (id)",
+    "referenced_table" : null
+  }, {
+    "table_name" : "application_interactions",
+    "name" : "application_interactions_source_check",
+    "type" : "c",
+    "definition" : "CHECK (((source)::text = ANY ((ARRAY['BROWSER'::character varying, 'SERVER'::character varying])::text[])))",
     "referenced_table" : null
   }, {
     "table_name" : "audit_logs",
@@ -9478,6 +12148,54 @@
     "definition" : "UNIQUE (id, event_id)",
     "referenced_table" : null
   }, {
+    "table_name" : "coupon_redemptions",
+    "name" : "coupon_redemptions_check",
+    "type" : "c",
+    "definition" : "CHECK (((expires_at IS NULL) OR (expires_at > created_at)))",
+    "referenced_table" : null
+  }, {
+    "table_name" : "coupon_redemptions",
+    "name" : "coupon_redemptions_coupon_id_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (coupon_id) REFERENCES promotional_coupons(id)",
+    "referenced_table" : "promotional_coupons"
+  }, {
+    "table_name" : "coupon_redemptions",
+    "name" : "coupon_redemptions_currency_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (currency) REFERENCES supported_currencies(code)",
+    "referenced_table" : "supported_currencies"
+  }, {
+    "table_name" : "coupon_redemptions",
+    "name" : "coupon_redemptions_discount_minor_check",
+    "type" : "c",
+    "definition" : "CHECK ((discount_minor >= 0))",
+    "referenced_table" : null
+  }, {
+    "table_name" : "coupon_redemptions",
+    "name" : "coupon_redemptions_pkey",
+    "type" : "p",
+    "definition" : "PRIMARY KEY (id)",
+    "referenced_table" : null
+  }, {
+    "table_name" : "coupon_redemptions",
+    "name" : "coupon_redemptions_source_reference_key",
+    "type" : "u",
+    "definition" : "UNIQUE (source_reference)",
+    "referenced_table" : null
+  }, {
+    "table_name" : "coupon_redemptions",
+    "name" : "coupon_redemptions_status_check",
+    "type" : "c",
+    "definition" : "CHECK (((status)::text = ANY ((ARRAY['RESERVED'::character varying, 'APPLIED'::character varying, 'RELEASED'::character varying])::text[])))",
+    "referenced_table" : null
+  }, {
+    "table_name" : "coupon_redemptions",
+    "name" : "coupon_redemptions_user_id_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (user_id) REFERENCES users(id)",
+    "referenced_table" : "users"
+  }, {
     "table_name" : "credential_session_versions",
     "name" : "credential_session_versions_account_kind_check",
     "type" : "c",
@@ -9494,6 +12212,24 @@
     "name" : "credential_session_versions_version_check",
     "type" : "c",
     "definition" : "CHECK ((version >= 0))",
+    "referenced_table" : null
+  }, {
+    "table_name" : "event_celebration_settings",
+    "name" : "event_celebration_settings_duration_minutes_check",
+    "type" : "c",
+    "definition" : "CHECK (((duration_minutes >= 15) AND (duration_minutes <= 1440)))",
+    "referenced_table" : null
+  }, {
+    "table_name" : "event_celebration_settings",
+    "name" : "event_celebration_settings_event_id_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE",
+    "referenced_table" : "events"
+  }, {
+    "table_name" : "event_celebration_settings",
+    "name" : "event_celebration_settings_pkey",
+    "type" : "p",
+    "definition" : "PRIMARY KEY (event_id)",
     "referenced_table" : null
   }, {
     "table_name" : "event_guest_submission_limits",
@@ -10192,6 +12928,36 @@
     "definition" : "CHECK (((width >= 160) AND (width <= 1200)))",
     "referenced_table" : null
   }, {
+    "table_name" : "gift_recommendations",
+    "name" : "gift_recommendations_event_id_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (event_id) REFERENCES events(id)",
+    "referenced_table" : "events"
+  }, {
+    "table_name" : "gift_recommendations",
+    "name" : "gift_recommendations_pkey",
+    "type" : "p",
+    "definition" : "PRIMARY KEY (id)",
+    "referenced_table" : null
+  }, {
+    "table_name" : "gift_recommendations",
+    "name" : "gift_recommendations_recommendations_check",
+    "type" : "c",
+    "definition" : "CHECK ((jsonb_typeof(recommendations) = 'array'::text))",
+    "referenced_table" : null
+  }, {
+    "table_name" : "gift_recommendations",
+    "name" : "gift_recommendations_requested_by_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (requested_by) REFERENCES users(id)",
+    "referenced_table" : "users"
+  }, {
+    "table_name" : "gift_recommendations",
+    "name" : "gift_recommendations_status_check",
+    "type" : "c",
+    "definition" : "CHECK (((status)::text = ANY ((ARRAY['DRAFT'::character varying, 'ACCEPTED'::character varying, 'DISMISSED'::character varying])::text[])))",
+    "referenced_table" : null
+  }, {
     "table_name" : "gift_retailer_metadata_audit",
     "name" : "gift_retailer_metadata_audit_actor_id_fkey",
     "type" : "f",
@@ -10588,6 +13354,54 @@
     "definition" : "CHECK (((state)::text = ANY ((ARRAY['PENDING'::character varying, 'VERIFIED'::character varying, 'REJECTED'::character varying, 'UNAVAILABLE'::character varying])::text[])))",
     "referenced_table" : null
   }, {
+    "table_name" : "host_invitation_upload_controls",
+    "name" : "host_invitation_upload_controls_changed_by_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (changed_by) REFERENCES users(id)",
+    "referenced_table" : "users"
+  }, {
+    "table_name" : "host_invitation_upload_controls",
+    "name" : "host_invitation_upload_controls_host_id_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (host_id) REFERENCES users(id)",
+    "referenced_table" : "users"
+  }, {
+    "table_name" : "host_invitation_upload_controls",
+    "name" : "host_invitation_upload_controls_pkey",
+    "type" : "p",
+    "definition" : "PRIMARY KEY (host_id)",
+    "referenced_table" : null
+  }, {
+    "table_name" : "host_invitation_uploads",
+    "name" : "host_invitation_uploads_category_check",
+    "type" : "c",
+    "definition" : "CHECK (((category)::text = ANY ((ARRAY['BACKGROUND'::character varying, 'DECORATION'::character varying])::text[])))",
+    "referenced_table" : null
+  }, {
+    "table_name" : "host_invitation_uploads",
+    "name" : "host_invitation_uploads_height_check",
+    "type" : "c",
+    "definition" : "CHECK (((height >= 32) AND (height <= 4096)))",
+    "referenced_table" : null
+  }, {
+    "table_name" : "host_invitation_uploads",
+    "name" : "host_invitation_uploads_host_id_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (host_id) REFERENCES users(id)",
+    "referenced_table" : "users"
+  }, {
+    "table_name" : "host_invitation_uploads",
+    "name" : "host_invitation_uploads_pkey",
+    "type" : "p",
+    "definition" : "PRIMARY KEY (id)",
+    "referenced_table" : null
+  }, {
+    "table_name" : "host_invitation_uploads",
+    "name" : "host_invitation_uploads_width_check",
+    "type" : "c",
+    "definition" : "CHECK (((width >= 32) AND (width <= 4096)))",
+    "referenced_table" : null
+  }, {
     "table_name" : "host_payout_requests",
     "name" : "ck_payout_cancel_pair",
     "type" : "c",
@@ -10876,6 +13690,108 @@
     "definition" : "CHECK (((width >= 32) AND (width <= 4096)))",
     "referenced_table" : null
   }, {
+    "table_name" : "language_delivery_templates",
+    "name" : "language_delivery_templates_changed_by_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (changed_by) REFERENCES users(id)",
+    "referenced_table" : "users"
+  }, {
+    "table_name" : "language_delivery_templates",
+    "name" : "language_delivery_templates_language_code_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (language_code) REFERENCES platform_languages(code)",
+    "referenced_table" : "platform_languages"
+  }, {
+    "table_name" : "language_delivery_templates",
+    "name" : "language_delivery_templates_pkey",
+    "type" : "p",
+    "definition" : "PRIMARY KEY (language_code, provider)",
+    "referenced_table" : null
+  }, {
+    "table_name" : "language_delivery_templates",
+    "name" : "language_delivery_templates_provider_check",
+    "type" : "c",
+    "definition" : "CHECK (((provider)::text = 'MSG91'::text))",
+    "referenced_table" : null
+  }, {
+    "table_name" : "localization_event_controls",
+    "name" : "localization_event_controls_changed_by_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (changed_by) REFERENCES users(id)",
+    "referenced_table" : "users"
+  }, {
+    "table_name" : "localization_event_controls",
+    "name" : "localization_event_controls_event_id_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE",
+    "referenced_table" : "events"
+  }, {
+    "table_name" : "localization_event_controls",
+    "name" : "localization_event_controls_pkey",
+    "type" : "p",
+    "definition" : "PRIMARY KEY (event_id)",
+    "referenced_table" : null
+  }, {
+    "table_name" : "localization_host_controls",
+    "name" : "localization_host_controls_changed_by_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (changed_by) REFERENCES users(id)",
+    "referenced_table" : "users"
+  }, {
+    "table_name" : "localization_host_controls",
+    "name" : "localization_host_controls_host_id_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (host_id) REFERENCES users(id) ON DELETE CASCADE",
+    "referenced_table" : "users"
+  }, {
+    "table_name" : "localization_host_controls",
+    "name" : "localization_host_controls_pkey",
+    "type" : "p",
+    "definition" : "PRIMARY KEY (host_id)",
+    "referenced_table" : null
+  }, {
+    "table_name" : "localization_sources",
+    "name" : "localization_sources_category_check",
+    "type" : "c",
+    "definition" : "CHECK (((category)::text = ANY ((ARRAY['UI'::character varying, 'EMAIL'::character varying, 'SMS'::character varying, 'NOTIFICATION'::character varying, 'VALIDATION'::character varying])::text[])))",
+    "referenced_table" : null
+  }, {
+    "table_name" : "localization_sources",
+    "name" : "localization_sources_pkey",
+    "type" : "p",
+    "definition" : "PRIMARY KEY (message_key)",
+    "referenced_table" : null
+  }, {
+    "table_name" : "localization_translations",
+    "name" : "localization_translations_changed_by_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (changed_by) REFERENCES users(id)",
+    "referenced_table" : "users"
+  }, {
+    "table_name" : "localization_translations",
+    "name" : "localization_translations_language_code_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (language_code) REFERENCES platform_languages(code)",
+    "referenced_table" : "platform_languages"
+  }, {
+    "table_name" : "localization_translations",
+    "name" : "localization_translations_message_key_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (message_key) REFERENCES localization_sources(message_key)",
+    "referenced_table" : "localization_sources"
+  }, {
+    "table_name" : "localization_translations",
+    "name" : "localization_translations_pkey",
+    "type" : "p",
+    "definition" : "PRIMARY KEY (language_code, message_key)",
+    "referenced_table" : null
+  }, {
+    "table_name" : "localization_translations",
+    "name" : "localization_translations_translated_text_check",
+    "type" : "c",
+    "definition" : "CHECK ((length(translated_text) <= 10000))",
+    "referenced_table" : null
+  }, {
     "table_name" : "notification_outbox",
     "name" : "notification_outbox_attempts_check",
     "type" : "c",
@@ -10899,6 +13815,12 @@
     "type" : "u",
     "definition" : "UNIQUE (event_id, notification_kind, recipient_kind, channel, source_kind, source_id)",
     "referenced_table" : null
+  }, {
+    "table_name" : "notification_outbox",
+    "name" : "notification_outbox_language_code_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (language_code) REFERENCES platform_languages(code)",
+    "referenced_table" : "platform_languages"
   }, {
     "table_name" : "notification_outbox",
     "name" : "notification_outbox_message_check",
@@ -11320,6 +14242,54 @@
     "definition" : "PRIMARY KEY (id)",
     "referenced_table" : null
   }, {
+    "table_name" : "platform_brand_assets",
+    "name" : "platform_brand_assets_created_by_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (created_by) REFERENCES users(id)",
+    "referenced_table" : "users"
+  }, {
+    "table_name" : "platform_brand_assets",
+    "name" : "platform_brand_assets_image_bytes_check",
+    "type" : "c",
+    "definition" : "CHECK ((octet_length(image_bytes) <= 5242880))",
+    "referenced_table" : null
+  }, {
+    "table_name" : "platform_brand_assets",
+    "name" : "platform_brand_assets_pkey",
+    "type" : "p",
+    "definition" : "PRIMARY KEY (id)",
+    "referenced_table" : null
+  }, {
+    "table_name" : "platform_branding",
+    "name" : "platform_branding_favicon_id_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (favicon_id) REFERENCES platform_brand_assets(id)",
+    "referenced_table" : "platform_brand_assets"
+  }, {
+    "table_name" : "platform_branding",
+    "name" : "platform_branding_id_check",
+    "type" : "c",
+    "definition" : "CHECK ((id = 1))",
+    "referenced_table" : null
+  }, {
+    "table_name" : "platform_branding",
+    "name" : "platform_branding_logo_id_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (logo_id) REFERENCES platform_brand_assets(id)",
+    "referenced_table" : "platform_brand_assets"
+  }, {
+    "table_name" : "platform_branding",
+    "name" : "platform_branding_pkey",
+    "type" : "p",
+    "definition" : "PRIMARY KEY (id)",
+    "referenced_table" : null
+  }, {
+    "table_name" : "platform_branding",
+    "name" : "platform_branding_updated_by_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (updated_by) REFERENCES users(id)",
+    "referenced_table" : "users"
+  }, {
     "table_name" : "platform_event_ai_design_settings",
     "name" : "platform_event_ai_design_settings_changed_by_fkey",
     "type" : "f",
@@ -11374,6 +14344,36 @@
     "definition" : "PRIMARY KEY (event_id)",
     "referenced_table" : null
   }, {
+    "table_name" : "platform_event_module_grants",
+    "name" : "event_module_supported",
+    "type" : "c",
+    "definition" : "CHECK (((module_code)::text = ANY ((ARRAY['CELEBRATION_PLANNING'::character varying, 'EVENT_ESSENTIALS'::character varying, 'EVENT_REUSE'::character varying])::text[])))",
+    "referenced_table" : null
+  }, {
+    "table_name" : "platform_event_module_grants",
+    "name" : "platform_event_module_grants_changed_by_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (changed_by) REFERENCES users(id)",
+    "referenced_table" : "users"
+  }, {
+    "table_name" : "platform_event_module_grants",
+    "name" : "platform_event_module_grants_event_id_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE",
+    "referenced_table" : "events"
+  }, {
+    "table_name" : "platform_event_module_grants",
+    "name" : "platform_event_module_grants_module_code_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (module_code) REFERENCES platform_module_controls(module_code)",
+    "referenced_table" : "platform_module_controls"
+  }, {
+    "table_name" : "platform_event_module_grants",
+    "name" : "platform_event_module_grants_pkey",
+    "type" : "p",
+    "definition" : "PRIMARY KEY (event_id, module_code)",
+    "referenced_table" : null
+  }, {
     "table_name" : "platform_experience_settings",
     "name" : "platform_experience_settings_changed_by_fkey",
     "type" : "f",
@@ -11396,6 +14396,30 @@
     "name" : "platform_experience_settings_view_mode_check",
     "type" : "c",
     "definition" : "CHECK (((view_mode)::text = ANY ((ARRAY['CLASSIC'::character varying, 'FOCUSED'::character varying])::text[])))",
+    "referenced_table" : null
+  }, {
+    "table_name" : "platform_growth_features",
+    "name" : "platform_growth_features_pkey",
+    "type" : "p",
+    "definition" : "PRIMARY KEY (code)",
+    "referenced_table" : null
+  }, {
+    "table_name" : "platform_growth_settings",
+    "name" : "platform_growth_settings_changed_by_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (changed_by) REFERENCES users(id)",
+    "referenced_table" : "users"
+  }, {
+    "table_name" : "platform_growth_settings",
+    "name" : "platform_growth_settings_id_check",
+    "type" : "c",
+    "definition" : "CHECK ((id = 1))",
+    "referenced_table" : null
+  }, {
+    "table_name" : "platform_growth_settings",
+    "name" : "platform_growth_settings_pkey",
+    "type" : "p",
+    "definition" : "PRIMARY KEY (id)",
     "referenced_table" : null
   }, {
     "table_name" : "platform_host_module_grants",
@@ -11422,10 +14446,58 @@
     "definition" : "PRIMARY KEY (host_id, module_code)",
     "referenced_table" : null
   }, {
+    "table_name" : "platform_languages",
+    "name" : "platform_languages_changed_by_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (changed_by) REFERENCES users(id)",
+    "referenced_table" : "users"
+  }, {
+    "table_name" : "platform_languages",
+    "name" : "platform_languages_direction_check",
+    "type" : "c",
+    "definition" : "CHECK (((direction)::text = ANY ((ARRAY['LTR'::character varying, 'RTL'::character varying])::text[])))",
+    "referenced_table" : null
+  }, {
+    "table_name" : "platform_languages",
+    "name" : "platform_languages_pkey",
+    "type" : "p",
+    "definition" : "PRIMARY KEY (code)",
+    "referenced_table" : null
+  }, {
+    "table_name" : "platform_localization_settings",
+    "name" : "platform_localization_settings_changed_by_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (changed_by) REFERENCES users(id)",
+    "referenced_table" : "users"
+  }, {
+    "table_name" : "platform_localization_settings",
+    "name" : "platform_localization_settings_default_language_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (default_language) REFERENCES platform_languages(code)",
+    "referenced_table" : "platform_languages"
+  }, {
+    "table_name" : "platform_localization_settings",
+    "name" : "platform_localization_settings_fallback_language_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (fallback_language) REFERENCES platform_languages(code)",
+    "referenced_table" : "platform_languages"
+  }, {
+    "table_name" : "platform_localization_settings",
+    "name" : "platform_localization_settings_id_check",
+    "type" : "c",
+    "definition" : "CHECK ((id = 1))",
+    "referenced_table" : null
+  }, {
+    "table_name" : "platform_localization_settings",
+    "name" : "platform_localization_settings_pkey",
+    "type" : "p",
+    "definition" : "PRIMARY KEY (id)",
+    "referenced_table" : null
+  }, {
     "table_name" : "platform_module_controls",
     "name" : "module_code_allowed",
     "type" : "c",
-    "definition" : "CHECK (((module_code)::text = ANY ((ARRAY['GROUP_GIFTING'::character varying, 'GUEST_GIFTS'::character varying, 'RSVP'::character varying, 'GUEST_ATTENDANCE'::character varying, 'WHATSAPP_SHARING'::character varying, 'GUESTBOOK'::character varying, 'SOCIAL_SHARING'::character varying, 'MEMORY_ALBUM'::character varying, 'AI_INVITATION'::character varying])::text[])))",
+    "definition" : "CHECK (((module_code)::text = ANY ((ARRAY['GROUP_GIFTING'::character varying, 'GUEST_GIFTS'::character varying, 'RSVP'::character varying, 'GUEST_ATTENDANCE'::character varying, 'WHATSAPP_SHARING'::character varying, 'GUESTBOOK'::character varying, 'SOCIAL_SHARING'::character varying, 'MEMORY_ALBUM'::character varying, 'AI_INVITATION'::character varying, 'CELEBRATION_PLANNING'::character varying, 'EVENT_ESSENTIALS'::character varying, 'EVENT_REUSE'::character varying])::text[])))",
     "referenced_table" : null
   }, {
     "table_name" : "platform_module_controls",
@@ -11518,6 +14590,30 @@
     "definition" : "CHECK (((rate_bps >= 0) AND (rate_bps <= 10000)))",
     "referenced_table" : null
   }, {
+    "table_name" : "platform_tenants",
+    "name" : "platform_tenants_display_name_check",
+    "type" : "c",
+    "definition" : "CHECK ((length(btrim((display_name)::text)) > 0))",
+    "referenced_table" : null
+  }, {
+    "table_name" : "platform_tenants",
+    "name" : "platform_tenants_pkey",
+    "type" : "p",
+    "definition" : "PRIMARY KEY (id)",
+    "referenced_table" : null
+  }, {
+    "table_name" : "platform_tenants",
+    "name" : "platform_tenants_slug_check",
+    "type" : "c",
+    "definition" : "CHECK (((slug)::text ~ '^[a-z0-9][a-z0-9-]{1,62}$'::text))",
+    "referenced_table" : null
+  }, {
+    "table_name" : "platform_tenants",
+    "name" : "platform_tenants_slug_key",
+    "type" : "u",
+    "definition" : "UNIQUE (slug)",
+    "referenced_table" : null
+  }, {
     "table_name" : "platform_verification_settings",
     "name" : "platform_verification_settings_changed_by_fkey",
     "type" : "f",
@@ -11535,6 +14631,66 @@
     "type" : "p",
     "definition" : "PRIMARY KEY (id)",
     "referenced_table" : null
+  }, {
+    "table_name" : "promotional_coupons",
+    "name" : "promotional_coupons_check",
+    "type" : "c",
+    "definition" : "CHECK ((ends_at > starts_at))",
+    "referenced_table" : null
+  }, {
+    "table_name" : "promotional_coupons",
+    "name" : "promotional_coupons_check1",
+    "type" : "c",
+    "definition" : "CHECK (((((discount_kind)::text = 'PERCENT'::text) AND (percentage IS NOT NULL) AND ((percentage >= 1) AND (percentage <= 100)) AND (amount_minor IS NULL) AND (currency IS NULL)) OR (((discount_kind)::text = 'FIXED'::text) AND (percentage IS NULL) AND (amount_minor IS NOT NULL) AND (amount_minor > 0) AND (currency IS NOT NULL))))",
+    "referenced_table" : null
+  }, {
+    "table_name" : "promotional_coupons",
+    "name" : "promotional_coupons_code_check",
+    "type" : "c",
+    "definition" : "CHECK (((code)::text ~ '^[A-Z0-9_]{3,40}$'::text))",
+    "referenced_table" : null
+  }, {
+    "table_name" : "promotional_coupons",
+    "name" : "promotional_coupons_created_by_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (created_by) REFERENCES users(id)",
+    "referenced_table" : "users"
+  }, {
+    "table_name" : "promotional_coupons",
+    "name" : "promotional_coupons_currency_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (currency) REFERENCES supported_currencies(code)",
+    "referenced_table" : "supported_currencies"
+  }, {
+    "table_name" : "promotional_coupons",
+    "name" : "promotional_coupons_discount_kind_check",
+    "type" : "c",
+    "definition" : "CHECK (((discount_kind)::text = ANY ((ARRAY['PERCENT'::character varying, 'FIXED'::character varying])::text[])))",
+    "referenced_table" : null
+  }, {
+    "table_name" : "promotional_coupons",
+    "name" : "promotional_coupons_max_redemptions_check",
+    "type" : "c",
+    "definition" : "CHECK ((max_redemptions > 0))",
+    "referenced_table" : null
+  }, {
+    "table_name" : "promotional_coupons",
+    "name" : "promotional_coupons_per_user_limit_check",
+    "type" : "c",
+    "definition" : "CHECK ((per_user_limit > 0))",
+    "referenced_table" : null
+  }, {
+    "table_name" : "promotional_coupons",
+    "name" : "promotional_coupons_pkey",
+    "type" : "p",
+    "definition" : "PRIMARY KEY (id)",
+    "referenced_table" : null
+  }, {
+    "table_name" : "promotional_coupons",
+    "name" : "promotional_coupons_tenant_id_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (tenant_id) REFERENCES platform_tenants(id)",
+    "referenced_table" : "platform_tenants"
   }, {
     "table_name" : "qr_invitation_designs",
     "name" : "ck_invitation_name",
@@ -11559,6 +14715,42 @@
     "type" : "p",
     "definition" : "PRIMARY KEY (id)",
     "referenced_table" : null
+  }, {
+    "table_name" : "referral_codes",
+    "name" : "referral_codes_code_check",
+    "type" : "c",
+    "definition" : "CHECK (((code)::text ~ '^[A-Z0-9_]{3,40}$'::text))",
+    "referenced_table" : null
+  }, {
+    "table_name" : "referral_codes",
+    "name" : "referral_codes_code_key",
+    "type" : "u",
+    "definition" : "UNIQUE (code)",
+    "referenced_table" : null
+  }, {
+    "table_name" : "referral_codes",
+    "name" : "referral_codes_id_referrer_id_key",
+    "type" : "u",
+    "definition" : "UNIQUE (id, referrer_id)",
+    "referenced_table" : null
+  }, {
+    "table_name" : "referral_codes",
+    "name" : "referral_codes_pkey",
+    "type" : "p",
+    "definition" : "PRIMARY KEY (id)",
+    "referenced_table" : null
+  }, {
+    "table_name" : "referral_codes",
+    "name" : "referral_codes_referrer_id_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (referrer_id) REFERENCES users(id)",
+    "referenced_table" : "users"
+  }, {
+    "table_name" : "referral_codes",
+    "name" : "referral_codes_tenant_id_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (tenant_id) REFERENCES platform_tenants(id)",
+    "referenced_table" : "platform_tenants"
   }, {
     "table_name" : "routing_commission_history",
     "name" : "routing_commission_history_actor_id_fkey",
@@ -11632,6 +14824,342 @@
     "definition" : "UNIQUE (proof_hash)",
     "referenced_table" : null
   }, {
+    "table_name" : "subscription_plans",
+    "name" : "subscription_plans_billing_period_check",
+    "type" : "c",
+    "definition" : "CHECK (((billing_period)::text = ANY ((ARRAY['MONTH'::character varying, 'YEAR'::character varying])::text[])))",
+    "referenced_table" : null
+  }, {
+    "table_name" : "subscription_plans",
+    "name" : "subscription_plans_code_check",
+    "type" : "c",
+    "definition" : "CHECK ((length(btrim((code)::text)) > 0))",
+    "referenced_table" : null
+  }, {
+    "table_name" : "subscription_plans",
+    "name" : "subscription_plans_code_key",
+    "type" : "u",
+    "definition" : "UNIQUE (code)",
+    "referenced_table" : null
+  }, {
+    "table_name" : "subscription_plans",
+    "name" : "subscription_plans_currency_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (currency) REFERENCES supported_currencies(code)",
+    "referenced_table" : "supported_currencies"
+  }, {
+    "table_name" : "subscription_plans",
+    "name" : "subscription_plans_entitlements_check",
+    "type" : "c",
+    "definition" : "CHECK ((jsonb_typeof(entitlements) = 'object'::text))",
+    "referenced_table" : null
+  }, {
+    "table_name" : "subscription_plans",
+    "name" : "subscription_plans_name_check",
+    "type" : "c",
+    "definition" : "CHECK ((length(btrim((name)::text)) > 0))",
+    "referenced_table" : null
+  }, {
+    "table_name" : "subscription_plans",
+    "name" : "subscription_plans_pkey",
+    "type" : "p",
+    "definition" : "PRIMARY KEY (id)",
+    "referenced_table" : null
+  }, {
+    "table_name" : "subscription_plans",
+    "name" : "subscription_plans_price_minor_check",
+    "type" : "c",
+    "definition" : "CHECK ((price_minor >= 0))",
+    "referenced_table" : null
+  }, {
+    "table_name" : "subscription_plans",
+    "name" : "subscription_plans_version_check",
+    "type" : "c",
+    "definition" : "CHECK ((version > 0))",
+    "referenced_table" : null
+  }, {
+    "table_name" : "supported_currencies",
+    "name" : "supported_currencies_code_check",
+    "type" : "c",
+    "definition" : "CHECK (((code)::text ~ '^[A-Z]{3}$'::text))",
+    "referenced_table" : null
+  }, {
+    "table_name" : "supported_currencies",
+    "name" : "supported_currencies_minor_units_check",
+    "type" : "c",
+    "definition" : "CHECK (((minor_units >= 0) AND (minor_units <= 4)))",
+    "referenced_table" : null
+  }, {
+    "table_name" : "supported_currencies",
+    "name" : "supported_currencies_pkey",
+    "type" : "p",
+    "definition" : "PRIMARY KEY (code)",
+    "referenced_table" : null
+  }, {
+    "table_name" : "tenant_branding",
+    "name" : "tenant_branding_application_name_check",
+    "type" : "c",
+    "definition" : "CHECK ((length(btrim((application_name)::text)) > 0))",
+    "referenced_table" : null
+  }, {
+    "table_name" : "tenant_branding",
+    "name" : "tenant_branding_brand_color_check",
+    "type" : "c",
+    "definition" : "CHECK (((brand_color)::text ~ '^#[0-9a-fA-F]{6}$'::text))",
+    "referenced_table" : null
+  }, {
+    "table_name" : "tenant_branding",
+    "name" : "tenant_branding_favicon_id_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (favicon_id) REFERENCES platform_brand_assets(id)",
+    "referenced_table" : "platform_brand_assets"
+  }, {
+    "table_name" : "tenant_branding",
+    "name" : "tenant_branding_logo_id_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (logo_id) REFERENCES platform_brand_assets(id)",
+    "referenced_table" : "platform_brand_assets"
+  }, {
+    "table_name" : "tenant_branding",
+    "name" : "tenant_branding_pkey",
+    "type" : "p",
+    "definition" : "PRIMARY KEY (tenant_id)",
+    "referenced_table" : null
+  }, {
+    "table_name" : "tenant_branding",
+    "name" : "tenant_branding_tenant_id_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (tenant_id) REFERENCES platform_tenants(id)",
+    "referenced_table" : "platform_tenants"
+  }, {
+    "table_name" : "tenant_events",
+    "name" : "tenant_events_event_id_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (event_id) REFERENCES events(id)",
+    "referenced_table" : "events"
+  }, {
+    "table_name" : "tenant_events",
+    "name" : "tenant_events_pkey",
+    "type" : "p",
+    "definition" : "PRIMARY KEY (event_id)",
+    "referenced_table" : null
+  }, {
+    "table_name" : "tenant_events",
+    "name" : "tenant_events_tenant_id_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (tenant_id) REFERENCES platform_tenants(id)",
+    "referenced_table" : "platform_tenants"
+  }, {
+    "table_name" : "tenant_memberships",
+    "name" : "tenant_memberships_pkey",
+    "type" : "p",
+    "definition" : "PRIMARY KEY (tenant_id, user_id)",
+    "referenced_table" : null
+  }, {
+    "table_name" : "tenant_memberships",
+    "name" : "tenant_memberships_role_check",
+    "type" : "c",
+    "definition" : "CHECK (((role)::text = ANY ((ARRAY['OWNER'::character varying, 'ADMIN'::character varying, 'MEMBER'::character varying])::text[])))",
+    "referenced_table" : null
+  }, {
+    "table_name" : "tenant_memberships",
+    "name" : "tenant_memberships_tenant_id_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (tenant_id) REFERENCES platform_tenants(id)",
+    "referenced_table" : "platform_tenants"
+  }, {
+    "table_name" : "tenant_memberships",
+    "name" : "tenant_memberships_user_id_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (user_id) REFERENCES users(id)",
+    "referenced_table" : "users"
+  }, {
+    "table_name" : "transactional_email_outbox",
+    "name" : "transactional_email_outbox_pkey",
+    "type" : "p",
+    "definition" : "PRIMARY KEY (id)",
+    "referenced_table" : null
+  }, {
+    "table_name" : "transactional_email_outbox",
+    "name" : "transactional_email_outbox_source_key_key",
+    "type" : "u",
+    "definition" : "UNIQUE (source_key)",
+    "referenced_table" : null
+  }, {
+    "table_name" : "transactional_email_outbox",
+    "name" : "transactional_email_outbox_status_check",
+    "type" : "c",
+    "definition" : "CHECK (((status)::text = ANY ((ARRAY['PENDING'::character varying, 'SENDING'::character varying, 'SENT'::character varying, 'FAILED'::character varying, 'CANCELLED'::character varying])::text[])))",
+    "referenced_table" : null
+  }, {
+    "table_name" : "transactional_email_outbox",
+    "name" : "transactional_email_outbox_template_key_check",
+    "type" : "c",
+    "definition" : "CHECK (((template_key)::text = ANY ((ARRAY['registration'::character varying, 'event-invitation'::character varying, 'contribution-received'::character varying, 'payment-success'::character varying, 'event-completed'::character varying])::text[])))",
+    "referenced_table" : null
+  }, {
+    "table_name" : "user_language_preferences",
+    "name" : "user_language_preferences_language_code_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (language_code) REFERENCES platform_languages(code)",
+    "referenced_table" : "platform_languages"
+  }, {
+    "table_name" : "user_language_preferences",
+    "name" : "user_language_preferences_pkey",
+    "type" : "p",
+    "definition" : "PRIMARY KEY (user_id)",
+    "referenced_table" : null
+  }, {
+    "table_name" : "user_language_preferences",
+    "name" : "user_language_preferences_user_id_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE",
+    "referenced_table" : "users"
+  }, {
+    "table_name" : "user_legal_consents",
+    "name" : "user_legal_consents_pkey",
+    "type" : "p",
+    "definition" : "PRIMARY KEY (id)",
+    "referenced_table" : null
+  }, {
+    "table_name" : "user_legal_consents",
+    "name" : "user_legal_consents_user_id_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (user_id) REFERENCES users(id)",
+    "referenced_table" : "users"
+  }, {
+    "table_name" : "user_profile_preferences",
+    "name" : "user_profile_preferences_picture_png_check",
+    "type" : "c",
+    "definition" : "CHECK ((octet_length(picture_png) <= 5242880))",
+    "referenced_table" : null
+  }, {
+    "table_name" : "user_profile_preferences",
+    "name" : "user_profile_preferences_pkey",
+    "type" : "p",
+    "definition" : "PRIMARY KEY (user_id)",
+    "referenced_table" : null
+  }, {
+    "table_name" : "user_profile_preferences",
+    "name" : "user_profile_preferences_user_id_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE",
+    "referenced_table" : "users"
+  }, {
+    "table_name" : "user_referrals",
+    "name" : "user_referrals_check",
+    "type" : "c",
+    "definition" : "CHECK ((referrer_id <> referred_user_id))",
+    "referenced_table" : null
+  }, {
+    "table_name" : "user_referrals",
+    "name" : "user_referrals_pkey",
+    "type" : "p",
+    "definition" : "PRIMARY KEY (id)",
+    "referenced_table" : null
+  }, {
+    "table_name" : "user_referrals",
+    "name" : "user_referrals_referral_code_id_referrer_id_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (referral_code_id, referrer_id) REFERENCES referral_codes(id, referrer_id)",
+    "referenced_table" : "referral_codes"
+  }, {
+    "table_name" : "user_referrals",
+    "name" : "user_referrals_referred_user_id_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (referred_user_id) REFERENCES users(id)",
+    "referenced_table" : "users"
+  }, {
+    "table_name" : "user_referrals",
+    "name" : "user_referrals_referred_user_id_key",
+    "type" : "u",
+    "definition" : "UNIQUE (referred_user_id)",
+    "referenced_table" : null
+  }, {
+    "table_name" : "user_referrals",
+    "name" : "user_referrals_referrer_id_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (referrer_id) REFERENCES users(id)",
+    "referenced_table" : "users"
+  }, {
+    "table_name" : "user_referrals",
+    "name" : "user_referrals_status_check",
+    "type" : "c",
+    "definition" : "CHECK (((status)::text = ANY ((ARRAY['ATTRIBUTED'::character varying, 'QUALIFIED'::character varying, 'REWARDED'::character varying, 'CANCELLED'::character varying])::text[])))",
+    "referenced_table" : null
+  }, {
+    "table_name" : "user_subscriptions",
+    "name" : "user_subscriptions_check",
+    "type" : "c",
+    "definition" : "CHECK (((length(btrim((provider)::text)) > 0) AND (length(btrim((provider_subscription_id)::text)) > 0)))",
+    "referenced_table" : null
+  }, {
+    "table_name" : "user_subscriptions",
+    "name" : "user_subscriptions_check1",
+    "type" : "c",
+    "definition" : "CHECK ((((period_start IS NULL) AND (period_end IS NULL)) OR ((period_start IS NOT NULL) AND (period_end IS NOT NULL) AND (period_end > period_start))))",
+    "referenced_table" : null
+  }, {
+    "table_name" : "user_subscriptions",
+    "name" : "user_subscriptions_currency_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (currency) REFERENCES supported_currencies(code)",
+    "referenced_table" : "supported_currencies"
+  }, {
+    "table_name" : "user_subscriptions",
+    "name" : "user_subscriptions_entitlement_snapshot_check",
+    "type" : "c",
+    "definition" : "CHECK ((jsonb_typeof(entitlement_snapshot) = 'object'::text))",
+    "referenced_table" : null
+  }, {
+    "table_name" : "user_subscriptions",
+    "name" : "user_subscriptions_pkey",
+    "type" : "p",
+    "definition" : "PRIMARY KEY (id)",
+    "referenced_table" : null
+  }, {
+    "table_name" : "user_subscriptions",
+    "name" : "user_subscriptions_plan_id_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (plan_id) REFERENCES subscription_plans(id)",
+    "referenced_table" : "subscription_plans"
+  }, {
+    "table_name" : "user_subscriptions",
+    "name" : "user_subscriptions_price_minor_check",
+    "type" : "c",
+    "definition" : "CHECK ((price_minor >= 0))",
+    "referenced_table" : null
+  }, {
+    "table_name" : "user_subscriptions",
+    "name" : "user_subscriptions_provider_provider_subscription_id_key",
+    "type" : "u",
+    "definition" : "UNIQUE (provider, provider_subscription_id)",
+    "referenced_table" : null
+  }, {
+    "table_name" : "user_subscriptions",
+    "name" : "user_subscriptions_status_check",
+    "type" : "c",
+    "definition" : "CHECK (((status)::text = ANY ((ARRAY['PENDING'::character varying, 'ACTIVE'::character varying, 'PAST_DUE'::character varying, 'CANCELLED'::character varying, 'EXPIRED'::character varying])::text[])))",
+    "referenced_table" : null
+  }, {
+    "table_name" : "user_subscriptions",
+    "name" : "user_subscriptions_tenant_id_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (tenant_id) REFERENCES platform_tenants(id)",
+    "referenced_table" : "platform_tenants"
+  }, {
+    "table_name" : "user_subscriptions",
+    "name" : "user_subscriptions_tenant_id_user_id_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (tenant_id, user_id) REFERENCES tenant_memberships(tenant_id, user_id)",
+    "referenced_table" : "tenant_memberships"
+  }, {
+    "table_name" : "user_subscriptions",
+    "name" : "user_subscriptions_user_id_fkey",
+    "type" : "f",
+    "definition" : "FOREIGN KEY (user_id) REFERENCES users(id)",
+    "referenced_table" : "users"
+  }, {
     "table_name" : "username_recovery_attempts",
     "name" : "username_recovery_attempts_account_kind_check",
     "type" : "c",
@@ -11677,7 +15205,7 @@
     "table_name" : "users",
     "name" : "chk_users_username_format",
     "type" : "c",
-    "definition" : "CHECK (((username IS NULL) OR ((username)::text ~ '^[a-z][a-z0-9_]{3,29}$'::text)))",
+    "definition" : "CHECK (((username IS NULL) OR ((username)::text ~ '^[A-Za-z0-9][A-Za-z0-9_]{3,29}$'::text)))",
     "referenced_table" : null
   }, {
     "table_name" : "users",
@@ -11898,6 +15426,34 @@
     "target_table" : "gifts",
     "target_column" : "event_id",
     "definition" : "FOREIGN KEY (gift_id, event_id) REFERENCES gifts(id, event_id)"
+  }, {
+    "name" : "coupon_redemptions_coupon_id_fkey",
+    "source_table" : "coupon_redemptions",
+    "source_column" : "coupon_id",
+    "target_table" : "promotional_coupons",
+    "target_column" : "id",
+    "definition" : "FOREIGN KEY (coupon_id) REFERENCES promotional_coupons(id)"
+  }, {
+    "name" : "coupon_redemptions_currency_fkey",
+    "source_table" : "coupon_redemptions",
+    "source_column" : "currency",
+    "target_table" : "supported_currencies",
+    "target_column" : "code",
+    "definition" : "FOREIGN KEY (currency) REFERENCES supported_currencies(code)"
+  }, {
+    "name" : "coupon_redemptions_user_id_fkey",
+    "source_table" : "coupon_redemptions",
+    "source_column" : "user_id",
+    "target_table" : "users",
+    "target_column" : "id",
+    "definition" : "FOREIGN KEY (user_id) REFERENCES users(id)"
+  }, {
+    "name" : "event_celebration_settings_event_id_fkey",
+    "source_table" : "event_celebration_settings",
+    "source_column" : "event_id",
+    "target_table" : "events",
+    "target_column" : "id",
+    "definition" : "FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE"
   }, {
     "name" : "event_guest_submission_limits_event_id_fkey",
     "source_table" : "event_guest_submission_limits",
@@ -12193,6 +15749,20 @@
     "target_column" : "id",
     "definition" : "FOREIGN KEY (event_id) REFERENCES events(id)"
   }, {
+    "name" : "gift_recommendations_event_id_fkey",
+    "source_table" : "gift_recommendations",
+    "source_column" : "event_id",
+    "target_table" : "events",
+    "target_column" : "id",
+    "definition" : "FOREIGN KEY (event_id) REFERENCES events(id)"
+  }, {
+    "name" : "gift_recommendations_requested_by_fkey",
+    "source_table" : "gift_recommendations",
+    "source_column" : "requested_by",
+    "target_table" : "users",
+    "target_column" : "id",
+    "definition" : "FOREIGN KEY (requested_by) REFERENCES users(id)"
+  }, {
     "name" : "gift_retailer_metadata_audit_actor_id_fkey",
     "source_table" : "gift_retailer_metadata_audit",
     "source_column" : "actor_id",
@@ -12354,6 +15924,27 @@
     "target_column" : "id",
     "definition" : "FOREIGN KEY (host_id) REFERENCES users(id)"
   }, {
+    "name" : "host_invitation_upload_controls_changed_by_fkey",
+    "source_table" : "host_invitation_upload_controls",
+    "source_column" : "changed_by",
+    "target_table" : "users",
+    "target_column" : "id",
+    "definition" : "FOREIGN KEY (changed_by) REFERENCES users(id)"
+  }, {
+    "name" : "host_invitation_upload_controls_host_id_fkey",
+    "source_table" : "host_invitation_upload_controls",
+    "source_column" : "host_id",
+    "target_table" : "users",
+    "target_column" : "id",
+    "definition" : "FOREIGN KEY (host_id) REFERENCES users(id)"
+  }, {
+    "name" : "host_invitation_uploads_host_id_fkey",
+    "source_table" : "host_invitation_uploads",
+    "source_column" : "host_id",
+    "target_table" : "users",
+    "target_column" : "id",
+    "definition" : "FOREIGN KEY (host_id) REFERENCES users(id)"
+  }, {
     "name" : "host_payout_requests_destination_id_fkey",
     "source_table" : "host_payout_requests",
     "source_column" : "destination_id",
@@ -12452,12 +16043,82 @@
     "target_column" : "id",
     "definition" : "FOREIGN KEY (host_id) REFERENCES users(id)"
   }, {
+    "name" : "language_delivery_templates_changed_by_fkey",
+    "source_table" : "language_delivery_templates",
+    "source_column" : "changed_by",
+    "target_table" : "users",
+    "target_column" : "id",
+    "definition" : "FOREIGN KEY (changed_by) REFERENCES users(id)"
+  }, {
+    "name" : "language_delivery_templates_language_code_fkey",
+    "source_table" : "language_delivery_templates",
+    "source_column" : "language_code",
+    "target_table" : "platform_languages",
+    "target_column" : "code",
+    "definition" : "FOREIGN KEY (language_code) REFERENCES platform_languages(code)"
+  }, {
+    "name" : "localization_event_controls_changed_by_fkey",
+    "source_table" : "localization_event_controls",
+    "source_column" : "changed_by",
+    "target_table" : "users",
+    "target_column" : "id",
+    "definition" : "FOREIGN KEY (changed_by) REFERENCES users(id)"
+  }, {
+    "name" : "localization_event_controls_event_id_fkey",
+    "source_table" : "localization_event_controls",
+    "source_column" : "event_id",
+    "target_table" : "events",
+    "target_column" : "id",
+    "definition" : "FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE"
+  }, {
+    "name" : "localization_host_controls_changed_by_fkey",
+    "source_table" : "localization_host_controls",
+    "source_column" : "changed_by",
+    "target_table" : "users",
+    "target_column" : "id",
+    "definition" : "FOREIGN KEY (changed_by) REFERENCES users(id)"
+  }, {
+    "name" : "localization_host_controls_host_id_fkey",
+    "source_table" : "localization_host_controls",
+    "source_column" : "host_id",
+    "target_table" : "users",
+    "target_column" : "id",
+    "definition" : "FOREIGN KEY (host_id) REFERENCES users(id) ON DELETE CASCADE"
+  }, {
+    "name" : "localization_translations_changed_by_fkey",
+    "source_table" : "localization_translations",
+    "source_column" : "changed_by",
+    "target_table" : "users",
+    "target_column" : "id",
+    "definition" : "FOREIGN KEY (changed_by) REFERENCES users(id)"
+  }, {
+    "name" : "localization_translations_language_code_fkey",
+    "source_table" : "localization_translations",
+    "source_column" : "language_code",
+    "target_table" : "platform_languages",
+    "target_column" : "code",
+    "definition" : "FOREIGN KEY (language_code) REFERENCES platform_languages(code)"
+  }, {
+    "name" : "localization_translations_message_key_fkey",
+    "source_table" : "localization_translations",
+    "source_column" : "message_key",
+    "target_table" : "localization_sources",
+    "target_column" : "message_key",
+    "definition" : "FOREIGN KEY (message_key) REFERENCES localization_sources(message_key)"
+  }, {
     "name" : "notification_outbox_event_id_fkey",
     "source_table" : "notification_outbox",
     "source_column" : "event_id",
     "target_table" : "events",
     "target_column" : "id",
     "definition" : "FOREIGN KEY (event_id) REFERENCES events(id)"
+  }, {
+    "name" : "notification_outbox_language_code_fkey",
+    "source_table" : "notification_outbox",
+    "source_column" : "language_code",
+    "target_table" : "platform_languages",
+    "target_column" : "code",
+    "definition" : "FOREIGN KEY (language_code) REFERENCES platform_languages(code)"
   }, {
     "name" : "payment_channel_controls_changed_by_fkey",
     "source_table" : "payment_channel_controls",
@@ -12564,6 +16225,34 @@
     "target_column" : "id",
     "definition" : "FOREIGN KEY (actor_id) REFERENCES users(id)"
   }, {
+    "name" : "platform_brand_assets_created_by_fkey",
+    "source_table" : "platform_brand_assets",
+    "source_column" : "created_by",
+    "target_table" : "users",
+    "target_column" : "id",
+    "definition" : "FOREIGN KEY (created_by) REFERENCES users(id)"
+  }, {
+    "name" : "platform_branding_favicon_id_fkey",
+    "source_table" : "platform_branding",
+    "source_column" : "favicon_id",
+    "target_table" : "platform_brand_assets",
+    "target_column" : "id",
+    "definition" : "FOREIGN KEY (favicon_id) REFERENCES platform_brand_assets(id)"
+  }, {
+    "name" : "platform_branding_logo_id_fkey",
+    "source_table" : "platform_branding",
+    "source_column" : "logo_id",
+    "target_table" : "platform_brand_assets",
+    "target_column" : "id",
+    "definition" : "FOREIGN KEY (logo_id) REFERENCES platform_brand_assets(id)"
+  }, {
+    "name" : "platform_branding_updated_by_fkey",
+    "source_table" : "platform_branding",
+    "source_column" : "updated_by",
+    "target_table" : "users",
+    "target_column" : "id",
+    "definition" : "FOREIGN KEY (updated_by) REFERENCES users(id)"
+  }, {
     "name" : "platform_event_ai_design_settings_changed_by_fkey",
     "source_table" : "platform_event_ai_design_settings",
     "source_column" : "changed_by",
@@ -12599,8 +16288,36 @@
     "target_column" : "id",
     "definition" : "FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE"
   }, {
+    "name" : "platform_event_module_grants_changed_by_fkey",
+    "source_table" : "platform_event_module_grants",
+    "source_column" : "changed_by",
+    "target_table" : "users",
+    "target_column" : "id",
+    "definition" : "FOREIGN KEY (changed_by) REFERENCES users(id)"
+  }, {
+    "name" : "platform_event_module_grants_event_id_fkey",
+    "source_table" : "platform_event_module_grants",
+    "source_column" : "event_id",
+    "target_table" : "events",
+    "target_column" : "id",
+    "definition" : "FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE"
+  }, {
+    "name" : "platform_event_module_grants_module_code_fkey",
+    "source_table" : "platform_event_module_grants",
+    "source_column" : "module_code",
+    "target_table" : "platform_module_controls",
+    "target_column" : "module_code",
+    "definition" : "FOREIGN KEY (module_code) REFERENCES platform_module_controls(module_code)"
+  }, {
     "name" : "platform_experience_settings_changed_by_fkey",
     "source_table" : "platform_experience_settings",
+    "source_column" : "changed_by",
+    "target_table" : "users",
+    "target_column" : "id",
+    "definition" : "FOREIGN KEY (changed_by) REFERENCES users(id)"
+  }, {
+    "name" : "platform_growth_settings_changed_by_fkey",
+    "source_table" : "platform_growth_settings",
     "source_column" : "changed_by",
     "target_table" : "users",
     "target_column" : "id",
@@ -12626,6 +16343,34 @@
     "target_table" : "platform_module_controls",
     "target_column" : "module_code",
     "definition" : "FOREIGN KEY (module_code) REFERENCES platform_module_controls(module_code)"
+  }, {
+    "name" : "platform_languages_changed_by_fkey",
+    "source_table" : "platform_languages",
+    "source_column" : "changed_by",
+    "target_table" : "users",
+    "target_column" : "id",
+    "definition" : "FOREIGN KEY (changed_by) REFERENCES users(id)"
+  }, {
+    "name" : "platform_localization_settings_changed_by_fkey",
+    "source_table" : "platform_localization_settings",
+    "source_column" : "changed_by",
+    "target_table" : "users",
+    "target_column" : "id",
+    "definition" : "FOREIGN KEY (changed_by) REFERENCES users(id)"
+  }, {
+    "name" : "platform_localization_settings_default_language_fkey",
+    "source_table" : "platform_localization_settings",
+    "source_column" : "default_language",
+    "target_table" : "platform_languages",
+    "target_column" : "code",
+    "definition" : "FOREIGN KEY (default_language) REFERENCES platform_languages(code)"
+  }, {
+    "name" : "platform_localization_settings_fallback_language_fkey",
+    "source_table" : "platform_localization_settings",
+    "source_column" : "fallback_language",
+    "target_table" : "platform_languages",
+    "target_column" : "code",
+    "definition" : "FOREIGN KEY (fallback_language) REFERENCES platform_languages(code)"
   }, {
     "name" : "platform_module_controls_changed_by_fkey",
     "source_table" : "platform_module_controls",
@@ -12655,12 +16400,47 @@
     "target_column" : "id",
     "definition" : "FOREIGN KEY (changed_by) REFERENCES users(id)"
   }, {
+    "name" : "promotional_coupons_created_by_fkey",
+    "source_table" : "promotional_coupons",
+    "source_column" : "created_by",
+    "target_table" : "users",
+    "target_column" : "id",
+    "definition" : "FOREIGN KEY (created_by) REFERENCES users(id)"
+  }, {
+    "name" : "promotional_coupons_currency_fkey",
+    "source_table" : "promotional_coupons",
+    "source_column" : "currency",
+    "target_table" : "supported_currencies",
+    "target_column" : "code",
+    "definition" : "FOREIGN KEY (currency) REFERENCES supported_currencies(code)"
+  }, {
+    "name" : "promotional_coupons_tenant_id_fkey",
+    "source_table" : "promotional_coupons",
+    "source_column" : "tenant_id",
+    "target_table" : "platform_tenants",
+    "target_column" : "id",
+    "definition" : "FOREIGN KEY (tenant_id) REFERENCES platform_tenants(id)"
+  }, {
     "name" : "qr_invitation_designs_event_id_fkey",
     "source_table" : "qr_invitation_designs",
     "source_column" : "event_id",
     "target_table" : "events",
     "target_column" : "id",
     "definition" : "FOREIGN KEY (event_id) REFERENCES events(id)"
+  }, {
+    "name" : "referral_codes_referrer_id_fkey",
+    "source_table" : "referral_codes",
+    "source_column" : "referrer_id",
+    "target_table" : "users",
+    "target_column" : "id",
+    "definition" : "FOREIGN KEY (referrer_id) REFERENCES users(id)"
+  }, {
+    "name" : "referral_codes_tenant_id_fkey",
+    "source_table" : "referral_codes",
+    "source_column" : "tenant_id",
+    "target_table" : "platform_tenants",
+    "target_column" : "id",
+    "definition" : "FOREIGN KEY (tenant_id) REFERENCES platform_tenants(id)"
   }, {
     "name" : "routing_commission_history_actor_id_fkey",
     "source_table" : "routing_commission_history",
@@ -12675,6 +16455,160 @@
     "target_table" : "users",
     "target_column" : "id",
     "definition" : "FOREIGN KEY (changed_by) REFERENCES users(id)"
+  }, {
+    "name" : "subscription_plans_currency_fkey",
+    "source_table" : "subscription_plans",
+    "source_column" : "currency",
+    "target_table" : "supported_currencies",
+    "target_column" : "code",
+    "definition" : "FOREIGN KEY (currency) REFERENCES supported_currencies(code)"
+  }, {
+    "name" : "tenant_branding_favicon_id_fkey",
+    "source_table" : "tenant_branding",
+    "source_column" : "favicon_id",
+    "target_table" : "platform_brand_assets",
+    "target_column" : "id",
+    "definition" : "FOREIGN KEY (favicon_id) REFERENCES platform_brand_assets(id)"
+  }, {
+    "name" : "tenant_branding_logo_id_fkey",
+    "source_table" : "tenant_branding",
+    "source_column" : "logo_id",
+    "target_table" : "platform_brand_assets",
+    "target_column" : "id",
+    "definition" : "FOREIGN KEY (logo_id) REFERENCES platform_brand_assets(id)"
+  }, {
+    "name" : "tenant_branding_tenant_id_fkey",
+    "source_table" : "tenant_branding",
+    "source_column" : "tenant_id",
+    "target_table" : "platform_tenants",
+    "target_column" : "id",
+    "definition" : "FOREIGN KEY (tenant_id) REFERENCES platform_tenants(id)"
+  }, {
+    "name" : "tenant_events_event_id_fkey",
+    "source_table" : "tenant_events",
+    "source_column" : "event_id",
+    "target_table" : "events",
+    "target_column" : "id",
+    "definition" : "FOREIGN KEY (event_id) REFERENCES events(id)"
+  }, {
+    "name" : "tenant_events_tenant_id_fkey",
+    "source_table" : "tenant_events",
+    "source_column" : "tenant_id",
+    "target_table" : "platform_tenants",
+    "target_column" : "id",
+    "definition" : "FOREIGN KEY (tenant_id) REFERENCES platform_tenants(id)"
+  }, {
+    "name" : "tenant_memberships_tenant_id_fkey",
+    "source_table" : "tenant_memberships",
+    "source_column" : "tenant_id",
+    "target_table" : "platform_tenants",
+    "target_column" : "id",
+    "definition" : "FOREIGN KEY (tenant_id) REFERENCES platform_tenants(id)"
+  }, {
+    "name" : "tenant_memberships_user_id_fkey",
+    "source_table" : "tenant_memberships",
+    "source_column" : "user_id",
+    "target_table" : "users",
+    "target_column" : "id",
+    "definition" : "FOREIGN KEY (user_id) REFERENCES users(id)"
+  }, {
+    "name" : "user_language_preferences_language_code_fkey",
+    "source_table" : "user_language_preferences",
+    "source_column" : "language_code",
+    "target_table" : "platform_languages",
+    "target_column" : "code",
+    "definition" : "FOREIGN KEY (language_code) REFERENCES platform_languages(code)"
+  }, {
+    "name" : "user_language_preferences_user_id_fkey",
+    "source_table" : "user_language_preferences",
+    "source_column" : "user_id",
+    "target_table" : "users",
+    "target_column" : "id",
+    "definition" : "FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE"
+  }, {
+    "name" : "user_legal_consents_user_id_fkey",
+    "source_table" : "user_legal_consents",
+    "source_column" : "user_id",
+    "target_table" : "users",
+    "target_column" : "id",
+    "definition" : "FOREIGN KEY (user_id) REFERENCES users(id)"
+  }, {
+    "name" : "user_profile_preferences_user_id_fkey",
+    "source_table" : "user_profile_preferences",
+    "source_column" : "user_id",
+    "target_table" : "users",
+    "target_column" : "id",
+    "definition" : "FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE"
+  }, {
+    "name" : "user_referrals_referral_code_id_referrer_id_fkey",
+    "source_table" : "user_referrals",
+    "source_column" : "referral_code_id",
+    "target_table" : "referral_codes",
+    "target_column" : "id",
+    "definition" : "FOREIGN KEY (referral_code_id, referrer_id) REFERENCES referral_codes(id, referrer_id)"
+  }, {
+    "name" : "user_referrals_referral_code_id_referrer_id_fkey",
+    "source_table" : "user_referrals",
+    "source_column" : "referrer_id",
+    "target_table" : "referral_codes",
+    "target_column" : "referrer_id",
+    "definition" : "FOREIGN KEY (referral_code_id, referrer_id) REFERENCES referral_codes(id, referrer_id)"
+  }, {
+    "name" : "user_referrals_referred_user_id_fkey",
+    "source_table" : "user_referrals",
+    "source_column" : "referred_user_id",
+    "target_table" : "users",
+    "target_column" : "id",
+    "definition" : "FOREIGN KEY (referred_user_id) REFERENCES users(id)"
+  }, {
+    "name" : "user_referrals_referrer_id_fkey",
+    "source_table" : "user_referrals",
+    "source_column" : "referrer_id",
+    "target_table" : "users",
+    "target_column" : "id",
+    "definition" : "FOREIGN KEY (referrer_id) REFERENCES users(id)"
+  }, {
+    "name" : "user_subscriptions_currency_fkey",
+    "source_table" : "user_subscriptions",
+    "source_column" : "currency",
+    "target_table" : "supported_currencies",
+    "target_column" : "code",
+    "definition" : "FOREIGN KEY (currency) REFERENCES supported_currencies(code)"
+  }, {
+    "name" : "user_subscriptions_plan_id_fkey",
+    "source_table" : "user_subscriptions",
+    "source_column" : "plan_id",
+    "target_table" : "subscription_plans",
+    "target_column" : "id",
+    "definition" : "FOREIGN KEY (plan_id) REFERENCES subscription_plans(id)"
+  }, {
+    "name" : "user_subscriptions_tenant_id_fkey",
+    "source_table" : "user_subscriptions",
+    "source_column" : "tenant_id",
+    "target_table" : "platform_tenants",
+    "target_column" : "id",
+    "definition" : "FOREIGN KEY (tenant_id) REFERENCES platform_tenants(id)"
+  }, {
+    "name" : "user_subscriptions_tenant_id_user_id_fkey",
+    "source_table" : "user_subscriptions",
+    "source_column" : "tenant_id",
+    "target_table" : "tenant_memberships",
+    "target_column" : "tenant_id",
+    "definition" : "FOREIGN KEY (tenant_id, user_id) REFERENCES tenant_memberships(tenant_id, user_id)"
+  }, {
+    "name" : "user_subscriptions_tenant_id_user_id_fkey",
+    "source_table" : "user_subscriptions",
+    "source_column" : "user_id",
+    "target_table" : "tenant_memberships",
+    "target_column" : "user_id",
+    "definition" : "FOREIGN KEY (tenant_id, user_id) REFERENCES tenant_memberships(tenant_id, user_id)"
+  }, {
+    "name" : "user_subscriptions_user_id_fkey",
+    "source_table" : "user_subscriptions",
+    "source_column" : "user_id",
+    "target_table" : "users",
+    "target_column" : "id",
+    "definition" : "FOREIGN KEY (user_id) REFERENCES users(id)"
   }, {
     "name" : "wallet_ledger_entries_contribution_id_fkey",
     "source_table" : "wallet_ledger_entries",
@@ -12698,6 +16632,14 @@
     "table_name" : "account_contact_challenges",
     "name" : "account_contact_challenges_pkey",
     "definition" : "CREATE UNIQUE INDEX account_contact_challenges_pkey ON public.account_contact_challenges USING btree (id)"
+  }, {
+    "table_name" : "account_legal_consents",
+    "name" : "account_legal_consents_pkey",
+    "definition" : "CREATE UNIQUE INDEX account_legal_consents_pkey ON public.account_legal_consents USING btree (id)"
+  }, {
+    "table_name" : "account_legal_consents",
+    "name" : "idx_account_consents",
+    "definition" : "CREATE INDEX idx_account_consents ON public.account_legal_consents USING btree (account_kind, account_id, accepted_at)"
   }, {
     "table_name" : "account_pending_email_verifications",
     "name" : "account_pending_email_account",
@@ -12746,6 +16688,30 @@
     "table_name" : "affiliate_partners",
     "name" : "affiliate_partners_product_domain_key",
     "definition" : "CREATE UNIQUE INDEX affiliate_partners_product_domain_key ON public.affiliate_partners USING btree (product_domain)"
+  }, {
+    "table_name" : "application_interactions",
+    "name" : "application_interactions_date",
+    "definition" : "CREATE INDEX application_interactions_date ON public.application_interactions USING btree (created_at DESC)"
+  }, {
+    "table_name" : "application_interactions",
+    "name" : "application_interactions_event_date",
+    "definition" : "CREATE INDEX application_interactions_event_date ON public.application_interactions USING btree (event_id, created_at DESC)"
+  }, {
+    "table_name" : "application_interactions",
+    "name" : "application_interactions_funnel",
+    "definition" : "CREATE INDEX application_interactions_funnel ON public.application_interactions USING btree (action, created_at DESC) WHERE ((kind)::text = ANY ((ARRAY['OPERATION'::character varying, 'REQUEST'::character varying])::text[]))"
+  }, {
+    "table_name" : "application_interactions",
+    "name" : "application_interactions_host_date",
+    "definition" : "CREATE INDEX application_interactions_host_date ON public.application_interactions USING btree (host_id, created_at DESC)"
+  }, {
+    "table_name" : "application_interactions",
+    "name" : "application_interactions_parent",
+    "definition" : "CREATE INDEX application_interactions_parent ON public.application_interactions USING btree (parent_id) WHERE (parent_id IS NOT NULL)"
+  }, {
+    "table_name" : "application_interactions",
+    "name" : "application_interactions_pkey",
+    "definition" : "CREATE UNIQUE INDEX application_interactions_pkey ON public.application_interactions USING btree (id)"
   }, {
     "table_name" : "audit_logs",
     "name" : "audit_logs_pkey",
@@ -12859,9 +16825,25 @@
     "name" : "uq_contributions_id_event",
     "definition" : "CREATE UNIQUE INDEX uq_contributions_id_event ON public.contributions USING btree (id, event_id)"
   }, {
+    "table_name" : "coupon_redemptions",
+    "name" : "coupon_redemptions_pkey",
+    "definition" : "CREATE UNIQUE INDEX coupon_redemptions_pkey ON public.coupon_redemptions USING btree (id)"
+  }, {
+    "table_name" : "coupon_redemptions",
+    "name" : "coupon_redemptions_source_reference_key",
+    "definition" : "CREATE UNIQUE INDEX coupon_redemptions_source_reference_key ON public.coupon_redemptions USING btree (source_reference)"
+  }, {
+    "table_name" : "coupon_redemptions",
+    "name" : "idx_coupon_redemption_limits",
+    "definition" : "CREATE INDEX idx_coupon_redemption_limits ON public.coupon_redemptions USING btree (coupon_id, user_id, status)"
+  }, {
     "table_name" : "credential_session_versions",
     "name" : "credential_session_versions_pkey",
     "definition" : "CREATE UNIQUE INDEX credential_session_versions_pkey ON public.credential_session_versions USING btree (account_kind, account_id)"
+  }, {
+    "table_name" : "event_celebration_settings",
+    "name" : "event_celebration_settings_pkey",
+    "definition" : "CREATE UNIQUE INDEX event_celebration_settings_pkey ON public.event_celebration_settings USING btree (event_id)"
   }, {
     "table_name" : "event_guest_submission_limits",
     "name" : "event_guest_submission_limits_pkey",
@@ -13083,6 +17065,14 @@
     "name" : "idx_gift_photos_event",
     "definition" : "CREATE INDEX idx_gift_photos_event ON public.gift_photos USING btree (event_id)"
   }, {
+    "table_name" : "gift_recommendations",
+    "name" : "gift_recommendations_pkey",
+    "definition" : "CREATE UNIQUE INDEX gift_recommendations_pkey ON public.gift_recommendations USING btree (id)"
+  }, {
+    "table_name" : "gift_recommendations",
+    "name" : "idx_gift_recommendations",
+    "definition" : "CREATE INDEX idx_gift_recommendations ON public.gift_recommendations USING btree (event_id, created_at DESC)"
+  }, {
     "table_name" : "gift_retailer_metadata_audit",
     "name" : "gift_retailer_metadata_audit_pkey",
     "definition" : "CREATE UNIQUE INDEX gift_retailer_metadata_audit_pkey ON public.gift_retailer_metadata_audit USING btree (id)"
@@ -13235,6 +17225,18 @@
     "name" : "ux_host_verification_request_reference",
     "definition" : "CREATE UNIQUE INDEX ux_host_verification_request_reference ON public.host_destination_verification_attempts USING btree (request_provider, request_reference) WHERE (request_reference IS NOT NULL)"
   }, {
+    "table_name" : "host_invitation_upload_controls",
+    "name" : "host_invitation_upload_controls_pkey",
+    "definition" : "CREATE UNIQUE INDEX host_invitation_upload_controls_pkey ON public.host_invitation_upload_controls USING btree (host_id)"
+  }, {
+    "table_name" : "host_invitation_uploads",
+    "name" : "host_invitation_uploads_owner",
+    "definition" : "CREATE INDEX host_invitation_uploads_owner ON public.host_invitation_uploads USING btree (host_id, created_at DESC)"
+  }, {
+    "table_name" : "host_invitation_uploads",
+    "name" : "host_invitation_uploads_pkey",
+    "definition" : "CREATE UNIQUE INDEX host_invitation_uploads_pkey ON public.host_invitation_uploads USING btree (id)"
+  }, {
     "table_name" : "host_payout_requests",
     "name" : "host_payout_requests_host_id_idempotency_key_key",
     "definition" : "CREATE UNIQUE INDEX host_payout_requests_host_id_idempotency_key_key ON public.host_payout_requests USING btree (host_id, idempotency_key)"
@@ -13314,6 +17316,30 @@
     "table_name" : "invitation_gallery_assets",
     "name" : "invitation_gallery_assets_pkey",
     "definition" : "CREATE UNIQUE INDEX invitation_gallery_assets_pkey ON public.invitation_gallery_assets USING btree (id)"
+  }, {
+    "table_name" : "language_delivery_templates",
+    "name" : "language_delivery_templates_pkey",
+    "definition" : "CREATE UNIQUE INDEX language_delivery_templates_pkey ON public.language_delivery_templates USING btree (language_code, provider)"
+  }, {
+    "table_name" : "localization_event_controls",
+    "name" : "localization_event_controls_pkey",
+    "definition" : "CREATE UNIQUE INDEX localization_event_controls_pkey ON public.localization_event_controls USING btree (event_id)"
+  }, {
+    "table_name" : "localization_host_controls",
+    "name" : "localization_host_controls_pkey",
+    "definition" : "CREATE UNIQUE INDEX localization_host_controls_pkey ON public.localization_host_controls USING btree (host_id)"
+  }, {
+    "table_name" : "localization_sources",
+    "name" : "localization_sources_pkey",
+    "definition" : "CREATE UNIQUE INDEX localization_sources_pkey ON public.localization_sources USING btree (message_key)"
+  }, {
+    "table_name" : "localization_translations",
+    "name" : "localization_translation_review",
+    "definition" : "CREATE INDEX localization_translation_review ON public.localization_translations USING btree (language_code, published, message_key)"
+  }, {
+    "table_name" : "localization_translations",
+    "name" : "localization_translations_pkey",
+    "definition" : "CREATE UNIQUE INDEX localization_translations_pkey ON public.localization_translations USING btree (language_code, message_key)"
   }, {
     "table_name" : "notification_outbox",
     "name" : "idx_notification_host_unread",
@@ -13459,6 +17485,14 @@
     "name" : "platform_admin_audit_page_idx",
     "definition" : "CREATE INDEX platform_admin_audit_page_idx ON public.platform_admin_action_audit USING btree (created_at DESC, id DESC)"
   }, {
+    "table_name" : "platform_brand_assets",
+    "name" : "platform_brand_assets_pkey",
+    "definition" : "CREATE UNIQUE INDEX platform_brand_assets_pkey ON public.platform_brand_assets USING btree (id)"
+  }, {
+    "table_name" : "platform_branding",
+    "name" : "platform_branding_pkey",
+    "definition" : "CREATE UNIQUE INDEX platform_branding_pkey ON public.platform_branding USING btree (id)"
+  }, {
     "table_name" : "platform_event_ai_design_settings",
     "name" : "platform_event_ai_design_settings_pkey",
     "definition" : "CREATE UNIQUE INDEX platform_event_ai_design_settings_pkey ON public.platform_event_ai_design_settings USING btree (event_id)"
@@ -13471,13 +17505,33 @@
     "name" : "platform_event_message_settings_pkey",
     "definition" : "CREATE UNIQUE INDEX platform_event_message_settings_pkey ON public.platform_event_message_settings USING btree (event_id)"
   }, {
+    "table_name" : "platform_event_module_grants",
+    "name" : "platform_event_module_grants_pkey",
+    "definition" : "CREATE UNIQUE INDEX platform_event_module_grants_pkey ON public.platform_event_module_grants USING btree (event_id, module_code)"
+  }, {
     "table_name" : "platform_experience_settings",
     "name" : "platform_experience_settings_pkey",
     "definition" : "CREATE UNIQUE INDEX platform_experience_settings_pkey ON public.platform_experience_settings USING btree (id)"
   }, {
+    "table_name" : "platform_growth_features",
+    "name" : "platform_growth_features_pkey",
+    "definition" : "CREATE UNIQUE INDEX platform_growth_features_pkey ON public.platform_growth_features USING btree (code)"
+  }, {
+    "table_name" : "platform_growth_settings",
+    "name" : "platform_growth_settings_pkey",
+    "definition" : "CREATE UNIQUE INDEX platform_growth_settings_pkey ON public.platform_growth_settings USING btree (id)"
+  }, {
     "table_name" : "platform_host_module_grants",
     "name" : "platform_host_module_grants_pkey",
     "definition" : "CREATE UNIQUE INDEX platform_host_module_grants_pkey ON public.platform_host_module_grants USING btree (host_id, module_code)"
+  }, {
+    "table_name" : "platform_languages",
+    "name" : "platform_languages_pkey",
+    "definition" : "CREATE UNIQUE INDEX platform_languages_pkey ON public.platform_languages USING btree (code)"
+  }, {
+    "table_name" : "platform_localization_settings",
+    "name" : "platform_localization_settings_pkey",
+    "definition" : "CREATE UNIQUE INDEX platform_localization_settings_pkey ON public.platform_localization_settings USING btree (id)"
   }, {
     "table_name" : "platform_module_controls",
     "name" : "platform_module_controls_pkey",
@@ -13495,9 +17549,29 @@
     "name" : "platform_monetization_streams_pkey",
     "definition" : "CREATE UNIQUE INDEX platform_monetization_streams_pkey ON public.platform_monetization_streams USING btree (code)"
   }, {
+    "table_name" : "platform_tenants",
+    "name" : "platform_tenants_pkey",
+    "definition" : "CREATE UNIQUE INDEX platform_tenants_pkey ON public.platform_tenants USING btree (id)"
+  }, {
+    "table_name" : "platform_tenants",
+    "name" : "platform_tenants_slug_key",
+    "definition" : "CREATE UNIQUE INDEX platform_tenants_slug_key ON public.platform_tenants USING btree (slug)"
+  }, {
     "table_name" : "platform_verification_settings",
     "name" : "platform_verification_settings_pkey",
     "definition" : "CREATE UNIQUE INDEX platform_verification_settings_pkey ON public.platform_verification_settings USING btree (id)"
+  }, {
+    "table_name" : "promotional_coupons",
+    "name" : "promotional_coupons_pkey",
+    "definition" : "CREATE UNIQUE INDEX promotional_coupons_pkey ON public.promotional_coupons USING btree (id)"
+  }, {
+    "table_name" : "promotional_coupons",
+    "name" : "ux_coupon_platform_code",
+    "definition" : "CREATE UNIQUE INDEX ux_coupon_platform_code ON public.promotional_coupons USING btree (code) WHERE (tenant_id IS NULL)"
+  }, {
+    "table_name" : "promotional_coupons",
+    "name" : "ux_coupon_tenant_code",
+    "definition" : "CREATE UNIQUE INDEX ux_coupon_tenant_code ON public.promotional_coupons USING btree (tenant_id, code) WHERE (tenant_id IS NOT NULL)"
   }, {
     "table_name" : "qr_invitation_designs",
     "name" : "idx_qr_invitation_event",
@@ -13506,6 +17580,18 @@
     "table_name" : "qr_invitation_designs",
     "name" : "qr_invitation_designs_pkey",
     "definition" : "CREATE UNIQUE INDEX qr_invitation_designs_pkey ON public.qr_invitation_designs USING btree (id)"
+  }, {
+    "table_name" : "referral_codes",
+    "name" : "referral_codes_code_key",
+    "definition" : "CREATE UNIQUE INDEX referral_codes_code_key ON public.referral_codes USING btree (code)"
+  }, {
+    "table_name" : "referral_codes",
+    "name" : "referral_codes_id_referrer_id_key",
+    "definition" : "CREATE UNIQUE INDEX referral_codes_id_referrer_id_key ON public.referral_codes USING btree (id, referrer_id)"
+  }, {
+    "table_name" : "referral_codes",
+    "name" : "referral_codes_pkey",
+    "definition" : "CREATE UNIQUE INDEX referral_codes_pkey ON public.referral_codes USING btree (id)"
   }, {
     "table_name" : "routing_commission_history",
     "name" : "routing_commission_history_pkey",
@@ -13530,6 +17616,82 @@
     "table_name" : "signup_email_verifications",
     "name" : "signup_email_verifications_proof_hash_key",
     "definition" : "CREATE UNIQUE INDEX signup_email_verifications_proof_hash_key ON public.signup_email_verifications USING btree (proof_hash)"
+  }, {
+    "table_name" : "subscription_plans",
+    "name" : "subscription_plans_code_key",
+    "definition" : "CREATE UNIQUE INDEX subscription_plans_code_key ON public.subscription_plans USING btree (code)"
+  }, {
+    "table_name" : "subscription_plans",
+    "name" : "subscription_plans_pkey",
+    "definition" : "CREATE UNIQUE INDEX subscription_plans_pkey ON public.subscription_plans USING btree (id)"
+  }, {
+    "table_name" : "supported_currencies",
+    "name" : "supported_currencies_pkey",
+    "definition" : "CREATE UNIQUE INDEX supported_currencies_pkey ON public.supported_currencies USING btree (code)"
+  }, {
+    "table_name" : "tenant_branding",
+    "name" : "tenant_branding_pkey",
+    "definition" : "CREATE UNIQUE INDEX tenant_branding_pkey ON public.tenant_branding USING btree (tenant_id)"
+  }, {
+    "table_name" : "tenant_events",
+    "name" : "idx_tenant_events",
+    "definition" : "CREATE INDEX idx_tenant_events ON public.tenant_events USING btree (tenant_id, event_id)"
+  }, {
+    "table_name" : "tenant_events",
+    "name" : "tenant_events_pkey",
+    "definition" : "CREATE UNIQUE INDEX tenant_events_pkey ON public.tenant_events USING btree (event_id)"
+  }, {
+    "table_name" : "tenant_memberships",
+    "name" : "tenant_memberships_pkey",
+    "definition" : "CREATE UNIQUE INDEX tenant_memberships_pkey ON public.tenant_memberships USING btree (tenant_id, user_id)"
+  }, {
+    "table_name" : "transactional_email_outbox",
+    "name" : "idx_transactional_email_pending",
+    "definition" : "CREATE INDEX idx_transactional_email_pending ON public.transactional_email_outbox USING btree (status, next_attempt_at)"
+  }, {
+    "table_name" : "transactional_email_outbox",
+    "name" : "transactional_email_outbox_pkey",
+    "definition" : "CREATE UNIQUE INDEX transactional_email_outbox_pkey ON public.transactional_email_outbox USING btree (id)"
+  }, {
+    "table_name" : "transactional_email_outbox",
+    "name" : "transactional_email_outbox_source_key_key",
+    "definition" : "CREATE UNIQUE INDEX transactional_email_outbox_source_key_key ON public.transactional_email_outbox USING btree (source_key)"
+  }, {
+    "table_name" : "user_language_preferences",
+    "name" : "user_language_preferences_pkey",
+    "definition" : "CREATE UNIQUE INDEX user_language_preferences_pkey ON public.user_language_preferences USING btree (user_id)"
+  }, {
+    "table_name" : "user_legal_consents",
+    "name" : "idx_user_legal_consents_user",
+    "definition" : "CREATE INDEX idx_user_legal_consents_user ON public.user_legal_consents USING btree (user_id, accepted_at)"
+  }, {
+    "table_name" : "user_legal_consents",
+    "name" : "user_legal_consents_pkey",
+    "definition" : "CREATE UNIQUE INDEX user_legal_consents_pkey ON public.user_legal_consents USING btree (id)"
+  }, {
+    "table_name" : "user_profile_preferences",
+    "name" : "user_profile_preferences_pkey",
+    "definition" : "CREATE UNIQUE INDEX user_profile_preferences_pkey ON public.user_profile_preferences USING btree (user_id)"
+  }, {
+    "table_name" : "user_referrals",
+    "name" : "user_referrals_pkey",
+    "definition" : "CREATE UNIQUE INDEX user_referrals_pkey ON public.user_referrals USING btree (id)"
+  }, {
+    "table_name" : "user_referrals",
+    "name" : "user_referrals_referred_user_id_key",
+    "definition" : "CREATE UNIQUE INDEX user_referrals_referred_user_id_key ON public.user_referrals USING btree (referred_user_id)"
+  }, {
+    "table_name" : "user_subscriptions",
+    "name" : "idx_user_subscriptions",
+    "definition" : "CREATE INDEX idx_user_subscriptions ON public.user_subscriptions USING btree (user_id, status)"
+  }, {
+    "table_name" : "user_subscriptions",
+    "name" : "user_subscriptions_pkey",
+    "definition" : "CREATE UNIQUE INDEX user_subscriptions_pkey ON public.user_subscriptions USING btree (id)"
+  }, {
+    "table_name" : "user_subscriptions",
+    "name" : "user_subscriptions_provider_provider_subscription_id_key",
+    "definition" : "CREATE UNIQUE INDEX user_subscriptions_provider_provider_subscription_id_key ON public.user_subscriptions USING btree (provider, provider_subscription_id)"
   }, {
     "table_name" : "username_recovery_attempts",
     "name" : "username_recovery_account_time",
@@ -13635,8 +17797,20 @@
     "definition" : "CREATE TRIGGER group_member_report_history AFTER INSERT OR UPDATE ON public.gift_group_payment_reports FOR EACH ROW EXECUTE FUNCTION record_group_activity()"
   }, {
     "table_name" : "gift_groups",
+    "name" : "group_gifting_policy",
+    "definition" : "CREATE TRIGGER group_gifting_policy BEFORE INSERT ON public.gift_groups FOR EACH ROW EXECUTE FUNCTION enforce_event_gifting_policy()"
+  }, {
+    "table_name" : "gift_groups",
     "name" : "group_history",
     "definition" : "CREATE TRIGGER group_history AFTER INSERT OR UPDATE ON public.gift_groups FOR EACH ROW EXECUTE FUNCTION record_group_activity()"
+  }, {
+    "table_name" : "guest_direct_transfer_claims",
+    "name" : "direct_claim_gifting_policy",
+    "definition" : "CREATE TRIGGER direct_claim_gifting_policy BEFORE INSERT ON public.guest_direct_transfer_claims FOR EACH ROW EXECUTE FUNCTION enforce_event_gifting_policy()"
+  }, {
+    "table_name" : "guest_gifts",
+    "name" : "guest_gift_gifting_policy",
+    "definition" : "CREATE TRIGGER guest_gift_gifting_policy BEFORE INSERT ON public.guest_gifts FOR EACH ROW EXECUTE FUNCTION enforce_event_gifting_policy()"
   }, {
     "table_name" : "host_bank_accounts",
     "name" : "trg_bank_event_preferences",
@@ -13649,6 +17823,10 @@
     "table_name" : "payment_control_history",
     "name" : "payment_control_history_immutable",
     "definition" : "CREATE TRIGGER payment_control_history_immutable BEFORE DELETE OR UPDATE ON public.payment_control_history FOR EACH ROW EXECUTE FUNCTION reject_monetization_history_mutation()"
+  }, {
+    "table_name" : "payment_orders",
+    "name" : "payment_order_gifting_policy",
+    "definition" : "CREATE TRIGGER payment_order_gifting_policy BEFORE INSERT ON public.payment_orders FOR EACH ROW EXECUTE FUNCTION enforce_event_gifting_policy()"
   }, {
     "table_name" : "payment_orders",
     "name" : "payment_order_pricing_immutable",
@@ -13674,6 +17852,10 @@
     "name" : "clear_event_account_preferences",
     "arguments" : "",
     "definition" : "CREATE OR REPLACE FUNCTION public.clear_event_account_preferences()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n IF NOT NEW.enabled OR NEW.archived_at IS NOT NULL OR NEW.verification_status IN ('FAILED','REVOKED') THEN\n  UPDATE event_payment_account_links SET preferred=FALSE\n   WHERE host_id=NEW.host_id AND destination_id=NEW.id AND destination_kind=TG_ARGV[0];\n END IF;\n RETURN NEW;\nEND;\n$function$\n"
+  }, {
+    "name" : "enforce_event_gifting_policy",
+    "arguments" : "",
+    "definition" : "CREATE OR REPLACE FUNCTION public.enforce_event_gifting_policy()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE gifting BOOLEAN;\nBEGIN\n PERFORM pg_advisory_xact_lock_shared(1195984468,hashtext(NEW.event_id::text));\n SELECT gifting_enabled INTO gifting FROM events WHERE id=NEW.event_id;\n IF gifting IS FALSE THEN\n  RAISE EXCEPTION 'Gifting is not enabled for this event'\n   USING ERRCODE='23514',CONSTRAINT='event_gifting_open';\n END IF;\n RETURN NEW;\nEND;\n$function$\n"
   }, {
     "name" : "gift_check_group_destination_verification_binding",
     "arguments" : "",
@@ -13712,6 +17894,10 @@
     "enabled" : false,
     "forced" : false
   }, {
+    "table_name" : "account_legal_consents",
+    "enabled" : false,
+    "forced" : false
+  }, {
     "table_name" : "account_pending_email_verifications",
     "enabled" : false,
     "forced" : false
@@ -13737,6 +17923,10 @@
     "forced" : false
   }, {
     "table_name" : "affiliate_partners",
+    "enabled" : false,
+    "forced" : false
+  }, {
+    "table_name" : "application_interactions",
     "enabled" : false,
     "forced" : false
   }, {
@@ -13784,7 +17974,15 @@
     "enabled" : false,
     "forced" : false
   }, {
+    "table_name" : "coupon_redemptions",
+    "enabled" : false,
+    "forced" : false
+  }, {
     "table_name" : "credential_session_versions",
+    "enabled" : false,
+    "forced" : false
+  }, {
+    "table_name" : "event_celebration_settings",
     "enabled" : false,
     "forced" : false
   }, {
@@ -13864,6 +18062,10 @@
     "enabled" : false,
     "forced" : false
   }, {
+    "table_name" : "gift_recommendations",
+    "enabled" : false,
+    "forced" : false
+  }, {
     "table_name" : "gift_retailer_metadata_audit",
     "enabled" : false,
     "forced" : false
@@ -13908,6 +18110,14 @@
     "enabled" : false,
     "forced" : false
   }, {
+    "table_name" : "host_invitation_upload_controls",
+    "enabled" : false,
+    "forced" : false
+  }, {
+    "table_name" : "host_invitation_uploads",
+    "enabled" : false,
+    "forced" : false
+  }, {
     "table_name" : "host_payout_requests",
     "enabled" : false,
     "forced" : false
@@ -13933,6 +18143,26 @@
     "forced" : false
   }, {
     "table_name" : "invitation_gallery_assets",
+    "enabled" : false,
+    "forced" : false
+  }, {
+    "table_name" : "language_delivery_templates",
+    "enabled" : false,
+    "forced" : false
+  }, {
+    "table_name" : "localization_event_controls",
+    "enabled" : false,
+    "forced" : false
+  }, {
+    "table_name" : "localization_host_controls",
+    "enabled" : false,
+    "forced" : false
+  }, {
+    "table_name" : "localization_sources",
+    "enabled" : false,
+    "forced" : false
+  }, {
+    "table_name" : "localization_translations",
     "enabled" : false,
     "forced" : false
   }, {
@@ -13988,6 +18218,14 @@
     "enabled" : false,
     "forced" : false
   }, {
+    "table_name" : "platform_brand_assets",
+    "enabled" : false,
+    "forced" : false
+  }, {
+    "table_name" : "platform_branding",
+    "enabled" : false,
+    "forced" : false
+  }, {
     "table_name" : "platform_event_ai_design_settings",
     "enabled" : false,
     "forced" : false
@@ -14000,11 +18238,31 @@
     "enabled" : false,
     "forced" : false
   }, {
+    "table_name" : "platform_event_module_grants",
+    "enabled" : false,
+    "forced" : false
+  }, {
     "table_name" : "platform_experience_settings",
     "enabled" : false,
     "forced" : false
   }, {
+    "table_name" : "platform_growth_features",
+    "enabled" : false,
+    "forced" : false
+  }, {
+    "table_name" : "platform_growth_settings",
+    "enabled" : false,
+    "forced" : false
+  }, {
     "table_name" : "platform_host_module_grants",
+    "enabled" : false,
+    "forced" : false
+  }, {
+    "table_name" : "platform_languages",
+    "enabled" : false,
+    "forced" : false
+  }, {
+    "table_name" : "platform_localization_settings",
     "enabled" : false,
     "forced" : false
   }, {
@@ -14024,11 +18282,23 @@
     "enabled" : false,
     "forced" : false
   }, {
+    "table_name" : "platform_tenants",
+    "enabled" : false,
+    "forced" : false
+  }, {
     "table_name" : "platform_verification_settings",
     "enabled" : false,
     "forced" : false
   }, {
+    "table_name" : "promotional_coupons",
+    "enabled" : false,
+    "forced" : false
+  }, {
     "table_name" : "qr_invitation_designs",
+    "enabled" : false,
+    "forced" : false
+  }, {
+    "table_name" : "referral_codes",
     "enabled" : false,
     "forced" : false
   }, {
@@ -14041,6 +18311,50 @@
     "forced" : false
   }, {
     "table_name" : "signup_email_verifications",
+    "enabled" : false,
+    "forced" : false
+  }, {
+    "table_name" : "subscription_plans",
+    "enabled" : false,
+    "forced" : false
+  }, {
+    "table_name" : "supported_currencies",
+    "enabled" : false,
+    "forced" : false
+  }, {
+    "table_name" : "tenant_branding",
+    "enabled" : false,
+    "forced" : false
+  }, {
+    "table_name" : "tenant_events",
+    "enabled" : false,
+    "forced" : false
+  }, {
+    "table_name" : "tenant_memberships",
+    "enabled" : false,
+    "forced" : false
+  }, {
+    "table_name" : "transactional_email_outbox",
+    "enabled" : false,
+    "forced" : false
+  }, {
+    "table_name" : "user_language_preferences",
+    "enabled" : false,
+    "forced" : false
+  }, {
+    "table_name" : "user_legal_consents",
+    "enabled" : false,
+    "forced" : false
+  }, {
+    "table_name" : "user_profile_preferences",
+    "enabled" : false,
+    "forced" : false
+  }, {
+    "table_name" : "user_referrals",
+    "enabled" : false,
+    "forced" : false
+  }, {
+    "table_name" : "user_subscriptions",
     "enabled" : false,
     "forced" : false
   }, {
@@ -14057,5 +18371,5 @@
     "forced" : false
   } ],
   "policies" : [ ],
-  "migration_version" : "95"
+  "migration_version" : "107"
 }

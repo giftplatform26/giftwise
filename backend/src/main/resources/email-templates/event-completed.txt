@@ -1,0 +1,12 @@
+GiftWise Logo: {{brandLogoUrl}}
+
+{{eventName}} has completed
+
+Thank you for celebrating {{eventName}} with us. Your participation made it special.
+
+View event: {{eventUrl}}
+
+Contact Support: {{supportUrl}}
+Privacy Policy: {{privacyUrl}}
+Terms & Conditions: {{termsUrl}}
+© 2026 GiftWise

@@ -27,6 +27,32 @@ class GalleryAssetServiceTest {
         service = new GalleryAssetService(repo, processor, audit, actor);
     }
 
+    @Test void previewRequiresAuthenticationBeforeReadingAsset() {
+        when(actor.requireAuthenticatedUserId()).thenThrow(new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+        assertThrows(ResponseStatusException.class,()->service.preview(UUID.randomUUID()));
+        verifyNoInteractions(repo);
+    }
+
+    @Test void unpublishedPreviewIsNotAvailable() {
+        GalleryAsset draft=asset();when(actor.requireAuthenticatedUserId()).thenReturn(UUID.randomUUID());
+        when(repo.findById(draft.getId())).thenReturn(Optional.of(draft));
+        assertEquals(HttpStatus.NOT_FOUND,assertThrows(ResponseStatusException.class,()->service.preview(draft.getId())).getStatusCode());
+    }
+
+    @Test void unpaidHostCanPreviewButCannotFetchCleanPremiumImage() throws Exception {
+        var commerce=mock(com.giftplatform.monetization.CommercialAccessService.class);
+        org.springframework.test.util.ReflectionTestUtils.setField(service,"commerce",commerce);
+        UUID host=UUID.randomUUID();when(actor.requireAuthenticatedUserId()).thenReturn(host);
+        GalleryAsset premium=new GalleryAsset("BACKGROUND","WEDDING","Premium",db.migration.V98__premium_invitation_collection.artwork(0),600,800);
+        premium.setPublished(true);premium.setTier("PREMIUM");
+        when(repo.findById(premium.getId())).thenReturn(Optional.of(premium));
+        byte[] preview=service.preview(premium.getId());assertNotNull(javax.imageio.ImageIO.read(new java.io.ByteArrayInputStream(preview)));
+        assertFalse(java.util.Arrays.equals(preview,premium.getImagePng()));
+        assertEquals(HttpStatus.PAYMENT_REQUIRED,assertThrows(ResponseStatusException.class,()->service.purchasedImage(premium.getId())).getStatusCode());
+        assertEquals(HttpStatus.NOT_FOUND,assertThrows(ResponseStatusException.class,()->service.publishedImage(premium.getId())).getStatusCode());
+        when(commerce.template(host,premium.getId())).thenReturn(true);assertSame(premium,service.purchasedImage(premium.getId()));
+    }
+
     @Test void anonymousCanListOnlyPublishedAssets() {
         GalleryAsset published = asset();
         published.setPublished(true);

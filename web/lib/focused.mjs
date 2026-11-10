@@ -1,8 +1,10 @@
+
+import {activeLocale} from './localization.mjs';
 export const isEventId=value=>typeof value==='string'&&/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
 export function eventIdForRoute(path,queryId){const match=path.match(/^\/events\/([^/]+)(?:\/|$)/);return match&&isEventId(match[1])?match[1]:path==='/gifts'&&isEventId(queryId)?queryId:null;}
-export function eventDate(value){if(!value)return 'Date to be decided';const d=new Date(`${value}T12:00:00Z`);return Number.isNaN(d.getTime())?'Date to be decided':new Intl.DateTimeFormat('en-IN',{day:'numeric',month:'long',year:'numeric',timeZone:'UTC'}).format(d);}
-export const inr=paise=>new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:2}).format(paise/100);
-export function occasionArt(occasion){return ({WEDDING:'sage-leaves',BIRTHDAY:'balloon-dreams',BABY_SHOWER:'cloud-dream',HOUSEWARMING:'olive-branch',ANNIVERSARY:'rose-gold-lines',OTHER:'cream-paper'})[occasion]||'cream-paper';}
+export function eventDate(value){if(!value)return 'Date to be decided';const d=new Date(`${value}T12:00:00Z`);return Number.isNaN(d.getTime())?'Date to be decided':new Intl.DateTimeFormat(activeLocale("en-IN"),{day:'numeric',month:'long',year:'numeric',timeZone:'UTC'}).format(d);}
+export const inr=paise=>new Intl.NumberFormat(activeLocale("en-IN"),{style:'currency',currency:'INR',maximumFractionDigits:2}).format(paise/100);
+export function occasionArt(occasion){return ({WEDDING:'sage-leaves',BIRTHDAY:'balloon-dreams',BABY_SHOWER:'cloud-dream',HOUSEWARMING:'olive-branch',ANNIVERSARY:'rose-gold-lines',FAREWELL:'linen-lines',RETIREMENT:'golden-arch',REUNION:'family-vines',OTHER:'cream-paper'})[occasion]||'cream-paper';}
 export function restoreEventDraft(raw,defaults){
  try{
   const value=JSON.parse(raw);if(!value||typeof value!=='object'||Array.isArray(value))return defaults;

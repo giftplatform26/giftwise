@@ -1,0 +1,12 @@
+GiftWise Logo: {{brandLogoUrl}}
+
+You are invited to {{eventName}}
+
+{{hostName}} invites you to celebrate {{eventName}}. Event date: {{eventDate}}. Please share this invitation only with intended guests.
+
+View invitation: {{invitationUrl}}
+
+Contact Support: {{supportUrl}}
+Privacy Policy: {{privacyUrl}}
+Terms & Conditions: {{termsUrl}}
+© 2026 GiftWise

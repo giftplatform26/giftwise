@@ -34,6 +34,7 @@ Source target Java 21. Maven parent Spring Boot 4.1.1. A missing explicit Maven 
 
 | Lockfile path | Resolved version | Development | Declared license |
 | --- | --- | --- | --- |
+| node_modules/@babel/runtime | 7.29.10 | False | MIT |
 | node_modules/@emnapi/runtime | 1.11.3 | False | MIT |
 | node_modules/@img/colour | 1.1.0 | False | MIT |
 | node_modules/@img/sharp-darwin-arm64 | 0.35.5 | False | Apache-2.0 |
@@ -62,15 +63,15 @@ Source target Java 21. Maven parent Spring Boot 4.1.1. A missing explicit Maven 
 | node_modules/@img/sharp-win32-arm64 | 0.35.5 | False | Apache-2.0 AND LGPL-3.0-or-later |
 | node_modules/@img/sharp-win32-ia32 | 0.35.5 | False | Apache-2.0 AND LGPL-3.0-or-later |
 | node_modules/@img/sharp-win32-x64 | 0.35.5 | False | Apache-2.0 AND LGPL-3.0-or-later |
-| node_modules/@next/env | 15.5.27 | False | MIT |
-| node_modules/@next/swc-darwin-arm64 | 15.5.27 | False | MIT |
-| node_modules/@next/swc-darwin-x64 | 15.5.27 | False | MIT |
-| node_modules/@next/swc-linux-arm64-gnu | 15.5.27 | False | MIT |
-| node_modules/@next/swc-linux-arm64-musl | 15.5.27 | False | MIT |
-| node_modules/@next/swc-linux-x64-gnu | 15.5.27 | False | MIT |
-| node_modules/@next/swc-linux-x64-musl | 15.5.27 | False | MIT |
-| node_modules/@next/swc-win32-arm64-msvc | 15.5.27 | False | MIT |
-| node_modules/@next/swc-win32-x64-msvc | 15.5.27 | False | MIT |
+| node_modules/@next/env | 15.5.28 | False | MIT |
+| node_modules/@next/swc-darwin-arm64 | 15.5.28 | False | MIT |
+| node_modules/@next/swc-darwin-x64 | 15.5.28 | False | MIT |
+| node_modules/@next/swc-linux-arm64-gnu | 15.5.28 | False | MIT |
+| node_modules/@next/swc-linux-arm64-musl | 15.5.28 | False | MIT |
+| node_modules/@next/swc-linux-x64-gnu | 15.5.28 | False | MIT |
+| node_modules/@next/swc-linux-x64-musl | 15.5.28 | False | MIT |
+| node_modules/@next/swc-win32-arm64-msvc | 15.5.28 | False | MIT |
+| node_modules/@next/swc-win32-x64-msvc | 15.5.28 | False | MIT |
 | node_modules/@swc/helpers | 0.5.15 | False | Apache-2.0 |
 | node_modules/@types/node | 22.20.5 | True | MIT |
 | node_modules/@types/react | 19.3.0 | True | MIT |
@@ -79,18 +80,22 @@ Source target Java 21. Maven parent Spring Boot 4.1.1. A missing explicit Maven 
 | node_modules/client-only | 0.0.1 | False | MIT |
 | node_modules/csstype | 3.2.3 | True | MIT |
 | node_modules/detect-libc | 2.1.2 | False | Apache-2.0 |
+| node_modules/html-parse-stringify | 4.0.1 | False | MIT |
+| node_modules/i18next | 26.7.1 | False | MIT |
 | node_modules/lucide-react | 0.468.0 | False | ISC |
 | node_modules/nanoid | 3.3.20 | False | MIT |
-| node_modules/next | 15.5.27 | False | MIT |
+| node_modules/next | 15.5.28 | False | MIT |
 | node_modules/picocolors | 1.1.1 | False | ISC |
-| node_modules/postcss | 8.4.31 | False | MIT |
+| node_modules/postcss | 8.5.32 | False | MIT |
 | node_modules/react | 19.3.0 | False | MIT |
 | node_modules/react-dom | 19.3.0 | False | MIT |
+| node_modules/react-i18next | 17.1.11 | False | MIT |
 | node_modules/scheduler | 0.28.0 | False | MIT |
 | node_modules/semver | 7.8.5 | False | ISC |
 | node_modules/sharp | 0.35.5 | False | Apache-2.0 |
 | node_modules/source-map-js | 1.2.2 | False | BSD-3-Clause |
 | node_modules/styled-jsx | 5.1.6 | False | MIT |
 | node_modules/tslib | 2.8.1 | False | 0BSD |
-| node_modules/typescript | 5.9.3 | True | Apache-2.0 |
+| node_modules/typescript | 5.9.3 | False | Apache-2.0 |
 | node_modules/undici-types | 6.21.0 | True | MIT |
+| node_modules/use-sync-external-store | 1.7.0 | False | MIT |

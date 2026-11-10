@@ -1,0 +1,13 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+const s=readFileSync(new URL('../../../src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java',import.meta.url),'utf8');
+const v=readFileSync(new URL('../../../src/main/java/com/giftplatform/payment/direct/GuestVerifiedDestinationService.java',import.meta.url),'utf8');
+const c=readFileSync(new URL('../components/GuestContributionCheckout.tsx',import.meta.url),'utf8');
+const m=readFileSync(new URL('../../../src/main/resources/db/migration/V42__guest_direct_reporting_details.sql',import.meta.url),'utf8');
+test('manual route does not depend on provider reconciliation',()=>{assert.match(s,/this.enabled=enabled;/);assert.match(v,/this.active=transfers;/);});
+test('host-confirmed preferred only, archived excluded',()=>{for(const x of [s,v]){assert.match(x,/host_confirmed_at IS NOT NULL/);assert.match(x,/l\.preferred/);assert.match(x,/archived_at IS NULL/);}});
+test('UPI QR must be stored',()=>{assert.match(s,/host_upi_qr_images/);assert.match(v,/host_upi_qr_images/);});
+test('manual claim persists contact and UTR hash without ledger posting',()=>{assert.match(s,/guest_email,guest_phone/);assert.match(s,/reference_hash/);assert.doesNotMatch(s,/INSERT INTO contributions|INSERT INTO wallet_ledger_entries/);assert.match(m,/guest_email/);});
+test('thank you only after server claim succeeds',()=>{assert.match(c,/const result=await json/);assert.match(c,/Thank you for sharing your love!/);assert.doesNotMatch(c,/awaiting verification/i);});
+test('Razorpay capture remains provider verified',()=>{assert.match(c,/razorpaySignature:result.razorpay_signature/);assert.match(c,/setReceipt\(confirmation\)/);});

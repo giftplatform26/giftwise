@@ -1,6 +1,6 @@
 # Database catalogue
 
-Fresh PostgreSQL migration snapshot: V95. BASE TABLE and VIEW entries are distinguished. Column defaults are SQL expressions, not application defaults. FK rules below are the actual database-enforced relationships; logical associations are described in Document 1. No customer rows were exported.
+Fresh PostgreSQL migration snapshot: V107. BASE TABLE and VIEW entries are distinguished. Column defaults are SQL expressions, not application defaults. FK rules below are the actual database-enforced relationships; logical associations are described in Document 1. No customer rows were exported.
 
 ## account_contact_challenges
 
@@ -41,6 +41,38 @@ Type: **BASE TABLE**. Purpose: Authentication, contact verification, account rec
 
 
 Consumers: [backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:1](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L1); [backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:1](../../src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java#L1); [backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:1](../../src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java#L1); [backend/src/main/java/com/giftplatform/security/recovery/RecoveryChallengeStore.java:1](../../src/main/java/com/giftplatform/security/recovery/RecoveryChallengeStore.java#L1); [backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:1](../../src/main/java/com/giftplatform/security/verification/MobileVerificationService.java#L1)
+
+## account_legal_consents
+
+Type: **BASE TABLE**. Purpose: Authentication, contact verification, account recovery, throttling or session invalidation metadata.
+
+| Column | PostgreSQL type | Nullable | SQL default | Length / precision / scale | Description / validation |
+| --- | --- | --- | --- | --- | --- |
+| id | uuid / uuid | NO | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Identifier/reference. |
+| account_kind | character varying / varchar | NO | No SQL default | 30 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored account kind. |
+| account_id | uuid / uuid | NO | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Identifier/reference. |
+| terms_version | character varying / varchar | NO | No SQL default | 40 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored terms version. |
+| privacy_version | character varying / varchar | NO | No SQL default | 40 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored privacy version. |
+| accepted_at | timestamp with time zone / timestamptz | NO | `now()` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored accepted at. |
+
+
+### Constraints
+
+| Name | Type (p primary, f foreign, u unique, c check) | Exact definition |
+| --- | --- | --- |
+| account_legal_consents_account_kind_check | c | `CHECK (((account_kind)::text = ANY ((ARRAY['GROUP_ADMIN'::character varying, 'GROUP_MEMBER'::character varying])::text[])))` |
+| account_legal_consents_pkey | p | `PRIMARY KEY (id)` |
+
+
+### Indexes
+
+| Index | Definition |
+| --- | --- |
+| account_legal_consents_pkey | `CREATE UNIQUE INDEX account_legal_consents_pkey ON public.account_legal_consents USING btree (id)` |
+| idx_account_consents | `CREATE INDEX idx_account_consents ON public.account_legal_consents USING btree (account_kind, account_id, accepted_at)` |
+
+
+Consumers: [backend/src/main/java/com/giftplatform/group/GroupContributionController.java:1](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L1)
 
 ## account_pending_email_verifications
 
@@ -283,6 +315,56 @@ Type: **BASE TABLE**. Purpose: Monetization, commercial access, attribution, pro
 
 Consumers: [backend/src/main/java/com/giftplatform/monetization/CommercialPublicService.java:1](../../src/main/java/com/giftplatform/monetization/CommercialPublicService.java#L1); [backend/src/main/java/com/giftplatform/monetization/CommercialSetupService.java:1](../../src/main/java/com/giftplatform/monetization/CommercialSetupService.java#L1)
 
+## application_interactions
+
+Type: **BASE TABLE**. Purpose: Persisted application object; exact structural contract follows. Narrative ownership beyond its FK/consumer code requires review.
+
+| Column | PostgreSQL type | Nullable | SQL default | Length / precision / scale | Description / validation |
+| --- | --- | --- | --- | --- | --- |
+| id | uuid / uuid | NO | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Identifier/reference. |
+| parent_id | uuid / uuid | YES | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Identifier/reference. |
+| visitor_key | character varying / varchar | NO | No SQL default | 64 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored visitor key. |
+| kind | character varying / varchar | NO | No SQL default | 16 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored kind. |
+| source | character varying / varchar | NO | No SQL default | 16 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored source. |
+| actor_id | uuid / uuid | YES | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Identifier/reference. |
+| actor_role | character varying / varchar | NO | No SQL default | 16 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored actor role. |
+| host_id | uuid / uuid | YES | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Identifier/reference. |
+| event_id | uuid / uuid | YES | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Identifier/reference. |
+| action | character varying / varchar | NO | No SQL default | 64 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored action. |
+| page | character varying / varchar | NO | No SQL default | 240 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored page. |
+| control | character varying / varchar | NO | `''::character varying` | 160 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored control. |
+| destination | character varying / varchar | NO | `''::character varying` | 240 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored destination. |
+| outcome | character varying / varchar | NO | No SQL default | 32 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored outcome. |
+| detail | character varying / varchar | NO | `''::character varying` | 120 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored detail. |
+| http_status | integer / int4 | YES | No SQL default | None / 32 / 0 | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. State value; see CHECK constraints. |
+| duration_ms | bigint / int8 | YES | No SQL default | None / 64 / 0 | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored duration ms. |
+| created_at | timestamp with time zone / timestamptz | NO | `now()` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored created at. |
+| updated_at | timestamp with time zone / timestamptz | NO | `now()` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored updated at. |
+
+
+### Constraints
+
+| Name | Type (p primary, f foreign, u unique, c check) | Exact definition |
+| --- | --- | --- |
+| application_interactions_kind_check | c | `CHECK (((kind)::text = ANY ((ARRAY['CLICK'::character varying, 'PAGE_VIEW'::character varying, 'REQUEST'::character varying, 'OPERATION'::character varying])::text[])))` |
+| application_interactions_pkey | p | `PRIMARY KEY (id)` |
+| application_interactions_source_check | c | `CHECK (((source)::text = ANY ((ARRAY['BROWSER'::character varying, 'SERVER'::character varying])::text[])))` |
+
+
+### Indexes
+
+| Index | Definition |
+| --- | --- |
+| application_interactions_date | `CREATE INDEX application_interactions_date ON public.application_interactions USING btree (created_at DESC)` |
+| application_interactions_event_date | `CREATE INDEX application_interactions_event_date ON public.application_interactions USING btree (event_id, created_at DESC)` |
+| application_interactions_funnel | `CREATE INDEX application_interactions_funnel ON public.application_interactions USING btree (action, created_at DESC) WHERE ((kind)::text = ANY ((ARRAY['OPERATION'::character varying, 'REQUEST'::character varying])::text[]))` |
+| application_interactions_host_date | `CREATE INDEX application_interactions_host_date ON public.application_interactions USING btree (host_id, created_at DESC)` |
+| application_interactions_parent | `CREATE INDEX application_interactions_parent ON public.application_interactions USING btree (parent_id) WHERE (parent_id IS NOT NULL)` |
+| application_interactions_pkey | `CREATE UNIQUE INDEX application_interactions_pkey ON public.application_interactions USING btree (id)` |
+
+
+Consumers: [backend/src/main/java/com/giftplatform/analytics/InteractionAdminController.java:1](../../src/main/java/com/giftplatform/analytics/InteractionAdminController.java#L1); [backend/src/main/java/com/giftplatform/analytics/InteractionService.java:1](../../src/main/java/com/giftplatform/analytics/InteractionService.java#L1)
+
 ## audit_logs
 
 Type: **BASE TABLE**. Purpose: Application audit history for actor/resource changes.
@@ -320,7 +402,7 @@ Type: **BASE TABLE**. Purpose: Application audit history for actor/resource chan
 | idx_audit_occurred_at | `CREATE INDEX idx_audit_occurred_at ON public.audit_logs USING btree (occurred_at DESC)` |
 
 
-Consumers: [backend/src/main/java/com/giftplatform/audit/entity/AuditLog.java:1](../../src/main/java/com/giftplatform/audit/entity/AuditLog.java#L1); [backend/src/main/java/com/giftplatform/payment/settlement/HostSettlementUiService.java:1](../../src/main/java/com/giftplatform/payment/settlement/HostSettlementUiService.java#L1)
+Consumers: [backend/src/main/java/com/giftplatform/audit/api/BusinessAuditController.java:1](../../src/main/java/com/giftplatform/audit/api/BusinessAuditController.java#L1); [backend/src/main/java/com/giftplatform/audit/entity/AuditLog.java:1](../../src/main/java/com/giftplatform/audit/entity/AuditLog.java#L1); [backend/src/main/java/com/giftplatform/payment/settlement/HostSettlementUiService.java:1](../../src/main/java/com/giftplatform/payment/settlement/HostSettlementUiService.java#L1)
 
 ## commercial_entitlements
 
@@ -691,7 +773,49 @@ Type: **BASE TABLE**. Purpose: Confirmed or recorded payment contribution entiti
 | uq_contributions_id_event | `CREATE UNIQUE INDEX uq_contributions_id_event ON public.contributions USING btree (id, event_id)` |
 
 
-Consumers: [backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:1](../../src/main/java/com/giftplatform/gift/service/GiftManagementService.java#L1); [backend/src/main/java/com/giftplatform/group/GroupGiftCollectionController.java:1](../../src/main/java/com/giftplatform/group/GroupGiftCollectionController.java#L1); [backend/src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java:1](../../src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java#L1); [backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:1](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L1); [backend/src/main/java/com/giftplatform/group/GuestGiftController.java:1](../../src/main/java/com/giftplatform/group/GuestGiftController.java#L1); [backend/src/main/java/com/giftplatform/group/IndependentGroupGiftController.java:1](../../src/main/java/com/giftplatform/group/IndependentGroupGiftController.java#L1); [backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:1](../../src/main/java/com/giftplatform/group/IndividualGuestGiftController.java#L1); [backend/src/main/java/com/giftplatform/hostpayment/verification/cashfree/CashfreeVerificationAttemptService.java:1](../../src/main/java/com/giftplatform/hostpayment/verification/cashfree/CashfreeVerificationAttemptService.java#L1); [backend/src/main/java/com/giftplatform/monetization/CommercialController.java:1](../../src/main/java/com/giftplatform/monetization/CommercialController.java#L1); [backend/src/main/java/com/giftplatform/monetization/MonetizationService.java:1](../../src/main/java/com/giftplatform/monetization/MonetizationService.java#L1); [backend/src/main/java/com/giftplatform/payment/controller/PublicGiftProgressController.java:1](../../src/main/java/com/giftplatform/payment/controller/PublicGiftProgressController.java#L1); [backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:1](../../src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java#L1); [backend/src/main/java/com/giftplatform/payment/entity/Contribution.java:1](../../src/main/java/com/giftplatform/payment/entity/Contribution.java#L1); [backend/src/main/java/com/giftplatform/payment/report/HostContributionReportController.java:1](../../src/main/java/com/giftplatform/payment/report/HostContributionReportController.java#L1); [backend/src/main/java/com/giftplatform/payment/report/HostContributionReportService.java:1](../../src/main/java/com/giftplatform/payment/report/HostContributionReportService.java#L1); [backend/src/main/java/com/giftplatform/payment/service/ContributionAllocationService.java:1](../../src/main/java/com/giftplatform/payment/service/ContributionAllocationService.java#L1); [backend/src/main/java/com/giftplatform/payment/service/GiftFundingService.java:1](../../src/main/java/com/giftplatform/payment/service/GiftFundingService.java#L1); [backend/src/main/java/com/giftplatform/payment/service/GuestCheckoutService.java:1](../../src/main/java/com/giftplatform/payment/service/GuestCheckoutService.java#L1); [backend/src/main/java/com/giftplatform/payment/service/PaymentNotificationService.java:1](../../src/main/java/com/giftplatform/payment/service/PaymentNotificationService.java#L1); [backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:1](../../src/main/java/com/giftplatform/payment/service/PaymentOrderService.java#L1); [backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:1](../../src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java#L1)
+Consumers: [backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:1](../../src/main/java/com/giftplatform/gift/service/GiftManagementService.java#L1); [backend/src/main/java/com/giftplatform/group/GroupGiftCollectionController.java:1](../../src/main/java/com/giftplatform/group/GroupGiftCollectionController.java#L1); [backend/src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java:1](../../src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java#L1); [backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:1](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L1); [backend/src/main/java/com/giftplatform/group/GuestGiftController.java:1](../../src/main/java/com/giftplatform/group/GuestGiftController.java#L1); [backend/src/main/java/com/giftplatform/group/IndependentGroupGiftController.java:1](../../src/main/java/com/giftplatform/group/IndependentGroupGiftController.java#L1); [backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:1](../../src/main/java/com/giftplatform/group/IndividualGuestGiftController.java#L1); [backend/src/main/java/com/giftplatform/hostpayment/verification/cashfree/CashfreeVerificationAttemptService.java:1](../../src/main/java/com/giftplatform/hostpayment/verification/cashfree/CashfreeVerificationAttemptService.java#L1); [backend/src/main/java/com/giftplatform/monetization/CommercialController.java:1](../../src/main/java/com/giftplatform/monetization/CommercialController.java#L1); [backend/src/main/java/com/giftplatform/monetization/MonetizationService.java:1](../../src/main/java/com/giftplatform/monetization/MonetizationService.java#L1); [backend/src/main/java/com/giftplatform/notification/email/TransactionalEmailOutbox.java:1](../../src/main/java/com/giftplatform/notification/email/TransactionalEmailOutbox.java#L1); [backend/src/main/java/com/giftplatform/payment/controller/PublicGiftProgressController.java:1](../../src/main/java/com/giftplatform/payment/controller/PublicGiftProgressController.java#L1); [backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:1](../../src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java#L1); [backend/src/main/java/com/giftplatform/payment/entity/Contribution.java:1](../../src/main/java/com/giftplatform/payment/entity/Contribution.java#L1); [backend/src/main/java/com/giftplatform/payment/report/HostContributionReportController.java:1](../../src/main/java/com/giftplatform/payment/report/HostContributionReportController.java#L1); [backend/src/main/java/com/giftplatform/payment/report/HostContributionReportService.java:1](../../src/main/java/com/giftplatform/payment/report/HostContributionReportService.java#L1); [backend/src/main/java/com/giftplatform/payment/service/ContributionAllocationService.java:1](../../src/main/java/com/giftplatform/payment/service/ContributionAllocationService.java#L1); [backend/src/main/java/com/giftplatform/payment/service/GiftFundingService.java:1](../../src/main/java/com/giftplatform/payment/service/GiftFundingService.java#L1); [backend/src/main/java/com/giftplatform/payment/service/GuestCheckoutService.java:1](../../src/main/java/com/giftplatform/payment/service/GuestCheckoutService.java#L1); [backend/src/main/java/com/giftplatform/payment/service/PaymentNotificationService.java:1](../../src/main/java/com/giftplatform/payment/service/PaymentNotificationService.java#L1); [backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:1](../../src/main/java/com/giftplatform/payment/service/PaymentOrderService.java#L1); [backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:1](../../src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java#L1)
+
+## coupon_redemptions
+
+Type: **BASE TABLE**. Purpose: Persisted application object; exact structural contract follows. Narrative ownership beyond its FK/consumer code requires review.
+
+| Column | PostgreSQL type | Nullable | SQL default | Length / precision / scale | Description / validation |
+| --- | --- | --- | --- | --- | --- |
+| id | uuid / uuid | NO | `gen_random_uuid()` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Identifier/reference. |
+| coupon_id | uuid / uuid | NO | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Identifier/reference. |
+| user_id | uuid / uuid | NO | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Identifier/reference. |
+| source_reference | character varying / varchar | NO | No SQL default | 180 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored source reference. |
+| discount_minor | bigint / int8 | NO | No SQL default | None / 64 / 0 | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored discount minor. |
+| currency | character varying / varchar | NO | No SQL default | 3 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored currency. |
+| status | character varying / varchar | NO | No SQL default | 16 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. State value; see CHECK constraints. |
+| created_at | timestamp with time zone / timestamptz | NO | `now()` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored created at. |
+| expires_at | timestamp with time zone / timestamptz | YES | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored expires at. |
+
+
+### Constraints
+
+| Name | Type (p primary, f foreign, u unique, c check) | Exact definition |
+| --- | --- | --- |
+| coupon_redemptions_check | c | `CHECK (((expires_at IS NULL) OR (expires_at > created_at)))` |
+| coupon_redemptions_coupon_id_fkey | f | `FOREIGN KEY (coupon_id) REFERENCES promotional_coupons(id)` |
+| coupon_redemptions_currency_fkey | f | `FOREIGN KEY (currency) REFERENCES supported_currencies(code)` |
+| coupon_redemptions_discount_minor_check | c | `CHECK ((discount_minor >= 0))` |
+| coupon_redemptions_pkey | p | `PRIMARY KEY (id)` |
+| coupon_redemptions_source_reference_key | u | `UNIQUE (source_reference)` |
+| coupon_redemptions_status_check | c | `CHECK (((status)::text = ANY ((ARRAY['RESERVED'::character varying, 'APPLIED'::character varying, 'RELEASED'::character varying])::text[])))` |
+| coupon_redemptions_user_id_fkey | f | `FOREIGN KEY (user_id) REFERENCES users(id)` |
+
+
+### Indexes
+
+| Index | Definition |
+| --- | --- |
+| coupon_redemptions_pkey | `CREATE UNIQUE INDEX coupon_redemptions_pkey ON public.coupon_redemptions USING btree (id)` |
+| coupon_redemptions_source_reference_key | `CREATE UNIQUE INDEX coupon_redemptions_source_reference_key ON public.coupon_redemptions USING btree (source_reference)` |
+| idx_coupon_redemption_limits | `CREATE INDEX idx_coupon_redemption_limits ON public.coupon_redemptions USING btree (coupon_id, user_id, status)` |
+
+
+Consumers: No direct Java literal reference found; migrations, views, triggers or indirect table selection may be the consumer.
 
 ## credential_session_versions
 
@@ -722,6 +846,41 @@ Type: **BASE TABLE**. Purpose: Authentication, contact verification, account rec
 
 
 Consumers: [backend/src/main/java/com/giftplatform/security/recovery/CredentialSessionVersionStore.java:1](../../src/main/java/com/giftplatform/security/recovery/CredentialSessionVersionStore.java#L1)
+
+## event_celebration_settings
+
+Type: **BASE TABLE**. Purpose: Event-scoped guest responses, guestbook, notification preferences or submission limits.
+
+| Column | PostgreSQL type | Nullable | SQL default | Length / precision / scale | Description / validation |
+| --- | --- | --- | --- | --- | --- |
+| event_id | uuid / uuid | NO | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Identifier/reference. |
+| welcome_message | character varying / varchar | NO | `''::character varying` | 500 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored welcome message. |
+| share_venue | boolean / bool | NO | `false` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored share venue. |
+| start_time | time without time zone / time | YES | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored start time. |
+| timezone | character varying / varchar | NO | `'Asia/Kolkata'::character varying` | 80 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored timezone. |
+| duration_minutes | integer / int4 | NO | `120` | None / 32 / 0 | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored duration minutes. |
+| arrival_notes | character varying / varchar | NO | `''::character varying` | 1000 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored arrival notes. |
+| version | bigint / int8 | NO | `0` | None / 64 / 0 | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored version. |
+| changed_at | timestamp with time zone / timestamptz | NO | `now()` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored changed at. |
+
+
+### Constraints
+
+| Name | Type (p primary, f foreign, u unique, c check) | Exact definition |
+| --- | --- | --- |
+| event_celebration_settings_duration_minutes_check | c | `CHECK (((duration_minutes >= 15) AND (duration_minutes <= 1440)))` |
+| event_celebration_settings_event_id_fkey | f | `FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE` |
+| event_celebration_settings_pkey | p | `PRIMARY KEY (event_id)` |
+
+
+### Indexes
+
+| Index | Definition |
+| --- | --- |
+| event_celebration_settings_pkey | `CREATE UNIQUE INDEX event_celebration_settings_pkey ON public.event_celebration_settings USING btree (event_id)` |
+
+
+Consumers: [backend/src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java:1](../../src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java#L1)
 
 ## event_guest_submission_limits
 
@@ -787,7 +946,7 @@ Type: **BASE TABLE**. Purpose: Event-scoped guest responses, guestbook, notifica
 | ix_event_guestbook_event_status | `CREATE INDEX ix_event_guestbook_event_status ON public.event_guestbook USING btree (event_id, status, created_at DESC)` |
 
 
-Consumers: [backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:1](../../src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java#L1); [backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:1](../../src/main/java/com/giftplatform/celebration/CelebrationController.java#L1); [backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:1](../../src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java#L1); [backend/src/main/java/com/giftplatform/celebration/MemoryAlbumController.java:1](../../src/main/java/com/giftplatform/celebration/MemoryAlbumController.java#L1)
+Consumers: [backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:1](../../src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java#L1); [backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:1](../../src/main/java/com/giftplatform/celebration/CelebrationController.java#L1); [backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:1](../../src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java#L1); [backend/src/main/java/com/giftplatform/celebration/MemoryAlbumController.java:1](../../src/main/java/com/giftplatform/celebration/MemoryAlbumController.java#L1); [backend/src/main/java/com/giftplatform/celebrationplanning/CelebrationKeepsakeController.java:1](../../src/main/java/com/giftplatform/celebrationplanning/CelebrationKeepsakeController.java#L1); [backend/src/main/java/com/giftplatform/publicevent/PublicKeepsakeController.java:1](../../src/main/java/com/giftplatform/publicevent/PublicKeepsakeController.java#L1)
 
 ## event_payment_account_links
 
@@ -864,7 +1023,7 @@ Type: **BASE TABLE**. Purpose: Event-scoped guest responses, guestbook, notifica
 | ux_event_rsvp_email | `CREATE UNIQUE INDEX ux_event_rsvp_email ON public.event_rsvps USING btree (event_id, guest_email)` |
 
 
-Consumers: [backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:1](../../src/main/java/com/giftplatform/celebration/CelebrationController.java#L1)
+Consumers: [backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:1](../../src/main/java/com/giftplatform/celebration/CelebrationController.java#L1); [backend/src/main/java/com/giftplatform/event/Controller/WorkspaceSummaryController.java:1](../../src/main/java/com/giftplatform/event/Controller/WorkspaceSummaryController.java#L1)
 
 ## event_thank_you_settings
 
@@ -940,6 +1099,9 @@ Type: **BASE TABLE**. Purpose: Host-owned celebration, invitation identity, life
 | delivery_state | character varying / varchar | YES | No SQL default | 120 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored delivery state. |
 | delivery_postal_code | character varying / varchar | YES | No SQL default | 20 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored delivery postal code. |
 | delivery_country | character varying / varchar | YES | No SQL default | 80 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored delivery country. |
+| gifting_enabled | boolean / bool | NO | `true` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored gifting enabled. |
+| share_preview_enabled | boolean / bool | NO | `false` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored share preview enabled. |
+| keepsake_enabled | boolean / bool | NO | `false` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored keepsake enabled. |
 
 
 ### Constraints
@@ -968,7 +1130,7 @@ Type: **BASE TABLE**. Purpose: Host-owned celebration, invitation identity, life
 | ux_events_id_owner | `CREATE UNIQUE INDEX ux_events_id_owner ON public.events USING btree (id, owner_id)` |
 
 
-Consumers: [backend/src/main/java/com/giftplatform/admin/AccountPolicyController.java:1](../../src/main/java/com/giftplatform/admin/AccountPolicyController.java#L1); [backend/src/main/java/com/giftplatform/admin/AiInvitationAdminController.java:1](../../src/main/java/com/giftplatform/admin/AiInvitationAdminController.java#L1); [backend/src/main/java/com/giftplatform/admin/EffectiveModulePermissionService.java:1](../../src/main/java/com/giftplatform/admin/EffectiveModulePermissionService.java#L1); [backend/src/main/java/com/giftplatform/admin/ExperienceSettingsController.java:1](../../src/main/java/com/giftplatform/admin/ExperienceSettingsController.java#L1); [backend/src/main/java/com/giftplatform/admin/GroupModuleInterceptor.java:1](../../src/main/java/com/giftplatform/admin/GroupModuleInterceptor.java#L1); [backend/src/main/java/com/giftplatform/admin/ModulePrivilegeWebConfiguration.java:1](../../src/main/java/com/giftplatform/admin/ModulePrivilegeWebConfiguration.java#L1); [backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:1](../../src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java#L1); [backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:1](../../src/main/java/com/giftplatform/celebration/CelebrationController.java#L1); [backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:1](../../src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java#L1); [backend/src/main/java/com/giftplatform/celebration/MemoryAlbumController.java:1](../../src/main/java/com/giftplatform/celebration/MemoryAlbumController.java#L1); [backend/src/main/java/com/giftplatform/event/Controller/EventController.java:1](../../src/main/java/com/giftplatform/event/Controller/EventController.java#L1); [backend/src/main/java/com/giftplatform/event/entity/Event.java:1](../../src/main/java/com/giftplatform/event/entity/Event.java#L1); [backend/src/main/java/com/giftplatform/gift/controller/GiftController.java:1](../../src/main/java/com/giftplatform/gift/controller/GiftController.java#L1); [backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoController.java:1](../../src/main/java/com/giftplatform/gift/photo/GiftPhotoController.java#L1); [backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java:1](../../src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java#L1); [backend/src/main/java/com/giftplatform/gift/retailer/RetailerMetadataController.java:1](../../src/main/java/com/giftplatform/gift/retailer/RetailerMetadataController.java#L1); [backend/src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java:1](../../src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java#L1); [backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:1](../../src/main/java/com/giftplatform/gift/service/GiftManagementService.java#L1); [backend/src/main/java/com/giftplatform/group/GroupContributionController.java:1](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L1); [backend/src/main/java/com/giftplatform/group/GroupGiftCollectionController.java:1](../../src/main/java/com/giftplatform/group/GroupGiftCollectionController.java#L1); [backend/src/main/java/com/giftplatform/group/GroupGiftCompletionController.java:1](../../src/main/java/com/giftplatform/group/GroupGiftCompletionController.java#L1); [backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:1](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L1); [backend/src/main/java/com/giftplatform/group/GroupReadinessService.java:1](../../src/main/java/com/giftplatform/group/GroupReadinessService.java#L1); [backend/src/main/java/com/giftplatform/group/GuestGiftController.java:1](../../src/main/java/com/giftplatform/group/GuestGiftController.java#L1); [backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:1](../../src/main/java/com/giftplatform/group/IndividualGuestGiftController.java#L1); [backend/src/main/java/com/giftplatform/hostpayment/controller/ReceivingAccountHealthController.java:1](../../src/main/java/com/giftplatform/hostpayment/controller/ReceivingAccountHealthController.java#L1); [backend/src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java:1](../../src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java#L1); [backend/src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java:1](../../src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java#L1); [backend/src/main/java/com/giftplatform/monetization/CommercialAccessService.java:1](../../src/main/java/com/giftplatform/monetization/CommercialAccessService.java#L1); [backend/src/main/java/com/giftplatform/monetization/CommercialController.java:1](../../src/main/java/com/giftplatform/monetization/CommercialController.java#L1); [backend/src/main/java/com/giftplatform/monetization/CommercialPublicService.java:1](../../src/main/java/com/giftplatform/monetization/CommercialPublicService.java#L1); [backend/src/main/java/com/giftplatform/notification/HostInboxController.java:1](../../src/main/java/com/giftplatform/notification/HostInboxController.java#L1); [backend/src/main/java/com/giftplatform/notification/HostThankYouController.java:1](../../src/main/java/com/giftplatform/notification/HostThankYouController.java#L1); [backend/src/main/java/com/giftplatform/notification/HostThankYouService.java:1](../../src/main/java/com/giftplatform/notification/HostThankYouService.java#L1); [backend/src/main/java/com/giftplatform/notification/ManualClaimNotificationService.java:1](../../src/main/java/com/giftplatform/notification/ManualClaimNotificationService.java#L1); [backend/src/main/java/com/giftplatform/payment/control/PaymentControlController.java:1](../../src/main/java/com/giftplatform/payment/control/PaymentControlController.java#L1); [backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:1](../../src/main/java/com/giftplatform/payment/control/PaymentControlService.java#L1); [backend/src/main/java/com/giftplatform/payment/controller/PublicGiftProgressController.java:1](../../src/main/java/com/giftplatform/payment/controller/PublicGiftProgressController.java#L1); [backend/src/main/java/com/giftplatform/payment/controller/PublicPaymentContextController.java:1](../../src/main/java/com/giftplatform/payment/controller/PublicPaymentContextController.java#L1); [backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:1](../../src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java#L1); [backend/src/main/java/com/giftplatform/payment/direct/GuestVerifiedDestinationService.java:1](../../src/main/java/com/giftplatform/payment/direct/GuestVerifiedDestinationService.java#L1); [backend/src/main/java/com/giftplatform/payment/hybrid/HybridCheckoutQuoteService.java:1](../../src/main/java/com/giftplatform/payment/hybrid/HybridCheckoutQuoteService.java#L1); [backend/src/main/java/com/giftplatform/payment/report/HostContributionReportController.java:1](../../src/main/java/com/giftplatform/payment/report/HostContributionReportController.java#L1); [backend/src/main/java/com/giftplatform/payment/report/HostContributionReportService.java:1](../../src/main/java/com/giftplatform/payment/report/HostContributionReportService.java#L1); [backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:1](../../src/main/java/com/giftplatform/payment/service/PaymentOrderService.java#L1); [backend/src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java:1](../../src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java#L1); [backend/src/main/java/com/giftplatform/payment/settlement/HostPayoutRequestService.java:1](../../src/main/java/com/giftplatform/payment/settlement/HostPayoutRequestService.java#L1); [backend/src/main/java/com/giftplatform/payment/settlement/HostSettlementUiController.java:1](../../src/main/java/com/giftplatform/payment/settlement/HostSettlementUiController.java#L1); [backend/src/main/java/com/giftplatform/payment/settlement/HostSettlementUiService.java:1](../../src/main/java/com/giftplatform/payment/settlement/HostSettlementUiService.java#L1); [backend/src/main/java/com/giftplatform/payment/verification/HostTransactionVerificationController.java:1](../../src/main/java/com/giftplatform/payment/verification/HostTransactionVerificationController.java#L1); [backend/src/main/java/com/giftplatform/publicevent/PublicEventController.java:1](../../src/main/java/com/giftplatform/publicevent/PublicEventController.java#L1); [backend/src/main/java/com/giftplatform/qr/EventQrController.java:1](../../src/main/java/com/giftplatform/qr/EventQrController.java#L1); [backend/src/main/java/com/giftplatform/qr/EventQrService.java:1](../../src/main/java/com/giftplatform/qr/EventQrService.java#L1); [backend/src/main/java/com/giftplatform/qr/design/InvitationDesignController.java:1](../../src/main/java/com/giftplatform/qr/design/InvitationDesignController.java#L1); [backend/src/main/java/com/giftplatform/qr/design/InvitationDesignService.java:1](../../src/main/java/com/giftplatform/qr/design/InvitationDesignService.java#L1); [backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationController.java:1](../../src/main/java/com/giftplatform/qr/design/ai/AiInvitationController.java#L1); [backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationOptionsController.java:1](../../src/main/java/com/giftplatform/qr/design/ai/AiInvitationOptionsController.java#L1); [backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationService.java:1](../../src/main/java/com/giftplatform/qr/design/ai/AiInvitationService.java#L1); [backend/src/main/java/com/giftplatform/security/SecurityConfig.java:1](../../src/main/java/com/giftplatform/security/SecurityConfig.java#L1); [backend/src/main/java/com/giftplatform/security/recovery/EffectiveRecoveryPolicyService.java:1](../../src/main/java/com/giftplatform/security/recovery/EffectiveRecoveryPolicyService.java#L1); [backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:1](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L1); [backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:1](../../src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java#L1); [backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:1](../../src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java#L1); [backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:1](../../src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java#L1); [backend/src/main/java/com/giftplatform/security/recovery/UsernameRecoveryController.java:1](../../src/main/java/com/giftplatform/security/recovery/UsernameRecoveryController.java#L1)
+Consumers: [backend/src/main/java/com/giftplatform/admin/AccountPolicyController.java:1](../../src/main/java/com/giftplatform/admin/AccountPolicyController.java#L1); [backend/src/main/java/com/giftplatform/admin/AiInvitationAdminController.java:1](../../src/main/java/com/giftplatform/admin/AiInvitationAdminController.java#L1); [backend/src/main/java/com/giftplatform/admin/EffectiveModulePermissionService.java:1](../../src/main/java/com/giftplatform/admin/EffectiveModulePermissionService.java#L1); [backend/src/main/java/com/giftplatform/admin/EventModuleGrantsController.java:1](../../src/main/java/com/giftplatform/admin/EventModuleGrantsController.java#L1); [backend/src/main/java/com/giftplatform/admin/ExperienceSettingsController.java:1](../../src/main/java/com/giftplatform/admin/ExperienceSettingsController.java#L1); [backend/src/main/java/com/giftplatform/admin/GroupModuleInterceptor.java:1](../../src/main/java/com/giftplatform/admin/GroupModuleInterceptor.java#L1); [backend/src/main/java/com/giftplatform/admin/ModulePrivilegeWebConfiguration.java:1](../../src/main/java/com/giftplatform/admin/ModulePrivilegeWebConfiguration.java#L1); [backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:1](../../src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java#L1); [backend/src/main/java/com/giftplatform/analytics/InteractionAdminController.java:1](../../src/main/java/com/giftplatform/analytics/InteractionAdminController.java#L1); [backend/src/main/java/com/giftplatform/analytics/InteractionController.java:1](../../src/main/java/com/giftplatform/analytics/InteractionController.java#L1); [backend/src/main/java/com/giftplatform/analytics/InteractionRequestFilter.java:1](../../src/main/java/com/giftplatform/analytics/InteractionRequestFilter.java#L1); [backend/src/main/java/com/giftplatform/analytics/InteractionScope.java:1](../../src/main/java/com/giftplatform/analytics/InteractionScope.java#L1); [backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:1](../../src/main/java/com/giftplatform/celebration/CelebrationController.java#L1); [backend/src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java:1](../../src/main/java/com/giftplatform/celebration/GuestbookPhotoController.java#L1); [backend/src/main/java/com/giftplatform/celebration/MemoryAlbumController.java:1](../../src/main/java/com/giftplatform/celebration/MemoryAlbumController.java#L1); [backend/src/main/java/com/giftplatform/celebrationplanning/CelebrationKeepsakeController.java:1](../../src/main/java/com/giftplatform/celebrationplanning/CelebrationKeepsakeController.java#L1); [backend/src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java:1](../../src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java#L1); [backend/src/main/java/com/giftplatform/event/Controller/EventController.java:1](../../src/main/java/com/giftplatform/event/Controller/EventController.java#L1); [backend/src/main/java/com/giftplatform/event/Controller/WorkspaceSummaryController.java:1](../../src/main/java/com/giftplatform/event/Controller/WorkspaceSummaryController.java#L1); [backend/src/main/java/com/giftplatform/event/entity/Event.java:1](../../src/main/java/com/giftplatform/event/entity/Event.java#L1); [backend/src/main/java/com/giftplatform/gift/controller/GiftController.java:1](../../src/main/java/com/giftplatform/gift/controller/GiftController.java#L1); [backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoController.java:1](../../src/main/java/com/giftplatform/gift/photo/GiftPhotoController.java#L1); [backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java:1](../../src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java#L1); [backend/src/main/java/com/giftplatform/gift/retailer/RetailerMetadataController.java:1](../../src/main/java/com/giftplatform/gift/retailer/RetailerMetadataController.java#L1); [backend/src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java:1](../../src/main/java/com/giftplatform/gift/retailer/RetailerMetadataService.java#L1); [backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:1](../../src/main/java/com/giftplatform/gift/service/GiftManagementService.java#L1); [backend/src/main/java/com/giftplatform/group/GroupContributionController.java:1](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L1); [backend/src/main/java/com/giftplatform/group/GroupGiftCollectionController.java:1](../../src/main/java/com/giftplatform/group/GroupGiftCollectionController.java#L1); [backend/src/main/java/com/giftplatform/group/GroupGiftCompletionController.java:1](../../src/main/java/com/giftplatform/group/GroupGiftCompletionController.java#L1); [backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:1](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L1); [backend/src/main/java/com/giftplatform/group/GroupReadinessService.java:1](../../src/main/java/com/giftplatform/group/GroupReadinessService.java#L1); [backend/src/main/java/com/giftplatform/group/GuestGiftController.java:1](../../src/main/java/com/giftplatform/group/GuestGiftController.java#L1); [backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:1](../../src/main/java/com/giftplatform/group/IndividualGuestGiftController.java#L1); [backend/src/main/java/com/giftplatform/hostpayment/controller/ReceivingAccountHealthController.java:1](../../src/main/java/com/giftplatform/hostpayment/controller/ReceivingAccountHealthController.java#L1); [backend/src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java:1](../../src/main/java/com/giftplatform/hostpayment/service/EventAccountLinkService.java#L1); [backend/src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java:1](../../src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java#L1); [backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:1](../../src/main/java/com/giftplatform/localization/LocalizationAdminController.java#L1); [backend/src/main/java/com/giftplatform/localization/LocalizationRequestConfiguration.java:1](../../src/main/java/com/giftplatform/localization/LocalizationRequestConfiguration.java#L1); [backend/src/main/java/com/giftplatform/localization/LocalizationService.java:1](../../src/main/java/com/giftplatform/localization/LocalizationService.java#L1); [backend/src/main/java/com/giftplatform/monetization/CommercialAccessService.java:1](../../src/main/java/com/giftplatform/monetization/CommercialAccessService.java#L1); [backend/src/main/java/com/giftplatform/monetization/CommercialController.java:1](../../src/main/java/com/giftplatform/monetization/CommercialController.java#L1); [backend/src/main/java/com/giftplatform/monetization/CommercialPublicService.java:1](../../src/main/java/com/giftplatform/monetization/CommercialPublicService.java#L1); [backend/src/main/java/com/giftplatform/notification/HostInboxController.java:1](../../src/main/java/com/giftplatform/notification/HostInboxController.java#L1); [backend/src/main/java/com/giftplatform/notification/HostThankYouController.java:1](../../src/main/java/com/giftplatform/notification/HostThankYouController.java#L1); [backend/src/main/java/com/giftplatform/notification/HostThankYouService.java:1](../../src/main/java/com/giftplatform/notification/HostThankYouService.java#L1); [backend/src/main/java/com/giftplatform/notification/ManualClaimNotificationService.java:1](../../src/main/java/com/giftplatform/notification/ManualClaimNotificationService.java#L1); [backend/src/main/java/com/giftplatform/notification/email/EventInvitationEmailController.java:1](../../src/main/java/com/giftplatform/notification/email/EventInvitationEmailController.java#L1); [backend/src/main/java/com/giftplatform/notification/email/TransactionalEmailOutbox.java:1](../../src/main/java/com/giftplatform/notification/email/TransactionalEmailOutbox.java#L1); [backend/src/main/java/com/giftplatform/payment/control/PaymentControlController.java:1](../../src/main/java/com/giftplatform/payment/control/PaymentControlController.java#L1); [backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:1](../../src/main/java/com/giftplatform/payment/control/PaymentControlService.java#L1); [backend/src/main/java/com/giftplatform/payment/controller/PublicGiftProgressController.java:1](../../src/main/java/com/giftplatform/payment/controller/PublicGiftProgressController.java#L1); [backend/src/main/java/com/giftplatform/payment/controller/PublicPaymentContextController.java:1](../../src/main/java/com/giftplatform/payment/controller/PublicPaymentContextController.java#L1); [backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:1](../../src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java#L1); [backend/src/main/java/com/giftplatform/payment/direct/GuestVerifiedDestinationService.java:1](../../src/main/java/com/giftplatform/payment/direct/GuestVerifiedDestinationService.java#L1); [backend/src/main/java/com/giftplatform/payment/hybrid/HybridCheckoutQuoteService.java:1](../../src/main/java/com/giftplatform/payment/hybrid/HybridCheckoutQuoteService.java#L1); [backend/src/main/java/com/giftplatform/payment/report/HostContributionReportController.java:1](../../src/main/java/com/giftplatform/payment/report/HostContributionReportController.java#L1); [backend/src/main/java/com/giftplatform/payment/report/HostContributionReportService.java:1](../../src/main/java/com/giftplatform/payment/report/HostContributionReportService.java#L1); [backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:1](../../src/main/java/com/giftplatform/payment/service/PaymentOrderService.java#L1); [backend/src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java:1](../../src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java#L1); [backend/src/main/java/com/giftplatform/payment/settlement/HostPayoutRequestService.java:1](../../src/main/java/com/giftplatform/payment/settlement/HostPayoutRequestService.java#L1); [backend/src/main/java/com/giftplatform/payment/settlement/HostSettlementUiController.java:1](../../src/main/java/com/giftplatform/payment/settlement/HostSettlementUiController.java#L1); [backend/src/main/java/com/giftplatform/payment/settlement/HostSettlementUiService.java:1](../../src/main/java/com/giftplatform/payment/settlement/HostSettlementUiService.java#L1); [backend/src/main/java/com/giftplatform/payment/verification/HostTransactionVerificationController.java:1](../../src/main/java/com/giftplatform/payment/verification/HostTransactionVerificationController.java#L1); [backend/src/main/java/com/giftplatform/publicevent/PublicEventController.java:1](../../src/main/java/com/giftplatform/publicevent/PublicEventController.java#L1); [backend/src/main/java/com/giftplatform/publicevent/PublicKeepsakeController.java:1](../../src/main/java/com/giftplatform/publicevent/PublicKeepsakeController.java#L1); [backend/src/main/java/com/giftplatform/publicevent/SharingPreviewController.java:1](../../src/main/java/com/giftplatform/publicevent/SharingPreviewController.java#L1); [backend/src/main/java/com/giftplatform/qr/EventQrController.java:1](../../src/main/java/com/giftplatform/qr/EventQrController.java#L1); [backend/src/main/java/com/giftplatform/qr/EventQrService.java:1](../../src/main/java/com/giftplatform/qr/EventQrService.java#L1); [backend/src/main/java/com/giftplatform/qr/design/InvitationDesignController.java:1](../../src/main/java/com/giftplatform/qr/design/InvitationDesignController.java#L1); [backend/src/main/java/com/giftplatform/qr/design/InvitationDesignService.java:1](../../src/main/java/com/giftplatform/qr/design/InvitationDesignService.java#L1); [backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationController.java:1](../../src/main/java/com/giftplatform/qr/design/ai/AiInvitationController.java#L1); [backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationOptionsController.java:1](../../src/main/java/com/giftplatform/qr/design/ai/AiInvitationOptionsController.java#L1); [backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationService.java:1](../../src/main/java/com/giftplatform/qr/design/ai/AiInvitationService.java#L1); [backend/src/main/java/com/giftplatform/security/SecurityConfig.java:1](../../src/main/java/com/giftplatform/security/SecurityConfig.java#L1); [backend/src/main/java/com/giftplatform/security/recovery/EffectiveRecoveryPolicyService.java:1](../../src/main/java/com/giftplatform/security/recovery/EffectiveRecoveryPolicyService.java#L1); [backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:1](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L1); [backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:1](../../src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java#L1); [backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:1](../../src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java#L1); [backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:1](../../src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java#L1); [backend/src/main/java/com/giftplatform/security/recovery/UsernameRecoveryController.java:1](../../src/main/java/com/giftplatform/security/recovery/UsernameRecoveryController.java#L1)
 
 ## flyway_schema_history
 
@@ -1492,7 +1654,7 @@ Type: **BASE TABLE**. Purpose: Invitation/group/individual gift coordination, co
 | uq_reserved_group_gift | `CREATE UNIQUE INDEX uq_reserved_group_gift ON public.gift_groups USING btree (reserved_gift_id) WHERE (reserved_gift_id IS NOT NULL)` |
 
 
-Consumers: [backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:1](../../src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java#L1); [backend/src/main/java/com/giftplatform/group/GroupContributionController.java:1](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L1); [backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:1](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L1); [backend/src/main/java/com/giftplatform/group/GroupGiftCollectionController.java:1](../../src/main/java/com/giftplatform/group/GroupGiftCollectionController.java#L1); [backend/src/main/java/com/giftplatform/group/GroupGiftCompletionController.java:1](../../src/main/java/com/giftplatform/group/GroupGiftCompletionController.java#L1); [backend/src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java:1](../../src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java#L1); [backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:1](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L1); [backend/src/main/java/com/giftplatform/group/GroupReadinessService.java:1](../../src/main/java/com/giftplatform/group/GroupReadinessService.java#L1); [backend/src/main/java/com/giftplatform/group/GuestGiftController.java:1](../../src/main/java/com/giftplatform/group/GuestGiftController.java#L1); [backend/src/main/java/com/giftplatform/group/IndependentGroupGiftController.java:1](../../src/main/java/com/giftplatform/group/IndependentGroupGiftController.java#L1); [backend/src/main/java/com/giftplatform/monetization/CommercialAccessService.java:1](../../src/main/java/com/giftplatform/monetization/CommercialAccessService.java#L1); [backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:1](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L1); [backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:1](../../src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java#L1); [backend/src/main/java/com/giftplatform/payment/report/HostContributionReportService.java:1](../../src/main/java/com/giftplatform/payment/report/HostContributionReportService.java#L1); [backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:1](../../src/main/java/com/giftplatform/payment/service/PaymentOrderService.java#L1); [backend/src/main/java/com/giftplatform/publicevent/PublicEventController.java:1](../../src/main/java/com/giftplatform/publicevent/PublicEventController.java#L1); [backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:1](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L1); [backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:1](../../src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java#L1); [backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:1](../../src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java#L1); [backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:1](../../src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java#L1); [backend/src/main/java/com/giftplatform/security/recovery/UsernameRecoveryController.java:1](../../src/main/java/com/giftplatform/security/recovery/UsernameRecoveryController.java#L1)
+Consumers: [backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:1](../../src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java#L1); [backend/src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java:1](../../src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java#L1); [backend/src/main/java/com/giftplatform/group/GroupContributionController.java:1](../../src/main/java/com/giftplatform/group/GroupContributionController.java#L1); [backend/src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java:1](../../src/main/java/com/giftplatform/group/GroupCreatorPaymentController.java#L1); [backend/src/main/java/com/giftplatform/group/GroupGiftCollectionController.java:1](../../src/main/java/com/giftplatform/group/GroupGiftCollectionController.java#L1); [backend/src/main/java/com/giftplatform/group/GroupGiftCompletionController.java:1](../../src/main/java/com/giftplatform/group/GroupGiftCompletionController.java#L1); [backend/src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java:1](../../src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java#L1); [backend/src/main/java/com/giftplatform/group/GroupGuestContributionController.java:1](../../src/main/java/com/giftplatform/group/GroupGuestContributionController.java#L1); [backend/src/main/java/com/giftplatform/group/GroupReadinessService.java:1](../../src/main/java/com/giftplatform/group/GroupReadinessService.java#L1); [backend/src/main/java/com/giftplatform/group/GuestGiftController.java:1](../../src/main/java/com/giftplatform/group/GuestGiftController.java#L1); [backend/src/main/java/com/giftplatform/group/IndependentGroupGiftController.java:1](../../src/main/java/com/giftplatform/group/IndependentGroupGiftController.java#L1); [backend/src/main/java/com/giftplatform/monetization/CommercialAccessService.java:1](../../src/main/java/com/giftplatform/monetization/CommercialAccessService.java#L1); [backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:1](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L1); [backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:1](../../src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java#L1); [backend/src/main/java/com/giftplatform/payment/report/HostContributionReportService.java:1](../../src/main/java/com/giftplatform/payment/report/HostContributionReportService.java#L1); [backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:1](../../src/main/java/com/giftplatform/payment/service/PaymentOrderService.java#L1); [backend/src/main/java/com/giftplatform/publicevent/PublicEventController.java:1](../../src/main/java/com/giftplatform/publicevent/PublicEventController.java#L1); [backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:1](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L1); [backend/src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java:1](../../src/main/java/com/giftplatform/security/recovery/GroupEmailEnrollmentController.java#L1); [backend/src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java:1](../../src/main/java/com/giftplatform/security/recovery/GroupMobileEnrollmentController.java#L1); [backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:1](../../src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java#L1); [backend/src/main/java/com/giftplatform/security/recovery/UsernameRecoveryController.java:1](../../src/main/java/com/giftplatform/security/recovery/UsernameRecoveryController.java#L1)
 
 ## gift_photos
 
@@ -1507,6 +1669,7 @@ Type: **BASE TABLE**. Purpose: Invitation/media/AI request metadata or validated
 | width | integer / int4 | NO | No SQL default | None / 32 / 0 | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored width. |
 | height | integer / int4 | NO | No SQL default | None / 32 / 0 | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored height. |
 | created_at | timestamp with time zone / timestamptz | NO | `CURRENT_TIMESTAMP` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored created at. |
+| thumbnail | bytea / bytea | YES | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored thumbnail. |
 
 
 ### Constraints
@@ -1529,6 +1692,42 @@ Type: **BASE TABLE**. Purpose: Invitation/media/AI request metadata or validated
 
 
 Consumers: [backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java:1](../../src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java#L1)
+
+## gift_recommendations
+
+Type: **BASE TABLE**. Purpose: Persisted application object; exact structural contract follows. Narrative ownership beyond its FK/consumer code requires review.
+
+| Column | PostgreSQL type | Nullable | SQL default | Length / precision / scale | Description / validation |
+| --- | --- | --- | --- | --- | --- |
+| id | uuid / uuid | NO | `gen_random_uuid()` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Identifier/reference. |
+| event_id | uuid / uuid | NO | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Identifier/reference. |
+| requested_by | uuid / uuid | NO | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored requested by. |
+| model_reference | character varying / varchar | NO | No SQL default | 120 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored model reference. |
+| recommendations | jsonb / jsonb | NO | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored recommendations. |
+| status | character varying / varchar | NO | `'DRAFT'::character varying` | 16 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. State value; see CHECK constraints. |
+| created_at | timestamp with time zone / timestamptz | NO | `now()` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored created at. |
+
+
+### Constraints
+
+| Name | Type (p primary, f foreign, u unique, c check) | Exact definition |
+| --- | --- | --- |
+| gift_recommendations_event_id_fkey | f | `FOREIGN KEY (event_id) REFERENCES events(id)` |
+| gift_recommendations_pkey | p | `PRIMARY KEY (id)` |
+| gift_recommendations_recommendations_check | c | `CHECK ((jsonb_typeof(recommendations) = 'array'::text))` |
+| gift_recommendations_requested_by_fkey | f | `FOREIGN KEY (requested_by) REFERENCES users(id)` |
+| gift_recommendations_status_check | c | `CHECK (((status)::text = ANY ((ARRAY['DRAFT'::character varying, 'ACCEPTED'::character varying, 'DISMISSED'::character varying])::text[])))` |
+
+
+### Indexes
+
+| Index | Definition |
+| --- | --- |
+| gift_recommendations_pkey | `CREATE UNIQUE INDEX gift_recommendations_pkey ON public.gift_recommendations USING btree (id)` |
+| idx_gift_recommendations | `CREATE INDEX idx_gift_recommendations ON public.gift_recommendations USING btree (event_id, created_at DESC)` |
+
+
+Consumers: No direct Java literal reference found; migrations, views, triggers or indirect table selection may be the consumer.
 
 ## gift_retailer_metadata_audit
 
@@ -1614,7 +1813,7 @@ Type: **BASE TABLE**. Purpose: Host wishlist gift and its publication/funding me
 | uq_gifts_id_event | `CREATE UNIQUE INDEX uq_gifts_id_event ON public.gifts USING btree (id, event_id)` |
 
 
-Consumers: [backend/src/main/java/com/giftplatform/admin/GroupModuleInterceptor.java:1](../../src/main/java/com/giftplatform/admin/GroupModuleInterceptor.java#L1); [backend/src/main/java/com/giftplatform/gift/controller/GiftController.java:1](../../src/main/java/com/giftplatform/gift/controller/GiftController.java#L1); [backend/src/main/java/com/giftplatform/gift/entity/Gift.java:1](../../src/main/java/com/giftplatform/gift/entity/Gift.java#L1); [backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoController.java:1](../../src/main/java/com/giftplatform/gift/photo/GiftPhotoController.java#L1); [backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java:1](../../src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java#L1); [backend/src/main/java/com/giftplatform/gift/retailer/RetailerMetadataController.java:1](../../src/main/java/com/giftplatform/gift/retailer/RetailerMetadataController.java#L1); [backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:1](../../src/main/java/com/giftplatform/gift/service/GiftManagementService.java#L1); [backend/src/main/java/com/giftplatform/group/GroupGiftCollectionController.java:1](../../src/main/java/com/giftplatform/group/GroupGiftCollectionController.java#L1); [backend/src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java:1](../../src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java#L1); [backend/src/main/java/com/giftplatform/group/GuestGiftController.java:1](../../src/main/java/com/giftplatform/group/GuestGiftController.java#L1); [backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:1](../../src/main/java/com/giftplatform/group/IndividualGuestGiftController.java#L1); [backend/src/main/java/com/giftplatform/monetization/CommercialPublicService.java:1](../../src/main/java/com/giftplatform/monetization/CommercialPublicService.java#L1); [backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:1](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L1); [backend/src/main/java/com/giftplatform/payment/controller/PublicGiftProgressController.java:1](../../src/main/java/com/giftplatform/payment/controller/PublicGiftProgressController.java#L1); [backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:1](../../src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java#L1); [backend/src/main/java/com/giftplatform/payment/hybrid/HybridCheckoutQuoteService.java:1](../../src/main/java/com/giftplatform/payment/hybrid/HybridCheckoutQuoteService.java#L1); [backend/src/main/java/com/giftplatform/payment/report/HostContributionReportService.java:1](../../src/main/java/com/giftplatform/payment/report/HostContributionReportService.java#L1); [backend/src/main/java/com/giftplatform/payment/service/ContributionAllocationService.java:1](../../src/main/java/com/giftplatform/payment/service/ContributionAllocationService.java#L1); [backend/src/main/java/com/giftplatform/payment/service/GiftFundingService.java:1](../../src/main/java/com/giftplatform/payment/service/GiftFundingService.java#L1); [backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:1](../../src/main/java/com/giftplatform/payment/service/PaymentOrderService.java#L1); [backend/src/main/java/com/giftplatform/publicevent/PublicEventController.java:1](../../src/main/java/com/giftplatform/publicevent/PublicEventController.java#L1); [backend/src/main/java/com/giftplatform/qr/design/InvitationComposer.java:1](../../src/main/java/com/giftplatform/qr/design/InvitationComposer.java#L1); [backend/src/main/java/com/giftplatform/security/SecurityConfig.java:1](../../src/main/java/com/giftplatform/security/SecurityConfig.java#L1)
+Consumers: [backend/src/main/java/com/giftplatform/admin/GroupModuleInterceptor.java:1](../../src/main/java/com/giftplatform/admin/GroupModuleInterceptor.java#L1); [backend/src/main/java/com/giftplatform/event/Controller/WorkspaceSummaryController.java:1](../../src/main/java/com/giftplatform/event/Controller/WorkspaceSummaryController.java#L1); [backend/src/main/java/com/giftplatform/gift/controller/GiftController.java:1](../../src/main/java/com/giftplatform/gift/controller/GiftController.java#L1); [backend/src/main/java/com/giftplatform/gift/entity/Gift.java:1](../../src/main/java/com/giftplatform/gift/entity/Gift.java#L1); [backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoController.java:1](../../src/main/java/com/giftplatform/gift/photo/GiftPhotoController.java#L1); [backend/src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java:1](../../src/main/java/com/giftplatform/gift/photo/GiftPhotoService.java#L1); [backend/src/main/java/com/giftplatform/gift/retailer/RetailerMetadataController.java:1](../../src/main/java/com/giftplatform/gift/retailer/RetailerMetadataController.java#L1); [backend/src/main/java/com/giftplatform/gift/service/GiftManagementService.java:1](../../src/main/java/com/giftplatform/gift/service/GiftManagementService.java#L1); [backend/src/main/java/com/giftplatform/group/GroupGiftCollectionController.java:1](../../src/main/java/com/giftplatform/group/GroupGiftCollectionController.java#L1); [backend/src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java:1](../../src/main/java/com/giftplatform/group/GroupGiftLifecycleService.java#L1); [backend/src/main/java/com/giftplatform/group/GuestGiftController.java:1](../../src/main/java/com/giftplatform/group/GuestGiftController.java#L1); [backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:1](../../src/main/java/com/giftplatform/group/IndividualGuestGiftController.java#L1); [backend/src/main/java/com/giftplatform/localization/LocalizationRequestConfiguration.java:1](../../src/main/java/com/giftplatform/localization/LocalizationRequestConfiguration.java#L1); [backend/src/main/java/com/giftplatform/monetization/CommercialPublicService.java:1](../../src/main/java/com/giftplatform/monetization/CommercialPublicService.java#L1); [backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:1](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L1); [backend/src/main/java/com/giftplatform/payment/controller/PublicGiftProgressController.java:1](../../src/main/java/com/giftplatform/payment/controller/PublicGiftProgressController.java#L1); [backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:1](../../src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java#L1); [backend/src/main/java/com/giftplatform/payment/hybrid/HybridCheckoutQuoteService.java:1](../../src/main/java/com/giftplatform/payment/hybrid/HybridCheckoutQuoteService.java#L1); [backend/src/main/java/com/giftplatform/payment/report/HostContributionReportService.java:1](../../src/main/java/com/giftplatform/payment/report/HostContributionReportService.java#L1); [backend/src/main/java/com/giftplatform/payment/service/ContributionAllocationService.java:1](../../src/main/java/com/giftplatform/payment/service/ContributionAllocationService.java#L1); [backend/src/main/java/com/giftplatform/payment/service/GiftFundingService.java:1](../../src/main/java/com/giftplatform/payment/service/GiftFundingService.java#L1); [backend/src/main/java/com/giftplatform/payment/service/PaymentOrderService.java:1](../../src/main/java/com/giftplatform/payment/service/PaymentOrderService.java#L1); [backend/src/main/java/com/giftplatform/publicevent/PublicEventController.java:1](../../src/main/java/com/giftplatform/publicevent/PublicEventController.java#L1); [backend/src/main/java/com/giftplatform/qr/design/InvitationComposer.java:1](../../src/main/java/com/giftplatform/qr/design/InvitationComposer.java#L1); [backend/src/main/java/com/giftplatform/security/SecurityConfig.java:1](../../src/main/java/com/giftplatform/security/SecurityConfig.java#L1)
 
 ## group_collection_notifications
 
@@ -1773,7 +1972,7 @@ Type: **BASE TABLE**. Purpose: Persisted application object; exact structural co
 | uq_direct_claim_reference | `CREATE UNIQUE INDEX uq_direct_claim_reference ON public.guest_direct_transfer_claims USING btree (method, reference_hash)` |
 
 
-Consumers: [backend/src/main/java/com/giftplatform/group/GuestGiftController.java:1](../../src/main/java/com/giftplatform/group/GuestGiftController.java#L1); [backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:1](../../src/main/java/com/giftplatform/group/IndividualGuestGiftController.java#L1); [backend/src/main/java/com/giftplatform/payment/controller/PublicGiftProgressController.java:1](../../src/main/java/com/giftplatform/payment/controller/PublicGiftProgressController.java#L1); [backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:1](../../src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java#L1); [backend/src/main/java/com/giftplatform/payment/report/HostContributionReportService.java:1](../../src/main/java/com/giftplatform/payment/report/HostContributionReportService.java#L1); [backend/src/main/java/com/giftplatform/payment/verification/HostTransactionVerificationController.java:1](../../src/main/java/com/giftplatform/payment/verification/HostTransactionVerificationController.java#L1)
+Consumers: [backend/src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java:1](../../src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java#L1); [backend/src/main/java/com/giftplatform/group/GuestGiftController.java:1](../../src/main/java/com/giftplatform/group/GuestGiftController.java#L1); [backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:1](../../src/main/java/com/giftplatform/group/IndividualGuestGiftController.java#L1); [backend/src/main/java/com/giftplatform/payment/controller/PublicGiftProgressController.java:1](../../src/main/java/com/giftplatform/payment/controller/PublicGiftProgressController.java#L1); [backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:1](../../src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java#L1); [backend/src/main/java/com/giftplatform/payment/report/HostContributionReportService.java:1](../../src/main/java/com/giftplatform/payment/report/HostContributionReportService.java#L1); [backend/src/main/java/com/giftplatform/payment/verification/HostTransactionVerificationController.java:1](../../src/main/java/com/giftplatform/payment/verification/HostTransactionVerificationController.java#L1)
 
 ## guest_gift_host_contributions
 
@@ -1855,7 +2054,7 @@ Type: **BASE TABLE**. Purpose: Invitation/group/individual gift coordination, co
 | guest_gifts_pkey | `CREATE UNIQUE INDEX guest_gifts_pkey ON public.guest_gifts USING btree (id)` |
 
 
-Consumers: [backend/src/main/java/com/giftplatform/group/GuestGiftController.java:1](../../src/main/java/com/giftplatform/group/GuestGiftController.java#L1); [backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:1](../../src/main/java/com/giftplatform/group/IndividualGuestGiftController.java#L1)
+Consumers: [backend/src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java:1](../../src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java#L1); [backend/src/main/java/com/giftplatform/group/GuestGiftController.java:1](../../src/main/java/com/giftplatform/group/GuestGiftController.java#L1); [backend/src/main/java/com/giftplatform/group/IndividualGuestGiftController.java:1](../../src/main/java/com/giftplatform/group/IndividualGuestGiftController.java#L1)
 
 ## guest_manual_display_allocations
 
@@ -2036,6 +2235,74 @@ Type: **BASE TABLE**. Purpose: Host receiving destinations, event-scoped account
 
 
 Consumers: [backend/src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationInboxController.java:1](../../src/main/java/com/giftplatform/hostpayment/verification/HostDestinationVerificationInboxController.java#L1); [backend/src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java:1](../../src/main/java/com/giftplatform/hostpayment/verification/VerificationAttempt.java#L1)
+
+## host_invitation_upload_controls
+
+Type: **BASE TABLE**. Purpose: Host receiving destinations, event-scoped account selection or independent account-verification attempts.
+
+| Column | PostgreSQL type | Nullable | SQL default | Length / precision / scale | Description / validation |
+| --- | --- | --- | --- | --- | --- |
+| host_id | uuid / uuid | NO | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Identifier/reference. |
+| enabled | boolean / bool | NO | `false` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored enabled. |
+| requires_payment | boolean / bool | NO | `true` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored requires payment. |
+| changed_by | uuid / uuid | NO | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored changed by. |
+| changed_at | timestamp with time zone / timestamptz | NO | `now()` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored changed at. |
+
+
+### Constraints
+
+| Name | Type (p primary, f foreign, u unique, c check) | Exact definition |
+| --- | --- | --- |
+| host_invitation_upload_controls_changed_by_fkey | f | `FOREIGN KEY (changed_by) REFERENCES users(id)` |
+| host_invitation_upload_controls_host_id_fkey | f | `FOREIGN KEY (host_id) REFERENCES users(id)` |
+| host_invitation_upload_controls_pkey | p | `PRIMARY KEY (host_id)` |
+
+
+### Indexes
+
+| Index | Definition |
+| --- | --- |
+| host_invitation_upload_controls_pkey | `CREATE UNIQUE INDEX host_invitation_upload_controls_pkey ON public.host_invitation_upload_controls USING btree (host_id)` |
+
+
+Consumers: [backend/src/main/java/com/giftplatform/asset/HostInvitationUploadService.java:1](../../src/main/java/com/giftplatform/asset/HostInvitationUploadService.java#L1)
+
+## host_invitation_uploads
+
+Type: **BASE TABLE**. Purpose: Host receiving destinations, event-scoped account selection or independent account-verification attempts.
+
+| Column | PostgreSQL type | Nullable | SQL default | Length / precision / scale | Description / validation |
+| --- | --- | --- | --- | --- | --- |
+| id | uuid / uuid | NO | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Identifier/reference. |
+| host_id | uuid / uuid | NO | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Identifier/reference. |
+| category | character varying / varchar | NO | No SQL default | 20 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored category. |
+| title | character varying / varchar | NO | No SQL default | 120 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored title. |
+| image_png | bytea / bytea | NO | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored image png. |
+| width | integer / int4 | NO | No SQL default | None / 32 / 0 | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored width. |
+| height | integer / int4 | NO | No SQL default | None / 32 / 0 | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored height. |
+| created_at | timestamp with time zone / timestamptz | NO | `now()` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored created at. |
+
+
+### Constraints
+
+| Name | Type (p primary, f foreign, u unique, c check) | Exact definition |
+| --- | --- | --- |
+| host_invitation_uploads_category_check | c | `CHECK (((category)::text = ANY ((ARRAY['BACKGROUND'::character varying, 'DECORATION'::character varying])::text[])))` |
+| host_invitation_uploads_height_check | c | `CHECK (((height >= 32) AND (height <= 4096)))` |
+| host_invitation_uploads_host_id_fkey | f | `FOREIGN KEY (host_id) REFERENCES users(id)` |
+| host_invitation_uploads_pkey | p | `PRIMARY KEY (id)` |
+| host_invitation_uploads_width_check | c | `CHECK (((width >= 32) AND (width <= 4096)))` |
+
+
+### Indexes
+
+| Index | Definition |
+| --- | --- |
+| host_invitation_uploads_owner | `CREATE INDEX host_invitation_uploads_owner ON public.host_invitation_uploads USING btree (host_id, created_at DESC)` |
+| host_invitation_uploads_pkey | `CREATE UNIQUE INDEX host_invitation_uploads_pkey ON public.host_invitation_uploads USING btree (id)` |
+
+
+Consumers: [backend/src/main/java/com/giftplatform/asset/HostInvitationUploadService.java:1](../../src/main/java/com/giftplatform/asset/HostInvitationUploadService.java#L1)
 
 ## host_payout_requests
 
@@ -2325,7 +2592,165 @@ Type: **BASE TABLE**. Purpose: Invitation/media/AI request metadata or validated
 | invitation_gallery_assets_pkey | `CREATE UNIQUE INDEX invitation_gallery_assets_pkey ON public.invitation_gallery_assets USING btree (id)` |
 
 
-Consumers: [backend/src/main/java/com/giftplatform/asset/GalleryAsset.java:1](../../src/main/java/com/giftplatform/asset/GalleryAsset.java#L1); [backend/src/main/java/com/giftplatform/monetization/CommercialController.java:1](../../src/main/java/com/giftplatform/monetization/CommercialController.java#L1); [backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:1](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L1)
+Consumers: [backend/src/main/java/com/giftplatform/asset/GalleryAsset.java:1](../../src/main/java/com/giftplatform/asset/GalleryAsset.java#L1); [backend/src/main/java/com/giftplatform/monetization/CommercialController.java:1](../../src/main/java/com/giftplatform/monetization/CommercialController.java#L1); [backend/src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java:1](../../src/main/java/com/giftplatform/monetization/CommercialPurchaseService.java#L1); [backend/src/main/java/db/migration/V100__refresh_signature_invitation_artwork.java:1](../../src/main/java/db/migration/V100__refresh_signature_invitation_artwork.java#L1); [backend/src/main/java/db/migration/V102__expanded_premium_stationery.java:1](../../src/main/java/db/migration/V102__expanded_premium_stationery.java#L1); [backend/src/main/java/db/migration/V98__premium_invitation_collection.java:1](../../src/main/java/db/migration/V98__premium_invitation_collection.java#L1)
+
+## language_delivery_templates
+
+Type: **BASE TABLE**. Purpose: Persisted application object; exact structural contract follows. Narrative ownership beyond its FK/consumer code requires review.
+
+| Column | PostgreSQL type | Nullable | SQL default | Length / precision / scale | Description / validation |
+| --- | --- | --- | --- | --- | --- |
+| language_code | character varying / varchar | NO | No SQL default | 63 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored language code. |
+| provider | character varying / varchar | NO | No SQL default | 16 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored provider. |
+| template_id | character varying / varchar | NO | No SQL default | 120 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Identifier/reference. |
+| version | bigint / int8 | NO | `0` | None / 64 / 0 | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored version. |
+| changed_by | uuid / uuid | YES | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored changed by. |
+| changed_at | timestamp with time zone / timestamptz | NO | `now()` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored changed at. |
+
+
+### Constraints
+
+| Name | Type (p primary, f foreign, u unique, c check) | Exact definition |
+| --- | --- | --- |
+| language_delivery_templates_changed_by_fkey | f | `FOREIGN KEY (changed_by) REFERENCES users(id)` |
+| language_delivery_templates_language_code_fkey | f | `FOREIGN KEY (language_code) REFERENCES platform_languages(code)` |
+| language_delivery_templates_pkey | p | `PRIMARY KEY (language_code, provider)` |
+| language_delivery_templates_provider_check | c | `CHECK (((provider)::text = 'MSG91'::text))` |
+
+
+### Indexes
+
+| Index | Definition |
+| --- | --- |
+| language_delivery_templates_pkey | `CREATE UNIQUE INDEX language_delivery_templates_pkey ON public.language_delivery_templates USING btree (language_code, provider)` |
+
+
+Consumers: [backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:1](../../src/main/java/com/giftplatform/localization/LocalizationAdminController.java#L1); [backend/src/main/java/com/giftplatform/localization/LocalizationService.java:1](../../src/main/java/com/giftplatform/localization/LocalizationService.java#L1)
+
+## localization_event_controls
+
+Type: **BASE TABLE**. Purpose: Persisted application object; exact structural contract follows. Narrative ownership beyond its FK/consumer code requires review.
+
+| Column | PostgreSQL type | Nullable | SQL default | Length / precision / scale | Description / validation |
+| --- | --- | --- | --- | --- | --- |
+| event_id | uuid / uuid | NO | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Identifier/reference. |
+| enabled | boolean / bool | NO | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored enabled. |
+| changed_by | uuid / uuid | YES | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored changed by. |
+| changed_at | timestamp with time zone / timestamptz | NO | `now()` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored changed at. |
+
+
+### Constraints
+
+| Name | Type (p primary, f foreign, u unique, c check) | Exact definition |
+| --- | --- | --- |
+| localization_event_controls_changed_by_fkey | f | `FOREIGN KEY (changed_by) REFERENCES users(id)` |
+| localization_event_controls_event_id_fkey | f | `FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE` |
+| localization_event_controls_pkey | p | `PRIMARY KEY (event_id)` |
+
+
+### Indexes
+
+| Index | Definition |
+| --- | --- |
+| localization_event_controls_pkey | `CREATE UNIQUE INDEX localization_event_controls_pkey ON public.localization_event_controls USING btree (event_id)` |
+
+
+Consumers: [backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:1](../../src/main/java/com/giftplatform/localization/LocalizationAdminController.java#L1); [backend/src/main/java/com/giftplatform/localization/LocalizationService.java:1](../../src/main/java/com/giftplatform/localization/LocalizationService.java#L1)
+
+## localization_host_controls
+
+Type: **BASE TABLE**. Purpose: Persisted application object; exact structural contract follows. Narrative ownership beyond its FK/consumer code requires review.
+
+| Column | PostgreSQL type | Nullable | SQL default | Length / precision / scale | Description / validation |
+| --- | --- | --- | --- | --- | --- |
+| host_id | uuid / uuid | NO | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Identifier/reference. |
+| enabled | boolean / bool | NO | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored enabled. |
+| changed_by | uuid / uuid | YES | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored changed by. |
+| changed_at | timestamp with time zone / timestamptz | NO | `now()` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored changed at. |
+
+
+### Constraints
+
+| Name | Type (p primary, f foreign, u unique, c check) | Exact definition |
+| --- | --- | --- |
+| localization_host_controls_changed_by_fkey | f | `FOREIGN KEY (changed_by) REFERENCES users(id)` |
+| localization_host_controls_host_id_fkey | f | `FOREIGN KEY (host_id) REFERENCES users(id) ON DELETE CASCADE` |
+| localization_host_controls_pkey | p | `PRIMARY KEY (host_id)` |
+
+
+### Indexes
+
+| Index | Definition |
+| --- | --- |
+| localization_host_controls_pkey | `CREATE UNIQUE INDEX localization_host_controls_pkey ON public.localization_host_controls USING btree (host_id)` |
+
+
+Consumers: [backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:1](../../src/main/java/com/giftplatform/localization/LocalizationAdminController.java#L1); [backend/src/main/java/com/giftplatform/localization/LocalizationService.java:1](../../src/main/java/com/giftplatform/localization/LocalizationService.java#L1)
+
+## localization_sources
+
+Type: **BASE TABLE**. Purpose: Persisted application object; exact structural contract follows. Narrative ownership beyond its FK/consumer code requires review.
+
+| Column | PostgreSQL type | Nullable | SQL default | Length / precision / scale | Description / validation |
+| --- | --- | --- | --- | --- | --- |
+| message_key | character varying / varchar | NO | No SQL default | 120 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored message key. |
+| source_text | text / text | NO | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored source text. |
+| category | character varying / varchar | NO | `'UI'::character varying` | 16 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored category. |
+| created_at | timestamp with time zone / timestamptz | NO | `now()` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored created at. |
+
+
+### Constraints
+
+| Name | Type (p primary, f foreign, u unique, c check) | Exact definition |
+| --- | --- | --- |
+| localization_sources_category_check | c | `CHECK (((category)::text = ANY ((ARRAY['UI'::character varying, 'EMAIL'::character varying, 'SMS'::character varying, 'NOTIFICATION'::character varying, 'VALIDATION'::character varying])::text[])))` |
+| localization_sources_pkey | p | `PRIMARY KEY (message_key)` |
+
+
+### Indexes
+
+| Index | Definition |
+| --- | --- |
+| localization_sources_pkey | `CREATE UNIQUE INDEX localization_sources_pkey ON public.localization_sources USING btree (message_key)` |
+
+
+Consumers: [backend/src/main/java/com/giftplatform/analytics/InteractionAdminController.java:1](../../src/main/java/com/giftplatform/analytics/InteractionAdminController.java#L1); [backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:1](../../src/main/java/com/giftplatform/localization/LocalizationAdminController.java#L1); [backend/src/main/java/com/giftplatform/localization/LocalizationService.java:1](../../src/main/java/com/giftplatform/localization/LocalizationService.java#L1); [backend/src/main/java/com/giftplatform/localization/LocalizationSourceBootstrap.java:1](../../src/main/java/com/giftplatform/localization/LocalizationSourceBootstrap.java#L1)
+
+## localization_translations
+
+Type: **BASE TABLE**. Purpose: Persisted application object; exact structural contract follows. Narrative ownership beyond its FK/consumer code requires review.
+
+| Column | PostgreSQL type | Nullable | SQL default | Length / precision / scale | Description / validation |
+| --- | --- | --- | --- | --- | --- |
+| language_code | character varying / varchar | NO | No SQL default | 63 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored language code. |
+| message_key | character varying / varchar | NO | No SQL default | 120 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored message key. |
+| translated_text | text / text | NO | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored translated text. |
+| published | boolean / bool | NO | `false` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored published. |
+| version | bigint / int8 | NO | `0` | None / 64 / 0 | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored version. |
+| changed_by | uuid / uuid | YES | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored changed by. |
+| changed_at | timestamp with time zone / timestamptz | NO | `now()` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored changed at. |
+
+
+### Constraints
+
+| Name | Type (p primary, f foreign, u unique, c check) | Exact definition |
+| --- | --- | --- |
+| localization_translations_changed_by_fkey | f | `FOREIGN KEY (changed_by) REFERENCES users(id)` |
+| localization_translations_language_code_fkey | f | `FOREIGN KEY (language_code) REFERENCES platform_languages(code)` |
+| localization_translations_message_key_fkey | f | `FOREIGN KEY (message_key) REFERENCES localization_sources(message_key)` |
+| localization_translations_pkey | p | `PRIMARY KEY (language_code, message_key)` |
+| localization_translations_translated_text_check | c | `CHECK ((length(translated_text) <= 10000))` |
+
+
+### Indexes
+
+| Index | Definition |
+| --- | --- |
+| localization_translation_review | `CREATE INDEX localization_translation_review ON public.localization_translations USING btree (language_code, published, message_key)` |
+| localization_translations_pkey | `CREATE UNIQUE INDEX localization_translations_pkey ON public.localization_translations USING btree (language_code, message_key)` |
+
+
+Consumers: [backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:1](../../src/main/java/com/giftplatform/localization/LocalizationAdminController.java#L1); [backend/src/main/java/com/giftplatform/localization/LocalizationService.java:1](../../src/main/java/com/giftplatform/localization/LocalizationService.java#L1); [backend/src/main/java/com/giftplatform/localization/LocalizationSourceBootstrap.java:1](../../src/main/java/com/giftplatform/localization/LocalizationSourceBootstrap.java#L1)
 
 ## notification_outbox
 
@@ -2352,6 +2777,7 @@ Type: **BASE TABLE**. Purpose: Notification intent/status history; a stored row 
 | sent_at | timestamp with time zone / timestamptz | YES | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored sent at. |
 | last_error_code | character varying / varchar | YES | No SQL default | 100 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored last error code. |
 | read_at | timestamp with time zone / timestamptz | YES | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored read at. |
+| language_code | character varying / varchar | NO | `'en'::character varying` | 63 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored language code. |
 
 
 ### Constraints
@@ -2362,6 +2788,7 @@ Type: **BASE TABLE**. Purpose: Notification intent/status history; a stored row 
 | notification_outbox_channel_check | c | `CHECK (((channel)::text = ANY ((ARRAY['IN_APP'::character varying, 'EMAIL'::character varying, 'SMS'::character varying, 'WHATSAPP'::character varying])::text[])))` |
 | notification_outbox_event_id_fkey | f | `FOREIGN KEY (event_id) REFERENCES events(id)` |
 | notification_outbox_event_id_notification_kind_recipient_ki_key | u | `UNIQUE (event_id, notification_kind, recipient_kind, channel, source_kind, source_id)` |
+| notification_outbox_language_code_fkey | f | `FOREIGN KEY (language_code) REFERENCES platform_languages(code)` |
 | notification_outbox_message_check | c | `CHECK (((length(message) >= 1) AND (length(message) <= 10000)))` |
 | notification_outbox_payment_evidence_check | c | `CHECK (((payment_evidence)::text = ANY ((ARRAY['GUEST_REPORTED'::character varying, 'CAPTURED'::character varying, 'CHECKOUT_PENDING'::character varying])::text[])))` |
 | notification_outbox_pkey | p | `PRIMARY KEY (id)` |
@@ -2606,7 +3033,7 @@ Type: **BASE TABLE**. Purpose: Payment, accounting, pricing, reconciliation or b
 | payment_orders_provider_order_id_key | `CREATE UNIQUE INDEX payment_orders_provider_order_id_key ON public.payment_orders USING btree (provider_order_id)` |
 
 
-Consumers: [backend/src/main/java/com/giftplatform/monetization/CommercialController.java:1](../../src/main/java/com/giftplatform/monetization/CommercialController.java#L1); [backend/src/main/java/com/giftplatform/payment/control/PaymentControlController.java:1](../../src/main/java/com/giftplatform/payment/control/PaymentControlController.java#L1); [backend/src/main/java/com/giftplatform/payment/controller/PublicGiftProgressController.java:1](../../src/main/java/com/giftplatform/payment/controller/PublicGiftProgressController.java#L1); [backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:1](../../src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java#L1); [backend/src/main/java/com/giftplatform/payment/entity/PaymentOrder.java:1](../../src/main/java/com/giftplatform/payment/entity/PaymentOrder.java#L1); [backend/src/main/java/com/giftplatform/payment/report/HostContributionReportService.java:1](../../src/main/java/com/giftplatform/payment/report/HostContributionReportService.java#L1); [backend/src/main/java/com/giftplatform/payment/service/ContributionAllocationService.java:1](../../src/main/java/com/giftplatform/payment/service/ContributionAllocationService.java#L1); [backend/src/main/java/com/giftplatform/payment/service/PaymentNotificationService.java:1](../../src/main/java/com/giftplatform/payment/service/PaymentNotificationService.java#L1); [backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:1](../../src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java#L1); [backend/src/main/java/com/giftplatform/payment/service/RazorpayOrderCreationService.java:1](../../src/main/java/com/giftplatform/payment/service/RazorpayOrderCreationService.java#L1); [backend/src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java:1](../../src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java#L1); [backend/src/main/java/com/giftplatform/payment/verification/HostTransactionVerificationController.java:1](../../src/main/java/com/giftplatform/payment/verification/HostTransactionVerificationController.java#L1)
+Consumers: [backend/src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java:1](../../src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java#L1); [backend/src/main/java/com/giftplatform/monetization/CommercialController.java:1](../../src/main/java/com/giftplatform/monetization/CommercialController.java#L1); [backend/src/main/java/com/giftplatform/notification/email/TransactionalEmailOutbox.java:1](../../src/main/java/com/giftplatform/notification/email/TransactionalEmailOutbox.java#L1); [backend/src/main/java/com/giftplatform/payment/control/PaymentControlController.java:1](../../src/main/java/com/giftplatform/payment/control/PaymentControlController.java#L1); [backend/src/main/java/com/giftplatform/payment/controller/PublicGiftProgressController.java:1](../../src/main/java/com/giftplatform/payment/controller/PublicGiftProgressController.java#L1); [backend/src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java:1](../../src/main/java/com/giftplatform/payment/direct/GuestDirectTransferService.java#L1); [backend/src/main/java/com/giftplatform/payment/entity/PaymentOrder.java:1](../../src/main/java/com/giftplatform/payment/entity/PaymentOrder.java#L1); [backend/src/main/java/com/giftplatform/payment/report/HostContributionReportService.java:1](../../src/main/java/com/giftplatform/payment/report/HostContributionReportService.java#L1); [backend/src/main/java/com/giftplatform/payment/service/ContributionAllocationService.java:1](../../src/main/java/com/giftplatform/payment/service/ContributionAllocationService.java#L1); [backend/src/main/java/com/giftplatform/payment/service/PaymentNotificationService.java:1](../../src/main/java/com/giftplatform/payment/service/PaymentNotificationService.java#L1); [backend/src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java:1](../../src/main/java/com/giftplatform/payment/service/RazorpayCaptureService.java#L1); [backend/src/main/java/com/giftplatform/payment/service/RazorpayOrderCreationService.java:1](../../src/main/java/com/giftplatform/payment/service/RazorpayOrderCreationService.java#L1); [backend/src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java:1](../../src/main/java/com/giftplatform/payment/service/RazorpayWebhookService.java#L1); [backend/src/main/java/com/giftplatform/payment/verification/HostTransactionVerificationController.java:1](../../src/main/java/com/giftplatform/payment/verification/HostTransactionVerificationController.java#L1)
 
 ## payment_transactions
 
@@ -2842,7 +3269,76 @@ Type: **BASE TABLE**. Purpose: Administrative configuration, grants, revision co
 | platform_admin_audit_page_idx | `CREATE INDEX platform_admin_audit_page_idx ON public.platform_admin_action_audit USING btree (created_at DESC, id DESC)` |
 
 
-Consumers: [backend/src/main/java/com/giftplatform/admin/AccountPolicyController.java:1](../../src/main/java/com/giftplatform/admin/AccountPolicyController.java#L1); [backend/src/main/java/com/giftplatform/admin/ExperienceSettingsService.java:1](../../src/main/java/com/giftplatform/admin/ExperienceSettingsService.java#L1); [backend/src/main/java/com/giftplatform/admin/GroupMemberEmailPolicyController.java:1](../../src/main/java/com/giftplatform/admin/GroupMemberEmailPolicyController.java#L1); [backend/src/main/java/com/giftplatform/admin/PlatformAdminAuditController.java:1](../../src/main/java/com/giftplatform/admin/PlatformAdminAuditController.java#L1); [backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:1](../../src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java#L1); [backend/src/main/java/com/giftplatform/monetization/MonetizationService.java:1](../../src/main/java/com/giftplatform/monetization/MonetizationService.java#L1); [backend/src/main/java/com/giftplatform/payment/control/RoutingCommissionService.java:1](../../src/main/java/com/giftplatform/payment/control/RoutingCommissionService.java#L1); [backend/src/main/java/com/giftplatform/security/verification/VerificationSettingsController.java:1](../../src/main/java/com/giftplatform/security/verification/VerificationSettingsController.java#L1)
+Consumers: [backend/src/main/java/com/giftplatform/admin/AccountPolicyController.java:1](../../src/main/java/com/giftplatform/admin/AccountPolicyController.java#L1); [backend/src/main/java/com/giftplatform/admin/EventModuleGrantsController.java:1](../../src/main/java/com/giftplatform/admin/EventModuleGrantsController.java#L1); [backend/src/main/java/com/giftplatform/admin/ExperienceSettingsService.java:1](../../src/main/java/com/giftplatform/admin/ExperienceSettingsService.java#L1); [backend/src/main/java/com/giftplatform/admin/GroupMemberEmailPolicyController.java:1](../../src/main/java/com/giftplatform/admin/GroupMemberEmailPolicyController.java#L1); [backend/src/main/java/com/giftplatform/admin/GrowthSettingsService.java:1](../../src/main/java/com/giftplatform/admin/GrowthSettingsService.java#L1); [backend/src/main/java/com/giftplatform/admin/PlatformAdminAuditController.java:1](../../src/main/java/com/giftplatform/admin/PlatformAdminAuditController.java#L1); [backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:1](../../src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java#L1); [backend/src/main/java/com/giftplatform/branding/BrandingService.java:1](../../src/main/java/com/giftplatform/branding/BrandingService.java#L1); [backend/src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java:1](../../src/main/java/com/giftplatform/celebrationplanning/CelebrationPlanningController.java#L1); [backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:1](../../src/main/java/com/giftplatform/localization/LocalizationAdminController.java#L1); [backend/src/main/java/com/giftplatform/monetization/MonetizationService.java:1](../../src/main/java/com/giftplatform/monetization/MonetizationService.java#L1); [backend/src/main/java/com/giftplatform/payment/control/RoutingCommissionService.java:1](../../src/main/java/com/giftplatform/payment/control/RoutingCommissionService.java#L1); [backend/src/main/java/com/giftplatform/publicevent/PublicKeepsakeController.java:1](../../src/main/java/com/giftplatform/publicevent/PublicKeepsakeController.java#L1); [backend/src/main/java/com/giftplatform/publicevent/SharingPreviewController.java:1](../../src/main/java/com/giftplatform/publicevent/SharingPreviewController.java#L1); [backend/src/main/java/com/giftplatform/security/verification/VerificationSettingsController.java:1](../../src/main/java/com/giftplatform/security/verification/VerificationSettingsController.java#L1)
+
+## platform_brand_assets
+
+Type: **BASE TABLE**. Purpose: Administrative configuration, grants, revision controls or change history; use the documented admin workflow.
+
+| Column | PostgreSQL type | Nullable | SQL default | Length / precision / scale | Description / validation |
+| --- | --- | --- | --- | --- | --- |
+| id | uuid / uuid | NO | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Identifier/reference. |
+| image_bytes | bytea / bytea | NO | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored image bytes. |
+| created_by | uuid / uuid | NO | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored created by. |
+| created_at | timestamp with time zone / timestamptz | NO | `now()` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored created at. |
+
+
+### Constraints
+
+| Name | Type (p primary, f foreign, u unique, c check) | Exact definition |
+| --- | --- | --- |
+| platform_brand_assets_created_by_fkey | f | `FOREIGN KEY (created_by) REFERENCES users(id)` |
+| platform_brand_assets_image_bytes_check | c | `CHECK ((octet_length(image_bytes) <= 5242880))` |
+| platform_brand_assets_pkey | p | `PRIMARY KEY (id)` |
+
+
+### Indexes
+
+| Index | Definition |
+| --- | --- |
+| platform_brand_assets_pkey | `CREATE UNIQUE INDEX platform_brand_assets_pkey ON public.platform_brand_assets USING btree (id)` |
+
+
+Consumers: [backend/src/main/java/com/giftplatform/branding/BrandingService.java:1](../../src/main/java/com/giftplatform/branding/BrandingService.java#L1)
+
+## platform_branding
+
+Type: **BASE TABLE**. Purpose: Administrative configuration, grants, revision controls or change history; use the documented admin workflow.
+
+| Column | PostgreSQL type | Nullable | SQL default | Length / precision / scale | Description / validation |
+| --- | --- | --- | --- | --- | --- |
+| id | integer / int4 | NO | No SQL default | None / 32 / 0 | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Identifier/reference. |
+| application_name | character varying / varchar | NO | `'GiftWise'::character varying` | 80 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored application name. |
+| brand_color | character varying / varchar | NO | `'#5b21b6'::character varying` | 7 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored brand color. |
+| footer_text | character varying / varchar | NO | `'© 2026 GiftWise. All rights reserved.'::character varying` | 240 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored footer text. |
+| support_email | character varying / varchar | NO | `''::character varying` | 254 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored support email. |
+| social_links | text / text | NO | `''::text` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored social links. |
+| logo_id | uuid / uuid | YES | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Identifier/reference. |
+| favicon_id | uuid / uuid | YES | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Identifier/reference. |
+| revision | bigint / int8 | NO | `0` | None / 64 / 0 | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored revision. |
+| updated_by | uuid / uuid | YES | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored updated by. |
+| updated_at | timestamp with time zone / timestamptz | NO | `now()` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored updated at. |
+
+
+### Constraints
+
+| Name | Type (p primary, f foreign, u unique, c check) | Exact definition |
+| --- | --- | --- |
+| platform_branding_favicon_id_fkey | f | `FOREIGN KEY (favicon_id) REFERENCES platform_brand_assets(id)` |
+| platform_branding_id_check | c | `CHECK ((id = 1))` |
+| platform_branding_logo_id_fkey | f | `FOREIGN KEY (logo_id) REFERENCES platform_brand_assets(id)` |
+| platform_branding_pkey | p | `PRIMARY KEY (id)` |
+| platform_branding_updated_by_fkey | f | `FOREIGN KEY (updated_by) REFERENCES users(id)` |
+
+
+### Indexes
+
+| Index | Definition |
+| --- | --- |
+| platform_branding_pkey | `CREATE UNIQUE INDEX platform_branding_pkey ON public.platform_branding USING btree (id)` |
+
+
+Consumers: [backend/src/main/java/com/giftplatform/branding/BrandingService.java:1](../../src/main/java/com/giftplatform/branding/BrandingService.java#L1)
 
 ## platform_event_ai_design_settings
 
@@ -2933,6 +3429,39 @@ Type: **BASE TABLE**. Purpose: Administrative configuration, grants, revision co
 
 Consumers: [backend/src/main/java/com/giftplatform/admin/EffectiveModulePermissionService.java:1](../../src/main/java/com/giftplatform/admin/EffectiveModulePermissionService.java#L1); [backend/src/main/java/com/giftplatform/celebration/CelebrationController.java:1](../../src/main/java/com/giftplatform/celebration/CelebrationController.java#L1)
 
+## platform_event_module_grants
+
+Type: **BASE TABLE**. Purpose: Administrative configuration, grants, revision controls or change history; use the documented admin workflow.
+
+| Column | PostgreSQL type | Nullable | SQL default | Length / precision / scale | Description / validation |
+| --- | --- | --- | --- | --- | --- |
+| event_id | uuid / uuid | NO | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Identifier/reference. |
+| module_code | character varying / varchar | NO | No SQL default | 40 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored module code. |
+| enabled | boolean / bool | NO | `false` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored enabled. |
+| changed_by | uuid / uuid | YES | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored changed by. |
+| changed_at | timestamp with time zone / timestamptz | NO | `now()` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored changed at. |
+
+
+### Constraints
+
+| Name | Type (p primary, f foreign, u unique, c check) | Exact definition |
+| --- | --- | --- |
+| event_module_supported | c | `CHECK (((module_code)::text = ANY ((ARRAY['CELEBRATION_PLANNING'::character varying, 'EVENT_ESSENTIALS'::character varying, 'EVENT_REUSE'::character varying])::text[])))` |
+| platform_event_module_grants_changed_by_fkey | f | `FOREIGN KEY (changed_by) REFERENCES users(id)` |
+| platform_event_module_grants_event_id_fkey | f | `FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE` |
+| platform_event_module_grants_module_code_fkey | f | `FOREIGN KEY (module_code) REFERENCES platform_module_controls(module_code)` |
+| platform_event_module_grants_pkey | p | `PRIMARY KEY (event_id, module_code)` |
+
+
+### Indexes
+
+| Index | Definition |
+| --- | --- |
+| platform_event_module_grants_pkey | `CREATE UNIQUE INDEX platform_event_module_grants_pkey ON public.platform_event_module_grants USING btree (event_id, module_code)` |
+
+
+Consumers: [backend/src/main/java/com/giftplatform/admin/EffectiveModulePermissionService.java:1](../../src/main/java/com/giftplatform/admin/EffectiveModulePermissionService.java#L1); [backend/src/main/java/com/giftplatform/admin/EventModuleGrantsController.java:1](../../src/main/java/com/giftplatform/admin/EventModuleGrantsController.java#L1)
+
 ## platform_experience_settings
 
 Type: **BASE TABLE**. Purpose: Administrative configuration, grants, revision controls or change history; use the documented admin workflow.
@@ -2963,6 +3492,62 @@ Type: **BASE TABLE**. Purpose: Administrative configuration, grants, revision co
 
 
 Consumers: [backend/src/main/java/com/giftplatform/admin/ExperienceSettingsService.java:1](../../src/main/java/com/giftplatform/admin/ExperienceSettingsService.java#L1)
+
+## platform_growth_features
+
+Type: **BASE TABLE**. Purpose: Administrative configuration, grants, revision controls or change history; use the documented admin workflow.
+
+| Column | PostgreSQL type | Nullable | SQL default | Length / precision / scale | Description / validation |
+| --- | --- | --- | --- | --- | --- |
+| code | character varying / varchar | NO | No SQL default | 40 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored code. |
+| enabled | boolean / bool | NO | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored enabled. |
+
+
+### Constraints
+
+| Name | Type (p primary, f foreign, u unique, c check) | Exact definition |
+| --- | --- | --- |
+| platform_growth_features_pkey | p | `PRIMARY KEY (code)` |
+
+
+### Indexes
+
+| Index | Definition |
+| --- | --- |
+| platform_growth_features_pkey | `CREATE UNIQUE INDEX platform_growth_features_pkey ON public.platform_growth_features USING btree (code)` |
+
+
+Consumers: [backend/src/main/java/com/giftplatform/admin/GrowthSettingsService.java:1](../../src/main/java/com/giftplatform/admin/GrowthSettingsService.java#L1)
+
+## platform_growth_settings
+
+Type: **BASE TABLE**. Purpose: Administrative configuration, grants, revision controls or change history; use the documented admin workflow.
+
+| Column | PostgreSQL type | Nullable | SQL default | Length / precision / scale | Description / validation |
+| --- | --- | --- | --- | --- | --- |
+| id | integer / int4 | NO | No SQL default | None / 32 / 0 | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Identifier/reference. |
+| version | bigint / int8 | NO | `0` | None / 64 / 0 | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored version. |
+| changed_by | uuid / uuid | YES | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored changed by. |
+| changed_at | timestamp with time zone / timestamptz | NO | `now()` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored changed at. |
+
+
+### Constraints
+
+| Name | Type (p primary, f foreign, u unique, c check) | Exact definition |
+| --- | --- | --- |
+| platform_growth_settings_changed_by_fkey | f | `FOREIGN KEY (changed_by) REFERENCES users(id)` |
+| platform_growth_settings_id_check | c | `CHECK ((id = 1))` |
+| platform_growth_settings_pkey | p | `PRIMARY KEY (id)` |
+
+
+### Indexes
+
+| Index | Definition |
+| --- | --- |
+| platform_growth_settings_pkey | `CREATE UNIQUE INDEX platform_growth_settings_pkey ON public.platform_growth_settings USING btree (id)` |
+
+
+Consumers: [backend/src/main/java/com/giftplatform/admin/GrowthSettingsService.java:1](../../src/main/java/com/giftplatform/admin/GrowthSettingsService.java#L1)
 
 ## platform_host_module_grants
 
@@ -2996,6 +3581,75 @@ Type: **BASE TABLE**. Purpose: Administrative configuration, grants, revision co
 
 Consumers: [backend/src/main/java/com/giftplatform/admin/AiInvitationAdminController.java:1](../../src/main/java/com/giftplatform/admin/AiInvitationAdminController.java#L1); [backend/src/main/java/com/giftplatform/admin/EffectiveModulePermissionService.java:1](../../src/main/java/com/giftplatform/admin/EffectiveModulePermissionService.java#L1); [backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:1](../../src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java#L1)
 
+## platform_languages
+
+Type: **BASE TABLE**. Purpose: Administrative configuration, grants, revision controls or change history; use the documented admin workflow.
+
+| Column | PostgreSQL type | Nullable | SQL default | Length / precision / scale | Description / validation |
+| --- | --- | --- | --- | --- | --- |
+| code | character varying / varchar | NO | No SQL default | 63 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored code. |
+| native_name | character varying / varchar | NO | No SQL default | 120 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored native name. |
+| english_name | character varying / varchar | NO | No SQL default | 120 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored english name. |
+| direction | character varying / varchar | NO | No SQL default | 3 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored direction. |
+| enabled | boolean / bool | NO | `true` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored enabled. |
+| version | bigint / int8 | NO | `0` | None / 64 / 0 | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored version. |
+| changed_by | uuid / uuid | YES | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored changed by. |
+| changed_at | timestamp with time zone / timestamptz | NO | `now()` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored changed at. |
+
+
+### Constraints
+
+| Name | Type (p primary, f foreign, u unique, c check) | Exact definition |
+| --- | --- | --- |
+| platform_languages_changed_by_fkey | f | `FOREIGN KEY (changed_by) REFERENCES users(id)` |
+| platform_languages_direction_check | c | `CHECK (((direction)::text = ANY ((ARRAY['LTR'::character varying, 'RTL'::character varying])::text[])))` |
+| platform_languages_pkey | p | `PRIMARY KEY (code)` |
+
+
+### Indexes
+
+| Index | Definition |
+| --- | --- |
+| platform_languages_pkey | `CREATE UNIQUE INDEX platform_languages_pkey ON public.platform_languages USING btree (code)` |
+
+
+Consumers: [backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:1](../../src/main/java/com/giftplatform/localization/LocalizationAdminController.java#L1); [backend/src/main/java/com/giftplatform/localization/LocalizationService.java:1](../../src/main/java/com/giftplatform/localization/LocalizationService.java#L1)
+
+## platform_localization_settings
+
+Type: **BASE TABLE**. Purpose: Administrative configuration, grants, revision controls or change history; use the documented admin workflow.
+
+| Column | PostgreSQL type | Nullable | SQL default | Length / precision / scale | Description / validation |
+| --- | --- | --- | --- | --- | --- |
+| id | integer / int4 | NO | No SQL default | None / 32 / 0 | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Identifier/reference. |
+| enabled | boolean / bool | NO | `false` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored enabled. |
+| default_language | character varying / varchar | NO | No SQL default | 63 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored default language. |
+| fallback_language | character varying / varchar | NO | No SQL default | 63 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored fallback language. |
+| version | bigint / int8 | NO | `0` | None / 64 / 0 | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored version. |
+| changed_by | uuid / uuid | YES | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored changed by. |
+| changed_at | timestamp with time zone / timestamptz | NO | `now()` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored changed at. |
+
+
+### Constraints
+
+| Name | Type (p primary, f foreign, u unique, c check) | Exact definition |
+| --- | --- | --- |
+| platform_localization_settings_changed_by_fkey | f | `FOREIGN KEY (changed_by) REFERENCES users(id)` |
+| platform_localization_settings_default_language_fkey | f | `FOREIGN KEY (default_language) REFERENCES platform_languages(code)` |
+| platform_localization_settings_fallback_language_fkey | f | `FOREIGN KEY (fallback_language) REFERENCES platform_languages(code)` |
+| platform_localization_settings_id_check | c | `CHECK ((id = 1))` |
+| platform_localization_settings_pkey | p | `PRIMARY KEY (id)` |
+
+
+### Indexes
+
+| Index | Definition |
+| --- | --- |
+| platform_localization_settings_pkey | `CREATE UNIQUE INDEX platform_localization_settings_pkey ON public.platform_localization_settings USING btree (id)` |
+
+
+Consumers: [backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:1](../../src/main/java/com/giftplatform/localization/LocalizationAdminController.java#L1); [backend/src/main/java/com/giftplatform/localization/LocalizationService.java:1](../../src/main/java/com/giftplatform/localization/LocalizationService.java#L1)
+
 ## platform_module_controls
 
 Type: **BASE TABLE**. Purpose: Administrative configuration, grants, revision controls or change history; use the documented admin workflow.
@@ -3012,7 +3666,7 @@ Type: **BASE TABLE**. Purpose: Administrative configuration, grants, revision co
 
 | Name | Type (p primary, f foreign, u unique, c check) | Exact definition |
 | --- | --- | --- |
-| module_code_allowed | c | `CHECK (((module_code)::text = ANY ((ARRAY['GROUP_GIFTING'::character varying, 'GUEST_GIFTS'::character varying, 'RSVP'::character varying, 'GUEST_ATTENDANCE'::character varying, 'WHATSAPP_SHARING'::character varying, 'GUESTBOOK'::character varying, 'SOCIAL_SHARING'::character varying, 'MEMORY_ALBUM'::character varying, 'AI_INVITATION'::character varying])::text[])))` |
+| module_code_allowed | c | `CHECK (((module_code)::text = ANY ((ARRAY['GROUP_GIFTING'::character varying, 'GUEST_GIFTS'::character varying, 'RSVP'::character varying, 'GUEST_ATTENDANCE'::character varying, 'WHATSAPP_SHARING'::character varying, 'GUESTBOOK'::character varying, 'SOCIAL_SHARING'::character varying, 'MEMORY_ALBUM'::character varying, 'AI_INVITATION'::character varying, 'CELEBRATION_PLANNING'::character varying, 'EVENT_ESSENTIALS'::character varying, 'EVENT_REUSE'::character varying])::text[])))` |
 | platform_module_controls_changed_by_fkey | f | `FOREIGN KEY (changed_by) REFERENCES users(id)` |
 | platform_module_controls_pkey | p | `PRIMARY KEY (module_code)` |
 
@@ -3126,6 +3780,39 @@ Type: **BASE TABLE**. Purpose: Administrative configuration, grants, revision co
 
 Consumers: [backend/src/main/java/com/giftplatform/monetization/MonetizationService.java:1](../../src/main/java/com/giftplatform/monetization/MonetizationService.java#L1)
 
+## platform_tenants
+
+Type: **BASE TABLE**. Purpose: Administrative configuration, grants, revision controls or change history; use the documented admin workflow.
+
+| Column | PostgreSQL type | Nullable | SQL default | Length / precision / scale | Description / validation |
+| --- | --- | --- | --- | --- | --- |
+| id | uuid / uuid | NO | `gen_random_uuid()` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Identifier/reference. |
+| slug | character varying / varchar | NO | No SQL default | 63 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored slug. |
+| display_name | character varying / varchar | NO | No SQL default | 120 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored display name. |
+| enabled | boolean / bool | NO | `false` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored enabled. |
+| created_at | timestamp with time zone / timestamptz | NO | `now()` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored created at. |
+
+
+### Constraints
+
+| Name | Type (p primary, f foreign, u unique, c check) | Exact definition |
+| --- | --- | --- |
+| platform_tenants_display_name_check | c | `CHECK ((length(btrim((display_name)::text)) > 0))` |
+| platform_tenants_pkey | p | `PRIMARY KEY (id)` |
+| platform_tenants_slug_check | c | `CHECK (((slug)::text ~ '^[a-z0-9][a-z0-9-]{1,62}$'::text))` |
+| platform_tenants_slug_key | u | `UNIQUE (slug)` |
+
+
+### Indexes
+
+| Index | Definition |
+| --- | --- |
+| platform_tenants_pkey | `CREATE UNIQUE INDEX platform_tenants_pkey ON public.platform_tenants USING btree (id)` |
+| platform_tenants_slug_key | `CREATE UNIQUE INDEX platform_tenants_slug_key ON public.platform_tenants USING btree (slug)` |
+
+
+Consumers: No direct Java literal reference found; migrations, views, triggers or indirect table selection may be the consumer.
+
 ## platform_verification_settings
 
 Type: **BASE TABLE**. Purpose: Administrative configuration, grants, revision controls or change history; use the documented admin workflow.
@@ -3156,6 +3843,54 @@ Type: **BASE TABLE**. Purpose: Administrative configuration, grants, revision co
 
 
 Consumers: [backend/src/main/java/com/giftplatform/security/verification/VerificationSettings.java:1](../../src/main/java/com/giftplatform/security/verification/VerificationSettings.java#L1); [backend/src/main/java/com/giftplatform/security/verification/VerificationSettingsController.java:1](../../src/main/java/com/giftplatform/security/verification/VerificationSettingsController.java#L1)
+
+## promotional_coupons
+
+Type: **BASE TABLE**. Purpose: Persisted application object; exact structural contract follows. Narrative ownership beyond its FK/consumer code requires review.
+
+| Column | PostgreSQL type | Nullable | SQL default | Length / precision / scale | Description / validation |
+| --- | --- | --- | --- | --- | --- |
+| id | uuid / uuid | NO | `gen_random_uuid()` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Identifier/reference. |
+| tenant_id | uuid / uuid | YES | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Identifier/reference. |
+| code | character varying / varchar | NO | No SQL default | 40 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored code. |
+| discount_kind | character varying / varchar | NO | No SQL default | 16 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored discount kind. |
+| percentage | smallint / int2 | YES | No SQL default | None / 16 / 0 | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored percentage. |
+| amount_minor | bigint / int8 | YES | No SQL default | None / 64 / 0 | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored amount minor. |
+| currency | character varying / varchar | YES | No SQL default | 3 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored currency. |
+| starts_at | timestamp with time zone / timestamptz | NO | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored starts at. |
+| ends_at | timestamp with time zone / timestamptz | NO | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored ends at. |
+| max_redemptions | integer / int4 | YES | No SQL default | None / 32 / 0 | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored max redemptions. |
+| per_user_limit | integer / int4 | NO | `1` | None / 32 / 0 | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored per user limit. |
+| enabled | boolean / bool | NO | `false` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored enabled. |
+| created_by | uuid / uuid | YES | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored created by. |
+
+
+### Constraints
+
+| Name | Type (p primary, f foreign, u unique, c check) | Exact definition |
+| --- | --- | --- |
+| promotional_coupons_check | c | `CHECK ((ends_at > starts_at))` |
+| promotional_coupons_check1 | c | `CHECK (((((discount_kind)::text = 'PERCENT'::text) AND (percentage IS NOT NULL) AND ((percentage >= 1) AND (percentage <= 100)) AND (amount_minor IS NULL) AND (currency IS NULL)) OR (((discount_kind)::text = 'FIXED'::text) AND (percentage IS NULL) AND (amount_minor IS NOT NULL) AND (amount_minor > 0) AND (currency IS NOT NULL))))` |
+| promotional_coupons_code_check | c | `CHECK (((code)::text ~ '^[A-Z0-9_]{3,40}$'::text))` |
+| promotional_coupons_created_by_fkey | f | `FOREIGN KEY (created_by) REFERENCES users(id)` |
+| promotional_coupons_currency_fkey | f | `FOREIGN KEY (currency) REFERENCES supported_currencies(code)` |
+| promotional_coupons_discount_kind_check | c | `CHECK (((discount_kind)::text = ANY ((ARRAY['PERCENT'::character varying, 'FIXED'::character varying])::text[])))` |
+| promotional_coupons_max_redemptions_check | c | `CHECK ((max_redemptions > 0))` |
+| promotional_coupons_per_user_limit_check | c | `CHECK ((per_user_limit > 0))` |
+| promotional_coupons_pkey | p | `PRIMARY KEY (id)` |
+| promotional_coupons_tenant_id_fkey | f | `FOREIGN KEY (tenant_id) REFERENCES platform_tenants(id)` |
+
+
+### Indexes
+
+| Index | Definition |
+| --- | --- |
+| promotional_coupons_pkey | `CREATE UNIQUE INDEX promotional_coupons_pkey ON public.promotional_coupons USING btree (id)` |
+| ux_coupon_platform_code | `CREATE UNIQUE INDEX ux_coupon_platform_code ON public.promotional_coupons USING btree (code) WHERE (tenant_id IS NULL)` |
+| ux_coupon_tenant_code | `CREATE UNIQUE INDEX ux_coupon_tenant_code ON public.promotional_coupons USING btree (tenant_id, code) WHERE (tenant_id IS NOT NULL)` |
+
+
+Consumers: No direct Java literal reference found; migrations, views, triggers or indirect table selection may be the consumer.
 
 ## qr_invitation_designs
 
@@ -3191,6 +3926,43 @@ Type: **BASE TABLE**. Purpose: Invitation/media/AI request metadata or validated
 
 
 Consumers: [backend/src/main/java/com/giftplatform/qr/design/InvitationDesign.java:1](../../src/main/java/com/giftplatform/qr/design/InvitationDesign.java#L1)
+
+## referral_codes
+
+Type: **BASE TABLE**. Purpose: Persisted application object; exact structural contract follows. Narrative ownership beyond its FK/consumer code requires review.
+
+| Column | PostgreSQL type | Nullable | SQL default | Length / precision / scale | Description / validation |
+| --- | --- | --- | --- | --- | --- |
+| id | uuid / uuid | NO | `gen_random_uuid()` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Identifier/reference. |
+| tenant_id | uuid / uuid | YES | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Identifier/reference. |
+| referrer_id | uuid / uuid | NO | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Identifier/reference. |
+| code | character varying / varchar | NO | No SQL default | 40 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored code. |
+| enabled | boolean / bool | NO | `false` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored enabled. |
+| created_at | timestamp with time zone / timestamptz | NO | `now()` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored created at. |
+
+
+### Constraints
+
+| Name | Type (p primary, f foreign, u unique, c check) | Exact definition |
+| --- | --- | --- |
+| referral_codes_code_check | c | `CHECK (((code)::text ~ '^[A-Z0-9_]{3,40}$'::text))` |
+| referral_codes_code_key | u | `UNIQUE (code)` |
+| referral_codes_id_referrer_id_key | u | `UNIQUE (id, referrer_id)` |
+| referral_codes_pkey | p | `PRIMARY KEY (id)` |
+| referral_codes_referrer_id_fkey | f | `FOREIGN KEY (referrer_id) REFERENCES users(id)` |
+| referral_codes_tenant_id_fkey | f | `FOREIGN KEY (tenant_id) REFERENCES platform_tenants(id)` |
+
+
+### Indexes
+
+| Index | Definition |
+| --- | --- |
+| referral_codes_code_key | `CREATE UNIQUE INDEX referral_codes_code_key ON public.referral_codes USING btree (code)` |
+| referral_codes_id_referrer_id_key | `CREATE UNIQUE INDEX referral_codes_id_referrer_id_key ON public.referral_codes USING btree (id, referrer_id)` |
+| referral_codes_pkey | `CREATE UNIQUE INDEX referral_codes_pkey ON public.referral_codes USING btree (id)` |
+
+
+Consumers: No direct Java literal reference found; migrations, views, triggers or indirect table selection may be the consumer.
 
 ## routing_commission_history
 
@@ -3299,6 +4071,396 @@ Type: **BASE TABLE**. Purpose: Authentication, contact verification, account rec
 
 Consumers: [backend/src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java:1](../../src/main/java/com/giftplatform/security/recovery/SignupEmailVerificationService.java#L1)
 
+## subscription_plans
+
+Type: **BASE TABLE**. Purpose: Persisted application object; exact structural contract follows. Narrative ownership beyond its FK/consumer code requires review.
+
+| Column | PostgreSQL type | Nullable | SQL default | Length / precision / scale | Description / validation |
+| --- | --- | --- | --- | --- | --- |
+| id | uuid / uuid | NO | `gen_random_uuid()` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Identifier/reference. |
+| code | character varying / varchar | NO | No SQL default | 50 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored code. |
+| name | character varying / varchar | NO | No SQL default | 120 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored name. |
+| price_minor | bigint / int8 | NO | No SQL default | None / 64 / 0 | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored price minor. |
+| currency | character varying / varchar | NO | No SQL default | 3 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored currency. |
+| billing_period | character varying / varchar | NO | No SQL default | 10 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored billing period. |
+| entitlements | jsonb / jsonb | NO | `'{}'::jsonb` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored entitlements. |
+| enabled | boolean / bool | NO | `false` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored enabled. |
+| version | bigint / int8 | NO | `1` | None / 64 / 0 | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored version. |
+
+
+### Constraints
+
+| Name | Type (p primary, f foreign, u unique, c check) | Exact definition |
+| --- | --- | --- |
+| subscription_plans_billing_period_check | c | `CHECK (((billing_period)::text = ANY ((ARRAY['MONTH'::character varying, 'YEAR'::character varying])::text[])))` |
+| subscription_plans_code_check | c | `CHECK ((length(btrim((code)::text)) > 0))` |
+| subscription_plans_code_key | u | `UNIQUE (code)` |
+| subscription_plans_currency_fkey | f | `FOREIGN KEY (currency) REFERENCES supported_currencies(code)` |
+| subscription_plans_entitlements_check | c | `CHECK ((jsonb_typeof(entitlements) = 'object'::text))` |
+| subscription_plans_name_check | c | `CHECK ((length(btrim((name)::text)) > 0))` |
+| subscription_plans_pkey | p | `PRIMARY KEY (id)` |
+| subscription_plans_price_minor_check | c | `CHECK ((price_minor >= 0))` |
+| subscription_plans_version_check | c | `CHECK ((version > 0))` |
+
+
+### Indexes
+
+| Index | Definition |
+| --- | --- |
+| subscription_plans_code_key | `CREATE UNIQUE INDEX subscription_plans_code_key ON public.subscription_plans USING btree (code)` |
+| subscription_plans_pkey | `CREATE UNIQUE INDEX subscription_plans_pkey ON public.subscription_plans USING btree (id)` |
+
+
+Consumers: No direct Java literal reference found; migrations, views, triggers or indirect table selection may be the consumer.
+
+## supported_currencies
+
+Type: **BASE TABLE**. Purpose: Persisted application object; exact structural contract follows. Narrative ownership beyond its FK/consumer code requires review.
+
+| Column | PostgreSQL type | Nullable | SQL default | Length / precision / scale | Description / validation |
+| --- | --- | --- | --- | --- | --- |
+| code | character varying / varchar | NO | No SQL default | 3 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored code. |
+| minor_units | smallint / int2 | NO | No SQL default | None / 16 / 0 | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored minor units. |
+| checkout_enabled | boolean / bool | NO | `false` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored checkout enabled. |
+
+
+### Constraints
+
+| Name | Type (p primary, f foreign, u unique, c check) | Exact definition |
+| --- | --- | --- |
+| supported_currencies_code_check | c | `CHECK (((code)::text ~ '^[A-Z]{3}$'::text))` |
+| supported_currencies_minor_units_check | c | `CHECK (((minor_units >= 0) AND (minor_units <= 4)))` |
+| supported_currencies_pkey | p | `PRIMARY KEY (code)` |
+
+
+### Indexes
+
+| Index | Definition |
+| --- | --- |
+| supported_currencies_pkey | `CREATE UNIQUE INDEX supported_currencies_pkey ON public.supported_currencies USING btree (code)` |
+
+
+Consumers: No direct Java literal reference found; migrations, views, triggers or indirect table selection may be the consumer.
+
+## tenant_branding
+
+Type: **BASE TABLE**. Purpose: Persisted application object; exact structural contract follows. Narrative ownership beyond its FK/consumer code requires review.
+
+| Column | PostgreSQL type | Nullable | SQL default | Length / precision / scale | Description / validation |
+| --- | --- | --- | --- | --- | --- |
+| tenant_id | uuid / uuid | NO | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Identifier/reference. |
+| application_name | character varying / varchar | NO | No SQL default | 80 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored application name. |
+| brand_color | character varying / varchar | NO | `'#5b21b6'::character varying` | 7 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored brand color. |
+| logo_id | uuid / uuid | YES | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Identifier/reference. |
+| favicon_id | uuid / uuid | YES | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Identifier/reference. |
+| support_email | character varying / varchar | YES | No SQL default | 254 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored support email. |
+| footer_text | character varying / varchar | YES | No SQL default | 240 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored footer text. |
+| revision | bigint / int8 | NO | `0` | None / 64 / 0 | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored revision. |
+
+
+### Constraints
+
+| Name | Type (p primary, f foreign, u unique, c check) | Exact definition |
+| --- | --- | --- |
+| tenant_branding_application_name_check | c | `CHECK ((length(btrim((application_name)::text)) > 0))` |
+| tenant_branding_brand_color_check | c | `CHECK (((brand_color)::text ~ '^#[0-9a-fA-F]{6}$'::text))` |
+| tenant_branding_favicon_id_fkey | f | `FOREIGN KEY (favicon_id) REFERENCES platform_brand_assets(id)` |
+| tenant_branding_logo_id_fkey | f | `FOREIGN KEY (logo_id) REFERENCES platform_brand_assets(id)` |
+| tenant_branding_pkey | p | `PRIMARY KEY (tenant_id)` |
+| tenant_branding_tenant_id_fkey | f | `FOREIGN KEY (tenant_id) REFERENCES platform_tenants(id)` |
+
+
+### Indexes
+
+| Index | Definition |
+| --- | --- |
+| tenant_branding_pkey | `CREATE UNIQUE INDEX tenant_branding_pkey ON public.tenant_branding USING btree (tenant_id)` |
+
+
+Consumers: No direct Java literal reference found; migrations, views, triggers or indirect table selection may be the consumer.
+
+## tenant_events
+
+Type: **BASE TABLE**. Purpose: Persisted application object; exact structural contract follows. Narrative ownership beyond its FK/consumer code requires review.
+
+| Column | PostgreSQL type | Nullable | SQL default | Length / precision / scale | Description / validation |
+| --- | --- | --- | --- | --- | --- |
+| event_id | uuid / uuid | NO | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Identifier/reference. |
+| tenant_id | uuid / uuid | NO | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Identifier/reference. |
+
+
+### Constraints
+
+| Name | Type (p primary, f foreign, u unique, c check) | Exact definition |
+| --- | --- | --- |
+| tenant_events_event_id_fkey | f | `FOREIGN KEY (event_id) REFERENCES events(id)` |
+| tenant_events_pkey | p | `PRIMARY KEY (event_id)` |
+| tenant_events_tenant_id_fkey | f | `FOREIGN KEY (tenant_id) REFERENCES platform_tenants(id)` |
+
+
+### Indexes
+
+| Index | Definition |
+| --- | --- |
+| idx_tenant_events | `CREATE INDEX idx_tenant_events ON public.tenant_events USING btree (tenant_id, event_id)` |
+| tenant_events_pkey | `CREATE UNIQUE INDEX tenant_events_pkey ON public.tenant_events USING btree (event_id)` |
+
+
+Consumers: No direct Java literal reference found; migrations, views, triggers or indirect table selection may be the consumer.
+
+## tenant_memberships
+
+Type: **BASE TABLE**. Purpose: Persisted application object; exact structural contract follows. Narrative ownership beyond its FK/consumer code requires review.
+
+| Column | PostgreSQL type | Nullable | SQL default | Length / precision / scale | Description / validation |
+| --- | --- | --- | --- | --- | --- |
+| tenant_id | uuid / uuid | NO | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Identifier/reference. |
+| user_id | uuid / uuid | NO | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Identifier/reference. |
+| role | character varying / varchar | NO | No SQL default | 20 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored role. |
+| created_at | timestamp with time zone / timestamptz | NO | `now()` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored created at. |
+
+
+### Constraints
+
+| Name | Type (p primary, f foreign, u unique, c check) | Exact definition |
+| --- | --- | --- |
+| tenant_memberships_pkey | p | `PRIMARY KEY (tenant_id, user_id)` |
+| tenant_memberships_role_check | c | `CHECK (((role)::text = ANY ((ARRAY['OWNER'::character varying, 'ADMIN'::character varying, 'MEMBER'::character varying])::text[])))` |
+| tenant_memberships_tenant_id_fkey | f | `FOREIGN KEY (tenant_id) REFERENCES platform_tenants(id)` |
+| tenant_memberships_user_id_fkey | f | `FOREIGN KEY (user_id) REFERENCES users(id)` |
+
+
+### Indexes
+
+| Index | Definition |
+| --- | --- |
+| tenant_memberships_pkey | `CREATE UNIQUE INDEX tenant_memberships_pkey ON public.tenant_memberships USING btree (tenant_id, user_id)` |
+
+
+Consumers: No direct Java literal reference found; migrations, views, triggers or indirect table selection may be the consumer.
+
+## transactional_email_outbox
+
+Type: **BASE TABLE**. Purpose: Persisted application object; exact structural contract follows. Narrative ownership beyond its FK/consumer code requires review.
+
+| Column | PostgreSQL type | Nullable | SQL default | Length / precision / scale | Description / validation |
+| --- | --- | --- | --- | --- | --- |
+| id | uuid / uuid | NO | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Identifier/reference. |
+| source_key | character varying / varchar | NO | No SQL default | 180 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored source key. |
+| template_key | character varying / varchar | NO | No SQL default | 40 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored template key. |
+| recipient | character varying / varchar | NO | No SQL default | 254 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored recipient. |
+| variables | jsonb / jsonb | NO | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored variables. |
+| rendered_email | jsonb / jsonb | YES | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored rendered email. |
+| language_code | character varying / varchar | NO | `'en'::character varying` | 63 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored language code. |
+| status | character varying / varchar | NO | `'PENDING'::character varying` | 20 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. State value; see CHECK constraints. |
+| attempts | integer / int4 | NO | `0` | None / 32 / 0 | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored attempts. |
+| next_attempt_at | timestamp with time zone / timestamptz | NO | `now()` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored next attempt at. |
+| created_at | timestamp with time zone / timestamptz | NO | `now()` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored created at. |
+| sent_at | timestamp with time zone / timestamptz | YES | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored sent at. |
+| last_error_code | character varying / varchar | YES | No SQL default | 50 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored last error code. |
+
+
+### Constraints
+
+| Name | Type (p primary, f foreign, u unique, c check) | Exact definition |
+| --- | --- | --- |
+| transactional_email_outbox_pkey | p | `PRIMARY KEY (id)` |
+| transactional_email_outbox_source_key_key | u | `UNIQUE (source_key)` |
+| transactional_email_outbox_status_check | c | `CHECK (((status)::text = ANY ((ARRAY['PENDING'::character varying, 'SENDING'::character varying, 'SENT'::character varying, 'FAILED'::character varying, 'CANCELLED'::character varying])::text[])))` |
+| transactional_email_outbox_template_key_check | c | `CHECK (((template_key)::text = ANY ((ARRAY['registration'::character varying, 'event-invitation'::character varying, 'contribution-received'::character varying, 'payment-success'::character varying, 'event-completed'::character varying])::text[])))` |
+
+
+### Indexes
+
+| Index | Definition |
+| --- | --- |
+| idx_transactional_email_pending | `CREATE INDEX idx_transactional_email_pending ON public.transactional_email_outbox USING btree (status, next_attempt_at)` |
+| transactional_email_outbox_pkey | `CREATE UNIQUE INDEX transactional_email_outbox_pkey ON public.transactional_email_outbox USING btree (id)` |
+| transactional_email_outbox_source_key_key | `CREATE UNIQUE INDEX transactional_email_outbox_source_key_key ON public.transactional_email_outbox USING btree (source_key)` |
+
+
+Consumers: [backend/src/main/java/com/giftplatform/notification/email/EmailAdminController.java:1](../../src/main/java/com/giftplatform/notification/email/EmailAdminController.java#L1); [backend/src/main/java/com/giftplatform/notification/email/EventInvitationEmailController.java:1](../../src/main/java/com/giftplatform/notification/email/EventInvitationEmailController.java#L1); [backend/src/main/java/com/giftplatform/notification/email/TransactionalEmailOutbox.java:1](../../src/main/java/com/giftplatform/notification/email/TransactionalEmailOutbox.java#L1)
+
+## user_language_preferences
+
+Type: **BASE TABLE**. Purpose: Persisted application object; exact structural contract follows. Narrative ownership beyond its FK/consumer code requires review.
+
+| Column | PostgreSQL type | Nullable | SQL default | Length / precision / scale | Description / validation |
+| --- | --- | --- | --- | --- | --- |
+| user_id | uuid / uuid | NO | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Identifier/reference. |
+| language_code | character varying / varchar | NO | No SQL default | 63 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored language code. |
+| changed_at | timestamp with time zone / timestamptz | NO | `now()` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored changed at. |
+
+
+### Constraints
+
+| Name | Type (p primary, f foreign, u unique, c check) | Exact definition |
+| --- | --- | --- |
+| user_language_preferences_language_code_fkey | f | `FOREIGN KEY (language_code) REFERENCES platform_languages(code)` |
+| user_language_preferences_pkey | p | `PRIMARY KEY (user_id)` |
+| user_language_preferences_user_id_fkey | f | `FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE` |
+
+
+### Indexes
+
+| Index | Definition |
+| --- | --- |
+| user_language_preferences_pkey | `CREATE UNIQUE INDEX user_language_preferences_pkey ON public.user_language_preferences USING btree (user_id)` |
+
+
+Consumers: [backend/src/main/java/com/giftplatform/localization/LocalizationController.java:1](../../src/main/java/com/giftplatform/localization/LocalizationController.java#L1); [backend/src/main/java/com/giftplatform/localization/LocalizationService.java:1](../../src/main/java/com/giftplatform/localization/LocalizationService.java#L1)
+
+## user_legal_consents
+
+Type: **BASE TABLE**. Purpose: Persisted application object; exact structural contract follows. Narrative ownership beyond its FK/consumer code requires review.
+
+| Column | PostgreSQL type | Nullable | SQL default | Length / precision / scale | Description / validation |
+| --- | --- | --- | --- | --- | --- |
+| id | uuid / uuid | NO | `gen_random_uuid()` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Identifier/reference. |
+| user_id | uuid / uuid | NO | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Identifier/reference. |
+| terms_version | character varying / varchar | NO | No SQL default | 40 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored terms version. |
+| privacy_version | character varying / varchar | NO | No SQL default | 40 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored privacy version. |
+| accepted_at | timestamp with time zone / timestamptz | NO | `now()` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored accepted at. |
+
+
+### Constraints
+
+| Name | Type (p primary, f foreign, u unique, c check) | Exact definition |
+| --- | --- | --- |
+| user_legal_consents_pkey | p | `PRIMARY KEY (id)` |
+| user_legal_consents_user_id_fkey | f | `FOREIGN KEY (user_id) REFERENCES users(id)` |
+
+
+### Indexes
+
+| Index | Definition |
+| --- | --- |
+| idx_user_legal_consents_user | `CREATE INDEX idx_user_legal_consents_user ON public.user_legal_consents USING btree (user_id, accepted_at)` |
+| user_legal_consents_pkey | `CREATE UNIQUE INDEX user_legal_consents_pkey ON public.user_legal_consents USING btree (id)` |
+
+
+Consumers: [backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:1](../../src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java#L1)
+
+## user_profile_preferences
+
+Type: **BASE TABLE**. Purpose: Persisted application object; exact structural contract follows. Narrative ownership beyond its FK/consumer code requires review.
+
+| Column | PostgreSQL type | Nullable | SQL default | Length / precision / scale | Description / validation |
+| --- | --- | --- | --- | --- | --- |
+| user_id | uuid / uuid | NO | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Identifier/reference. |
+| timezone | character varying / varchar | NO | `'Asia/Kolkata'::character varying` | 80 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored timezone. |
+| event_notifications | boolean / bool | NO | `true` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored event notifications. |
+| contribution_notifications | boolean / bool | NO | `true` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored contribution notifications. |
+| marketing_notifications | boolean / bool | NO | `false` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored marketing notifications. |
+| picture_png | bytea / bytea | YES | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored picture png. |
+| updated_at | timestamp with time zone / timestamptz | NO | `now()` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored updated at. |
+
+
+### Constraints
+
+| Name | Type (p primary, f foreign, u unique, c check) | Exact definition |
+| --- | --- | --- |
+| user_profile_preferences_picture_png_check | c | `CHECK ((octet_length(picture_png) <= 5242880))` |
+| user_profile_preferences_pkey | p | `PRIMARY KEY (user_id)` |
+| user_profile_preferences_user_id_fkey | f | `FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE` |
+
+
+### Indexes
+
+| Index | Definition |
+| --- | --- |
+| user_profile_preferences_pkey | `CREATE UNIQUE INDEX user_profile_preferences_pkey ON public.user_profile_preferences USING btree (user_id)` |
+
+
+Consumers: [backend/src/main/java/com/giftplatform/notification/email/TransactionalEmailOutbox.java:1](../../src/main/java/com/giftplatform/notification/email/TransactionalEmailOutbox.java#L1); [backend/src/main/java/com/giftplatform/user/controller/ProfilePreferencesController.java:1](../../src/main/java/com/giftplatform/user/controller/ProfilePreferencesController.java#L1)
+
+## user_referrals
+
+Type: **BASE TABLE**. Purpose: Persisted application object; exact structural contract follows. Narrative ownership beyond its FK/consumer code requires review.
+
+| Column | PostgreSQL type | Nullable | SQL default | Length / precision / scale | Description / validation |
+| --- | --- | --- | --- | --- | --- |
+| id | uuid / uuid | NO | `gen_random_uuid()` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Identifier/reference. |
+| referral_code_id | uuid / uuid | NO | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Identifier/reference. |
+| referrer_id | uuid / uuid | NO | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Identifier/reference. |
+| referred_user_id | uuid / uuid | NO | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Identifier/reference. |
+| status | character varying / varchar | NO | `'ATTRIBUTED'::character varying` | 20 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. State value; see CHECK constraints. |
+| created_at | timestamp with time zone / timestamptz | NO | `now()` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored created at. |
+
+
+### Constraints
+
+| Name | Type (p primary, f foreign, u unique, c check) | Exact definition |
+| --- | --- | --- |
+| user_referrals_check | c | `CHECK ((referrer_id <> referred_user_id))` |
+| user_referrals_pkey | p | `PRIMARY KEY (id)` |
+| user_referrals_referral_code_id_referrer_id_fkey | f | `FOREIGN KEY (referral_code_id, referrer_id) REFERENCES referral_codes(id, referrer_id)` |
+| user_referrals_referred_user_id_fkey | f | `FOREIGN KEY (referred_user_id) REFERENCES users(id)` |
+| user_referrals_referred_user_id_key | u | `UNIQUE (referred_user_id)` |
+| user_referrals_referrer_id_fkey | f | `FOREIGN KEY (referrer_id) REFERENCES users(id)` |
+| user_referrals_status_check | c | `CHECK (((status)::text = ANY ((ARRAY['ATTRIBUTED'::character varying, 'QUALIFIED'::character varying, 'REWARDED'::character varying, 'CANCELLED'::character varying])::text[])))` |
+
+
+### Indexes
+
+| Index | Definition |
+| --- | --- |
+| user_referrals_pkey | `CREATE UNIQUE INDEX user_referrals_pkey ON public.user_referrals USING btree (id)` |
+| user_referrals_referred_user_id_key | `CREATE UNIQUE INDEX user_referrals_referred_user_id_key ON public.user_referrals USING btree (referred_user_id)` |
+
+
+Consumers: No direct Java literal reference found; migrations, views, triggers or indirect table selection may be the consumer.
+
+## user_subscriptions
+
+Type: **BASE TABLE**. Purpose: Persisted application object; exact structural contract follows. Narrative ownership beyond its FK/consumer code requires review.
+
+| Column | PostgreSQL type | Nullable | SQL default | Length / precision / scale | Description / validation |
+| --- | --- | --- | --- | --- | --- |
+| id | uuid / uuid | NO | `gen_random_uuid()` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Identifier/reference. |
+| user_id | uuid / uuid | NO | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Identifier/reference. |
+| tenant_id | uuid / uuid | YES | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Identifier/reference. |
+| plan_id | uuid / uuid | NO | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Identifier/reference. |
+| provider | character varying / varchar | NO | No SQL default | 40 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored provider. |
+| provider_subscription_id | character varying / varchar | NO | No SQL default | 180 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Identifier/reference. |
+| status | character varying / varchar | NO | No SQL default | 20 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. State value; see CHECK constraints. |
+| period_start | timestamp with time zone / timestamptz | YES | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored period start. |
+| period_end | timestamp with time zone / timestamptz | YES | No SQL default | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored period end. |
+| price_minor | bigint / int8 | NO | No SQL default | None / 64 / 0 | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored price minor. |
+| currency | character varying / varchar | NO | No SQL default | 3 / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored currency. |
+| entitlement_snapshot | jsonb / jsonb | NO | `'{}'::jsonb` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored entitlement snapshot. |
+| created_at | timestamp with time zone / timestamptz | NO | `now()` | None / None / None | PK/FK/check/uniqueness below; application validations are in API models and rule catalogue. Stored created at. |
+
+
+### Constraints
+
+| Name | Type (p primary, f foreign, u unique, c check) | Exact definition |
+| --- | --- | --- |
+| user_subscriptions_check | c | `CHECK (((length(btrim((provider)::text)) > 0) AND (length(btrim((provider_subscription_id)::text)) > 0)))` |
+| user_subscriptions_check1 | c | `CHECK ((((period_start IS NULL) AND (period_end IS NULL)) OR ((period_start IS NOT NULL) AND (period_end IS NOT NULL) AND (period_end > period_start))))` |
+| user_subscriptions_currency_fkey | f | `FOREIGN KEY (currency) REFERENCES supported_currencies(code)` |
+| user_subscriptions_entitlement_snapshot_check | c | `CHECK ((jsonb_typeof(entitlement_snapshot) = 'object'::text))` |
+| user_subscriptions_pkey | p | `PRIMARY KEY (id)` |
+| user_subscriptions_plan_id_fkey | f | `FOREIGN KEY (plan_id) REFERENCES subscription_plans(id)` |
+| user_subscriptions_price_minor_check | c | `CHECK ((price_minor >= 0))` |
+| user_subscriptions_provider_provider_subscription_id_key | u | `UNIQUE (provider, provider_subscription_id)` |
+| user_subscriptions_status_check | c | `CHECK (((status)::text = ANY ((ARRAY['PENDING'::character varying, 'ACTIVE'::character varying, 'PAST_DUE'::character varying, 'CANCELLED'::character varying, 'EXPIRED'::character varying])::text[])))` |
+| user_subscriptions_tenant_id_fkey | f | `FOREIGN KEY (tenant_id) REFERENCES platform_tenants(id)` |
+| user_subscriptions_tenant_id_user_id_fkey | f | `FOREIGN KEY (tenant_id, user_id) REFERENCES tenant_memberships(tenant_id, user_id)` |
+| user_subscriptions_user_id_fkey | f | `FOREIGN KEY (user_id) REFERENCES users(id)` |
+
+
+### Indexes
+
+| Index | Definition |
+| --- | --- |
+| idx_user_subscriptions | `CREATE INDEX idx_user_subscriptions ON public.user_subscriptions USING btree (user_id, status)` |
+| user_subscriptions_pkey | `CREATE UNIQUE INDEX user_subscriptions_pkey ON public.user_subscriptions USING btree (id)` |
+| user_subscriptions_provider_provider_subscription_id_key | `CREATE UNIQUE INDEX user_subscriptions_provider_provider_subscription_id_key ON public.user_subscriptions USING btree (provider, provider_subscription_id)` |
+
+
+Consumers: No direct Java literal reference found; migrations, views, triggers or indirect table selection may be the consumer.
+
 ## username_recovery_attempts
 
 Type: **BASE TABLE**. Purpose: Authentication, contact verification, account recovery, throttling or session invalidation metadata.
@@ -3360,7 +4522,7 @@ Type: **BASE TABLE**. Purpose: Authenticated account identity and credential met
 | chk_users_phone_format | c | `CHECK (((phone_number IS NULL) OR ((phone_number)::text ~ '^\+[1-9][0-9]{1,14}$'::text)))` |
 | chk_users_phone_verification | c | `CHECK (((phone_verified_at IS NULL) OR (phone_number IS NOT NULL)))` |
 | chk_users_role | c | `CHECK (((role)::text = ANY ((ARRAY['CUSTOMER'::character varying, 'PLATFORM_ADMIN'::character varying])::text[])))` |
-| chk_users_username_format | c | `CHECK (((username IS NULL) OR ((username)::text ~ '^[a-z][a-z0-9_]{3,29}$'::text)))` |
+| chk_users_username_format | c | `CHECK (((username IS NULL) OR ((username)::text ~ '^[A-Za-z0-9][A-Za-z0-9_]{3,29}$'::text)))` |
 | users_pkey | p | `PRIMARY KEY (id)` |
 
 
@@ -3374,7 +4536,7 @@ Type: **BASE TABLE**. Purpose: Authenticated account identity and credential met
 | ux_users_username_normalized | `CREATE UNIQUE INDEX ux_users_username_normalized ON public.users USING btree (lower((username)::text)) WHERE (username IS NOT NULL)` |
 
 
-Consumers: [backend/src/main/java/com/giftplatform/admin/AccountPolicyController.java:1](../../src/main/java/com/giftplatform/admin/AccountPolicyController.java#L1); [backend/src/main/java/com/giftplatform/admin/AiInvitationAdminController.java:1](../../src/main/java/com/giftplatform/admin/AiInvitationAdminController.java#L1); [backend/src/main/java/com/giftplatform/admin/GroupMemberEmailPolicyController.java:1](../../src/main/java/com/giftplatform/admin/GroupMemberEmailPolicyController.java#L1); [backend/src/main/java/com/giftplatform/admin/PlatformAdminAuditController.java:1](../../src/main/java/com/giftplatform/admin/PlatformAdminAuditController.java#L1); [backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:1](../../src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java#L1); [backend/src/main/java/com/giftplatform/admin/bootstrap/AdminPasswordRecoveryRunner.java:1](../../src/main/java/com/giftplatform/admin/bootstrap/AdminPasswordRecoveryRunner.java#L1); [backend/src/main/java/com/giftplatform/admin/bootstrap/AdminProvisionRunner.java:1](../../src/main/java/com/giftplatform/admin/bootstrap/AdminProvisionRunner.java#L1); [backend/src/main/java/com/giftplatform/event/service/EventPublishReadiness.java:1](../../src/main/java/com/giftplatform/event/service/EventPublishReadiness.java#L1); [backend/src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java:1](../../src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java#L1); [backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java:1](../../src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java#L1); [backend/src/main/java/com/giftplatform/monetization/CommercialAccessService.java:1](../../src/main/java/com/giftplatform/monetization/CommercialAccessService.java#L1); [backend/src/main/java/com/giftplatform/otp/service/PhoneOtpIssuanceTransactionService.java:1](../../src/main/java/com/giftplatform/otp/service/PhoneOtpIssuanceTransactionService.java#L1); [backend/src/main/java/com/giftplatform/otp/service/PhoneOtpTransactionService.java:1](../../src/main/java/com/giftplatform/otp/service/PhoneOtpTransactionService.java#L1); [backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:1](../../src/main/java/com/giftplatform/payment/control/PaymentControlService.java#L1); [backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationService.java:1](../../src/main/java/com/giftplatform/qr/design/ai/AiInvitationService.java#L1); [backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:1](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L1); [backend/src/main/java/com/giftplatform/security/recovery/UsernameRecoveryController.java:1](../../src/main/java/com/giftplatform/security/recovery/UsernameRecoveryController.java#L1); [backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:1](../../src/main/java/com/giftplatform/security/verification/MobileVerificationService.java#L1); [backend/src/main/java/com/giftplatform/user/controller/ProfileNameController.java:1](../../src/main/java/com/giftplatform/user/controller/ProfileNameController.java#L1); [backend/src/main/java/com/giftplatform/user/entity/User.java:1](../../src/main/java/com/giftplatform/user/entity/User.java#L1); [backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:1](../../src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java#L1)
+Consumers: [backend/src/main/java/com/giftplatform/admin/AccountPolicyController.java:1](../../src/main/java/com/giftplatform/admin/AccountPolicyController.java#L1); [backend/src/main/java/com/giftplatform/admin/AiInvitationAdminController.java:1](../../src/main/java/com/giftplatform/admin/AiInvitationAdminController.java#L1); [backend/src/main/java/com/giftplatform/admin/GroupMemberEmailPolicyController.java:1](../../src/main/java/com/giftplatform/admin/GroupMemberEmailPolicyController.java#L1); [backend/src/main/java/com/giftplatform/admin/PlatformAdminAuditController.java:1](../../src/main/java/com/giftplatform/admin/PlatformAdminAuditController.java#L1); [backend/src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java:1](../../src/main/java/com/giftplatform/admin/PlatformAdminConsoleController.java#L1); [backend/src/main/java/com/giftplatform/admin/bootstrap/AdminPasswordRecoveryRunner.java:1](../../src/main/java/com/giftplatform/admin/bootstrap/AdminPasswordRecoveryRunner.java#L1); [backend/src/main/java/com/giftplatform/admin/bootstrap/AdminProvisionRunner.java:1](../../src/main/java/com/giftplatform/admin/bootstrap/AdminProvisionRunner.java#L1); [backend/src/main/java/com/giftplatform/analytics/InteractionAdminController.java:1](../../src/main/java/com/giftplatform/analytics/InteractionAdminController.java#L1); [backend/src/main/java/com/giftplatform/asset/HostInvitationUploadService.java:1](../../src/main/java/com/giftplatform/asset/HostInvitationUploadService.java#L1); [backend/src/main/java/com/giftplatform/event/service/EventPublishReadiness.java:1](../../src/main/java/com/giftplatform/event/service/EventPublishReadiness.java#L1); [backend/src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java:1](../../src/main/java/com/giftplatform/hostpayment/service/HostPaymentProfileService.java#L1); [backend/src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java:1](../../src/main/java/com/giftplatform/hostpayment/verification/account/AccountVerificationController.java#L1); [backend/src/main/java/com/giftplatform/localization/LocalizationAdminController.java:1](../../src/main/java/com/giftplatform/localization/LocalizationAdminController.java#L1); [backend/src/main/java/com/giftplatform/monetization/CommercialAccessService.java:1](../../src/main/java/com/giftplatform/monetization/CommercialAccessService.java#L1); [backend/src/main/java/com/giftplatform/notification/email/TransactionalEmailOutbox.java:1](../../src/main/java/com/giftplatform/notification/email/TransactionalEmailOutbox.java#L1); [backend/src/main/java/com/giftplatform/otp/service/PhoneOtpIssuanceTransactionService.java:1](../../src/main/java/com/giftplatform/otp/service/PhoneOtpIssuanceTransactionService.java#L1); [backend/src/main/java/com/giftplatform/otp/service/PhoneOtpTransactionService.java:1](../../src/main/java/com/giftplatform/otp/service/PhoneOtpTransactionService.java#L1); [backend/src/main/java/com/giftplatform/payment/control/PaymentControlService.java:1](../../src/main/java/com/giftplatform/payment/control/PaymentControlService.java#L1); [backend/src/main/java/com/giftplatform/qr/design/ai/AiInvitationService.java:1](../../src/main/java/com/giftplatform/qr/design/ai/AiInvitationService.java#L1); [backend/src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java:1](../../src/main/java/com/giftplatform/security/recovery/EmailRecoveryController.java#L1); [backend/src/main/java/com/giftplatform/security/recovery/UsernameRecoveryController.java:1](../../src/main/java/com/giftplatform/security/recovery/UsernameRecoveryController.java#L1); [backend/src/main/java/com/giftplatform/security/verification/MobileVerificationService.java:1](../../src/main/java/com/giftplatform/security/verification/MobileVerificationService.java#L1); [backend/src/main/java/com/giftplatform/user/controller/ProfileNameController.java:1](../../src/main/java/com/giftplatform/user/controller/ProfileNameController.java#L1); [backend/src/main/java/com/giftplatform/user/controller/ProfilePreferencesController.java:1](../../src/main/java/com/giftplatform/user/controller/ProfilePreferencesController.java#L1); [backend/src/main/java/com/giftplatform/user/entity/User.java:1](../../src/main/java/com/giftplatform/user/entity/User.java#L1); [backend/src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java:1](../../src/main/java/com/giftplatform/user/service/RegistrationServiceImpl.java#L1)
 
 ## wallet_ledger_entries
 
@@ -3581,11 +4743,32 @@ Table: gift_group_payment_reports
 CREATE TRIGGER group_member_report_history AFTER INSERT OR UPDATE ON public.gift_group_payment_reports FOR EACH ROW EXECUTE FUNCTION record_group_activity()
 ```
 
+## group_gifting_policy
+
+Table: gift_groups
+```sql
+CREATE TRIGGER group_gifting_policy BEFORE INSERT ON public.gift_groups FOR EACH ROW EXECUTE FUNCTION enforce_event_gifting_policy()
+```
+
 ## group_history
 
 Table: gift_groups
 ```sql
 CREATE TRIGGER group_history AFTER INSERT OR UPDATE ON public.gift_groups FOR EACH ROW EXECUTE FUNCTION record_group_activity()
+```
+
+## direct_claim_gifting_policy
+
+Table: guest_direct_transfer_claims
+```sql
+CREATE TRIGGER direct_claim_gifting_policy BEFORE INSERT ON public.guest_direct_transfer_claims FOR EACH ROW EXECUTE FUNCTION enforce_event_gifting_policy()
+```
+
+## guest_gift_gifting_policy
+
+Table: guest_gifts
+```sql
+CREATE TRIGGER guest_gift_gifting_policy BEFORE INSERT ON public.guest_gifts FOR EACH ROW EXECUTE FUNCTION enforce_event_gifting_policy()
 ```
 
 ## trg_bank_event_preferences
@@ -3607,6 +4790,13 @@ CREATE TRIGGER trg_upi_event_preferences AFTER UPDATE OF enabled, archived_at, v
 Table: payment_control_history
 ```sql
 CREATE TRIGGER payment_control_history_immutable BEFORE DELETE OR UPDATE ON public.payment_control_history FOR EACH ROW EXECUTE FUNCTION reject_monetization_history_mutation()
+```
+
+## payment_order_gifting_policy
+
+Table: payment_orders
+```sql
+CREATE TRIGGER payment_order_gifting_policy BEFORE INSERT ON public.payment_orders FOR EACH ROW EXECUTE FUNCTION enforce_event_gifting_policy()
 ```
 
 ## payment_order_pricing_immutable
@@ -3677,6 +4867,27 @@ BEGIN
  IF NOT NEW.enabled OR NEW.archived_at IS NOT NULL OR NEW.verification_status IN ('FAILED','REVOKED') THEN
   UPDATE event_payment_account_links SET preferred=FALSE
    WHERE host_id=NEW.host_id AND destination_id=NEW.id AND destination_kind=TG_ARGV[0];
+ END IF;
+ RETURN NEW;
+END;
+$function$
+```
+
+## enforce_event_gifting_policy
+
+
+```sql
+CREATE OR REPLACE FUNCTION public.enforce_event_gifting_policy()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+DECLARE gifting BOOLEAN;
+BEGIN
+ PERFORM pg_advisory_xact_lock_shared(1195984468,hashtext(NEW.event_id::text));
+ SELECT gifting_enabled INTO gifting FROM events WHERE id=NEW.event_id;
+ IF gifting IS FALSE THEN
+  RAISE EXCEPTION 'Gifting is not enabled for this event'
+   USING ERRCODE='23514',CONSTRAINT='event_gifting_open';
  END IF;
  RETURN NEW;
 END;
@@ -3846,6 +5057,7 @@ END $function$
 | Table | RLS enabled | RLS forced |
 | --- | --- | --- |
 | account_contact_challenges | False | False |
+| account_legal_consents | False | False |
 | account_pending_email_verifications | False | False |
 | account_pending_mobile_verifications | False | False |
 | account_recovery_challenges | False | False |
@@ -3853,6 +5065,7 @@ END $function$
 | affiliate_clicks | False | False |
 | affiliate_commissions | False | False |
 | affiliate_partners | False | False |
+| application_interactions | False | False |
 | audit_logs | False | False |
 | commercial_entitlements | False | False |
 | commercial_orders | False | False |
@@ -3864,7 +5077,9 @@ END $function$
 | contribution_allocation_postings | False | False |
 | contribution_allocations | False | False |
 | contributions | False | False |
+| coupon_redemptions | False | False |
 | credential_session_versions | False | False |
+| event_celebration_settings | False | False |
 | event_guest_submission_limits | False | False |
 | event_guestbook | False | False |
 | event_payment_account_links | False | False |
@@ -3884,6 +5099,7 @@ END $function$
 | gift_group_payment_reports | False | False |
 | gift_groups | False | False |
 | gift_photos | False | False |
+| gift_recommendations | False | False |
 | gift_retailer_metadata_audit | False | False |
 | gifts | False | False |
 | group_collection_notifications | False | False |
@@ -3895,6 +5111,8 @@ END $function$
 | host_account_verification_checks | False | False |
 | host_bank_accounts | False | False |
 | host_destination_verification_attempts | False | False |
+| host_invitation_upload_controls | False | False |
+| host_invitation_uploads | False | False |
 | host_payout_requests | False | False |
 | host_upi_accounts | False | False |
 | host_upi_qr_assets | False | False |
@@ -3902,6 +5120,11 @@ END $function$
 | hybrid_checkout_quotes | False | False |
 | invitation_ai_requests | False | False |
 | invitation_gallery_assets | False | False |
+| language_delivery_templates | False | False |
+| localization_event_controls | False | False |
+| localization_host_controls | False | False |
+| localization_sources | False | False |
+| localization_translations | False | False |
 | notification_outbox | False | False |
 | otp_request_rate_limits | False | False |
 | payment_channel_controls | False | False |
@@ -3915,20 +5138,41 @@ END $function$
 | payout_reservations | False | False |
 | phone_otp_challenges | False | False |
 | platform_admin_action_audit | False | False |
+| platform_brand_assets | False | False |
+| platform_branding | False | False |
 | platform_event_ai_design_settings | False | False |
 | platform_event_album_settings | False | False |
 | platform_event_message_settings | False | False |
+| platform_event_module_grants | False | False |
 | platform_experience_settings | False | False |
+| platform_growth_features | False | False |
+| platform_growth_settings | False | False |
 | platform_host_module_grants | False | False |
+| platform_languages | False | False |
+| platform_localization_settings | False | False |
 | platform_module_controls | False | False |
 | platform_monetization_history | False | False |
 | platform_monetization_settings | False | False |
 | platform_monetization_streams | False | False |
+| platform_tenants | False | False |
 | platform_verification_settings | False | False |
+| promotional_coupons | False | False |
 | qr_invitation_designs | False | False |
+| referral_codes | False | False |
 | routing_commission_history | False | False |
 | routing_commission_settings | False | False |
 | signup_email_verifications | False | False |
+| subscription_plans | False | False |
+| supported_currencies | False | False |
+| tenant_branding | False | False |
+| tenant_events | False | False |
+| tenant_memberships | False | False |
+| transactional_email_outbox | False | False |
+| user_language_preferences | False | False |
+| user_legal_consents | False | False |
+| user_profile_preferences | False | False |
+| user_referrals | False | False |
+| user_subscriptions | False | False |
 | username_recovery_attempts | False | False |
 | users | False | False |
 | wallet_ledger_entries | False | False |

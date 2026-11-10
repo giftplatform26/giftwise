@@ -1,0 +1,12 @@
+GiftWise Logo: {{brandLogoUrl}}
+
+Your GiftWise payment confirmation
+
+Payment completed successfully. Amount: {{formattedAmount}}. Recipient: {{recipientName}}. Reference: {{transactionReference}}. Keep this email for your records.
+
+View payment: {{paymentUrl}}
+
+Contact Support: {{supportUrl}}
+Privacy Policy: {{privacyUrl}}
+Terms & Conditions: {{termsUrl}}
+© 2026 GiftWise

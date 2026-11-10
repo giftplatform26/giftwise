@@ -1,0 +1,12 @@
+GiftWise Logo: {{brandLogoUrl}}
+
+Welcome to GiftWise
+
+Your account has been created. Start planning your next celebration.
+
+Sign in: {{signInUrl}}
+
+Contact Support: {{supportUrl}}
+Privacy Policy: {{privacyUrl}}
+Terms & Conditions: {{termsUrl}}
+© 2026 GiftWise

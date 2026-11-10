@@ -25,7 +25,8 @@ class GalleryAssetAuditServiceTest {
    new GalleryImageProcessor.Processed(new byte[]{1,2,3},80,100));
   when(repo.save(any(GalleryAsset.class))).thenAnswer(i->i.getArgument(0));
   var service=new GalleryAssetService(repo,processor,audit,actor);
-  var created=service.upload("BACKGROUND","BIRTHDAY","Test",new byte[]{1});
+  var created=service.upload("BACKGROUND","BIRTHDAY","Test",new byte[]{1},"PREMIUM");
+  assertEquals("PREMIUM",created.tier());
   assertFalse(created.published());
   verify(audit).recordChange(eq(admin),eq(AuditActorType.ADMIN),eq("INVITATION_ASSET"),
    eq(created.id()),eq(AuditAction.CREATE),isNull(),anyMap(),isNull());

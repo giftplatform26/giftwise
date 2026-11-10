@@ -1,21 +1,23 @@
+import {passwordRules} from './credential-policy.mjs';
 import {redirectIfSessionExpired} from './host-session.mjs';
 import {csrfToken} from './gift-api.mjs';
-export const OCCASIONS=['WEDDING','BIRTHDAY','BABY_SHOWER','HOUSEWARMING','ANNIVERSARY','OTHER'];
+export const OCCASIONS=['WEDDING','BIRTHDAY','BABY_SHOWER','HOUSEWARMING','ANNIVERSARY','FAREWELL','RETIREMENT','REUNION','OTHER'];
 const base='/backend/api';
-export function validateRegistration({fullName,username,email,mobile,password,emailVerificationToken}) {
+export function validateRegistration({fullName,username,email,mobile,password,emailVerificationToken,termsAccepted}) {
  if(!fullName || fullName.trim().length<2 || fullName.trim().length>120)throw Error('Enter your full name');
- if(!/^[a-z][a-z0-9_]{3,29}$/.test(username||'')) throw Error('Username must be 4–30 lowercase letters, digits or underscores, starting with a letter');
+ if(!/^[A-Za-z0-9][A-Za-z0-9_]{3,29}$/.test(username||'')) throw Error('Username must be 4–30 letters, numbers or underscores, starting with a letter or number');
  if(!email || email.length>254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw Error('Enter a valid email');
  if(!/^\+[1-9][0-9]{7,14}$/.test(mobile||'')) throw Error('Enter a mobile number with country code, e.g. +919876543210');
- if(!password || password.length<12) throw Error('Password must have at least 12 characters');
- return {fullName:fullName.trim(),username,email,mobile,password,...(emailVerificationToken?{emailVerificationToken}:{})};
+ if(passwordRules(password||'').some(([,valid])=>!valid)) throw Error('Password must contain at least 8 characters, uppercase and lowercase letters, a number and a special character, within 72 UTF-8 bytes.');
+ if(termsAccepted!==true) throw Error('Please agree to the Terms & Conditions and Privacy Policy.');
+ return {fullName:fullName.trim(),username,email,mobile,password,termsAccepted,...(emailVerificationToken?{emailVerificationToken}:{})};
 }
 export function validateEvent({title,description='',occasionType,eventDate='',addressLine1='',city='',state='',postalCode='',country='India',contactName='',contactPhone='',contactEmail='',hostName='',deliverySameAsEvent=true,deliveryAddress=null}) {
  if(!title?.trim()||title.trim().length>200) throw Error('Event title must be 1–200 characters');
  if(typeof hostName!=='string'||hostName.trim().length>200)throw Error('Host name must be at most 200 characters');
  if(description.length>10000) throw Error('Description too long');
  if(!OCCASIONS.includes(occasionType)) throw Error('Choose a supported occasion');
- if(eventDate && !/^\d{4}-\d{2}-\d{2}$/.test(eventDate)) throw Error('Invalid event date');
+ if(eventDate){const parsed=new Date(eventDate+'T00:00:00.000Z');if(!/^\d{4}-\d{2}-\d{2}$/.test(eventDate)||!Number.isFinite(parsed.getTime())||parsed.toISOString().slice(0,10)!==eventDate)throw Error('Please enter a valid event date.');}
   for(const [key,value] of Object.entries({addressLine1,city,state,postalCode,country,contactName,contactPhone}))if(!String(value).trim())throw Error(`${key} is required`);
   if(addressLine1.length>200||city.length>120||state.length>120||country.length>80||contactName.length>150)throw Error('Address or contact field is too long');
   if(country.trim().toLowerCase()==='india'&&!/^[1-9][0-9]{5}$/.test(postalCode.trim()))throw Error('Enter a valid 6-digit Indian PIN code');
@@ -37,6 +39,10 @@ export async function bootstrapCsrf(fetcher) {
  const r=await fetcher(`${base}/auth/csrf`,{method:'GET',credentials:'include',cache:'no-store'});
  if(!r.ok) throw Error(`Unable to initialize secure session (HTTP ${r.status})`);
 }
+/** @param {typeof fetch} fetcher
+ * @param {string} route
+ * @param {{method?:string,payload?:unknown,cookie?:string,bootstrap?:boolean}} [options]
+ */
 export async function hostRequest(fetcher,route,{method='GET',payload,cookie='',bootstrap=true}={}) {
  if(!route.startsWith('/auth/')&&!route.startsWith('/v1/events')) throw Error('Unsupported host API route');
  if(!['GET','POST','PUT'].includes(method)) throw Error('Unsupported method');

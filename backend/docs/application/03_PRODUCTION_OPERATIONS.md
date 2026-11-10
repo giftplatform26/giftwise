@@ -1,5 +1,7 @@
 # Document 3 — Production Readiness & Operations Handbook
 
+**Growth and performance update — 6 November 2026:** [Current implementation and rollout](releases/2026-11-06_GROWTH_AND_PERFORMANCE.md) covers the public home/demo, guided creation in both views, mobile invitations, consented sharing previews, bounded dashboard insights, approved-wishes keepsakes, image delivery and admin controls. Current schema head is V107. This update supersedes older route/default descriptions for the changed screens; it does not certify production deployment or live payments.
+
 This handbook distinguishes **Implemented** (source/export evidence), **Unknown** (not established by the repository), and **Proposed default** (an engineering starting point requiring approval and implementation). It is not a certification that the application is production-ready. No infrastructure was deployed, credentials changed, provider account funded, merchant enrolled, customer row read or live payment executed to create this package.
 
 The final section is the required prioritized gap register. It is deliberately the last section of this document.
@@ -33,6 +35,16 @@ The checked-in frontend rewrite assumes a backend on localhost:8080. Confirm the
 
 Guestbook photos require `magick` in PATH with the necessary JPEG/PNG/WebP/HEIC codecs and bounded resource policy. Check conversion with a non-personal fixture. Java image/QR rendering also needs its normal headless fonts/graphics support. The selected fonts must exist or render consistently under export; local browser font fallbacks are not a PDF/print-font guarantee.
 
+### 1.1.1 Invitation Studio uploads and stationery
+
+Implemented: the studio offers separate QR and invitation downloads, a tabbed design library, and undo/redo with one history step per completed drag. The library contains 36 built-in stickers, 48 built-in backgrounds, and ten premium stationery backgrounds. Template previews compose event details, typography, decorative elements, and a protected QR area.
+
+Deploy the frontend and restart the backend so Flyway applies V100–V102. V100 refreshes the six seeded premium designs, V101 creates private host upload storage and access controls, and V102 adds four premium designs. Existing admin-set Free/Premium tiers and publication choices are preserved for refreshed designs.
+
+Admin → Hosts & privileges → select a host → **Custom invitation uploads** controls access. Enable uploads, then choose whether an active premium host plan is required. Turning off the paid requirement explicitly grants complimentary access. Existing host-plan pricing and checkout apply; this change does not enable live payments or alter prices. Both admin approval and the configured entitlement rule are enforced on the upload, list, and image endpoints. Images are private to their owner; revoking access blocks further retrieval through these endpoints.
+
+Admin → Invitation gallery can upload backgrounds or decorations, select Free/Premium during upload, and publish drafts. Premium previews retain GiftWise watermarks; clean platform artwork continues to require the existing commercial entitlement.
+
 ### 1.2 Test
 
 Existing build separation: Surefire runs ordinary `*Test` classes and excludes the configured integration naming patterns; Failsafe runs `*IntegrationTest`, `*IT` and `*ITCase` during verify. Some ordinary test classes still use PostgreSQL/Testcontainers, so Docker access is needed for the full test command. Exact include/exclude patterns live in pom.xml.
@@ -53,7 +65,7 @@ npm run build
 
 Test data should use generated UUIDs, example contacts and isolated ephemeral databases. Production credentials/recipients must not be part of fixtures. Do not enable a live AI/payment/message provider for an ordinary test suite. Mock provider responses for error/retry/duplicate cases and keep explicit paid/live probes separately controlled.
 
-Evidence available at this documentation baseline: the preceding full backend test run completed **678 tests, 0 failures/errors/skips**. Documentation export tests subsequently passed against a fresh PostgreSQL V95 schema. Historical frontend full-suite execution had five unrelated failures among 392 tests; later focused tests/type checks passed, but a clean full browser/frontend acceptance run for this entire package is not attested. Re-run current CI commands; do not turn historical counts into current deployment approval.
+Current 2026-11-02 evidence: the full backend unit/HTTP suite passes **685 tests, 0 failures/errors/skips**. The schema/API export and dedicated celebration integration tests passed against isolated PostgreSQL V97 databases. The full integration run completed 595 tests with one outdated host-visibility assertion; the corrected test passed an isolated rerun. The 2026-11-02 full frontend suite passes 405 tests; TypeScript and the production frontend build pass. Earlier stale navigation/address expectations were repaired. Browser UAT, provider/live acceptance and production recovery are still not attested. Re-run current CI commands; do not turn historical counts into current deployment approval.
 
 ### 1.3 Staging
 
@@ -323,7 +335,7 @@ Failover must specify session loss, media consistency, DNS/ingress changes, prim
 
 - [ ] Approved environment topology, regions, domains/DNS/TLS, canonical QR URL and `/backend` reverse-proxy configuration.
 - [ ] Immutable backend/frontend artifacts, reproducible build, release/source/config/schema IDs and SBOM recorded.
-- [ ] Source V1–V95 and future migrations rehearsed on an approved representative database; schema checks/permissions/locks reviewed.
+- [ ] Source V1–V97 and future migrations rehearsed on an approved representative database; schema checks/permissions/locks reviewed.
 - [ ] Shared-session/media strategy implemented or explicitly constrained; load-balancer behavior/failover tested.
 - [ ] Resource, pool, disk/WAL/temp/media capacities and scaling limits measured against an approved workload.
 - [ ] Encrypted DB and filesystem-media backups scheduled, monitored, off-host and actually restored; approved RTO/RPO proved.
@@ -351,7 +363,7 @@ Failover must specify session loss, media consistency, DNS/ingress changes, prim
 
 ### UX, performance and acceptance
 
-- [ ] All 27 routes and conditional dialogs/forms have role/empty/loading/error/retry/mobile/browser acceptance coverage.
+- [ ] All 28 routes and conditional dialogs/forms have role/empty/loading/error/retry/mobile/browser acceptance coverage.
 - [ ] Full backend/frontend/integration/type/build suites are green or have explicitly approved, non-blocking dispositions.
 - [ ] Real exported invitation QR decodes to the intended published event on multiple supported devices/print conditions.
 - [ ] Individual/group guest privacy, optional registration, contact policies, targets/publication/fulfilment and account setup journeys pass UAT.
@@ -359,6 +371,22 @@ Failover must specify session loss, media consistency, DNS/ingress changes, prim
 - [ ] Commercial placement/premium access/affiliate disclosure and separated revenue state have product/finance acceptance.
 - [ ] Load, soak, burst, media conversion, provider failure, webhook replay and DB contention tests meet approved targets.
 - [ ] Monitoring/alert routes, thresholds, dashboards, escalation, support playbooks and incident exercises are verified.
+
+## 10.1 Implemented safeguards update — 2026-11-02
+
+The [controlled rollout](releases/2026-11-02_CELEBRATIONS_AND_SAFEGUARDS.md) records additive celebration features, permission controls, API/field contracts, V96 and rollback restrictions. The [operations toolkit](../../ops/README.md) provides production profile requirements, coordinated DB/media backup, guarded disposable restore and automated release checks.
+
+**Implemented:** separate environment-only executable production build profile and artifact-configuration check; minimal service health probes with protected metrics; opt-in `production`/`prod` startup policy and admin configuration status; secure/HttpOnly/SameSite cookie settings; schema validation/Flyway-clean restrictions; placeholder-key/simulator/profile checks; explicit single-instance limit; explicit private media path; bounded Razorpay transport (connect 5 s/read 20 s, redirects disabled); backup integrity/unsafe-archive checks; restore-to-empty `_restore` targets only; frontend regression expectation repair for earlier navigation/address changes.
+
+**Not established:** real infrastructure, TLS/DNS/ingress/client-IP behavior, provider entitlements/credits/merchant routing, live payout/refund capability, off-site encrypted backups/WAL/PITR, timed recovery, actual notification delivery, distributed sessions/rate limiting, legal/retention policy, full browser/accessibility/load/pentest evidence. A configuration check is not a substitute for these release gates.
+
+New feature rollout requires platform AND host AND event approval. New modules start off; existing gifting defaults remain unchanged. Invitation-only status persists when access is revoked so that revocation does not unexpectedly reopen collections. Published events must become private before settings edits; existing gifting activity prevents conversion to invitation-only mode. See the release note for the older-binary rollback restriction.
+
+## 10.2 Localisation implementation update
+
+[Platform localisation](releases/2026-11-02_LOCALIZATION.md) adds global availability, inheritable host/event restrictions, account preferences, independent remembered guest choices, dynamic native language metadata and draft/published translation management. English, தமிழ், हिन्दी, മലയാളം, ಕನ್ನಡ, తెలుగు, Español and العربية are registered; multilingual mode defaults off. Missing strings fall back through platform/default/additional/source rules. Customer-authored content, currencies, payment references, ownership and verification evidence remain unchanged.
+
+The framework covers host/guest/admin interface text and code-owned communication templates. Starter packs are partial and require native review; approved provider templates, real delivery and RTL/device acceptance remain external release gates. Dedicated localisation integration tests and the full frontend test/type/build checks pass at this stage. Existing production payment, deployment, notification dispatch and recovery gaps remain open.
 
 ## 11. Final production gap register — required work and missing information
 
@@ -370,9 +398,9 @@ This register is intentionally last. “Proposed default” is a recommendation 
 | PROD-02 | Blocker | Current payment paths enforce test-mode expectations; live merchant enrollment/routing/compliance not completed | Keep test paths labelled/isolated; implement and independently approve a live payment launch before collecting real provider payments | Payments/finance/security; provider approval and signed E2E/reconciliation evidence |
 | PROD-03 | Blocker for withdrawal promises | Live payouts are false; UI requests are blocked; no production dispatch/finalization workflow | Do not market live withdrawals. Define onboarding, approval, idempotent dispatch, provider webhooks, accounting and reconciliation | Payments/finance; completed audited payout lifecycle |
 | PROD-04 | Blocker for refund promises | No refund endpoint/workflow discovered | Define refund eligibility, approvals, provider API, idempotency, accounting reversal and failure/reconciliation process | Product/finance/payments; tests and operational sign-off |
-| PROD-05 | Blocker | No verified backup/restore/failover execution or approved RTO/RPO | Implement DB PITR and coordinated private-media backups; proposed RPO 15 min/RTO 1 h only after drill proves them | DevOps/DBA; timed recovery drill and reconciliation report |
-| PROD-06 | Blocker | Production encryption/signing/provider secrets custody/rotation not attested | Secret manager/runtime identity, separated encryption/HMAC keys and tested versioned data-key recovery/rotation | Security/DevOps; secret inventory and decrypting restore evidence |
-| PROD-07 | Blocker for multi-instance deployment | Process-local sessions and some in-memory rate windows do not establish distributed equivalence | Implement/test shared sessions and distributed abuse limits, or explicitly constrain initial deployment/failover behavior | Backend/DevOps; cross-node host/creator/member/individual tests |
+| PROD-05 | Blocker | Backup/integrity/disposable-restore scripts now exist; no verified production restore/failover or approved RTO/RPO | Implement DB PITR and coordinated private-media backups; proposed RPO 15 min/RTO 1 h only after drill proves them | DevOps/DBA; timed recovery drill and reconciliation report |
+| PROD-06 | Blocker | Startup rejects placeholder/missing keys and production artifact excludes private local configuration; secret custody/rotation/recovery still not attested | Secret manager/runtime identity, separated encryption/HMAC keys and tested versioned data-key recovery/rotation | Security/DevOps; secret inventory and decrypting restore evidence |
+| PROD-07 | Blocker for multi-instance deployment | Production startup explicitly limits declared deployment to one instance; shared sessions/distributed abuse limits remain absent | Implement/test shared sessions and distributed abuse limits, or explicitly constrain initial deployment/failover behavior | Backend/DevOps; cross-node host/creator/member/individual tests |
 | PROD-08 | Blocker for resilient media | Guestbook photos use local filesystem while other images use DB binaries | Durable shared private storage or reviewed adapter; consistent DB/media backups; missing-file monitoring | Backend/DevOps; node loss and restore tests |
 | PROD-09 | High | No actual workload, measured capacity, latency/error SLO or concurrency benchmark | Approve traffic mix; measure load/soak/burst/lock/render/provider behavior; publish limits and alerts | Product/performance/DevOps; benchmark and SLO review |
 | PROD-10 | High | No deployed dashboards, alert routing, on-call and incident escalation evidence | Configure protected observability and proposed initial thresholds, then tune to baseline | SRE/support; exercised alerts and runbooks |
@@ -380,19 +408,26 @@ This register is intentionally last. “Proposed default” is a recommendation 
 | PROD-12 | High | Email/SMS regional entitlement/sender/template/deliverability not verified | Configure supported providers; approved sender/recipient tests; no simulator in production | Communications/security; delivery and uncertain-outcome evidence |
 | PROD-13 | High | Verification provider production entitlement/schema/name matching not attested; sandbox scaffolding remains | Keep sandbox claims distinct; complete approved request binding, response matching, account-name rules and audit/reconciliation | Payments/security; production-verification acceptance |
 | PROD-14 | High for AI use | AI project credits/access/configuration are external; prior probe reported exhausted credits | Fund/authorize the configured project, monitor budgets/credits and test safe failures; grants do not supply credits | Admin/AI owner; successful controlled paid probe and budget alert |
-| PROD-15 | High | Cookie/TLS/proxy/CORS/security-header/WAF and client-IP policy not fully declared | Explicit reviewed same-origin HTTPS/cookie/proxy policies; test CSRF and signatures through ingress | Security/DevOps; production-like security tests |
+| PROD-15 | High | Production secure/HttpOnly/SameSite cookies and error restrictions implemented; actual TLS/proxy/CORS/WAF/client-IP policy still not verified | Explicit reviewed same-origin HTTPS/cookie/proxy policies; test CSRF and signatures through ingress | Security/DevOps; production-like security tests |
 | PROD-16 | High | No independent security audit/pentest/compliance approval | Risk assessment, threat model, dependency scans, penetration test and tracked remediation | Security/product; signed report and critical findings closed |
 | PROD-17 | High | No approved PII/photo/contact/financial/audit retention, consent, export, erasure or backup-deletion policy | Define policies before automating deletion; short secret-bearing challenge retention proposed; finance/legal set accounting durations | Product/privacy/legal/finance; policy plus working lifecycle jobs |
 | PROD-18 | High | No verified browser E2E/accessibility/mobile/print matrix for all routes and conditional forms | Define supported devices/languages; browser automation/UAT including actual QR scans and large/failed images | QA/design; route/control acceptance matrix |
-| PROD-19 | High | Historical full frontend test suite had five unrelated failures; clean full-build acceptance not recorded here | Re-run current full suite/type/build; fix or explicitly disposition each failure; do not cite focused tests as a full-suite pass | Frontend/QA; clean CI report or approved exception |
+| PROD-19 | Automated checks resolved; acceptance pending | Full frontend suite passes 405 tests; TypeScript and production build pass. Backend unit/HTTP suite passes 685 tests. Browser/device acceptance remains PROD-18 | Preserve release-bound automated reports and run browser UAT; repeat checks after code changes | Frontend/backend/QA; test/type/build reports and browser acceptance |
 | PROD-20 | High | Business requirements and branch rationale are not completely encoded in source | Review all guard/constraint inventories with domain owners; assign requirement IDs and edge-case acceptance tests | Product/architect/QA; signed traceability map |
 | PROD-21 | High documentation contract | Static JSX captures declarations/dynamic collections, not every runtime-generated instance; per-control DB/API semantic mapping is not universally explicit | Adopt stable field/action identifiers and typed API/form mappings; review route/control inventory against browser E2E and request logs | Frontend/backend/QA; zero unresolved semantic mapping audit |
 | PROD-22 | High API contract | Dynamic Map responses, heterogeneous error envelopes and delegated guard behavior lack a complete formal per-operation schema | Produce reviewed OpenAPI/JSON schemas and contract tests, including each conditional profile and binary/export variant | Backend/QA; schema/implementation diff and contract suite |
-| PROD-23 | Medium | Configuration precedence conflicts between active local/example/test defaults and deployment values are not reconciled | Version non-secret production config; validate required properties/flags at startup; keep private local values out of artifacts | DevOps/backend; environment diff and smoke assertions |
-| PROD-24 | Medium | No full third-party operational SLA/cost/timeout/retry/entitlement matrix | Review each adapter against current approved provider contract; define budget, timeout and uncertain-result ownership | Integrations/product; provider contract checklist |
+| PROD-23 | Medium; partially implemented | Environment-only production artifact/profile and config checks added; deployed configuration precedence and secret inventory remain unverified | Version non-secret production config; validate required properties/flags at startup; keep private local values out of artifacts | DevOps/backend; environment diff and smoke assertions |
+| PROD-24 | Medium | Razorpay transport now bounded (5 s connect/20 s read, no redirects); full provider SLA/cost/retry/entitlement matrix remains incomplete | Review each adapter against current approved provider contract; define budget, timeout and uncertain-result ownership | Integrations/product; provider contract checklist |
 | PROD-25 | Medium | Browser localStorage invitation drafts have no server backup/synchronization or cross-device recovery | Either document the limitation prominently or implement owner-scoped synchronization/version/recovery | Product/frontend/backend; recovery acceptance tests |
 | PROD-26 | Medium | Individual gift management is tied to the browser session | Define a secure cross-device recovery/claim-transfer policy if needed; never recover by public gift UUID alone | Product/security; scoped recovery threat model and tests |
 | PROD-27 | Medium | No complete data/key/archive lifecycle automation or schema rollback/compatibility gate | Add reviewed jobs and expand/migrate/contract release rules; preserve immutable history/idempotency | DBA/backend; migration/retention/replay tests |
 | PROD-28 | Medium | Maven transitive resolution/SBOM and license/vulnerability review are not fully exported from an immutable release | Generate and sign release SBOM/dependency locks/reports; review maintained versions before upgrade | Build/security/legal; artifact-bound scan and license report |
 | PROD-29 | Medium | No support/finance/admin separation beyond CUSTOMER/PLATFORM_ADMIN and scoped group roles | Define least-privilege operational roles/approval boundaries if multiple teams operate production | Security/product; approved RBAC matrix and access review |
 | PROD-30 | Medium | Complete production business continuity, rollback ownership, fraud/dispute handling and post-restore reconciliation procedures are not supplied | Assign accountable operators and rehearse tabletop + technical incidents with provider evidence | Product/finance/SRE; exercised incident/continuity plans |
+| PROD-31 | High for multilingual release | Localisation framework and eight language records exist; starter packs are partial, and complete native/RTL/device/payment-copy/provider-template acceptance is not attested | Review published-message coverage per language with native speakers; test switching with open forms, all payment/error states, RTL, calendars and approved delivered communications | Product/localisation/QA/communications; language-specific signed UAT and delivery evidence |
+
+## Deploying the growth release
+
+Apply V107 through normal Flyway startup after a verified backup; never reset an existing database. Use the [deployment runbook](../production-deployment/Production_Movement_Steps.md) and [growth rollout details](releases/2026-11-06_GROWTH_AND_PERFORMANCE.md#deployment-and-operations). Rich metadata requires runtime `GIFTWISE_PUBLIC_ORIGIN` and `GIFTWISE_BACKEND_ORIGIN` in the web service environment. The updated kit creates `/etc/giftwise/web.env` and backs it up with encrypted configuration.
+
+Keep rich previews and public keepsakes off until staging privacy checks and host-consent workflows pass. Verify thumbnail requests still return unavailable for unpublished events/private gifts. Check a narrow mobile screen, reduced motion, calendar failure feedback, stale admin save conflicts and analytics consent withdrawal. Measure actual mobile loading, interaction latency, layout shift and database queries before claiming a performance improvement. These changes do not remove the live-payment implementation gap.

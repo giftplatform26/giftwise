@@ -30,9 +30,10 @@ public class AdminProvisionRunner implements ApplicationRunner {
         if (rawEmail == null || !rawEmail.trim().matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) {
             throw new IllegalArgumentException("Valid ADMIN_PROVISION_EMAIL required");
         }
-        if (password==null || password.length()<16 || password.length()>128) {
-            throw new IllegalArgumentException("ADMIN_PROVISION_PASSWORD must be 16-128 characters");
+        if (password==null || password.codePointCount(0,password.length())<16) {
+            throw new IllegalArgumentException("ADMIN_PROVISION_PASSWORD must contain at least 16 characters");
         }
+        com.giftplatform.security.CredentialPolicy.validatePassword(password);
         String email=rawEmail.trim().toLowerCase(Locale.ROOT);
         if (users.existsByEmailIgnoreCase(email)) {
             throw new IllegalStateException("Account already exists; refusing to elevate an existing account");

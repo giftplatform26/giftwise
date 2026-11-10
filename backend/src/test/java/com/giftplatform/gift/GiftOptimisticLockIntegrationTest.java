@@ -28,6 +28,7 @@ class GiftOptimisticLockIntegrationTest {
  @Autowired EntityManagerFactory emf;
  @Test void staleGiftWriterCannotOverwriteCommittedUpdate() {
   Event event=new Event("Birthday",OccasionType.BIRTHDAY);
+event.setHostDisplayName("Fixture host");
   Gift gift=new Gift(event,"Mixer",new BigDecimal("100.00"));
   EntityManager seed=emf.createEntityManager();
   try {seed.getTransaction().begin();seed.persist(event);seed.persist(gift);seed.getTransaction().commit();}

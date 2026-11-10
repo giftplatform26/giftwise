@@ -1,0 +1,3 @@
+export const CONSENT_KEY='giftwise.cookie-preferences.v2';
+export function readConsent(storage=globalThis.localStorage){try{const value=JSON.parse(storage.getItem(CONSENT_KEY)||'null');return value?.version===2&&typeof value.analytics==='boolean'?value:null}catch{return null}}
+export function saveConsent(analytics,storage=globalThis.localStorage){const value={version:2,analytics:analytics===true,updatedAt:new Date().toISOString()};try{storage.setItem(CONSENT_KEY,JSON.stringify(value))}catch{}if(typeof window!=='undefined')window.dispatchEvent(new CustomEvent('giftwise-consent-changed',{detail:value}));return value}

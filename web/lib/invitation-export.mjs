@@ -1,3 +1,4 @@
+import {beginAction,completeAction} from './interaction-analytics.mjs';
 
 import {validateSafeLayout,QR_MARGIN} from './invitation-geometry.mjs';
 import {backgroundImageRect} from './background-position.mjs';
@@ -121,7 +122,7 @@ export async function renderInvitationPng(design,qrUrl){
     );
     ctx.drawImage(bg,rect.x,rect.y,rect.width,rect.height);
 
-    ctx.fillStyle='rgba(255,255,255,0.53)';
+    ctx.fillStyle=`rgba(255,255,255,${Number.isFinite(design.backgroundOverlay)?Math.max(0,Math.min(1,design.backgroundOverlay)):.53})`;
     ctx.fillRect(0,0,600,800);
   }
 
@@ -221,6 +222,8 @@ export async function downloadInvitationPng(
   qrUrl,
   filename='gift-invitation.png'
 ){
+  const interaction=beginAction('INVITATION_DOWNLOAD');
+  try{
   const blob=await renderInvitationPng(design,qrUrl);
   const url=URL.createObjectURL(blob);
 
@@ -231,7 +234,9 @@ export async function downloadInvitationPng(
     document.body.appendChild(a);
     a.click();
     a.remove();
+    completeAction(interaction,'BROWSER_READY','PNG_HANDED_TO_BROWSER');
   }finally{
     setTimeout(()=>URL.revokeObjectURL(url),1500);
   }
+  }catch(error){completeAction(interaction,'FAILURE','INVITATION_RENDER_OR_DOWNLOAD_FAILED');throw error;}
 }

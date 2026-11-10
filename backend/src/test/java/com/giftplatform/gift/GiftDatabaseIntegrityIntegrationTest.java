@@ -34,7 +34,7 @@ class GiftDatabaseIntegrityIntegrationTest {
  UUID seedEvent() {
   UUID user=UUID.randomUUID(), event=UUID.randomUUID();
   jdbc.update("INSERT INTO users(id,email,password_hash,role) VALUES (?,?,?,?)",user,user+"@example.test","test-hash","CUSTOMER");
-  jdbc.update("INSERT INTO events(id,title,occasion_type,status,owner_id) VALUES (?,?,?,?,?)",event,"Test","BIRTHDAY","DRAFT",user);
+  jdbc.update("INSERT INTO events(id,title,occasion_type,status,owner_id,host_display_name) VALUES (?,?,?,?,?,'Fixture host')",event,"Test","BIRTHDAY","DRAFT",user);
   return event;
  }
  UUID gift(UUID event,BigDecimal amount) {

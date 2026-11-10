@@ -15,6 +15,8 @@ public class GalleryAssetController {
  public ResponseEntity<byte[]> publishedImage(@PathVariable UUID id){return image(service.publishedImage(id));}
  @GetMapping("/api/v1/commerce/templates/{id}/image")
  public ResponseEntity<byte[]> purchasedImage(@PathVariable UUID id){return image(service.purchasedImage(id));}
+ @GetMapping("/api/v1/commerce/templates/{id}/preview")
+ public ResponseEntity<byte[]> preview(@PathVariable UUID id){return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).cacheControl(CacheControl.noStore()).body(service.preview(id));}
  public record Tier(String tier){}
  @PutMapping("/api/admin/invitation-assets/{id}/tier")
  public GalleryAssetService.AssetInfo tier(@PathVariable UUID id,@RequestBody Tier input){return service.tier(id,input==null?null:input.tier());}
@@ -24,8 +26,8 @@ public class GalleryAssetController {
  public ResponseEntity<byte[]> adminImage(@PathVariable UUID id){return image(service.adminImage(id));}
  @PostMapping(value="/api/admin/invitation-assets",consumes=MediaType.MULTIPART_FORM_DATA_VALUE)
  public GalleryAssetService.AssetInfo upload(@RequestParam String category,@RequestParam String occasion,@RequestParam String title,
-   @RequestPart("file") MultipartFile file) throws IOException {
-  return service.upload(category,occasion,title,file.getBytes());
+   @RequestPart("file") MultipartFile file,@RequestParam(defaultValue="FREE") String tier) throws IOException {
+  return service.upload(category,occasion,title,file.getBytes(),tier);
  }
  @PostMapping("/api/admin/invitation-assets/{id}/publish")
  public GalleryAssetService.AssetInfo publish(@PathVariable UUID id){return service.publish(id,true);}

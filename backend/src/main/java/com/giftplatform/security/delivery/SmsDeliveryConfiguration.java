@@ -15,6 +15,7 @@ import java.util.UUID;
 
 @Configuration
 public class SmsDeliveryConfiguration {
+    @org.springframework.beans.factory.annotation.Autowired(required=false) private com.giftplatform.localization.LocalizationService localization;
     @Bean("otpSmsDelivery")
     MessageDelivery smsDelivery(
             @Value("${gift.otp.sms.provider:disabled}") String provider,
@@ -27,7 +28,7 @@ public class SmsDeliveryConfiguration {
         if ("msg91".equals(provider)) return new Msg91SmsDelivery(
             environment.getProperty("gift.otp.sms.msg91.auth-key",""),
             environment.getProperty("gift.otp.sms.msg91.template-id",""),
-            environment.getProperty("gift.otp.sms.expiry-minutes",Integer.class,5));
+            environment.getProperty("gift.otp.sms.expiry-minutes",Integer.class,5),()->localization==null?environment.getProperty("gift.otp.sms.msg91.template-id",""):localization.smsTemplate(org.springframework.context.i18n.LocaleContextHolder.getLocale().toLanguageTag(),environment.getProperty("gift.otp.sms.msg91.template-id","")));
         if ("simulator".equals(provider)) {
             boolean localProfile = Arrays.stream(environment.getActiveProfiles()).anyMatch("local"::equals);
             if (!localProfile || !simulatorEnabled) throw new IllegalStateException("SMS simulator requires explicit local profile and opt-in");

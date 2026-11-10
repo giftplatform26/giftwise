@@ -1,0 +1,12 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+const ui=readFileSync(new URL('../components/GuestContributionCheckout.tsx',import.meta.url),'utf8');
+const page=readFileSync(new URL('../app/e/[token]/page.tsx',import.meta.url),'utf8');
+test('public page renders guest checkout',()=>assert.match(page,/GuestContributionCheckout[\s\S]*?token=\{token\}/));
+test('checkout uses server-created provider order',()=>assert.match(ui,/api\/public\/payments\/checkout/));
+test('checkout verifies payment with backend',()=>assert.match(ui,/api\/public\/payments\/confirm/));
+test('checkout uses CSRF token for writes',()=>assert.match(ui,/X-XSRF-TOKEN/));
+test('checkout enforces test-mode key',()=>assert.match(ui,/rzp_test_/));
+test('checkout distinguishes pending verification from success',()=>assert.match(ui,/confirmation is pending/));
+test('checkout shows verified split',()=>{assert.match(ui,/receipt\.giftPaise/);assert.match(ui,/receipt\.walletPaise/)});

@@ -1,0 +1,15 @@
+/* GiftWise web handoff. Mobile source of truth: src/theme/tokens.ts */
+:root {
+  --gw-purple: #6336B5; --gw-purple-deep: #35205B; --gw-gold: #E8BC62;
+  --gw-gold-ink: #76520E; --gw-lavender: #EEE7FA; --gw-peach: #F9DED0; --gw-mint: #DDEFE5;
+  --gw-background: #FCFAF6; --gw-surface: #FFFFFF; --gw-text: #292137;
+  --gw-muted: #6F657B; --gw-border: #DED7E8; --gw-primary: #6336B5; --gw-on-primary: #FFFFFF;
+  --gw-success: #216344; --gw-warning: #825509; --gw-error: #AC324A;
+  --gw-heading-font: 'Manrope', system-ui, sans-serif; --gw-body-font: 'Inter', system-ui, sans-serif;
+  --gw-radius-control: 16px; --gw-radius-card: 24px; --gw-radius-hero: 32px;
+}
+[data-theme='dark'] {
+  --gw-background: #171220; --gw-surface: #241C30; --gw-text: #FAF6FF;
+  --gw-muted: #C3B7D1; --gw-border: #51435F; --gw-primary: #CFB4FF;
+  --gw-on-primary: #281441; --gw-success: #8ED5AC; --gw-warning: #F1CD81; --gw-error: #FFA8B8;
+}

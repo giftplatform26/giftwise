@@ -11,6 +11,9 @@ import java.time.Duration;
 
 @Configuration
 public class EmailDeliveryConfiguration {
+    @org.springframework.beans.factory.annotation.Autowired(required=false) private com.giftplatform.localization.LocalizationService localization;
+    @org.springframework.beans.factory.annotation.Autowired(required=false) private com.giftplatform.notification.email.BrandedEmailService branded;
+    private String localized(String text){return localization==null?text:localization.localizeRendered(text,org.springframework.context.i18n.LocaleContextHolder.getLocale().toLanguageTag());}
     @Bean("otpEmailDelivery")
     MessageDelivery emailDelivery(
             @Value("${gift.otp.email.provider:disabled}") String provider,
@@ -34,7 +37,11 @@ public class EmailDeliveryConfiguration {
         HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build();
         return (to, body) -> {
             if (to == null || !to.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) throw new IllegalArgumentException("Invalid recipient");
-            String json = "{\"from\":\"" + escape(from) + "\",\"to\":[\"" + escape(to) + "\"],\"subject\":\"" + escape(subject) + "\",\"text\":\"" + escape(body) + "\"}";
+            if (branded != null && branded.available()) {
+                branded.send(to, branded.security(localized(subject.replace("Gift Platform", "GiftWise")), localized(body)), "giftwise-security-"+java.util.UUID.randomUUID());
+                return;
+            }
+            String json = "{\"from\":\"" + escape(from) + "\",\"to\":[\"" + escape(to) + "\"],\"subject\":\"" + escape(localized(subject)) + "\",\"text\":\"" + escape(localized(body)) + "\"}";
             HttpRequest request = HttpRequest.newBuilder(URI.create("https://api.resend.com/emails"))
                     .timeout(Duration.ofSeconds(10))
                     .header("Authorization", "Bearer " + apiKey)

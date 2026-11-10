@@ -8,6 +8,7 @@ import java.util.UUID;
 
 @Service
 public class PaymentNotificationService {
+    @org.springframework.beans.factory.annotation.Autowired(required=false) private com.giftplatform.notification.email.TransactionalEmailOutbox emails;
     private final JdbcTemplate jdbc;
     public PaymentNotificationService(JdbcTemplate jdbc) { this.jdbc = jdbc; }
 
@@ -43,5 +44,6 @@ public class PaymentNotificationService {
             VALUES (?, ?, 'HOST', ?, ?, ?)
             ON CONFLICT (contribution_id, recipient_type) DO NOTHING
             """, UUID.randomUUID(), contributionId, d.eventId(), result.giftPaise(), result.walletPaise());
+        if(emails!=null)emails.captured(contributionId);
     }
 }

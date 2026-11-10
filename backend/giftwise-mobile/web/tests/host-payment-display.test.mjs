@@ -1,0 +1,16 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {maskedBank,validateBank,validateUpi} from '../lib/host-payment-api.mjs';
+const page=readFileSync(new URL('../app/host/payment-settings/page.tsx',import.meta.url),'utf8');
+test('UPI list displays backend masked field',()=>assert.match(page,/u\.masked\|\|localize\([^]*?defaultValue:"UPI destination"/));
+test('bank list displays backend masked IFSC field',()=>assert.match(page,/b\.ifscMasked\|\|localize\([^]*?defaultValue:"IFSC unavailable"/));
+test('bank masking uses actual backend field',()=>assert.equal(maskedBank({accountMasked:'****1234'}),'****1234'));
+test('bank full account is not displayed',()=>assert.equal(maskedBank({accountMasked:'123456789'}),'Account details protected'));
+test('legacy bank masked fields still supported',()=>assert.equal(maskedBank({maskedAccountNumber:'****4567'}),'****4567'));
+test('bank length lower boundary matches backend',()=>assert.equal(validateBank({accountNumber:'123456',ifsc:'HDFC0001234',accountHolderName:'Test User'}).accountNumber,'123456'));
+test('bank length upper boundary matches backend',()=>assert.equal(validateBank({accountNumber:'1'.repeat(20),ifsc:'HDFC0001234',accountHolderName:'Test User'}).accountNumber.length,20));
+test('bank rejects too-short number',()=>assert.throws(()=>validateBank({accountNumber:'12345',ifsc:'HDFC0001234',accountHolderName:'Test User'})));
+test('UPI accepts backend supported format',()=>assert.equal(validateUpi('test.user@oksbi').upiId,'test.user@oksbi'));
+test('UPI rejects excessive handle length',()=>assert.throws(()=>validateUpi('ab@'+'x'.repeat(33))));
+test('UI displays disabled state',()=>{assert.match(page,/u\.enabled===false/);assert.match(page,/b\.enabled===false/)});

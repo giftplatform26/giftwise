@@ -22,7 +22,8 @@ public class AdminPasswordRecoveryRunner implements ApplicationRunner {
  public void run(ApplicationArguments args){
   if(!"YES".equals(System.getenv("ADMIN_RECOVERY_CONFIRM")))throw new IllegalStateException("Explicit ADMIN_RECOVERY_CONFIRM=YES required");
   String email=System.getenv("ADMIN_RECOVERY_EMAIL"),password=System.getenv("ADMIN_RECOVERY_NEW_PASSWORD");
-  if(email==null||password==null||password.length()<16||password.length()>72)throw new IllegalArgumentException("Valid email and password of 16–72 characters required");
+  if(email==null||password==null||password.codePointCount(0,password.length())<16)throw new IllegalArgumentException("Valid email and password of at least 16 characters required");
+  com.giftplatform.security.CredentialPolicy.validatePassword(password);
   User admin=users.findByEmailIgnoreCase(email.strip().toLowerCase(Locale.ROOT)).orElseThrow(()->new IllegalStateException("Account not found"));
   if(admin.getRole()!=UserRole.PLATFORM_ADMIN||!admin.isEnabled())throw new IllegalStateException("Account is not an enabled platform administrator");
   admin.setPasswordHash(passwords.encode(password));

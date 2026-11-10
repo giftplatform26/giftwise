@@ -2,7 +2,7 @@ const redirecting=new WeakSet();
 export function isProtectedHostRequest(input) {
  try {
   const path=new URL(input,'https://gift-platform.invalid').pathname;
-  return /^\/(?:backend\/)?api\/(?:v1\/(?:events|host)(?:\/|$)|auth\/(?:me|profile-name|logout)$)/.test(path);
+  return /^\/(?:backend\/)?api\/(?:v1\/(?:events|host)(?:\/|$)|admin(?:\/|$)|auth\/(?:me|profile-name|language|logout)$|auth\/profile(?:\/|$))/.test(path);
  }catch{return false;}
 }
 export function redirectIfSessionExpired(response,input,location=typeof window==='undefined'?null:window.location) {
@@ -16,3 +16,5 @@ export function redirectIfSessionExpired(response,input,location=typeof window==
  location.replace(`/login?reason=session-expired&next=${encodeURIComponent(next)}`);
  return true;
 }
+
+export function isActivityRequest(input,origin){try{const url=new URL(input,origin);return url.origin===origin&&(isProtectedHostRequest(url.pathname)||/^\/(?:backend\/)?api\/auth\/login$/.test(url.pathname)||/^\/(?:backend\/)?api\/public\/groups\/[a-f0-9-]{36}(?:\/|$)/i.test(url.pathname))}catch{return false}}

@@ -49,7 +49,7 @@ public class GiftPhotoService {
             try{graphics.setColor(java.awt.Color.WHITE);graphics.fillRect(0,0,w,h);graphics.setRenderingHint(java.awt.RenderingHints.KEY_INTERPOLATION,java.awt.RenderingHints.VALUE_INTERPOLATION_BICUBIC);graphics.drawImage(source,0,0,w,h,null);}finally{graphics.dispose();}
             ByteArrayOutputStream output=new ByteArrayOutputStream();ImageIO.write(result,"jpeg",output);
             UUID id=UUID.randomUUID();
-            db.update("INSERT INTO gift_photos(id,event_id,actor_id,content,width,height) VALUES (?,?,?,?,?,?)",id,eventId,actor,output.toByteArray(),w,h);
+            db.update("INSERT INTO gift_photos(id,event_id,actor_id,content,width,height,thumbnail) VALUES (?,?,?,?,?,?,?)",id,eventId,actor,output.toByteArray(),w,h,thumbnail(output.toByteArray()));
             return new Photo("gift-photo:"+id,w,h);
         }catch(IOException e){throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Photo could not be read. Choose a JPEG or PNG.");}
     }
@@ -65,11 +65,27 @@ public class GiftPhotoService {
         if(n==null||n!=1)throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         return db.query("SELECT content FROM gift_photos WHERE id=? AND event_id=?",(rs,i)->rs.getBytes(1),id,eventId).stream().findFirst().orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
-    public byte[] publicPhoto(UUID token,UUID giftId){
-        return db.query("""
-            SELECT p.content FROM gift_photos p JOIN gifts g ON g.image_key='gift-photo:'||p.id::text AND g.event_id=p.event_id
-            JOIN events e ON e.id=g.event_id WHERE e.public_token=? AND e.status='PUBLISHED'
+    /** Fixed-size thumbnail avoids arbitrary resize work and is reused after first access. */
+    public static byte[] thumbnail(byte[] input) throws IOException {
+        BufferedImage source=ImageIO.read(new ByteArrayInputStream(input));
+        if(source==null)throw new IOException("Unreadable gift image");
+        double scale=Math.min(1,480.0/Math.max(source.getWidth(),source.getHeight()));
+        int w=Math.max(1,(int)Math.round(source.getWidth()*scale)),h=Math.max(1,(int)Math.round(source.getHeight()*scale));
+        BufferedImage result=new BufferedImage(w,h,BufferedImage.TYPE_INT_RGB);var g=result.createGraphics();
+        try{g.setColor(java.awt.Color.WHITE);g.fillRect(0,0,w,h);g.setRenderingHint(java.awt.RenderingHints.KEY_INTERPOLATION,java.awt.RenderingHints.VALUE_INTERPOLATION_BICUBIC);g.drawImage(source,0,0,w,h,null);}finally{g.dispose();}
+        var out=new ByteArrayOutputStream();ImageIO.write(result,"jpeg",out);return out.toByteArray();
+    }
+    public byte[] publicPhoto(UUID token,UUID giftId){return publicPhoto(token,giftId,false);}
+    public byte[] publicPhoto(UUID token,UUID giftId,boolean small){
+        record Image(UUID id,byte[] content,byte[] thumbnail){}
+        var image=db.query("""
+            SELECT p.id,p.content,p.thumbnail FROM gift_photos p JOIN gifts g ON g.image_key='gift-photo:'||p.id::text AND g.event_id=p.event_id
+            JOIN events e ON e.id=g.event_id WHERE e.public_token=? AND e.status='PUBLISHED' AND e.gifting_enabled
             AND g.id=? AND g.visibility='PUBLIC' AND g.status='ACTIVE'
-            """,(rs,i)->rs.getBytes(1),token,giftId).stream().findFirst().orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
+            """,(rs,i)->new Image(rs.getObject(1,UUID.class),rs.getBytes(2),rs.getBytes(3)),token,giftId).stream().findFirst().orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
+        if(!small)return image.content();
+        if(image.thumbnail()!=null)return image.thumbnail();
+        try{byte[] bytes=thumbnail(image.content());db.update("UPDATE gift_photos SET thumbnail=? WHERE id=? AND thumbnail IS NULL",bytes,image.id());return bytes;}
+        catch(IOException ex){throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,"Unable to load this gift photo");}
     }
 }

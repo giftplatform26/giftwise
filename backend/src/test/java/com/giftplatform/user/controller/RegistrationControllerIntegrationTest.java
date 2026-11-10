@@ -75,8 +75,11 @@ class RegistrationControllerIntegrationTest {
                         "username", "user_" +
                                 UUID.randomUUID().toString()
                                         .replace("-", "").substring(0, 12),
+                        "fullName", "Fixture host",
+                        "mobile", "+919"+String.format(java.util.Locale.ROOT,"%09d",Long.remainderUnsigned(UUID.randomUUID().getLeastSignificantBits(),1_000_000_000L)),
                         "email", email,
-                        "password", password
+                        "password", password,
+                        "termsAccepted", true
                 )
         );
     }
@@ -302,8 +305,11 @@ class RegistrationControllerIntegrationTest {
         String body = objectMapper.writeValueAsString(
                 Map.of(
                         "username", username,
+                        "fullName", "Fixture host",
+                        "mobile", "+919"+String.format(java.util.Locale.ROOT,"%09d",Long.remainderUnsigned(UUID.randomUUID().getLeastSignificantBits(),1_000_000_000L)),
                         "email", email,
                         "password", "SecurePassword123!",
+                        "termsAccepted", true,
                         "role", "PLATFORM_ADMIN"
                 )
         );

@@ -1,0 +1,11 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {remoteGifts,toDisplayGift} from '../lib/gift-remote.mjs';
+const E='11111111-1111-4111-8111-111111111111',G='22222222-2222-4222-8222-222222222222';
+const ok=(data={})=>({ok:true,status:200,json:async()=>data});
+test('list includes session credentials',async()=>{let args;await remoteGifts.list(async(...a)=>{args=a;return ok([])},E);assert.equal(args[1].credentials,'include');assert.equal(args[1].method,'GET')});
+test('publication uses dedicated endpoint and CSRF',async()=>{let args;await remoteGifts.publish(async(...a)=>{args=a;return ok()},E,G,'PUBLIC','XSRF-TOKEN=abc');assert.match(args[0],/\/publication$/);assert.equal(args[1].headers['X-XSRF-TOKEN'],'abc');assert.deepEqual(JSON.parse(args[1].body),{visibility:'PUBLIC'})});
+test('product link uses separate payload',async()=>{let args;await remoteGifts.link(async(...a)=>{args=a;return ok()},E,G,'https://shop.example.org/p','XSRF-TOKEN=abc');assert.equal(JSON.parse(args[1].body).productUrl,'https://shop.example.org/p')});
+test('write fails closed without CSRF token',async()=>{await assert.rejects(remoteGifts.cancel(async()=>ok(),E,G,''),/CSRF token missing/)});
+test('401 is not treated as empty gift list',async()=>{await assert.rejects(remoteGifts.list(async()=>({ok:false,status:401}),E),/Login required/)});
+test('409 explains conflict',async()=>{await assert.rejects(remoteGifts.publish(async()=>({ok:false,status:409}),E,G,'DRAFT','XSRF-TOKEN=x'),/changed/)});
+test('response maps visibility separately from lifecycle',()=>{const x=toDisplayGift({id:G,name:'Test',targetAmount:'100.00',visibility:'PUBLIC',status:'ACTIVE'});assert.equal(x.status,'PUBLIC');assert.equal(x.lifecycle,'ACTIVE')});

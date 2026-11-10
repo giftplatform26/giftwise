@@ -9,7 +9,7 @@ import ts from 'typescript';
 const require=createRequire(import.meta.url);
 const source=readFileSync(resolve(dirname(new URL(import.meta.url).pathname),'../components/GroupGiftPlan.tsx'),'utf8');
 const compiled=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX,target:ts.ScriptTarget.ES2022}}).outputText;
-const module={exports:{}};new Function('require','module','exports',compiled)(require,module,module.exports);
+const module={exports:{}};new Function('require','module','exports',compiled)(name=>name==='./LocalizationProvider'?{useLocalizationRender:()=>{}}:require(name),module,module.exports);
 const Plan=module.exports.default;
 const base={groupId:'group',selectedGiftId:'',reserved:false,wishlist:[{id:'available',name:'Coffee maker',contributionEnabled:true},{id:'held',name:'Held gift',contributionEnabled:false}],call:async()=>{},onChange:async()=>{},busy:false,setBusy:()=>{}};
 const render=props=>renderToStaticMarkup(React.createElement(Plan,{...base,...props}));

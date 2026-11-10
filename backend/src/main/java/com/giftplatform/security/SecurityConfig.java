@@ -57,9 +57,12 @@ public class SecurityConfig {
             HttpSecurity http,
             SecurityContextRepository contextRepository,
             SessionAuthenticationStrategy sessionStrategy,
-            com.giftplatform.security.recovery.CredentialSessionVersionStore versions
+            com.giftplatform.security.recovery.CredentialSessionVersionStore versions,
+            org.springframework.beans.factory.ObjectProvider<com.giftplatform.analytics.InteractionService> interactions
     ) throws Exception {
 
+        var interactionService=interactions.getIfAvailable();
+        if(interactionService!=null)http.addFilterBefore(new com.giftplatform.analytics.InteractionRequestFilter(interactionService),org.springframework.security.web.access.ExceptionTranslationFilter.class);
         http.addFilterBefore(new org.springframework.web.filter.OncePerRequestFilter() {
             @Override protected void doFilterInternal(jakarta.servlet.http.HttpServletRequest req,
                     jakarta.servlet.http.HttpServletResponse res, jakarta.servlet.FilterChain chain)
@@ -68,6 +71,12 @@ public class SecurityConfig {
                 if (authentication != null && authentication.isAuthenticated()
                         && authentication.getPrincipal() instanceof GiftUserPrincipal principal) {
                     var session = req.getSession(false);
+                    if (session != null && HostSessionActivity.expired(session,System.currentTimeMillis(),"1".equals(req.getHeader("X-Gift-User-Activity")))) {
+                        org.springframework.security.core.context.SecurityContextHolder.clearContext();
+                        session.invalidate();
+                        if(req.getRequestURI().equals("/api/auth/login")){chain.doFilter(req,res);return;}
+                        res.sendError(401,"Session expired after inactivity. Please sign in again.");return;
+                    }
                     Object epoch = session == null ? null : session.getAttribute("gift.credential.epoch");
                     String kind = principal.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_PLATFORM_ADMIN")) ? "PLATFORM_ADMIN" : "HOST";
                     if (!(epoch instanceof Long v) || v.longValue() != versions.current(kind, principal.getUserId())) {
@@ -106,6 +115,7 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
+                        .requestMatchers(HttpMethod.GET,"/actuator/health","/actuator/health/liveness","/actuator/health/readiness").permitAll()
                         .requestMatchers(
                                 HttpMethod.POST,
                                 "/api/auth/register",
@@ -120,7 +130,7 @@ public class SecurityConfig {
                         ).permitAll()
                         .requestMatchers(
                                 HttpMethod.GET,
-                                "/api/public/verification-settings", "/api/public/events/*", "/api/public/events/*/features", "/api/public/events/*/gifts/*/photo", "/api/public/experience"
+                                "/api/public/keepsakes/*", "/api/public/growth-settings", "/api/public/events/*/share-preview", "/api/public/events/*/share-preview.png", "/api/public/localization/catalog", "/api/public/events/*/celebration-details", "/api/public/events/*/calendar", "/api/public/verification-settings", "/api/public/events/*", "/api/public/events/*/features", "/api/public/events/*/gifts/*/photo", "/api/public/experience"
                         ).permitAll()
                          .requestMatchers(HttpMethod.GET,
                                  "/api/public/celebrations/*/wishes").permitAll()
@@ -131,7 +141,11 @@ public class SecurityConfig {
                           .requestMatchers(HttpMethod.GET,
                                   "/api/public/celebrations/*/wishes/*/photo").permitAll()
 
+                        .requestMatchers(HttpMethod.POST,"/api/public/interactions").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/public/branding", "/api/public/branding/assets/*").permitAll()
+                        .requestMatchers("/api/auth/profile", "/api/auth/profile/**").authenticated()
                         .requestMatchers(HttpMethod.GET,"/api/public/commerce/**").permitAll()
+                        .requestMatchers("/api/v1/invitation-uploads", "/api/v1/invitation-uploads/**").hasRole("CUSTOMER")
                         .requestMatchers("/api/v1/commerce", "/api/v1/commerce/**").authenticated()
                         .requestMatchers("/api/public/groups/*/coordination/*", "/api/public/groups/*/coordination/*/checkout", "/api/public/groups/*/coordination/*/confirm").permitAll()
                         .requestMatchers(HttpMethod.GET,
@@ -164,11 +178,11 @@ public class SecurityConfig {
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/api/auth/me",
-                                "/api/auth/profile-name"
+                                "/api/auth/profile-name", "/api/auth/language", "/api/localization/catalog"
                         ).authenticated()
                         .requestMatchers(
                                 HttpMethod.POST,
-                                "/api/auth/profile-name"
+                                "/api/auth/profile-name", "/api/auth/language", "/api/localization/catalog"
                         ).authenticated()
                         .requestMatchers(
                                 HttpMethod.POST,

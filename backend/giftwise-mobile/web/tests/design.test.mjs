@@ -1,0 +1,17 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {initialDesign,updateElement,addText,deleteElement,validateDesign} from '../lib/design.mjs';
+test('default layout is valid',()=>assert.equal(validateDesign(initialDesign),true));
+test('QR element is mandatory',()=>assert.equal(validateDesign(deleteElement(initialDesign,'qr')),true));
+test('text can be added',()=>assert.equal(addText(initialDesign).elements.length,initialDesign.elements.length+1));
+test('element update is immutable',()=>{const d=updateElement(initialDesign,'title',{text:'New'});assert.equal(d.elements[0].text,'New');assert.notEqual(initialDesign.elements[0].text,'New')});
+test('non QR elements can be deleted',()=>assert.equal(deleteElement(initialDesign,'title').elements.length,initialDesign.elements.length-1));
+test('missing QR is invalid',()=>assert.equal(validateDesign({...initialDesign,elements:[]}),false));
+test('invalid geometry is rejected',()=>assert.equal(validateDesign(updateElement(initialDesign,'title',{w:-5})),false));
+test('too many elements rejected',()=>assert.equal(validateDesign({...initialDesign,elements:Array(101).fill(initialDesign.elements[0])}),false));
+import {occasionTemplates,createOccasionDesign,resetInvitationToDefault} from '../lib/design.mjs';
+test('all six occasion templates produce valid layouts',()=>{for(const k of Object.keys(occasionTemplates))assert.equal(validateDesign(createOccasionDesign(k)),true,k)});
+test('template selection preserves mandatory QR element',()=>{for(const k of Object.keys(occasionTemplates))assert.equal(createOccasionDesign(k).elements.filter(e=>e.id==='qr').length,1)});
+test('host event title appears in invitation',()=>assert.equal(createOccasionDesign('WEDDING',{title:'Our Special Day'}).elements.find(e=>e.id==='title').text,'Our Special Day'));
+test('reset discards visual changes and keeps current event name',()=>{const changed=updateElement(createOccasionDesign('BIRTHDAY',{title:'Party'}),'gift',{text:'changed'});const reset=resetInvitationToDefault('BIRTHDAY',{title:'Party'});assert.notDeepEqual(reset,changed);assert.equal(reset.elements.find(e=>e.id==='title').text,'Party')});
+test('unknown occasion falls back to general template',()=>assert.equal(validateDesign(createOccasionDesign('UNKNOWN')),true));
+test('template generation never mutates shared baseline',()=>{const old=JSON.stringify(initialDesign);createOccasionDesign('WEDDING');assert.equal(JSON.stringify(initialDesign),old)});

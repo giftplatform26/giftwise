@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+const wrapper=readFileSync(new URL('../components/GroupMobileVerification.tsx',import.meta.url),'utf8');
+const component=readFileSync(new URL('../components/MobileVerification.tsx',import.meta.url),'utf8');
+const page=readFileSync(new URL('../app/groups/[token]/[groupId]/page.tsx',import.meta.url),'utf8');
+test('member account includes shared mobile verification',()=>{assert.match(page,/GroupMobileVerification token=\{token\} groupId=\{groupId\}/);assert.match(wrapper,/from '.\/MobileVerification'/)});
+test('mobile verification is hidden unless globally enabled',()=>{assert.match(component,/if\(!mobileOtpEnabled\)return null/);assert.doesNotMatch(component,/local development only/)});
+test('mobile verification retains CSRF and authenticated session',()=>{assert.match(component,/X-XSRF-TOKEN/);assert.match(component,/credentials:'include'/)});
+test('mobile verification binds completion to challenge and group',()=>{assert.match(component,/challengeId:challenge,code/);assert.match(component,/groupId:groupId\|\|null/)});

@@ -15,7 +15,7 @@ public class PublicPaymentContextController {
 
     @GetMapping("/context/{token}")
     public Map<String, UUID> context(@PathVariable UUID token) {
-        var ids = jdbc.query("SELECT id FROM events WHERE public_token = ? AND status = 'PUBLISHED'",
+        var ids = jdbc.query("SELECT id FROM events WHERE public_token = ? AND status = 'PUBLISHED' AND gifting_enabled",
                 (rs, i) -> rs.getObject(1, UUID.class), token);
         if (ids.size() != 1) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation unavailable");
         return Map.of("eventId", ids.get(0));

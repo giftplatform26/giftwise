@@ -1,0 +1,12 @@
+GiftWise Logo: {{brandLogoUrl}}
+
+Contribution received for {{eventName}}
+
+Thank you for your contribution. Amount: {{formattedAmount}}. Reference: {{transactionReference}}.
+
+View contribution: {{contributionUrl}}
+
+Contact Support: {{supportUrl}}
+Privacy Policy: {{privacyUrl}}
+Terms & Conditions: {{termsUrl}}
+© 2026 GiftWise

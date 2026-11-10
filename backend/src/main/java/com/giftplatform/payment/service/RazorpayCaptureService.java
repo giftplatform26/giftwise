@@ -15,6 +15,7 @@ import java.util.UUID;
 @Service
 public class RazorpayCaptureService {
 
+    @org.springframework.beans.factory.annotation.Autowired(required=false) private com.giftplatform.audit.service.AuditService audit;
     private final RazorpayClient razorpay;
     private final RazorpaySignatureVerifier signatures;
     private final JdbcTemplate jdbc;
@@ -213,7 +214,8 @@ public class RazorpayCaptureService {
                         "Provider payment already belongs to another order");
             }
 
-            if (!"CAPTURED".equals(order.status())) {
+            boolean firstCapture=!"CAPTURED".equals(order.status());
+            if (firstCapture) {
 
                 if (!"PENDING".equals(order.status())
                         && !"AUTHORIZED".equals(order.status())) {
@@ -272,6 +274,10 @@ public class RazorpayCaptureService {
                     (payment.feePaise()!=null&&payment.taxPaise()!=null&&payment.taxPaise()>payment.feePaise()))throw new IllegalStateException("Invalid provider fee/tax breakdown");
             jdbc.update("UPDATE payment_transactions SET provider_fee_paise=COALESCE(?,provider_fee_paise),provider_tax_paise=COALESCE(?,provider_tax_paise) WHERE payment_order_id=? AND provider_payment_id=? AND status='CAPTURED'",payment.feePaise(),payment.taxPaise(),localOrderId,paymentId);
             var allocation = allocations.allocate(contributionId);
+            if(firstCapture&&audit!=null){
+                audit.recordChange(null,com.giftplatform.audit.entity.AuditActorType.SYSTEM,"PAYMENT",localOrderId,com.giftplatform.audit.entity.AuditAction.STATUS_CHANGE,java.util.Map.of(),java.util.Map.of("status","CAPTURED","amountPaise",order.amountPaise()),null);
+                audit.recordChange(null,com.giftplatform.audit.entity.AuditActorType.SYSTEM,"CONTRIBUTION",contributionId,com.giftplatform.audit.entity.AuditAction.CREATE,java.util.Map.of(),java.util.Map.of("received",true),null);
+            }
 
             // This runs inside the verified-capture transaction. Never emit on an unverified claim.
             jdbc.update("""

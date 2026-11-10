@@ -37,7 +37,7 @@ class EventConflictHttpIntegrationTest {
         when(service.update(eq(ID), any())).thenThrow(new OptimisticLockingFailureException("stale"));
         mvc.perform(put("/api/v1/events/"+ID).with(user("host")).with(csrf())
                 .contentType("application/json")
-                .content("{\"title\":\"Birthday\",\"occasionType\":\"BIRTHDAY\"}"))
+                .content("{\"title\":\"Birthday\",\"occasionType\":\"BIRTHDAY\",\"hostName\":\"Fixture host\",\"addressLine1\":\"1 Fixture Street\",\"city\":\"Bengaluru\",\"state\":\"Karnataka\",\"postalCode\":\"560001\",\"country\":\"India\",\"contactName\":\"Fixture contact\",\"contactPhone\":\"+919876543210\"}"))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.error").exists());
     }
@@ -49,7 +49,7 @@ class EventConflictHttpIntegrationTest {
     @Test void noCsrfStill403() throws Exception {
         mvc.perform(put("/api/v1/events/"+ID).with(user("host"))
                 .contentType("application/json")
-                .content("{\"title\":\"Birthday\",\"occasionType\":\"BIRTHDAY\"}"))
+                .content("{\"title\":\"Birthday\",\"occasionType\":\"BIRTHDAY\",\"hostName\":\"Fixture host\",\"addressLine1\":\"1 Fixture Street\",\"city\":\"Bengaluru\",\"state\":\"Karnataka\",\"postalCode\":\"560001\",\"country\":\"India\",\"contactName\":\"Fixture contact\",\"contactPhone\":\"+919876543210\"}"))
                 .andExpect(status().isForbidden());
         verifyNoInteractions(service);
     }

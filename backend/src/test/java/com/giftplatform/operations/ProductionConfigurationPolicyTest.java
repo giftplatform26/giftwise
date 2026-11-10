@@ -1,0 +1,12 @@
+package com.giftplatform.operations;
+import org.junit.jupiter.api.Test;
+import org.springframework.mock.env.MockEnvironment;
+import java.util.Base64;
+import static org.junit.jupiter.api.Assertions.*;
+class ProductionConfigurationPolicyTest {
+ MockEnvironment valid(){var e=new MockEnvironment().withProperty("server.servlet.session.cookie.secure","true").withProperty("server.servlet.session.cookie.http-only","true").withProperty("server.servlet.session.cookie.same-site","lax").withProperty("gift.production.public-origin","https://celebrate.example.org").withProperty("server.error.include-message","never").withProperty("gift.guestbook.photos.dir","/private-data/photos").withProperty("spring.jpa.hibernate.ddl-auto","validate").withProperty("spring.flyway.clean-disabled","true");byte[] key=new byte[32];new java.security.SecureRandom().nextBytes(key);String value=Base64.getEncoder().encodeToString(key);e.setProperty("gift.otp.secret-base64",value);e.setProperty("gift.otp.hmac-key-base64",value);e.setActiveProfiles("production");return e;}
+ @Test void acceptsSafeConfigurationWithoutClaimingDeploymentReadiness(){assertTrue(ProductionConfigurationPolicy.violations(valid()).isEmpty());}
+ @Test void rejectsUnsafeCookiesPlaceholderKeysSimulatorAndMultipleInstances(){var e=valid().withProperty("server.servlet.session.cookie.secure","false").withProperty("gift.otp.secret-base64",Base64.getEncoder().encodeToString(new byte[32])).withProperty("gift.otp.sms.provider","simulator").withProperty("gift.production.instance-count","2");var errors=ProductionConfigurationPolicy.violations(e);assertTrue(errors.size()>=4);assertTrue(errors.stream().anyMatch(s->s.contains("placeholder")));assertFalse(errors.toString().contains(e.getProperty("gift.otp.secret-base64")));}
+ @Test void cannotCombineProductionAndBootstrapAndCannotUseHttpOrigin(){var e=valid().withProperty("gift.production.public-origin","http://localhost:3000");e.setActiveProfiles("production","admin-provision");assertEquals(2,ProductionConfigurationPolicy.violations(e).size());}
+ @Test void enabledAiRequiresSecretAndPaymentKeysMustDiffer(){var e=valid().withProperty("gift.invitation.ai.enabled","true").withProperty("gift.payment.profiles.enabled","true");assertTrue(ProductionConfigurationPolicy.violations(e).stream().anyMatch(s->s.contains("AI")));assertTrue(ProductionConfigurationPolicy.violations(e).stream().anyMatch(s->s.contains("differ")));}
+}

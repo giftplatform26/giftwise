@@ -45,6 +45,7 @@ class GroupContributionValidCsrfHttpTest {
   base="/api/public/groups/"+token;
   Event event=mock(Event.class);
   when(event.getStatus()).thenReturn(EventStatus.PUBLISHED);
+  org.mockito.Mockito.lenient().when(event.isGiftingEnabled()).thenReturn(true);
   when(event.getId()).thenReturn(eventId);
   when(events.findByPublicToken(token)).thenReturn(Optional.of(event));
   when(policies.effective(null,eventId)).thenReturn(new com.giftplatform.security.recovery.EffectiveRecoveryPolicyService.Policy(true,true,true,true,true));
@@ -60,13 +61,13 @@ class GroupContributionValidCsrfHttpTest {
  }
  @Test void validCsrfRegistrationReachesController() throws Exception {
   mvc.perform(post(base+"/register").with(csrf()).contentType(MediaType.APPLICATION_JSON)
-    .content("{\"username\":\"groupguest1\",\"password\":\"securepassword123\",\"pin\":\"123456\",\"confirmPin\":\"123456\",\"fullName\":\"Test Creator\",\"email\":\"creator@example.com\",\"mobile\":\"+919876543210\",\"emailVerificationToken\":\"proof\"}"))
+    .content("{\"username\":\"groupguest1\",\"password\":\"SecurePassword123!\",\"pin\":\"123456\",\"confirmPin\":\"123456\",\"fullName\":\"Test Creator\",\"email\":\"creator@example.com\",\"mobile\":\"+919876543210\",\"emailVerificationToken\":\"proof\",\"termsAccepted\":true}"))
     .andExpect(status().isCreated());
   verify(db).update(contains("INSERT INTO gift_group_accounts"),any(),any(),eq("groupguest1"),any(),any(),any(),any(),any());
  }
  @Test void invalidCsrfRegistrationIsRejected() throws Exception {
   mvc.perform(post(base+"/register").contentType(MediaType.APPLICATION_JSON)
-    .content("{\"username\":\"groupguest1\",\"password\":\"securepassword123\",\"pin\":\"123456\",\"confirmPin\":\"123456\",\"fullName\":\"Test Creator\",\"email\":\"creator@example.com\",\"mobile\":\"+919876543210\",\"emailVerificationToken\":\"proof\"}"))
+    .content("{\"username\":\"groupguest1\",\"password\":\"SecurePassword123!\",\"pin\":\"123456\",\"confirmPin\":\"123456\",\"fullName\":\"Test Creator\",\"email\":\"creator@example.com\",\"mobile\":\"+919876543210\",\"emailVerificationToken\":\"proof\",\"termsAccepted\":true}"))
     .andExpect(status().isForbidden());
   verify(db,never()).update(anyString(),any(Object[].class));
  }
@@ -80,7 +81,7 @@ class GroupContributionValidCsrfHttpTest {
   when(draft.getStatus()).thenReturn(EventStatus.DRAFT);
   when(events.findByPublicToken(token)).thenReturn(Optional.of(draft));
   mvc.perform(post(base+"/register").with(csrf()).contentType(MediaType.APPLICATION_JSON)
-    .content("{\"username\":\"groupguest1\",\"password\":\"securepassword123\",\"pin\":\"123456\",\"confirmPin\":\"123456\",\"fullName\":\"Test Creator\",\"email\":\"creator@example.com\",\"mobile\":\"+919876543210\",\"emailVerificationToken\":\"proof\"}"))
+    .content("{\"username\":\"groupguest1\",\"password\":\"SecurePassword123!\",\"pin\":\"123456\",\"confirmPin\":\"123456\",\"fullName\":\"Test Creator\",\"email\":\"creator@example.com\",\"mobile\":\"+919876543210\",\"emailVerificationToken\":\"proof\",\"termsAccepted\":true}"))
     .andExpect(status().isNotFound());
  }
 

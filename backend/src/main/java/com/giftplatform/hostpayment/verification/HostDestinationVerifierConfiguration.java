@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Configuration;
 public class HostDestinationVerifierConfiguration {
 
     @Bean
+    @org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean(HostDestinationVerifier.class)
     HostDestinationVerifier hostDestinationVerifier() {
         return new DisabledHostDestinationVerifier();
     }

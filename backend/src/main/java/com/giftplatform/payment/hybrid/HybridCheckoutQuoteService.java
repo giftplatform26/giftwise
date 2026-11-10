@@ -33,7 +33,7 @@ public class HybridCheckoutQuoteService {
         }
         Integer valid = jdbc.queryForObject("""
             SELECT COUNT(*) FROM events e
-            WHERE e.id = ? AND e.status = 'PUBLISHED'
+            WHERE e.id = ? AND e.status = 'PUBLISHED' AND gifting_enabled
               AND (?::uuid IS NULL OR EXISTS (
                   SELECT 1 FROM gifts g WHERE g.id = ? AND g.event_id = e.id
                     AND g.status = 'ACTIVE' AND g.visibility = 'PUBLIC'))

@@ -13,6 +13,11 @@ public class Event {
     @Id
     @Column(name = "id", nullable = false)
     private UUID id;
+    @Column(name="gifting_enabled", nullable=false)
+    private boolean giftingEnabled = true;
+    public boolean isGiftingEnabled(){ return giftingEnabled; }
+    public void setGiftingEnabled(boolean value){ giftingEnabled=value; }
+
     @Version
     @Column(name = "version", nullable = false)
     private long version;

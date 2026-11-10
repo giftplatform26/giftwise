@@ -1,5 +1,11 @@
 // batch-3d4d2d-compact
 'use client';
+import SharePreviewControl from '../../../../components/SharePreviewControl';
+import {beginAction,completeAction,trackedCopy} from '../../../../lib/interaction-analytics.mjs';
+/* localization:instrumented */
+import {localize,localizeText} from '../../../../lib/localization.mjs';
+import {useLocalizationRender} from '../../../../components/LocalizationProvider';
+
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
@@ -24,7 +30,7 @@ const THEMES = [
   'HOUSEWARMING'
 ];
 
-export default function EventQrPage() {
+export default function EventQrPage() {useLocalizationRender();
   const {mode}=useExperience();const focused=mode==='FOCUSED';
   const params = useParams();
   const eventId = String(params.id);
@@ -78,6 +84,7 @@ export default function EventQrPage() {
   }
 
   async function downloadQr() {
+    const interaction=beginAction('QR_DOWNLOAD',{eventId});
     setBusy(true);
     setError('');
 
@@ -92,10 +99,12 @@ export default function EventQrPage() {
         document.body.appendChild(link);
         link.click();
         link.remove();
+        completeAction(interaction,'BROWSER_READY','PNG_HANDED_TO_BROWSER');
       } finally {
         setTimeout(() => URL.revokeObjectURL(url), 1000);
       }
     } catch (e) {
+      completeAction(interaction,'FAILURE','QR_DOWNLOAD_FAILED');
       setError(e instanceof Error ? e.message : 'Download failed');
     } finally {
       setBusy(false);
@@ -106,7 +115,7 @@ export default function EventQrPage() {
     if (!details) return;
 
     try {
-      await navigator.clipboard.writeText(details.url);
+      await trackedCopy(details.url);
       alert('Invitation link copied!');
     } catch {
       setError('Could not copy invitation link');
@@ -116,7 +125,7 @@ export default function EventQrPage() {
   return (
     <main className="hostShell invitationStudioPage">
       <div className="hostWide">
-        {!focused&&<nav aria-label="Event navigation" style={{marginBottom:22}}>
+        {!focused&&<nav aria-label={localize("ui.4d457dac5813d11d",{defaultValue:"Event navigation"})} style={{marginBottom:22}}>
           <Link
             href="/events"
             style={{
@@ -135,24 +144,23 @@ export default function EventQrPage() {
             }}
           >
             <span aria-hidden="true" style={{fontSize:20}}>←</span>
-            Back to My Events
-          </Link>
+            {localize("ui.d8f3bf2528dc1c57",{defaultValue:"Back to My Events"})}</Link>
         </nav>}
 
-        <section className="studioCardSection" aria-label="Gift Invitation Studio">
-          <SharedVisualInvitationEditor eventId={eventId}>
-<section className="hostPanel compactQrPanel" aria-label="QR Invitation">
+        <section className="studioCardSection" aria-label={localize("ui.48b59e0a0ebeed24",{defaultValue:"Gift Invitation Studio"})}>
+          <SharePreviewControl eventId={eventId}/><SharedVisualInvitationEditor eventId={eventId}>
+<section className="hostPanel compactQrPanel" aria-label={localize("ui.980385b71fcb316d",{defaultValue:"QR Invitation"})}>
           
 
-          <h1>QR Invitation</h1>
-          <p>Manage and share your celebration invitation.</p>
+          <h1>{localize("ui.980385b71fcb316d",{defaultValue:"QR Invitation"})}</h1>
+          <p>{localize("ui.b09fc31de30e0500",{defaultValue:"Manage and share your celebration invitation."})}</p>
 
-          {error && <p role="alert" className="hostError">{error}</p>}
+          {error && <p role="alert" className="hostError">{localizeText(error)}</p>}
 
           {imageUrl && (
             <img
               src={imageUrl}
-              alt="Scannable event invitation QR code"
+              alt={localize("ui.6a1de4fbd1f25750",{defaultValue:"Scannable event invitation QR code"})}
               width={280}
               height={280}
             />
@@ -161,7 +169,7 @@ export default function EventQrPage() {
           {details && (
             <>
               <p>
-                <strong>Invitation URL</strong>
+                <strong>{localize("ui.8be24553236ff13f",{defaultValue:"Invitation URL"})}</strong>
               </p>
 
               <p style={{ overflowWrap: 'anywhere' }}>
@@ -169,23 +177,21 @@ export default function EventQrPage() {
               </p>
 
               <button type="button" onClick={copyLink}>
-                Copy invitation link
-              </button>
+                {localize("ui.641dce44f65bbd68",{defaultValue:"Copy invitation link"})}</button>
 
               <button
                 type="button"
                 disabled={busy}
                 onClick={() => void downloadQr()}
               >
-                Download QR PNG
-              </button>
+                {localize("ui.82c96565542669d6",{defaultValue:"Download QR PNG"})}</button>
 
               <p>
-                <strong>QR Theme</strong>
+                <strong>{localize("ui.08385c0f6d95e0e7",{defaultValue:"QR Theme"})}</strong>
               </p>
 
               <select
-                aria-label="QR theme"
+                aria-label={localize("ui.96664140215e0a17",{defaultValue:"QR theme"})}
                 value={details.theme}
                 disabled={busy}
                 onChange={e => void updateTheme(e.target.value)}
@@ -198,9 +204,7 @@ export default function EventQrPage() {
               </select>
 
               <p>
-                Theme selection is saved. Customized invitation artwork
-                will be available in the next batch.
-              </p>
+                {localize("ui.2192e1becc0404dc",{defaultValue:"Theme selection is saved. Customized invitation artwork will be available in the next batch."})}</p>
             </>
           )}
         </section>

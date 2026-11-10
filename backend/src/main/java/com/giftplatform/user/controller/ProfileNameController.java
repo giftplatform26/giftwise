@@ -11,6 +11,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/auth/profile-name")
 public class ProfileNameController {
+ @org.springframework.beans.factory.annotation.Autowired(required=false) private com.giftplatform.audit.service.AuditService audit;
  private final JdbcTemplate db;
  public ProfileNameController(JdbcTemplate db){this.db=db;}
  public record NameInput(String fullName){}
@@ -24,10 +25,11 @@ public class ProfileNameController {
   String value=db.queryForObject("SELECT full_name FROM users WHERE id=?",String.class,user.getUserId());
   return java.util.Collections.singletonMap("fullName",value);
  }
- @PostMapping public Map<String,String> update(Authentication auth,@RequestBody NameInput input){
+ @PostMapping @org.springframework.transaction.annotation.Transactional public Map<String,String> update(Authentication auth,@RequestBody NameInput input){
   GiftUserPrincipal user=(GiftUserPrincipal)auth.getPrincipal();
   String value=name(input==null?null:input.fullName());
   db.update("UPDATE users SET full_name=? WHERE id=?",value,user.getUserId());
+  if(audit!=null)audit.recordChange(user.getUserId(),com.giftplatform.audit.entity.AuditActorType.CUSTOMER,"USER",user.getUserId(),com.giftplatform.audit.entity.AuditAction.UPDATE,Map.of(),Map.of("profileUpdated",true),null);
   return Map.of("fullName",value);
  }
 }

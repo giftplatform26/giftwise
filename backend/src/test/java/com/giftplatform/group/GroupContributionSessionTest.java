@@ -27,6 +27,7 @@ class GroupContributionSessionTest {
     token=UUID.randomUUID(); eventId=UUID.randomUUID(); accountId=UUID.randomUUID();
     Event e=mock(Event.class);
     when(e.getStatus()).thenReturn(EventStatus.PUBLISHED);
+  org.mockito.Mockito.lenient().when(e.isGiftingEnabled()).thenReturn(true);
     when(e.getId()).thenReturn(eventId);
     when(events.findByPublicToken(token)).thenReturn(Optional.of(e));
   }

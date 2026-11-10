@@ -1,0 +1,7 @@
+[Unit]
+Description=GiftWise coordinated encrypted offsite backup
+After=network-online.target postgresql.service
+[Service]
+Type=oneshot
+ExecStart=/usr/local/lib/giftwise/backup-and-restart.sh
+UMask=0077

@@ -13,3 +13,9 @@ test('feature request failures do not fall back to enabled modules',async()=>{
  await assert.rejects(fetchEventFeatures(async()=>({ok:false}),token));
  await assert.rejects(fetchEventFeatures(()=>{throw Error('Must not fetch')},'invalid'));
 });
+
+test('new celebration features require explicit grants and gifting respects server denial',()=>{
+ const flags=normalizeFeatures({GIFTING_ENABLED:false,CELEBRATION_PLANNING:true,EVENT_ESSENTIALS:'true',EVENT_REUSE:true});
+ assert.equal(flags.GIFTING_ENABLED,false);assert.equal(flags.CELEBRATION_PLANNING,true);assert.equal(flags.EVENT_ESSENTIALS,false);assert.equal(flags.EVENT_REUSE,true);
+ assert.equal(normalizeFeatures({GIFTING_ENABLED:true}).GIFTING_ENABLED,true);
+});

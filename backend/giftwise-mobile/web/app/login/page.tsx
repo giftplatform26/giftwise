@@ -1,0 +1,20 @@
+'use client';
+/* localization:instrumented */
+import {localize,localizeText} from '../../lib/localization.mjs';
+import {useLocalizationRender} from '../../components/LocalizationProvider';
+
+import {useVerification} from '../../components/VerificationProvider';
+import {useEffect,useState} from 'react';
+import Link from 'next/link';
+import GiftWiseWelcome from '../../components/GiftWiseWelcome';
+import {useRouter} from 'next/navigation';
+import {hostApi} from '../../lib/host-api.mjs';
+import {isAdminPath} from '../../lib/mobile-scope.mjs';
+import '../host.css';import {saveFlash} from '../../lib/flash.mjs';import HostToast from '../components/HostToast';
+export default function Login(){useLocalizationRender();const {emailVerificationEnabled}=useVerification();const router=useRouter();const [identifier,setIdentifier]=useState('');const [password,setPassword]=useState('');const [error,setError]=useState('');const [busy,setBusy]=useState(false);const [expired,setExpired]=useState(false);useEffect(()=>{const query=new URLSearchParams(window.location.search);setExpired(query.get('reason')==='session-expired');try{const saved=window.sessionStorage.getItem('gift.registration.identifier');if(saved)setIdentifier(saved);window.sessionStorage.removeItem('gift.registration.identifier')}catch{}},[]);
+async function submit(e:React.FormEvent){e.preventDefault();setBusy(true);setError('');try{const signedIn=await hostApi.login(fetch,identifier,password);const role=signedIn?.role;if(role!=='CUSTOMER'){await hostApi.logout(fetch);throw new Error('This app is for celebration hosts. Use the web application for platform administration.');}saveFlash(window.sessionStorage,'success','Welcome back! Your celebrations are ready.');const params=new URLSearchParams(window.location.search);
+ const next=params.get('next');
+ const destination=next==='/verify-email'?'/verify-email':(next&&next.startsWith('/')&&!next.startsWith('//')&&!next.includes('\\')&&!/[\r\n]/.test(next)&&!next.startsWith('/login')&&!isAdminPath(next)?next:'/events');
+ router.replace(destination);router.refresh();}catch(e){setError(e instanceof Error?e.message:'Unable to sign in');}finally{setBusy(false);}}
+return <main className="hostShell"><HostToast/><GiftWiseWelcome/><div className="hostAuth"><Link href="/" className="hostLogo">{localize("ui.775be12c6f4bb051",{defaultValue:"✦ GiftWise"})}</Link><div className="hostKicker">{localize("ui.d599547e30aac573",{defaultValue:"WELCOME BACK"})}</div><h1>{localize("ui.23cdf7fa833bd26b",{defaultValue:"Welcome to your next lovely moment."})}</h1><p>{localize("ui.ade0c8fe7c11cebb",{defaultValue:"Sign in for your celebrations, gifts, and people."})}</p>{expired&&<div role="status" className="hostError">{localize("ui.c2eb28f1f14bc763",{defaultValue:"Your session has expired. Please sign in again to continue."})}</div>}<form onSubmit={submit} className="hostForm"><label>{localize("ui.2d4a46f3688886c0",{defaultValue:"Username or email"})}<input autoComplete="username" required value={identifier} onChange={e=>setIdentifier(e.target.value)}/></label><label>{localize("ui.e7cf3ef4f17c3999",{defaultValue:"Password"})}<input type="password" autoComplete="current-password" required value={password} onChange={e=>setPassword(e.target.value)}/></label>{error&&<div role="alert" className="hostError">{localizeText(error)}</div>}<button className="hostPrimary" disabled={busy}>{busy?localize("ui.8b9d3de8ae00c89c",{defaultValue:"Signing in…"}):localize("ui.8637e0051dee66ad",{defaultValue:"Sign in →"})}</button></form>{emailVerificationEnabled&&<p><Link href="/forgot-username?kind=HOST&returnTo=%2Flogin">{localize("ui.91d00522b02cc29d",{defaultValue:"Forgot username?"})}</Link> · <Link href="/forgot-password">{localize("ui.6dbd52ba198f47cc",{defaultValue:"Forgot password or PIN?"})}</Link></p>}<p>{localize("ui.7f960d457904d99a",{defaultValue:"New here? "})}<Link href="/register">{localize("ui.9e709348f582d44e",{defaultValue:"Create your account"})}</Link></p></div></main>;
+}

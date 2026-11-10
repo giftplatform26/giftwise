@@ -51,7 +51,7 @@ for p in files:
   body=m.group(1);prefix=re.search(r'prefix\s*=\s*"([^\"]+)"',body);name=re.search(r'name\s*=\s*"([^\"]+)"',body)
   if name:
    key=(prefix.group(1)+'.' if prefix else '')+name.group(1);setting(key,body,f'{src}:{text.count(chr(10),0,m.start())+1}','conditional bean registration')
-for p in sorted((ROOT/'src/main/resources').glob('application*.properties*')):
+for p in sorted([*(ROOT/'src/main/resources').glob('application*.properties*'), *(ROOT/'src/release/resources').glob('application*.properties*')]):
  if p.name.endswith(('.bak','.backup')):continue
  pending='';line_start=1
  for number,line in enumerate(p.read_text().splitlines(),1):

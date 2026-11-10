@@ -58,6 +58,7 @@ class EventRepositoryIntegrationTest {
                 "Birthday Celebration",
                 OccasionType.BIRTHDAY
         );
+event.setHostDisplayName("Fixture host");
 
         Event savedEvent = eventRepository.saveAndFlush(event);
 
@@ -84,6 +85,7 @@ class EventRepositoryIntegrationTest {
                 null,
                 OccasionType.BIRTHDAY
         );
+event.setHostDisplayName("Fixture host");
 
         assertThatThrownBy(() ->
                 eventRepository.saveAndFlush(event)
@@ -102,6 +104,7 @@ class EventRepositoryIntegrationTest {
                 title,
                 OccasionType.BIRTHDAY
         );
+event.setHostDisplayName("Fixture host");
 
         Event savedEvent = eventRepository.saveAndFlush(event);
 
@@ -126,6 +129,7 @@ class EventRepositoryIntegrationTest {
                 title,
                 OccasionType.BIRTHDAY
         );
+event.setHostDisplayName("Fixture host");
 
         assertThatThrownBy(() ->
                 eventRepository.saveAndFlush(event)
@@ -142,6 +146,7 @@ class EventRepositoryIntegrationTest {
                 "Housewarming Ceremony",
                 OccasionType.HOUSEWARMING
         );
+event.setHostDisplayName("Fixture host");
 
         Event savedEvent = eventRepository.saveAndFlush(event);
 
@@ -169,6 +174,7 @@ class EventRepositoryIntegrationTest {
                     "Birthday " + i,
                     OccasionType.BIRTHDAY
             );
+event.setHostDisplayName("Fixture host");
 
             assertThat(event.getId()).isNotNull();
             assertThat(ids.add(event.getId())).isTrue();
@@ -181,6 +187,7 @@ class EventRepositoryIntegrationTest {
                 "Wedding",
                 OccasionType.WEDDING
         );
+event.setHostDisplayName("Fixture host");
 
         assertThat(event.getStatus())
                 .isEqualTo(EventStatus.DRAFT);
@@ -198,6 +205,7 @@ class EventRepositoryIntegrationTest {
                     "Event " + type.name(),
                     type
             );
+event.setHostDisplayName("Fixture host");
 
             Event saved = eventRepository.saveAndFlush(event);
 
@@ -212,6 +220,7 @@ class EventRepositoryIntegrationTest {
     @Test
     void shouldRejectNullOccasionType() {
         Event event = new Event("Test", null);
+event.setHostDisplayName("Fixture host");
 
         assertThatThrownBy(() ->
                 eventRepository.saveAndFlush(event)
@@ -235,6 +244,7 @@ class EventRepositoryIntegrationTest {
                 "Delete Test",
                 OccasionType.BIRTHDAY
         );
+event.setHostDisplayName("Fixture host");
 
         Event saved = eventRepository.saveAndFlush(event);
 
@@ -253,6 +263,7 @@ class EventRepositoryIntegrationTest {
                 "Timestamp Test",
                 OccasionType.BIRTHDAY
         );
+event.setHostDisplayName("Fixture host");
 
         Event saved = eventRepository.saveAndFlush(event);
 

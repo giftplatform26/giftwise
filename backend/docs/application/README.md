@@ -2,7 +2,18 @@
 
 This is the engineering entry point for the inspected application working tree. It contains the three requested documents and source-backed reference catalogues. The documents are linked parts of one package, not three isolated summaries.
 
-**Baseline date:** 2026-11-01. **Committed reference:** `79eb947b9097a6adb80197729337dd5094ec6494`. **Working tree:** contains uncommitted application changes; source hashes identify the actual snapshot. **Database baseline:** fresh PostgreSQL after Flyway V95. This is not a deployed-production attestation.
+**Baseline date:** 2026-11-06. **Committed reference:** `809a8ad6f762d0038fcedcb5e3e3a078eeb33285`. **Working tree:** contains uncommitted application changes; source hashes identify the actual snapshot. **Database baseline:** fresh PostgreSQL after Flyway V107. This is not a deployed-production attestation.
+
+## Current release
+
+The [6 November growth and performance release](releases/2026-11-06_GROWTH_AND_PERFORMANCE.md) describes the current changes and admin activation. Source/schema catalogues are refreshed through **V107**. Earlier dated validation and inventory statements below are historical baselines; use the current generated coverage report and the release validation record for this working tree.
+
+## Implementation updates
+
+- [Platform localisation](releases/2026-11-02_LOCALIZATION.md) — eight language records including Malayalam/Kannada/Telugu; admin/host/event controls, guest overrides, translation publishing, RTL and communication fallback.
+
+- [2026-11-02 controlled rollout](releases/2026-11-02_CELEBRATIONS_AND_SAFEGUARDS.md) — delivered behavior, admin activation, APIs/fields, V96 migration, compatibility, validation and remaining five-stage roadmap.
+- [Operations toolkit](../../ops/README.md) — opt-in production guard, backup/integrity/disposable restore and release checks.
 
 ## Start here
 
@@ -23,7 +34,7 @@ This is the engineering entry point for the inspected application working tree. 
 | [Full ER diagram](complete-er.mmd) | Mermaid source for every base table/column and FK association; use the smaller diagrams in Document 1 for orientation. |
 | [Business-rule catalogue](BUSINESS_RULE_CATALOGUE.md) | All source throw/guard sites, validation annotation sites and links to DB-enforced invariants. |
 | [Configuration catalogue](CONFIGURATION_CATALOGUE.md) | Explicit source configuration, defaults/layers, environment names, sensitive-value redaction and DB-backed controls. |
-| [Migration catalogue](MIGRATION_CATALOGUE.md) | V1–V95 source/hashes/object changes. |
+| [Migration catalogue](MIGRATION_CATALOGUE.md) | Source/hashes/object changes through the current exported migration head. |
 | [Dependency catalogue](DEPENDENCY_CATALOGUE.md) | Declared Maven dependencies and resolved npm lockfile packages, with managed-version limitations. |
 | [Coverage interpretation](COVERAGE_REPORT.md) | What is structurally complete, what cannot be established from source, and validation evidence. |
 | [Tooling and refresh guide](tooling/README.md) | Reproducible metadata export, AST/source scans, catalogue generation and validation. |
@@ -32,35 +43,35 @@ This is the engineering entry point for the inspected application working tree. 
 
 JSON exports are in [catalogue/](catalogue/): `database.json`, `api-runtime.json`, `api-operations.json`, `frontend.json`, `backend-source.json`, `dependencies.json`, `coverage.json` and `validation.json`. They are intended for search, contract review, QA traceability and AI-assisted maintenance. They contain schema/code metadata, not production customer rows or plaintext credentials.
 
-## Inventory at this baseline
+## Current generated inventory
 
 Counts are explicit discovered declarations/objects, not a fabricated percentage of undocumented product intent. A generated row/option may instantiate one control declaration multiple times. The table/view column count includes view columns. A foreign-key column count differs from a foreign-key-constraint count. Runtime handler mappings differ from source-declared operations when properties disable beans.
 
 | Inventory metric | Count |
 | --- | --- |
-| javaFiles | 273 |
-| pageRoutes | 27 |
-| tsxFiles | 92 |
-| jsxControlDeclarations | 905 |
-| fieldDeclarations | 260 |
-| buttonDeclarations | 293 |
-| runtimeHandlerMappings | 231 |
-| sourceHandlerMappings | 265 |
-| expandedApiOperations | 265 |
+| javaFiles | 315 |
+| pageRoutes | 34 |
+| tsxFiles | 131 |
+| jsxControlDeclarations | 1120 |
+| fieldDeclarations | 318 |
+| buttonDeclarations | 345 |
+| runtimeHandlerMappings | 291 |
+| sourceHandlerMappings | 325 |
+| expandedApiOperations | 325 |
 | conditionalUnregisteredOperations | 34 |
-| apiModels | 165 |
-| baseTables | 87 |
+| apiModels | 194 |
+| baseTables | 120 |
 | views | 3 |
-| columnsIncludingViews | 790 |
-| constraints | 459 |
-| foreignKeyColumns | 139 |
-| indexes | 220 |
-| triggers | 21 |
-| routines | 10 |
-| guardSites | 908 |
-| validationAnnotationSites | 113 |
-| configurationKeys | 61 |
-| migrations | 95 |
+| columnsIncludingViews | 1021 |
+| constraints | 607 |
+| foreignKeyColumns | 197 |
+| indexes | 277 |
+| triggers | 25 |
+| routines | 11 |
+| guardSites | 1029 |
+| validationAnnotationSites | 178 |
+| configurationKeys | 79 |
+| migrations | 104 |
 
 ## Evidence and precedence
 
@@ -70,7 +81,7 @@ Counts are explicit discovered declarations/objects, not a fabricated percentage
 4. The narrative explains those facts and points out limits; older docs in the parent `docs/` directory can describe an earlier stage and are historical context.
 5. Deployment, provider enrollment/credits, legal requirements, traffic forecasts and operating procedures are **unknown** unless separately attested. Proposed production defaults are labelled as proposals, not silently assumed implemented.
 
-Last observed full application backend suite before documentation: **678 tests passed**. The documentation-only schema/route export passed on its own isolated PostgreSQL database. Current package validation is recorded in `catalogue/validation.json`. A fresh full production/browser/load/security acceptance run was not performed as part of writing documents.
+Current 2026-11-02 validation: **685 backend unit/HTTP tests pass**, **405 frontend tests pass**, frontend TypeScript and production build pass, and isolated V97 schema/API export passes. Dedicated celebration integration tests pass; the full integration run completed 595 tests with one outdated host-visibility assertion; that test was corrected and passed an isolated rerun. Documentation structural validation is in `catalogue/validation.json`. Browser/device UAT, production load/security/DR and real provider acceptance have not been performed.
 
 ## How to use this package
 
@@ -80,4 +91,4 @@ Last observed full application backend suite before documentation: **678 tests p
 - Product/architect: resolve absent business rationale, unsupported refunds/payouts, retention/consent and operational ownership before making promises beyond implemented behavior.
 - AI maintainer: use source hashes and metadata as context; verify the actual working tree and do not invent unresolved dynamic schemas or private configuration. Regenerate after source changes.
 
-No application source or live records were intentionally modified to create the documentation. The temporary metadata-export test was removed; its reproducible template remains under tooling.
+Application code now includes the controlled celebration/safeguard release linked above. No live customer records or provider transactions were used for its tests. The temporary metadata-export test was removed; its reproducible template remains under tooling.

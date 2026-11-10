@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 const ui=readFileSync(new URL('../components/GuestContributionCheckout.tsx',import.meta.url),'utf8');
-const page=readFileSync(new URL('../app/e/[token]/page.tsx',import.meta.url),'utf8');
+const page=readFileSync(new URL('../app/e/[token]/PublicEventClient.tsx',import.meta.url),'utf8');
 test('public page renders guest checkout',()=>assert.match(page,/GuestContributionCheckout[\s\S]*?token=\{token\}/));
 test('checkout uses server-created provider order',()=>assert.match(ui,/api\/public\/payments\/checkout/));
 test('checkout verifies payment with backend',()=>assert.match(ui,/api\/public\/payments\/confirm/));

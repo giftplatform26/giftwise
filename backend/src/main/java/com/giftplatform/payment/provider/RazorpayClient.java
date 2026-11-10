@@ -27,7 +27,12 @@ public class RazorpayClient {
             @Value("${gift.payment.razorpay.key-id:}") String keyId,
             @Value("${gift.payment.razorpay.key-secret:}") String keySecret) {
 
-        this.client = RestClient.builder()
+        var transport = java.net.http.HttpClient.newBuilder()
+                .connectTimeout(java.time.Duration.ofSeconds(5))
+                .followRedirects(java.net.http.HttpClient.Redirect.NEVER).build();
+        var requests = new org.springframework.http.client.JdkClientHttpRequestFactory(transport);
+        requests.setReadTimeout(java.time.Duration.ofSeconds(20));
+        this.client = RestClient.builder().requestFactory(requests)
                 .baseUrl("https://api.razorpay.com/v1")
                 .build();
 

@@ -11,7 +11,7 @@ import java.util.*;
 @RestController
 @RequestMapping("/api/admin/console")
 public class PlatformAdminConsoleController {
- private static final Set<String> MODULES=Set.of("GROUP_GIFTING","GUEST_GIFTS","RSVP","GUEST_ATTENDANCE","WHATSAPP_SHARING","GUESTBOOK","SOCIAL_SHARING","MEMORY_ALBUM","AI_INVITATION");
+ private static final Set<String> MODULES=Set.of("GROUP_GIFTING","GUEST_GIFTS","RSVP","GUEST_ATTENDANCE","WHATSAPP_SHARING","GUESTBOOK","SOCIAL_SHARING","MEMORY_ALBUM","AI_INVITATION","CELEBRATION_PLANNING","EVENT_ESSENTIALS","EVENT_REUSE");
  private final JdbcTemplate db;
  private final ActorContext actor;
  public PlatformAdminConsoleController(JdbcTemplate db,ActorContext actor){this.db=db;this.actor=actor;}

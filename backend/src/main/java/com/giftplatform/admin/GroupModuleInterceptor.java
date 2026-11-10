@@ -29,6 +29,7 @@ public final class GroupModuleInterceptor implements HandlerInterceptor {
         try{id=UUID.fromString(token);}catch(IllegalArgumentException ex){throw new ResponseStatusException(HttpStatus.NOT_FOUND);}
         var event=events.findByPublicToken(id).filter(e->e.getStatus()==EventStatus.PUBLISHED)
             .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
+        if(!event.isGiftingEnabled())throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Gifting is not enabled for this invitation");
         permissions.require(event.getOwnerId(),"GROUP_GIFTING");
         if(path.matches(".*/guest-gifts(?:/.*)?"))permissions.require(event.getOwnerId(),"GUEST_GIFTS");
         return true;

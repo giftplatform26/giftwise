@@ -172,10 +172,12 @@
     "name": "gift-platform-web",
     "version": "0.1.0",
     "dependencies": {
+      "i18next": "26.7.1",
       "lucide-react": "^0.468.0",
       "next": "^15.5.0",
       "react": "^19.1.0",
-      "react-dom": "^19.1.0"
+      "react-dom": "^19.1.0",
+      "react-i18next": "17.1.11"
     },
     "devDependencies": {
       "@types/node": "^22.0.0",
@@ -185,6 +187,12 @@
     }
   },
   "npmResolved": [
+    {
+      "path": "node_modules/@babel/runtime",
+      "version": "7.29.10",
+      "dev": false,
+      "license": "MIT"
+    },
     {
       "path": "node_modules/@emnapi/runtime",
       "version": "1.11.3",
@@ -355,55 +363,55 @@
     },
     {
       "path": "node_modules/@next/env",
-      "version": "15.5.27",
+      "version": "15.5.28",
       "dev": false,
       "license": "MIT"
     },
     {
       "path": "node_modules/@next/swc-darwin-arm64",
-      "version": "15.5.27",
+      "version": "15.5.28",
       "dev": false,
       "license": "MIT"
     },
     {
       "path": "node_modules/@next/swc-darwin-x64",
-      "version": "15.5.27",
+      "version": "15.5.28",
       "dev": false,
       "license": "MIT"
     },
     {
       "path": "node_modules/@next/swc-linux-arm64-gnu",
-      "version": "15.5.27",
+      "version": "15.5.28",
       "dev": false,
       "license": "MIT"
     },
     {
       "path": "node_modules/@next/swc-linux-arm64-musl",
-      "version": "15.5.27",
+      "version": "15.5.28",
       "dev": false,
       "license": "MIT"
     },
     {
       "path": "node_modules/@next/swc-linux-x64-gnu",
-      "version": "15.5.27",
+      "version": "15.5.28",
       "dev": false,
       "license": "MIT"
     },
     {
       "path": "node_modules/@next/swc-linux-x64-musl",
-      "version": "15.5.27",
+      "version": "15.5.28",
       "dev": false,
       "license": "MIT"
     },
     {
       "path": "node_modules/@next/swc-win32-arm64-msvc",
-      "version": "15.5.27",
+      "version": "15.5.28",
       "dev": false,
       "license": "MIT"
     },
     {
       "path": "node_modules/@next/swc-win32-x64-msvc",
-      "version": "15.5.27",
+      "version": "15.5.28",
       "dev": false,
       "license": "MIT"
     },
@@ -456,6 +464,18 @@
       "license": "Apache-2.0"
     },
     {
+      "path": "node_modules/html-parse-stringify",
+      "version": "4.0.1",
+      "dev": false,
+      "license": "MIT"
+    },
+    {
+      "path": "node_modules/i18next",
+      "version": "26.7.1",
+      "dev": false,
+      "license": "MIT"
+    },
+    {
       "path": "node_modules/lucide-react",
       "version": "0.468.0",
       "dev": false,
@@ -469,7 +489,7 @@
     },
     {
       "path": "node_modules/next",
-      "version": "15.5.27",
+      "version": "15.5.28",
       "dev": false,
       "license": "MIT"
     },
@@ -481,7 +501,7 @@
     },
     {
       "path": "node_modules/postcss",
-      "version": "8.4.31",
+      "version": "8.5.32",
       "dev": false,
       "license": "MIT"
     },
@@ -494,6 +514,12 @@
     {
       "path": "node_modules/react-dom",
       "version": "19.3.0",
+      "dev": false,
+      "license": "MIT"
+    },
+    {
+      "path": "node_modules/react-i18next",
+      "version": "17.1.11",
       "dev": false,
       "license": "MIT"
     },
@@ -536,13 +562,19 @@
     {
       "path": "node_modules/typescript",
       "version": "5.9.3",
-      "dev": true,
+      "dev": false,
       "license": "Apache-2.0"
     },
     {
       "path": "node_modules/undici-types",
       "version": "6.21.0",
       "dev": true,
+      "license": "MIT"
+    },
+    {
+      "path": "node_modules/use-sync-external-store",
+      "version": "1.7.0",
+      "dev": false,
       "license": "MIT"
     }
   ]

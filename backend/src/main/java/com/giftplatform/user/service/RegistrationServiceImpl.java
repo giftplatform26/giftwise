@@ -10,12 +10,13 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
 @Service
 public class RegistrationServiceImpl implements RegistrationService {
 
+    @org.springframework.beans.factory.annotation.Autowired(required=false) private com.giftplatform.notification.email.TransactionalEmailOutbox emails;
+    @org.springframework.beans.factory.annotation.Autowired(required=false) private com.giftplatform.audit.service.AuditService audit;
     private final UserRepository repository;
     private final PasswordEncoder passwordEncoder;
     private final com.giftplatform.security.recovery.EffectiveRecoveryPolicyService policies;
@@ -58,23 +59,13 @@ public class RegistrationServiceImpl implements RegistrationService {
                 || !email.matches(
                 "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$"
         )) {
-            throw new IllegalArgumentException("Invalid email");
+            throw new IllegalArgumentException("Please enter a valid email address.");
         }
 
         String password = request.password();
 
-        int passwordBytes = password
-                .getBytes(StandardCharsets.UTF_8)
-                .length;
-
-        if (password.isBlank()
-                || passwordBytes < 12
-                || passwordBytes > 72) {
-
-            throw new IllegalArgumentException(
-                    "Password must be between 12 and 72 UTF-8 bytes"
-            );
-        }
+        com.giftplatform.security.CredentialPolicy.validatePassword(password);
+        if (!request.termsAccepted()) throw new IllegalArgumentException("Please agree to the Terms & Conditions and Privacy Policy.");
 
         if (repository.existsByEmailIgnoreCase(email)) {
             throw new DuplicateEmailException();
@@ -92,8 +83,8 @@ public class RegistrationServiceImpl implements RegistrationService {
         String username = request.username();
 
         if (username == null ||
-                !username.matches("^[a-z][a-z0-9_]{3,29}$")) {
-            throw new IllegalArgumentException("Invalid username");
+                !username.matches(com.giftplatform.security.CredentialPolicy.USERNAME_PATTERN)) {
+            throw new IllegalArgumentException(com.giftplatform.security.CredentialPolicy.USERNAME_MESSAGE);
         }
 
         if (repository.existsByUsernameIgnoreCase(username)) {
@@ -102,12 +93,15 @@ public class RegistrationServiceImpl implements RegistrationService {
 
         try {
             User saved = repository.saveAndFlush(user);
+            if (jdbc != null) jdbc.update("INSERT INTO user_legal_consents(user_id,terms_version,privacy_version) VALUES (?,?,?)", saved.getId(), "2026-11-05", "2026-11-05");
             if(request.emailVerificationToken()!=null&&!request.emailVerificationToken().isBlank()){
                 if(signupEmails==null)throw new IllegalStateException("Signup verification service unavailable");
                 if(signupEmails.consume(request.emailVerificationToken(),"HOST",null,email))
                     jdbc.update("UPDATE users SET email_verified_at=now() WHERE id=?",saved.getId());
             }
 
+            if(emails!=null)emails.registration(saved.getId(),saved.getEmail());
+            if(audit!=null)audit.recordChange(saved.getId(),com.giftplatform.audit.entity.AuditActorType.CUSTOMER,"USER",saved.getId(),com.giftplatform.audit.entity.AuditAction.CREATE,java.util.Map.of(),java.util.Map.of("created",true),null);
             return new RegistrationResponse(
                     saved.getId(),
                     saved.getUsername(),
@@ -115,9 +109,11 @@ public class RegistrationServiceImpl implements RegistrationService {
                     saved.getRole().name()
             );
         } catch (DataIntegrityViolationException ex) {
-            // The database unique index also protects
-            // against concurrent duplicate registrations.
-            throw new DuplicateEmailException();
+            // Classify database races without exposing SQL or mislabelling other failures.
+            String detail = ex.getMostSpecificCause().getMessage();
+            if (detail != null && detail.contains("ux_users_username_normalized")) throw new DuplicateUsernameException();
+            if (detail != null && detail.contains("ux_users_email_normalized")) throw new DuplicateEmailException();
+            throw ex;
         }
     }
 

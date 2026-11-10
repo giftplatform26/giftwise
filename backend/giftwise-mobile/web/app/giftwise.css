@@ -1,0 +1,61 @@
+/* GiftWise expressive theme. Presentation only: existing actions and permissions remain intact. */
+:root{--gw-purple:#6336b5;--gw-deep:#35205b;--gw-gold:#e8bc62;--gw-ink:#292137;--gw-muted:#6f657b;--gw-paper:#fcfaf6;--gw-lavender:#eee7fa;--gw-line:#dfd5ec}
+body.giftwise{background:radial-gradient(ellipse at 6% 0%,#eee7fa 0,transparent 38%),radial-gradient(ellipse at 98% 25%,#fff1d6 0,transparent 35%),var(--gw-paper);color:var(--gw-ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,sans-serif;line-height:1.5}
+body.giftwise :focus-visible{outline:3px solid #8c63cd;outline-offset:4px}
+body.giftwise button,body.giftwise input,body.giftwise select,body.giftwise textarea{font-family:inherit}
+body.giftwise button,body.giftwise a[role=button]{min-height:44px}
+body.giftwise input:not([type=checkbox]):not([type=radio]):not([type=color]):not([type=range]),body.giftwise select,body.giftwise textarea{font-size:16px;border-color:#9a8ca9;border-radius:12px}
+body.giftwise input[type=checkbox],body.giftwise input[type=radio]{accent-color:var(--gw-purple)}
+body.giftwise :is(.hostShell,.dashRoot,.focusShell,.focusPage,.hostWorkspaceContent){background:transparent}
+body.giftwise .ux-focused{--focus-ink:#292137;--focus-muted:#6f657b;--focus-paper:#fcfaf6;--focus-surface:#fff;--focus-line:#dfd5ec;--focus-accent:#6336b5;background:transparent}
+body.giftwise :is(.hostPrimary,.primary,.focusPrimary,.payPrimary,.loveCheckoutPay){background:var(--gw-purple);border-color:var(--gw-purple);color:#fff;border-radius:14px;box-shadow:0 7px 17px #6336b51c;transition:background .18s,box-shadow .18s}
+body.giftwise :is(.hostPrimary,.primary,.focusPrimary,.payPrimary,.loveCheckoutPay):hover{background:#4e2794;box-shadow:0 8px 24px #6336b52b}
+body.giftwise :is(.hostPanel,.hostEvent,.focusPanel,.focusEventCard,.dashEventCard,.payPanel,.acPanel,.acMetrics article){border-color:var(--gw-line);border-radius:22px;box-shadow:0 8px 32px #35205b08}
+body.giftwise :is(.hostBanner,.focusOverviewHero){background-color:var(--gw-lavender);border-radius:28px;border:1px solid #d8c9ee}
+body.giftwise .hostBanner h1,body.giftwise .focusOverviewHero h2{color:var(--gw-deep)}
+body.giftwise :is(.hostLogo,.hostBrand,.focusBrand){color:var(--gw-deep);font-weight:800;letter-spacing:-.6px}
+body.giftwise :is(.hostIdentity,.focusAccountNav){background:#fffffff2;border-color:var(--gw-line)}
+body.giftwise .hostSidebar{background:linear-gradient(170deg,#35205b,#44276e);border-right:0;color:#fff}
+body.giftwise .hostSidebar :is(.hostNavItem,.hostNavSection){color:#e9dff7}
+body.giftwise .hostSidebar .hostNavItem[aria-current=page]{background:#f0e7ff;color:#35205b;box-shadow:inset 3px 0 0 #e8bc62}
+body.giftwise .hostSidebar .hostNavItem:hover{background:#ffffff16;color:white}
+body.giftwise :is(.hostNavSection,.hostNavDivider){border-color:#ffffff25}
+body.giftwise .hostNavTooltip{background:var(--gw-deep);color:#fff}
+body.giftwise .ac{background:transparent;color:var(--gw-ink)}
+body.giftwise .acSide{background:linear-gradient(160deg,#35205b,#4c2b79)}
+body.giftwise .acBrand{color:#fff}body.giftwise .acSide nav button[aria-current=page]{background:#eee7fa;color:#35205b;border-left:3px solid #e8bc62}
+body.giftwise .acSide nav :is(button,a):hover{background:#ffffff18}
+body.giftwise :is(.acHeader span,.acMetrics span,.acPanel p,.acRows small){color:var(--gw-muted)}
+body.giftwise .acMetrics article{position:relative;overflow:hidden;border-top:3px solid #d3bdf0}
+body.giftwise .acMetrics article:nth-child(2n){border-top-color:#e8bc62}
+body.giftwise .acMetrics strong{color:var(--gw-deep)}
+body.giftwise .acLinks :is(button,a){color:var(--gw-purple);border-radius:12px}
+body.giftwise :is(.focusEventNav,.focusAccountNav) a[aria-current=page]{background:var(--gw-lavender);color:var(--gw-deep)}
+body.giftwise .hostAuth{background:#fffefb;border:1px solid var(--gw-line);border-radius:30px;box-shadow:0 18px 60px #35205b0c;padding:clamp(24px,4vw,42px);max-width:510px}
+body.giftwise .hostAuth h1{font-size:clamp(28px,3vw,37px);line-height:1.15;letter-spacing:-1.2px;color:var(--gw-deep)}
+body.giftwise .hostAuth :is(p,label){line-height:1.6}
+body.giftwise .hostAuth a{color:#6336b5}
+body.giftwise .hostShell:has(>.gwWelcome){min-height:100vh;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(330px,.9fr);align-items:center;gap:clamp(32px,5vw,90px);max-width:1440px;margin:auto;padding:42px clamp(24px,5vw,80px)}
+.gwWelcome{min-width:0;padding:12px 0}.gwWordmark{display:flex;align-items:center;gap:12px;color:#35205b;text-decoration:none;font-size:30px;font-weight:800;letter-spacing:-1px;flex-wrap:wrap}.gwWordmark span{font-size:9px;letter-spacing:2px;font-weight:700;margin-left:auto;color:#6f657b}.gwWelcomeCopy{margin-top:48px}.gwEyebrow{display:flex;align-items:center;gap:9px;font-size:10px;font-weight:750;letter-spacing:1.5px;color:#76520e}.gwWelcome h2{font-size:clamp(32px,3.7vw,53px);font-weight:650;line-height:1.12;letter-spacing:-2px;margin:22px 0}.gwWelcome h2 em{font-style:normal;color:#6336b5}.gwWelcomeCopy>p{font-size:16px;line-height:1.75;max-width:430px;color:#6f657b}
+.gwScene{position:relative;height:300px;display:grid;place-items:center;isolation:isolate}.gwSceneOrbit{position:absolute;width:255px;height:255px;border:1px solid #d5c3ed;border-radius:50%;background:radial-gradient(circle,#eee7fa 0,#eee7fa88 65%,transparent 66%)}.gwMiri{width:205px;height:205px;z-index:1;transform:rotate(-6deg)}.gwFloatingNote{position:absolute;z-index:2;display:flex;align-items:center;gap:12px;padding:14px 18px;border:1px solid #e7dced;background:#fffffff5;border-radius:18px;box-shadow:0 10px 35px #35205b0b;font-size:13px;font-weight:700;color:#35205b}.gwFloatingNote>span{background:#eee7fa;color:#6336b5;padding:9px;border-radius:12px;display:grid;place-items:center}.gwFloatingNote small{display:block;color:#6f657b;font-size:11px;font-weight:400;margin-top:3px}.gwFloatingNoteOne{left:0;top:40px;transform:rotate(-4deg)}.gwFloatingNoteTwo{right:0;bottom:34px;transform:rotate(3deg)}.gwFloatingNoteTwo>span{background:#fff1d6;color:#76520e}.gwSceneSpark{position:absolute;font-size:36px;color:#b98b30}.gwSceneSparkOne{right:15%;top:16px}.gwSceneSparkTwo{bottom:20px;left:20%;color:#6336b5}.gwWelcomeBenefits{display:flex;flex-wrap:wrap;gap:16px;font-size:11px;color:#6f657b}.gwWelcomeBenefits span{display:flex;align-items:center;gap:6px}.gwAdminEntry{display:flex;align-items:center;gap:8px;color:#6336b5;font-size:12px;margin-top:24px;min-height:44px;text-decoration:none}.gwAdminEntry:hover{text-decoration:underline}.gwAdminLoginNotice{max-width:1100px;margin:30px auto 0;padding:20px 24px;border-radius:20px;background:#35205b;color:#fff;display:flex;gap:12px;flex-wrap:wrap;align-items:center}.gwAdminLoginNotice strong{color:#e8bc62}.gwAdminLoginNotice span{font-size:13px;flex:1;min-width:200px}.gwAdminLoginNotice a{color:#fff;font-size:13px}.gwAdminLogin .gwAdminEntry{visibility:hidden}
+@media(max-width:900px){body.giftwise .hostShell:has(>.gwWelcome){grid-template-columns:1fr;max-width:680px;gap:20px;padding:24px}.gwWordmark span{display:none}.gwWelcomeCopy{margin-top:30px}.gwScene{height:240px}.gwMiri{width:170px;height:170px}.gwSceneOrbit{width:210px;height:210px}.gwWelcome h2{font-size:37px;letter-spacing:-1.3px}.gwWelcomeBenefits{gap:12px}body.giftwise .hostAuth{width:100%;max-width:none;margin:0}.gwAdminEntry{margin-top:12px}.gwAdminLoginNotice{margin:16px 16px 0}.gwAdminLogin .gwScene{display:none}.gwAdminLogin .gwWelcomeCopy{display:none}}
+@media(max-width:440px){.gwFloatingNote{padding:11px;font-size:11px}.gwFloatingNote small{font-size:10px}.gwFloatingNoteOne{top:30px}.gwFloatingNoteTwo{bottom:18px}.gwScene{height:225px}.gwWelcome h2{font-size:33px}.gwWelcomeBenefits{font-size:10px}.gwWelcomeCopy>p{font-size:15px}}
+@media(prefers-reduced-motion:reduce){body.giftwise *,body.giftwise *:before,body.giftwise *:after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+body.giftwise .hostSidebarFooter{background:transparent;border-color:#ffffff26}
+body.giftwise .hostSidebarError{color:#ffb9c8}
+body.giftwise .publicEvent{--accent:#6336b5;--wash:#eee7fa;background:#fcfaf6;color:#292137}
+body.giftwise .publicEvent.wedding,body.giftwise .publicEvent.anniversary{--wash:#f5e7eb}
+body.giftwise .publicEvent.home{--wash:#f8edda}
+body.giftwise .publicEvent.baby{--wash:#e6efe9}
+body.giftwise .publicEventHero{border:1px solid #e4d8ee;background:radial-gradient(ellipse at top,var(--wash),#fcfaf6 80%)}
+body.giftwise .publicEventPrimary,body.giftwise .loveGiftButton{background:#6336b5;color:#fff;border-radius:16px}
+body.giftwise .loveModal{background:#fcfaf6;border:1px solid #e4d8ee}
+body.giftwise .loveModalClose{background:#eee7fa;color:#35205b}
+body.giftwise .publicEventGift{border-color:#e4d8ee;box-shadow:0 12px 36px #35205b09}
+body.giftwise .dashCreate{background:#6336b5;color:#fff;border-color:#6336b5;border-radius:14px}
+body.giftwise .dashMetric{border-color:#dfd5ec;border-radius:22px;background:#fff}
+body.giftwise .dashMetric strong{color:#35205b}
+body.giftwise .dashEventLinks a{background:#eee7fa;color:#6336b5}
+body.giftwise .dashQuick>div{background:#eee7fa;border-radius:24px}
+body.giftwise .dashQuick>div:nth-child(2){background:#fbf0d9}
+body.giftwise .dashQuick a{color:#6336b5}

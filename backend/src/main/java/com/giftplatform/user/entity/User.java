@@ -62,9 +62,9 @@ public class User {
         this(email, passwordHash);
 
         if (username == null ||
-                !username.matches("^[a-z][a-z0-9_]{3,29}$")) {
+                !username.matches(com.giftplatform.security.CredentialPolicy.USERNAME_PATTERN)) {
             throw new IllegalArgumentException(
-                    "Invalid username"
+                    com.giftplatform.security.CredentialPolicy.USERNAME_MESSAGE
             );
         }
 

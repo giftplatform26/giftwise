@@ -39,6 +39,7 @@ class GroupLogoutRoutingTest {
  @BeforeEach void setup(){
   when(readiness.invitation(org.mockito.ArgumentMatchers.any())).thenReturn(new GroupReadinessService.Readiness(true,java.util.List.of()));
   Event event=mock(Event.class);when(event.getId()).thenReturn(eventId);when(event.getStatus()).thenReturn(EventStatus.PUBLISHED);
+  org.mockito.Mockito.lenient().when(event.isGiftingEnabled()).thenReturn(true);
   when(events.findByPublicToken(token)).thenReturn(Optional.of(event));
   when(db.queryForObject("SELECT count(*) FROM gift_groups WHERE id=? AND event_id=?",Integer.class,groupId,eventId)).thenReturn(1);
   when(db.queryForObject(org.mockito.ArgumentMatchers.contains("a.email_verified_at"),eq(Boolean.class),eq(groupId))).thenReturn(true);

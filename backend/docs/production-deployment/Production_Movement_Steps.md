@@ -1,0 +1,627 @@
+# GiftWise production deployment steps
+
+Operator runbook for the current GiftWise web application. Follow the steps in order to build a runtime release, initialize a clean database, configure the first administrator, verify recovery and open the site behind HTTPS. Use the companion command kit supplied with this document.
+
+Deployment target: one dedicated Debian 13 Linux x86_64 server, Java 21, Node 24, PostgreSQL 17 and Caddy. This path does not require production Docker. Docker is used on the build computer to produce Linux frontend dependencies and to run database tests.
+
+Release scope: this procedure supports a public nonpayment launch. Current Razorpay code accepts test credentials only. The public opening command refuses enabled payment channels. A live-money gifting launch requires a separately implemented and verified payment release. Do not remove test-mode checks as a deployment shortcut.
+
+### How to use this document
+
+- The release engineer completes Steps 1 to 3 and supplies the release archive, its trusted SHA256, the filled input sheet and the command kit.
+- The deployment operator completes Steps 4 to 16. Application development knowledge is not needed once the handoff inputs are complete. Basic SSH, sudo and terminal access are required.
+- Each step states the computer, directory, commands, expected result and stop condition. Do not continue after an unexpected result. Never run server installation commands on the current Mac or an existing shared server.
+- Keep this document and operational scripts outside the public web directory. Commands install code and configuration; no command wipes the production database.
+- Replace every REPLACE value before handoff. Do not put passwords, private keys or provider API keys into the shared document or input sheet.
+
+### Completion means
+
+The approved nonpayment site is reachable over HTTPS, the administrator and host can sign in, email recovery works, data survives service restart, all migrations are applied, and a verified encrypted offsite backup and restore record exist. Actual DNS, TLS, provider delivery, offsite authentication and browser acceptance are checked on the target server; they are not implied by a successful local build.
+
+Prepared for the GiftWise owner and deployment operator. Runbook version 1.1 dated 06 November 2026. Current migration head is 107. Use a separate staging server with the same procedure before the production server.
+
+## Handoff information required before starting
+
+The owner and release engineer complete this sheet before the operator schedules deployment. Missing ownership, credentials, approved legal text or recovery access are reasons to postpone the launch, not reasons to invent defaults.
+
+| Input | Required value or evidence |
+| --- | --- |
+| Release archive | giftwise RELEASE_ID tar gz and its SHA256 supplied through a trusted owner channel |
+| Command kit | GiftWise_Production_Deployment_Kit.zip from this runbook |
+| Source for build | Complete backend and web directories, approved revision or frozen working-tree snapshot |
+| Server | Dedicated Debian 13 x86_64 VM; public IPv4; SSH port 22; sudo account; provider recovery console |
+| Capacity starting point | 4 vCPU, 8 GB RAM, 80 GB SSD for this single-server baseline; load and storage tests determine actual capacity |
+| Domain | A public hostname controlled by the owner, with DNS A record access; DNS-only mode during initial setup |
+| SSH access | Actual login user, private-key location and trusted host-key fingerprint |
+| Administrator | First admin email, password custodian and recovery mailbox access |
+| Provider email | Verified Resend sender/domain, sending API key and support email |
+| Legal content | Approved privacy.txt and terms.txt, effective date and approval for initial consent version 2026-11-05 |
+| Offsite recovery | Working SSH backup account and directory, private key through secure transfer, trusted host fingerprint |
+| Encryption recovery | Owner age public recipient; matching private identity held off the production server |
+| Operations owner | Named incident contact, maintenance window, retention policy, uptime/backup alert destination |
+
+The capacity values are planning inputs, not a throughput guarantee. The backup timer uses 02:30 UTC and briefly stops application writes. Confirm this downtime window and the required recovery point and recovery time with the owner.
+
+A person receiving only this document still needs the owner-provided source or built release, domain control, server access and provider credentials. Those are external inputs; none are stored in the application repository or generated as default production accounts.
+
+## Application layout and deployment boundaries
+
+Traffic follows this path: browser over HTTPS to Caddy, then to Next.js on 127.0.0.1:3000, then through /backend to Spring Boot on 127.0.0.1:8080. Spring connects to PostgreSQL on 127.0.0.1:5432. Only Caddy and the approved SSH port are public.
+
+| Path | Purpose |
+| --- | --- |
+| Source root/backend | Spring Boot source, migrations and existing operations scripts |
+| Source root/web | Next.js source and public assets |
+| /srv/giftwise/incoming | Private received archives and command-kit extraction |
+| /srv/giftwise/releases/RELEASE_ID | Installed immutable application release |
+| /srv/giftwise/current | Symlink to the active release |
+| /srv/giftwise/previous | Symlink retained for a reviewed code rollback |
+| /etc/giftwise/backend.env | Root-only database credentials, persistent cryptographic keys and provider settings |
+| /var/lib/giftwise/media | Private durable guestbook and album photos |
+| /var/cache/giftwise | Writable frontend cache; not a business-data backup |
+| /var/backups/giftwise | Root-only local database/media snapshots and encrypted recovery files |
+| /usr/local/lib/giftwise | Installed operational helper scripts and service templates |
+
+### What gets uploaded
+
+The application archive contains only backend/backend.jar, the Linux Next.js standalone runtime with public/static assets, release.json and SHA256SUMS. It does not contain the project source tree, test tree, local environment files, root documentation, development database, logs or backup folders. Required third-party runtime licenses and notices are retained.
+
+The command kit is uploaded separately for private administration. Project documentation is not deleted from the build computer. The packager removes the unused email-templates README from the deployment JAR. Never use a whole-project zip, a development JAR or a target JAR original file as the production upload.
+
+## Step 1 Prepare the build computer
+
+Location: build computer. Working directory: the backend source directory. The current owner path is /Users/jijujones/gift-platform/backend. Another release engineer substitutes their actual complete checkout path. Do not clone an older commit that omits the current working-tree changes.
+
+```sh
+cd /Users/jijujones/gift-platform/backend
+java -version
+node --version
+python3 --version
+docker info
+./mvnw --version
+```
+
+Expected: Java 21, Node 24, Python 3.12 or newer for the release tooling, a working Docker engine and a working Maven wrapper. Install missing build tools before continuing. The server installation steps later install production runtimes separately.
+
+Copy kit/deployment-inputs.example.sh to deployment-inputs.sh outside the kit, fill the nonsecret values and source it. The source root must contain both backend and web. The SSH key must belong to the deployment operator and must not be committed.
+
+```sh
+cp docs/production-deployment/kit/deployment-inputs.example.sh \
+  deployment-inputs.sh
+# Edit the copied input file with the owner-provided values.
+${EDITOR:-vi} deployment-inputs.sh
+source ./deployment-inputs.sh
+chmod 600 "$GW_SSH_KEY"
+printf '%s\n' "$GW_SOURCE_ROOT" "$GW_RELEASE_ID" "$GW_DOMAIN"
+```
+
+Check that the displayed paths and hostname are real. GW_EXPECTED_SHA256 is filled after the build. Keep this nonsecret input sheet with the handoff; keep the private key and API secrets in the approved secure channel.
+
+### If source access is not part of the operator handoff
+
+The release engineer performs Steps 1 to 3. The server operator starts at Step 4 after receiving the finished archive, trusted hash, command kit and filled server input values. They do not need to understand or build the source.
+
+## Step 2 Run the release checks
+
+Location: build computer. Directory: backend. Docker must remain running. This step verifies the source before the packaging step deliberately skips repeated backend tests.
+
+```sh
+cd "$GW_SOURCE_ROOT/backend"
+set -o pipefail
+bash ops/release-check.sh 2>&1 | tee release-check.log
+```
+
+Expected: the command exits with status 0 and reports that automated checks passed. It runs clean Maven unit/integration checks, frontend tests, TypeScript/build, documentation checks and production artifact validation. Preserve the log with the release evidence. If a check fails, do not package or deploy that revision until the release engineer resolves it.
+
+The application has already passed targeted unit and PostgreSQL checks, but those results do not replace this full release gate for the exact candidate being handed over. Docker-only tests belong to Maven integration verification. See backend/docs/TESTING.md for discovery failures.
+
+### Confirm the launch content
+
+- Obtain owner-approved privacy.txt and terms.txt as plain UTF-8 text files. The packager replaces only the temporary deployment copy of the two legal pages; it does not alter the working source.
+- For this first release, the consent version recorded by the application is 2026-11-05. The printed effective date can be the actual owner-approved date. Retain the exact approved texts and hashes.
+- Future legal-text changes require a new application consent version. The activation helper rejects different legal text under the same version.
+- Confirm that the planned public scope is nonpayment. Coupons, subscriptions, referrals, tenant isolation and AI gift recommendations have database foundations, not active production workflows.
+
+## Step 3 Create the runtime release
+
+Location: build computer. Directory: backend. This step compiles the backend release and builds the frontend inside a Linux amd64 Node container. Do not copy a macOS node_modules or macOS-built standalone bundle to Linux.
+
+```sh
+cd "$GW_SOURCE_ROOT/backend"
+python3 "$GW_KIT/make-release.py" \
+  --source-root "$GW_SOURCE_ROOT" \
+  --output-dir "$GW_OUT" \
+  --release-id "$GW_RELEASE_ID" \
+  --privacy-text /absolute/path/to/approved/privacy.txt \
+  --terms-text /absolute/path/to/approved/terms.txt \
+  --legal-effective-date 2026-11-05 \
+  --legal-approved
+```
+
+Replace the two legal-file paths and the effective date. Expected: giftwise-RELEASE_ID.tar.gz and its .sha256 file in GW_OUT. The command refuses an existing release filename. It verifies the environment-only backend JAR, copies public and .next/static into the standalone runtime, and changes only the deployment-copy proxy to 127.0.0.1:8080.
+
+```sh
+cat "$GW_OUT/giftwise-$GW_RELEASE_ID.tar.gz.sha256"
+# Put the exact printed 64-character hash into the input sheet.
+${EDITOR:-vi} deployment-inputs.sh
+source ./deployment-inputs.sh
+test ${#GW_EXPECTED_SHA256} -eq 64
+```
+
+The trusted hash must be delivered through an authenticated owner handoff. A hash downloaded from the same untrusted source as an archive detects corruption but does not authenticate the release.
+
+Preserve the release-check log, archive, checksum, legal approval and source snapshot identification. The QA-only packaging option is for private engineering tests; a QA archive cannot be activated by the production helper. Do not use it for a release.
+
+## Step 4 Connect to the production server
+
+Location: build computer, then production server. The remainder targets a fresh dedicated Debian 13 x86_64 machine. Do not run first-install commands on an existing production database or shared application server.
+
+```sh
+ssh -i "$GW_SSH_KEY" "$GW_SSH_USER@$GW_SERVER"
+```
+
+Compare the SSH host-key fingerprint with the owner-provided value before accepting the connection. Keep this session open and retain access to the provider recovery console while configuring the firewall.
+
+Location now: production server. Restore the owner-provided input values in this new shell. These are examples of variable declarations, not usable production defaults.
+
+```sh
+export GW_DOMAIN='REPLACE_WITH_REAL_PUBLIC_HOSTNAME'
+export GW_TLS_EMAIL='REPLACE_WITH_TLS_CONTACT_EMAIL'
+export GW_ADMIN_EMAIL='REPLACE_WITH_FIRST_ADMIN_EMAIL'
+export GW_RELEASE_ID='2026-11-05-r1'
+export GW_EXPECTED_SHA256='REPLACE_WITH_TRUSTED_64_CHARACTER_HASH'
+cat /etc/os-release
+uname -m
+sudo -v
+sudo ss -lntp
+```
+
+Expected: Debian 13, x86_64, working sudo and no unrelated service using 80, 443, 3000 or 8080. SSH is assumed to use port 22. If the owner uses a different SSH port, adapt the firewall and SSH/scp commands before enabling the firewall.
+
+```sh
+export GW_ADMIN_IP="$(printf '%s' "$SSH_CONNECTION" | awk '{print $1}')"
+export GW_ADMIN_CIDR="$GW_ADMIN_IP/32"
+sudo apt-get update
+sudo apt-get install -y ufw ca-certificates curl unzip rsync nano
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+sudo ufw allow from "$GW_ADMIN_IP" to any port 22 proto tcp
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+sudo ufw --force enable
+sudo ufw status verbose
+```
+
+This path assumes IPv4 SSH. Keep 22 restricted to approved operator addresses. Allow 80/443 at the provider firewall too. Do not expose 3000, 8080 or 5432. Test a second SSH session before closing the first. Caddy will restrict application access to the setup operator until the final opening step.
+
+## Step 5 Install production runtimes
+
+Location: production server. Directory: any. Install the Debian 13 packages below. This OS choice supplies ImageMagick 7 directly; replacing it with ImageMagick 6 is not equivalent.
+
+```sh
+sudo apt-get install -y \
+  openjdk-21-jre-headless postgresql-17 postgresql-client-17 \
+  imagemagick-7.q16 libheif-plugin-libde265 \
+  fontconfig fonts-dejavu-core caddy python3 age xz-utils
+sudo systemctl stop caddy
+sudo systemctl enable --now postgresql
+java -version
+python3 --version
+magick -version
+pg_lsclusters
+sudo -u postgres psql -Atc 'SHOW server_version;'
+sudo -u postgres psql -Atc 'SHOW listen_addresses;' 
+```
+
+Expected: Java 21, Python 3.13 or another supported 3.12+ runtime, ImageMagick 7 and PostgreSQL 17 online. PostgreSQL should listen on localhost, not a public interface. If no 17/main cluster exists on this fresh installation, create it with sudo pg_createcluster 17 main --start. If it exists but is down, use sudo pg_ctlcluster 17 main start.
+
+```sh
+magick -list format | grep -E 'HEIC|HEIF|WEBP|JPEG|PNG'
+getent ahostsv4 "$GW_DOMAIN"
+```
+
+Verify HEIC/HEIF read support and JPEG/PNG/WebP support. The DNS IPv4 result must match the server address. Remove an incorrect AAAA record; do not leave IPv6 DNS active without tested IPv6 routing/firewall. Keep any DNS/CDN proxy disabled for the first direct-origin deployment.
+
+Node 24 is installed from the official Linux x64 distribution after the command kit is uploaded in the next step. The script checks its SHA256 and installs it under /opt with executable links in /usr/local/bin. The checksum and actual installed patch version are retained as release evidence.
+
+## Step 6 Upload and install the command kit
+
+Location: build computer. Directory: backend, where deployment-inputs.sh was created. Keep the server SSH session open. Upload the kit ZIP and runtime archive, not the project directory. If the kit was received separately, set GW_KIT_ZIP to its actual absolute path.
+
+```sh
+cd "$GW_SOURCE_ROOT/backend"
+source ./deployment-inputs.sh
+export GW_KIT_ZIP="$GW_SOURCE_ROOT/backend/docs/production-deployment"
+GW_KIT_ZIP="$GW_KIT_ZIP/GiftWise_Production_Deployment_Kit.zip"
+scp -i "$GW_SSH_KEY" \
+  "$GW_KIT_ZIP" \
+  "$GW_OUT/giftwise-$GW_RELEASE_ID.tar.gz" \
+  "$GW_SSH_USER@$GW_SERVER:"
+```
+
+Location: production server. The received files are in the SSH user home directory. The input values declared in Step 4 must still be present.
+
+```sh
+sudo install -d -m 0700 /srv/giftwise/incoming
+sudo unzip "$HOME/GiftWise_Production_Deployment_Kit.zip" \
+  -d /srv/giftwise/incoming/command-kit
+sudo install -d -m 0755 /usr/local/lib/giftwise
+sudo cp -a /srv/giftwise/incoming/command-kit/kit/. \
+  /usr/local/lib/giftwise/
+sudo chmod -R go-w /usr/local/lib/giftwise
+sudo install -m 0600 "$HOME/giftwise-$GW_RELEASE_ID.tar.gz" \
+  /srv/giftwise/incoming/
+sudo bash /usr/local/lib/giftwise/install-node24.sh
+/usr/local/bin/node --version
+```
+
+Expected: Node v24 and operational scripts under /usr/local/lib/giftwise. If unzip reports an existing destination, stop and check whether this is actually a first installation. Do not overwrite an existing environment or deployment configuration blindly.
+
+The command-kit ZIP contains administrative scripts and a text copy of the runbook. They are not web assets and are installed outside the public directory. The only application archive installed later is the checksummed runtime tar.gz.
+
+## Step 7 Create configuration and the empty database
+
+Location: production server. Directory: /usr/local/lib/giftwise. This creates a dedicated Linux account, a PostgreSQL role/database and persistent random keys. It does not start application services.
+
+```sh
+cd /usr/local/lib/giftwise
+sudo python3 server-configure.py \
+  --domain "$GW_DOMAIN" \
+  --tls-email "$GW_TLS_EMAIL" \
+  --setup-cidr "$GW_ADMIN_CIDR"
+sudo stat -c '%a %U %n' /etc/giftwise/backend.env
+sudo -u postgres psql -Atc \
+  "SELECT datname FROM pg_database WHERE datname='giftwise_prod';"
+sudo -u postgres psql -d giftwise_prod -Atc \
+  "SELECT count(*) FROM pg_tables WHERE schemaname='public';"
+```
+
+Expected: backend.env is root-owned mode 600; giftwise_prod exists; public table count is 0 before first application startup. The dedicated role is giftwise_app with no superuser or database-creation privilege. The helper stores four independent random 32-byte keys and a random database password. It never creates a default application login.
+
+On an interrupted first setup only, rerun the same command with --resume. Saved secrets are retained. An existing database or role without an explicitly resumed setup is refused. If stored credentials do not connect, investigate rather than generate a new password.
+
+Keep /etc/giftwise/backend.env root-only. It is read by systemd before dropping to the giftwise account. It contains the keys needed to decrypt stored data and must be included in the encrypted recovery process. Do not regenerate this file on upgrades or print it into a shared log.
+
+The helper also creates root-only /etc/giftwise/web.env with the HTTPS public origin and loopback backend origin, installs two systemd service files and a Caddy setup restriction. Caddy serves the application only to GW_ADMIN_CIDR and loopback during setup; other clients receive HTTP 503. Public ACME certificate handling remains available.
+
+## Step 8 Activate the release and apply migrations
+
+Location: production server. Directory: /usr/local/lib/giftwise. Confirm the trusted archive hash from the owner, not an arbitrary copied value. On this first installation the application services must be stopped.
+
+```sh
+cd /usr/local/lib/giftwise
+sudo python3 activate-release.py \
+  --archive "/srv/giftwise/incoming/giftwise-$GW_RELEASE_ID.tar.gz" \
+  --sha256 "$GW_EXPECTED_SHA256"
+readlink -f /srv/giftwise/current
+sudo systemctl enable giftwise-backend giftwise-web
+sudo systemctl start giftwise-backend
+sudo journalctl -u giftwise-backend -n 100 --no-pager
+curl --fail http://127.0.0.1:8080/actuator/health/readiness
+```
+
+Wait for HTTP 200 with status UP. The activation helper verifies the archive, inner file checksums and platform before switching current. It rejects QA archives and existing release directories. It creates a writable frontend cache outside the release. It does not modify the database itself.
+
+Spring Boot startup then applies Flyway migrations to the already-created empty database. Current head is 107. No command imports local development users, test events or a local database dump. On an existing database, migrations upgrade the schema without resetting its data.
+
+```sh
+sudo -u postgres psql -d giftwise_prod -c \
+  'SELECT version,description,success FROM flyway_schema_history ORDER BY installed_rank DESC LIMIT 5;'
+sudo -u postgres psql -d giftwise_prod -c \
+  'SELECT (SELECT count(*) FROM platform_branding) AS branding, (SELECT count(*) FROM platform_languages) AS languages, (SELECT count(*) FROM invitation_gallery_assets) AS gallery;' 
+```
+
+Expected: migration 107 succeeds, branding count is 1, languages count is 8 and gallery count is greater than 0. System settings and artwork are seeded automatically. Many optional modules, verification and commercial features intentionally require admin configuration. If startup fails, stop the service and diagnose; do not run Flyway clean, delete schema history or reset the database.
+
+## Step 9 Create the first platform administrator
+
+Location: production server. Directory: /usr/local/lib/giftwise. The backend must have completed its first migration run, then be stopped for provisioning. No public application access has been opened.
+
+```sh
+sudo systemctl stop giftwise-backend
+cd /usr/local/lib/giftwise
+sudo python3 bootstrap-admin.py --email "$GW_ADMIN_EMAIL"
+sudo -u postgres psql -d giftwise_prod -c \
+  "SELECT count(*) AS administrators FROM users WHERE role='PLATFORM_ADMIN';"
+sudo systemctl start giftwise-backend
+curl --fail http://127.0.0.1:8080/actuator/health/readiness
+```
+
+The helper prompts twice for a password without echoing it. Require at least 16 characters, uppercase/lowercase, a number and punctuation, within 72 UTF-8 bytes. Store it in the approved password manager. Expected: exactly one administrator and a healthy restarted backend.
+
+Provisioning uses the application admin-provision runner in a separate temporary process bound to 127.0.0.1:18080. Email/SMS transports are disabled in that process. The helper stops it when the account exists. It does not directly insert an administrator with SQL or combine admin-provision with the production profile.
+
+The first admin signs in using the email address; a username is not generated for this offline provisioned account. The helper refuses to create a second administrator. If provisioning fails, read /var/log/giftwise/bootstrap.log. If the account already exists, use account recovery after email is configured, or the documented offline recovery process under controlled operations access.
+
+## Step 10 Start the web service and HTTPS
+
+Location: production server. Keep the Caddy setup restriction active. The operator browser should use the same public egress address as the SSH connection used to derive GW_ADMIN_CIDR.
+
+```sh
+sudo systemctl start giftwise-web
+curl --fail http://127.0.0.1:3000/login >/dev/null
+sudo caddy validate --config /etc/caddy/Caddyfile
+sudo systemctl enable --now caddy
+sudo journalctl -u caddy -n 100 --no-pager
+curl --fail --head "https://$GW_DOMAIN/login"
+sudo ss -lntp
+```
+
+Expected: valid publicly trusted TLS, HTTP 200 on /login for the operator, automatic HTTP-to-HTTPS redirection, and public listeners only for approved SSH and Caddy. Backend, frontend and PostgreSQL must bind loopback. Caddy also has its normal loopback administration listener.
+
+Open https://DOMAIN/login in the operator browser. Sign in as the first administrator and confirm navigation to /admin. From another network, the site must still return the setup 503 response. Do not remove the restriction merely to work around a mismatched operator IP; review the CIDR and DNS first.
+
+The Linux frontend bundle contains the IPv4 loopback proxy matching the backend binding. No separate API domain or browser CORS setup is required for this path. Forwarded HTTPS headers are enabled for the backend. Confirm authenticated cookies are Secure and HttpOnly, and the CSRF flow works through the public hostname.
+
+If certificate issuance fails, check the A record, stray AAAA record, ports 80/443 in both firewalls, system time and Caddy logs. A certificate for localhost or an untrusted browser bypass is not a successful production TLS check.
+
+## Step 11 Configure the application and email
+
+Location: operator browser and production server. Stay behind the setup restriction until these checks pass. No seeded default is a substitute for the real business or provider settings.
+
+| Admin area | Required action |
+| --- | --- |
+| Branding and appearance | Set application name, logo/favicon, footer, support email and social URLs. Review Experience and growth controls; keep rich previews and public keepsakes off until staging consent checks pass. Verify logo propagation. |
+| Payment controls | Disable platform UPI, Bank, Razorpay and Routing for this nonpayment release. Keep direct-transfer and settlement runtime switches disabled. |
+| Authentication and policies | Configure email delivery first, then enable email verification and test it. Enable mobile OTP only after a real provider test; do not enable a simulator. |
+| Hosts and privileges | Grant only the modules required by each host. A platform toggle alone does not grant host access. |
+| Languages and monetization | Choose approved languages and published translations. Keep unconfigured monetization and optional features disabled. |
+
+Location: production server. Edit only the required provider fields in the root-only environment file. Do not paste API keys into this document or a terminal command line.
+
+```sh
+sudoedit /etc/giftwise/backend.env
+# Set these fields in the editor, using actual provider values:
+# GIFT_OTP_EMAIL_PROVIDER=resend
+# GIFT_OTP_EMAIL_RESEND_API_KEY=actual_secret_value
+# GIFT_OTP_EMAIL_FROM=verified_sender_at_your_domain
+sudo systemctl restart giftwise-backend
+curl --fail http://127.0.0.1:8080/actuator/health/readiness
+```
+
+Use a verified sender email address, such as support at the owner-controlled domain; replace the descriptive example, not just the field name. Restarting the backend invalidates its in-memory sessions, so sign in again. Enable email verification in Admin, verify the admin mailbox and test password recovery using an operator-controlled host account. Check Admin email delivery status; SENT means provider acceptance, not proof of inbox delivery. Verify receipt in the mailbox too.
+
+## Step 12 Complete browser acceptance checks
+
+Location: operator browser, using the real HTTPS hostname. Record the result, tester and time for each item. A failed item remains a launch blocker. Do not use a real guest or live payment as a smoke test.
+
+| Check | Expected outcome |
+| --- | --- |
+| First admin login | Email/password sign-in reaches /admin; ordinary hosts cannot access admin APIs. |
+| Host registration | Username/password rules turn green/red correctly; invalid fields and unchecked consent are rejected. |
+| Email and recovery | Verification arrives; resend works; password reset changes credentials and old sessions are rejected. |
+| Branding | Uploaded logo/favicon and support details survive reload; other active sessions refresh branding. |
+| Event flow | Create an operator-labeled non-gifting celebration, save/reopen, preview and publish the supported flow. If receiving-account verification is demanded, do not fake it or enable payments; resolve the event mode/configuration. |
+| Guest visibility | Open the invitation in an incognito browser; private account/admin data and host controls are absent. |
+| Uploads | Test a real allowed photo; verify it persists across service restart and unauthorized access is rejected. Enable only the approved module for this test. |
+| Inactivity | Host/admin idle sessions expire at the configured timeout; group sessions use their shorter idle policy. Background polling must not keep them alive. |
+| Cookies | Reject optional analytics, verify no optional interaction collection, accept it, then withdraw again. |
+| Payments | No live collection action is offered. All platform payment-channel toggles remain off. |
+| Mobile layout | Check a narrow viewport, navigation, dialogs, loading/error states and legal/support links. |
+| Restart durability | Restart backend/web, sign in again, verify the event, settings, logo and photo remain. |
+| Legal pages | Published pages contain the owner-approved wording and correct effective date, without draft or placeholder labels. |
+
+Use a clearly named operator smoke-test account/event. Close or cancel the test event through supported UI actions. Do not truncate tables or reset the database to remove smoke-test records; audit and consent records must remain valid.
+
+## Step 13 Verify a coordinated backup and restore
+
+Location: production server. Keep public access restricted. First verify local recovery while the application is stopped. The existing backup tool snapshots PostgreSQL and private media together; PostgreSQL alone does not cover filesystem photos.
+
+```sh
+sudo systemctl stop giftwise-web giftwise-backend
+cd /usr/local/lib/giftwise
+sudo python3 coordinated-backup.py
+sudo find /var/backups/giftwise -maxdepth 1 -type d -name 'backup-*'
+# Record the exact newly printed backup directory.
+export GW_BACKUP='/var/backups/giftwise/REPLACE_WITH_BACKUP_DIRECTORY'
+sudo python3 verify-backup.py "$GW_BACKUP"
+sudo -u postgres createdb --owner=giftwise_app giftwise_verify_restore
+sudo python3 restore-verification.py \
+  --backup-dir "$GW_BACKUP" \
+  --restore-db giftwise_verify_restore \
+  --media-dir /var/lib/giftwise/restore-check \
+  --confirm RESTORE_DISPOSABLE_DATABASE
+```
+
+Expected: backup integrity passes; the disposable database restores successfully; all restored media file hashes match. The target database must be empty and end in _restore. The restore media directory must not already exist. Production giftwise_prod is not modified by this drill.
+
+```sh
+sudo systemctl start giftwise-backend
+curl --fail http://127.0.0.1:8080/actuator/health/readiness
+sudo systemctl start giftwise-web
+curl --fail http://127.0.0.1:3000/login >/dev/null
+```
+
+Retain the backup/restore evidence and observed timings. Have the owner authorize cleanup of only the named disposable database and restore-check directory after signoff. Never substitute giftwise_prod as a restore target or run a blanket database/media cleanup.
+
+## Step 14 Configure encrypted offsite backups
+
+Location: production server. The owner supplies a working restricted SSH backup account, destination directory and trusted host fingerprint, plus an age public recipient. The corresponding private decryption identity stays with the recovery custodian off the production server.
+
+```sh
+sudo install -d -m 0700 /root/.ssh
+# Securely place the owner-supplied backup key here:
+# /root/.ssh/giftwise_backup
+sudo chmod 600 /root/.ssh/giftwise_backup
+sudo install -m 0600 /usr/local/lib/giftwise/offsite.example.env \
+  /etc/giftwise/offsite.env
+sudoedit /etc/giftwise/offsite.env
+```
+
+Fill AGE_RECIPIENT, OFFSITE_USER, OFFSITE_HOST, OFFSITE_DIR and OFFSITE_SSH_IDENTITY_FILE. Use a dedicated existing directory without spaces or shell metacharacters. Do not put the private age identity in this file. The SSH account must support both the directory check and scp upload; verify its least-privilege policy with the storage owner.
+
+```sh
+sudo bash -c '
+  source /etc/giftwise/offsite.env
+  ssh -i "$OFFSITE_SSH_IDENTITY_FILE" \
+    "$OFFSITE_USER@$OFFSITE_HOST" test -d "$OFFSITE_DIR"
+'
+# Compare the first SSH host fingerprint with the trusted owner value.
+sudo bash /usr/local/lib/giftwise/backup-and-restart.sh
+```
+
+Expected: database/media and configuration backups are encrypted separately and copied offsite. The wrapper locks against overlapping backups, stops writes for the snapshot and verification, restarts the application, then encrypts and uploads. It exits with an error if offsite delivery fails. Local plaintext remains root-only; the scripts do not delete old backups.
+
+On the separate recovery computer, download the two encrypted files from the offsite target. With the custodian identity, decrypt into a private directory and verify the data backup using verify-backup.py. Keep the configuration recovery file private; it contains database and encryption secrets.
+
+```sh
+umask 077
+mkdir -p recovery-check/data recovery-check/config
+age -d -i /secure/path/to/owner-identity.txt \
+  -o recovery-check/data.tar BACKUP_NAME.data.tar.age
+age -d -i /secure/path/to/owner-identity.txt \
+  -o recovery-check/config.tar BACKUP_NAME.config.tar.age
+tar -xf recovery-check/data.tar -C recovery-check/data
+tar -xf recovery-check/config.tar -C recovery-check/config
+python3 kit/verify-backup.py recovery-check/data
+```
+
+Record successful decryption and verification. Delete private recovery work files through the owner-approved process after the drill. This check does not certify a full-server recovery time; retain a separate timed server-rebuild drill as an operations requirement.
+
+## Step 15 Schedule backups and monitoring
+
+Location: production server. Confirm the 02:30 UTC write-stop window before enabling the timer. The wrapper requires running backend/web services and a working offsite configuration. It does not silently skip a failed prerequisite or erase backups.
+
+```sh
+sudo install -m 0644 /usr/local/lib/giftwise/giftwise-backup.service \
+  /etc/systemd/system/
+sudo install -m 0644 /usr/local/lib/giftwise/giftwise-backup.timer \
+  /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now giftwise-backup.timer
+systemctl list-timers giftwise-backup.timer
+sudo journalctl -u giftwise-backup.service -n 100 --no-pager
+df -h / /var/lib/postgresql /var/lib/giftwise /var/backups/giftwise
+```
+
+Expected: the timer has a next run and no active failure. Connect your existing monitoring system to HTTPS availability, disk space, backend service failure, PostgreSQL health, certificate expiry and backup success. Alert if a daily offsite backup has not succeeded within the agreed interval; an enabled timer alone is not backup evidence.
+
+Use the following commands for diagnosis. They do not print the secret environment file.
+
+```sh
+sudo systemctl status giftwise-backend giftwise-web caddy --no-pager
+sudo journalctl -u giftwise-backend -n 100 --no-pager
+sudo journalctl -u giftwise-web -n 100 --no-pager
+sudo journalctl -u caddy -n 100 --no-pager
+curl --fail http://127.0.0.1:8080/actuator/health/readiness
+```
+
+Give the named operations owner a tested alert channel, secure sudo access, the release ID, backup location and recovery-custodian contact. Define retention and capacity alerts before public launch. No automated deletion is configured by this kit; review capacity regularly and retain verified offsite recovery points according to the owner policy.
+
+## Step 16 Open public access and record handoff
+
+Location: production server. Open public access only after the browser checklist, real email delivery, local restore and offsite decryption checks pass. Keep all payment channels disabled for this current release.
+
+```sh
+cd /usr/local/lib/giftwise
+sudo python3 open-public-access.py --confirm OPEN_NONPAYMENT_SITE
+curl --fail --head "https://$GW_DOMAIN/login"
+curl --fail "https://$GW_DOMAIN/backend/actuator/health/readiness"
+```
+
+The helper checks the release purpose, local service readiness, disabled payment channels, support email and configured/enabled email verification before removing the setup guard. It validates and reloads Caddy. These checks do not replace the manual mailbox, privacy, backup or browser acceptance evidence.
+
+Verify from a second network: the site now opens, the certificate is valid, registration/recovery work and unavailable payment options are absent. Confirm the private services are still inaccessible from the internet. Make a final owner-approved smoke check, then monitor errors, disk, mail failures and support reports closely.
+
+| Handoff record | Operator completion |
+| --- | --- |
+| Hostname and release ID | Record the actual values |
+| Migration head and startup | Record 107 and readiness UP, with time |
+| Application and provider checks | Attach browser results and mailbox receipts |
+| Backup and restore evidence | Record local snapshot, offsite files, integrity/decryption results and timings |
+| Recovery ownership | Record the key custodian and secure access location, not the keys |
+| Public opening | Record operator, owner confirmation, UTC time and second-network result |
+| Monitoring and support | Record alert destination and on-call contact |
+
+Do not announce live payment availability. No production payment, payout, refund, subscription billing or referral reward has been authorized or enabled by this procedure. If the intended product launch requires live money, keep the site restricted until the separate payment implementation and acceptance release is ready.
+
+## Later upgrades and reviewed rollback
+
+Location: production server. Build a new uniquely named release through Steps 1 to 3 first. Retain the current archive and its matching pre-upgrade backup. Never rerun fresh server configuration to rotate keys or recreate the database.
+
+```sh
+cd /usr/local/lib/giftwise
+sudo python3 set-maintenance.py --setup-cidr "$GW_ADMIN_CIDR"
+sudo systemctl stop giftwise-backup.timer
+sudo systemctl is-active giftwise-backup.service
+# If the backup service is active, wait for it to finish before proceeding.
+sudo systemctl stop giftwise-web giftwise-backend
+sudo python3 coordinated-backup.py
+sudo python3 activate-release.py \
+  --archive /srv/giftwise/incoming/giftwise-NEW_RELEASE_ID.tar.gz \
+  --sha256 TRUSTED_NEW_ARCHIVE_SHA256
+sudo systemctl start giftwise-backend
+curl --fail http://127.0.0.1:8080/actuator/health/readiness
+sudo systemctl start giftwise-web
+```
+
+An inactive backup service returns a nonzero status; this line is a status check, not a command to chain with &&. Review migrations and run acceptance checks before reopening with open-public-access.py and re-enabling the backup timer. Keep the setup guard during investigation if anything fails.
+
+### Choose rollback according to database compatibility
+
+A previous application binary can be used only after the release engineer confirms compatibility with the current database schema and legal version. Never assume a symlink rollback reverses a migration. Prefer a corrected forward release when data may have changed.
+
+For a confirmed code-only rollback with unchanged/compatible schema, stop both services, point current to the reviewed previous release, start backend, verify readiness, start web and repeat acceptance before opening. The exact previous path must be copied from readlink -f /srv/giftwise/previous; never guess it.
+
+```sh
+readlink -f /srv/giftwise/previous
+# After compatibility review and with both services stopped:
+sudo ln -s /srv/giftwise/releases/REVIEWED_PREVIOUS_ID \
+  /srv/giftwise/current.rollback
+sudo mv -Tf /srv/giftwise/current.rollback /srv/giftwise/current
+```
+
+If schema or data rollback is necessary, keep writes stopped and use the incident recovery plan: verify the pre-upgrade backup, restore to a new empty database/media target, preserve the failed state for investigation, switch configuration to the restored targets and matching keys, then validate the reviewed application release. Restoring an older snapshot can lose later writes and requires explicit owner reconciliation. This runbook intentionally provides no command that drops or overwrites giftwise_prod.
+
+## Troubleshooting without destroying data
+
+| Symptom | Check and corrective action |
+| --- | --- |
+| Docker discovery fails during build | Start Docker and run docker info from the same terminal. Restart Maven after discovery failure. A sandbox may need socket access. Production runtime itself does not need Docker. |
+| Duplicate migration or old test runs | Run a clean build. The existing Java stationery migration is V102; consent SQL is V106. Do not edit applied migration checksums. The unit migration-version guard detects source collisions. |
+| Runtime release cannot activate | Check the owner-trusted SHA256, Linux amd64 platform, release purpose and unique ID. QA archives and unsafe/unlisted paths are refused. Do not disable the checks. |
+| Production startup rejected | Read journalctl for the exact configuration field. Confirm the production profile, canonical HTTPS origin, fixed non-placeholder keys, media path and instance count 1. Do not bypass the guard. |
+| Database password or connection error | Confirm PostgreSQL 17 is online and loopback-bound. Review the root-only environment file securely. Use --resume only for interrupted first setup; never regenerate encryption keys to fix a database login. |
+| TLS fails or operator sees setup 503 | Check DNS A/AAAA, proxy mode, ports, clock and setup CIDR. Ensure the browser uses the approved operator egress address. Do not publish while troubleshooting. |
+| Web page works but API fails | Check backend readiness and the deployment-copy proxy target 127.0.0.1:8080. Check forwarded HTTPS headers and secure cookies through the public hostname. |
+| Images fail or are not persistent | Check magick -version and delegates, private media ownership and the durable path. Check the service write allowlist. Do not make private media publicly writable. |
+| Email not received | Confirm verified provider sender, credentials, domain, Admin verification toggle and the actual mailbox. Provider accepted/SENT does not prove inbox delivery. |
+| Admin provisioning failed | Read /var/log/giftwise/bootstrap.log. A preexisting administrator is not overwritten or elevated. Use the existing recovery route under controlled access. |
+| Backup upload or timer failed | Inspect the backup service journal, free disk, encryption recipient, SSH key permissions, trusted host entry and destination directory. A local snapshot alone is not an offsite success. |
+| Migration or acceptance fails | Keep public restriction and stop changes. Preserve logs and the backup. Do not use Flyway clean, truncate production tables, remove schema history or use an in-memory database to hide a failing release check. |
+
+## Verification scope and reference material
+
+The 6 November release passed 680 backend unit/HTTP tests, 10 new PostgreSQL growth integration tests, a V107 schema/API export, 428 frontend tests and the frontend production build. Earlier targeted payment/startup checks remain historical evidence. This is not a claim that every integration class or real provider flow has passed.
+
+The runbook packaging path was exercised with explicit QA-only legal fixtures. It built the Linux amd64 standalone frontend with native ELF dependencies; login, favicon, privacy and terms returned HTTP 200 in a disposable Linux container. The backend release configuration checker passed after the unused project README was removed. QA-only fixtures and archives are not production deliverables.
+
+The server installation, real domain/TLS, provider delivery, offsite SSH destination, recovery identity and actual public launch must be verified by the operator on the target environment using the expected results in this document. No production server or production database was modified while preparing this runbook.
+
+### Application references
+
+- backend/ops/README.md for production guards, release artifact rules and coordinated backup behavior.
+- backend/docs/TESTING.md for Maven phases, Docker troubleshooting and verified PostgreSQL targets.
+- backend/docs/BRANDING_AND_READINESS_IMPLEMENTATION.md for branding, profile, consent and email behavior.
+- backend/src/release/resources/application.properties and backend/src/main/resources/application-production.properties for the actual release defaults.
+- backend/src/main/java/com/giftplatform/payment/provider/RazorpayClient.java and payment/service/GuestCheckoutService.java for the current test-mode-only checks.
+
+### Official runtime references
+
+Debian 13 Java 21 package: https://packages.debian.org/trixie/openjdk-21-jre-headless
+
+Debian PostgreSQL 17 package: https://packages.debian.org/trixie/postgresql-17
+
+Debian ImageMagick 7 package: https://packages.debian.org/trixie/imagemagick-7.q16
+
+Next.js standalone output: https://nextjs.org/docs/app/api-reference/config/next-config-js/output
+
+Node 24 downloads and checksums: https://nodejs.org/download/release/latest-v24.x/
+
+Caddy HTTPS: https://caddyserver.com/docs/automatic-https
+
+PostgreSQL backup/restore: https://www.postgresql.org/docs/17/app-pgdump.html
+
+systemd execution restrictions: https://www.freedesktop.org/software/systemd/man/latest/systemd.exec
+
+age encryption project: https://github.com/FiloSottile/age

@@ -51,6 +51,7 @@ public class PublicEventController {
         java.util.Set<UUID> reserved=new java.util.HashSet<>(db.query("SELECT reserved_gift_id FROM gift_groups WHERE event_id=? AND reserved_gift_id IS NOT NULL",(rs,n)->rs.getObject(1,UUID.class),event.getId()));
         List<PublicGiftView> visibleGifts = gifts.findByEventIdOrderByCreatedAtAsc(event.getId())
                 .stream()
+                .filter(g -> event.isGiftingEnabled())
                 .filter(g -> g.getVisibility() == GiftVisibility.PUBLIC && g.getStatus() == GiftStatus.ACTIVE)
                 .sorted(Comparator.comparing((com.giftplatform.gift.entity.Gift g) -> g.getPriority().ordinal())
                         .thenComparing(com.giftplatform.gift.entity.Gift::getCreatedAt, Comparator.nullsLast(Comparator.naturalOrder()))
@@ -60,7 +61,7 @@ public class PublicEventController {
         return ResponseEntity.ok()
                 .cacheControl(CacheControl.noStore())
                 .body(new PublicEventView(event.getTitle(), event.getDescription(),
-                        event.getOccasionType().name(), event.getEventDate(), visibleGifts, permissions.modules(event.getOwnerId()), event.getHostDisplayName(), event.getQrTheme()==null?null:event.getQrTheme().name()));
+                        event.getOccasionType().name(), event.getEventDate(), visibleGifts, permissions.eventModules(event.getOwnerId(),event.getId()), event.getHostDisplayName(), event.getQrTheme()==null?null:event.getQrTheme().name()));
     }
 
     @GetMapping("/{token}/features")
@@ -69,7 +70,7 @@ public class PublicEventController {
     public ResponseEntity<Map<String,Boolean>> features(@PathVariable UUID token) {
         Event event=events.findByPublicToken(token).filter(e->e.getStatus()==EventStatus.PUBLISHED)
             .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
-        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(permissions.modules(event.getOwnerId()));
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(permissions.eventModules(event.getOwnerId(),event.getId()));
     }
 
     public record PublicGiftView(UUID id, String name, String description, BigDecimal targetAmount, GiftPriority priority,String imageUrl,boolean contributionEnabled,String contributionDisabledReason,String productUrl) {}

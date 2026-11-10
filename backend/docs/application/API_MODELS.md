@@ -15,6 +15,15 @@ Kind: record.
 | allowGroupPin | boolean | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
 
 
+## com.giftplatform.admin.EventModuleGrantsController$GrantChange
+
+Kind: record.
+
+| Field | Java/JSON type | Validation / annotations | Default / optionality |
+| --- | --- | --- | --- |
+| enabled | java.lang.Boolean | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+
+
 ## com.giftplatform.admin.ExperienceSettingsService$Settings
 
 Kind: record.
@@ -31,6 +40,16 @@ Kind: record.
 | Field | Java/JSON type | Validation / annotations | Default / optionality |
 | --- | --- | --- | --- |
 | enabled | boolean | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+
+
+## com.giftplatform.admin.GrowthSettingsService$Settings
+
+Kind: record.
+
+| Field | Java/JSON type | Validation / annotations | Default / optionality |
+| --- | --- | --- | --- |
+| features | java.util.Map<java.lang.String, java.lang.Boolean> | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| version | long | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
 
 
 ## com.giftplatform.admin.PlatformAdminAuditController$Page
@@ -54,6 +73,35 @@ Kind: record.
 | Field | Java/JSON type | Validation / annotations | Default / optionality |
 | --- | --- | --- | --- |
 | enabled | boolean | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+
+
+## com.giftplatform.analytics.InteractionController$Batch
+
+Kind: record.
+
+| Field | Java/JSON type | Validation / annotations | Default / optionality |
+| --- | --- | --- | --- |
+| events | java.util.List<com.giftplatform.analytics.InteractionService$Input> | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+
+
+## com.giftplatform.analytics.InteractionService$Input
+
+Kind: record.
+
+| Field | Java/JSON type | Validation / annotations | Default / optionality |
+| --- | --- | --- | --- |
+| id | java.util.UUID | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| parentId | java.util.UUID | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| kind | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| action | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| page | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| control | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| destination | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| outcome | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| detail | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| eventId | java.util.UUID | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| token | java.util.UUID | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| durationMs | java.lang.Long | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
 
 
 ## com.giftplatform.asset.GalleryAssetController$Tier
@@ -81,6 +129,42 @@ Kind: record.
 | tier | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
 
 
+## com.giftplatform.asset.HostInvitationUploadController$Controls
+
+Kind: record.
+
+| Field | Java/JSON type | Validation / annotations | Default / optionality |
+| --- | --- | --- | --- |
+| enabled | java.lang.Boolean | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| requiresPayment | java.lang.Boolean | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+
+
+## com.giftplatform.asset.HostInvitationUploadService$Access
+
+Kind: record.
+
+| Field | Java/JSON type | Validation / annotations | Default / optionality |
+| --- | --- | --- | --- |
+| hostId | java.util.UUID | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| enabled | boolean | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| requiresPayment | boolean | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| paid | boolean | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| accessible | boolean | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+
+
+## com.giftplatform.asset.HostInvitationUploadService$Upload
+
+Kind: record.
+
+| Field | Java/JSON type | Validation / annotations | Default / optionality |
+| --- | --- | --- | --- |
+| id | java.util.UUID | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| category | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| title | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| width | int | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| height | int | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+
+
 ## com.giftplatform.audit.api.AdminAuditController$AuditEntry
 
 Kind: record.
@@ -97,6 +181,36 @@ Kind: record.
 | newValues | java.util.Map<java.lang.String, java.lang.Object> | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
 | occurredAt | java.time.Instant | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
 | requestId | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+
+
+## com.giftplatform.branding.BrandingService$Settings
+
+Kind: record.
+
+| Field | Java/JSON type | Validation / annotations | Default / optionality |
+| --- | --- | --- | --- |
+| applicationName | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| brandColor | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| footerText | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| supportEmail | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| socialLinks | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| logoUrl | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| faviconUrl | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| revision | long | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+
+
+## com.giftplatform.branding.BrandingService$Update
+
+Kind: record.
+
+| Field | Java/JSON type | Validation / annotations | Default / optionality |
+| --- | --- | --- | --- |
+| applicationName | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| brandColor | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| footerText | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| supportEmail | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| socialLinks | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| revision | long | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
 
 
 ## com.giftplatform.celebration.CelebrationController$GuestbookModeRequest
@@ -209,6 +323,47 @@ Kind: record.
 | status | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
 
 
+## com.giftplatform.celebrationplanning.CelebrationPlanningController$PublicDetails
+
+Kind: record.
+
+| Field | Java/JSON type | Validation / annotations | Default / optionality |
+| --- | --- | --- | --- |
+| giftingEnabled | boolean | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| welcomeMessage | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| venue | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| arrivalNotes | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| date | java.time.LocalDate | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| startTime | java.time.LocalTime | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| timezone | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| durationMinutes | int | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+
+
+## com.giftplatform.celebrationplanning.CelebrationPlanningController$RepeatRequest
+
+Kind: record.
+
+| Field | Java/JSON type | Validation / annotations | Default / optionality |
+| --- | --- | --- | --- |
+| title | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+
+
+## com.giftplatform.celebrationplanning.CelebrationPlanningController$Settings
+
+Kind: record.
+
+| Field | Java/JSON type | Validation / annotations | Default / optionality |
+| --- | --- | --- | --- |
+| giftingEnabled | java.lang.Boolean | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| welcomeMessage | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| shareVenue | java.lang.Boolean | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| startTime | java.time.LocalTime | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| timezone | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| durationMinutes | int | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| arrivalNotes | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| version | long | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+
+
 ## com.giftplatform.event.dto.EventRequest
 
 Kind: record.
@@ -277,7 +432,7 @@ Allowed values: `DRAFT`, `PUBLISHED`, `COMPLETED`, `CANCELLED`
 
 Kind: enum.
 
-Allowed values: `WEDDING`, `BIRTHDAY`, `BABY_SHOWER`, `HOUSEWARMING`, `ANNIVERSARY`, `OTHER`
+Allowed values: `WEDDING`, `BIRTHDAY`, `BABY_SHOWER`, `HOUSEWARMING`, `ANNIVERSARY`, `FAREWELL`, `RETIREMENT`, `REUNION`, `OTHER`
 
 ## com.giftplatform.gift.controller.GiftController$ProductLinkRequest
 
@@ -408,6 +563,7 @@ Kind: record.
 | email | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
 | mobile | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
 | emailVerificationToken | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| termsAccepted | boolean | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
 
 
 ## com.giftplatform.group.GroupContributionController$FullNameInput
@@ -451,6 +607,7 @@ Kind: record.
 | confirmPin | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
 | email | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
 | emailVerificationToken | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| termsAccepted | boolean | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
 
 
 ## com.giftplatform.group.GroupContributionController$MemberLogin
@@ -875,6 +1032,132 @@ Kind: record.
 | message | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
 
 
+## com.giftplatform.localization.LocalizationAdminController$Configuration
+
+Kind: record.
+
+| Field | Java/JSON type | Validation / annotations | Default / optionality |
+| --- | --- | --- | --- |
+| enabled | java.lang.Boolean | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| defaultLanguage | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| fallbackLanguage | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| version | long | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+
+
+## com.giftplatform.localization.LocalizationAdminController$DeliveryTemplate
+
+Kind: record.
+
+| Field | Java/JSON type | Validation / annotations | Default / optionality |
+| --- | --- | --- | --- |
+| templateId | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| version | long | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+
+
+## com.giftplatform.localization.LocalizationAdminController$ImportBatch
+
+Kind: record.
+
+| Field | Java/JSON type | Validation / annotations | Default / optionality |
+| --- | --- | --- | --- |
+| entries | java.util.Map<java.lang.String, com.giftplatform.localization.LocalizationAdminController$Translation> | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| publish | java.lang.Boolean | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+
+
+## com.giftplatform.localization.LocalizationAdminController$LanguageInput
+
+Kind: record.
+
+| Field | Java/JSON type | Validation / annotations | Default / optionality |
+| --- | --- | --- | --- |
+| nativeName | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| englishName | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| direction | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| enabled | java.lang.Boolean | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| version | long | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+
+
+## com.giftplatform.localization.LocalizationAdminController$Scope
+
+Kind: record.
+
+| Field | Java/JSON type | Validation / annotations | Default / optionality |
+| --- | --- | --- | --- |
+| state | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+
+
+## com.giftplatform.localization.LocalizationAdminController$Source
+
+Kind: record.
+
+| Field | Java/JSON type | Validation / annotations | Default / optionality |
+| --- | --- | --- | --- |
+| text | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+
+
+## com.giftplatform.localization.LocalizationAdminController$Translation
+
+Kind: record.
+
+| Field | Java/JSON type | Validation / annotations | Default / optionality |
+| --- | --- | --- | --- |
+| text | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| published | java.lang.Boolean | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| version | long | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+
+
+## com.giftplatform.localization.LocalizationController$Preference
+
+Kind: record.
+
+| Field | Java/JSON type | Validation / annotations | Default / optionality |
+| --- | --- | --- | --- |
+| language | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+
+
+## com.giftplatform.localization.LocalizationService$Catalog
+
+Kind: record.
+
+| Field | Java/JSON type | Validation / annotations | Default / optionality |
+| --- | --- | --- | --- |
+| enabled | boolean | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| defaultLanguage | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| fallbackLanguage | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| selectedLanguage | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| direction | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| languages | java.util.List<com.giftplatform.localization.LocalizationService$Language> | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| resources | java.util.Map<java.lang.String, java.util.Map<java.lang.String, java.lang.String>> | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| sources | java.util.Map<java.lang.String, java.lang.String> | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| version | long | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+
+
+## com.giftplatform.localization.LocalizationService$Language
+
+Kind: record.
+
+| Field | Java/JSON type | Validation / annotations | Default / optionality |
+| --- | --- | --- | --- |
+| code | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| nativeName | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| englishName | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| direction | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| enabled | boolean | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| version | long | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+
+
+## com.giftplatform.localization.LocalizationService$Settings
+
+Kind: record.
+
+| Field | Java/JSON type | Validation / annotations | Default / optionality |
+| --- | --- | --- | --- |
+| enabled | boolean | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| defaultLanguage | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| fallbackLanguage | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| version | long | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+
+
 ## com.giftplatform.monetization.CommercialPurchaseService$Checkout
 
 Kind: record.
@@ -1101,6 +1384,16 @@ Kind: record.
 | emailEnabled | boolean | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
 | smsEnabled | boolean | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
 | whatsappEnabled | boolean | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+
+
+## com.giftplatform.notification.email.EventInvitationEmailController$Invitation
+
+Kind: record.
+
+| Field | Java/JSON type | Validation / annotations | Default / optionality |
+| --- | --- | --- | --- |
+| email | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| requestId | java.util.UUID | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
 
 
 ## com.giftplatform.otp.controller.dto.PhoneOtpRequest
@@ -1533,6 +1826,45 @@ Kind: record.
 | contributionEnabled | boolean | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
 | contributionDisabledReason | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
 | productUrl | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+
+
+## com.giftplatform.publicevent.PublicKeepsakeController$Consent
+
+Kind: record.
+
+| Field | Java/JSON type | Validation / annotations | Default / optionality |
+| --- | --- | --- | --- |
+| enabled | java.lang.Boolean | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+
+
+## com.giftplatform.publicevent.SharingPreviewController$Consent
+
+Kind: record.
+
+| Field | Java/JSON type | Validation / annotations | Default / optionality |
+| --- | --- | --- | --- |
+| enabled | java.lang.Boolean | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+
+
+## com.giftplatform.publicevent.SharingPreviewController$Preference
+
+Kind: record.
+
+| Field | Java/JSON type | Validation / annotations | Default / optionality |
+| --- | --- | --- | --- |
+| enabled | boolean | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| platformEnabled | boolean | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+
+
+## com.giftplatform.publicevent.SharingPreviewController$Preview
+
+Kind: record.
+
+| Field | Java/JSON type | Validation / annotations | Default / optionality |
+| --- | --- | --- | --- |
+| title | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| occasion | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| date | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
 
 
 ## com.giftplatform.qr.EventQrController$ThemeRequest
@@ -1985,6 +2317,18 @@ Kind: record.
 | fullName | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
 
 
+## com.giftplatform.user.controller.ProfilePreferencesController$Input
+
+Kind: record.
+
+| Field | Java/JSON type | Validation / annotations | Default / optionality |
+| --- | --- | --- | --- |
+| timezone | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| eventNotifications | java.lang.Boolean | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| contributionNotifications | java.lang.Boolean | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| marketingNotifications | java.lang.Boolean | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+
+
 ## com.giftplatform.user.dto.RegisterRequest
 
 Kind: record.
@@ -1997,6 +2341,7 @@ Kind: record.
 | mobile | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
 | password | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
 | emailVerificationToken | java.lang.String | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
+| termsAccepted | boolean | No field annotation | Not declared; constructor, handler, service and DB may supply a value. See source/rules. |
 
 
 ## com.giftplatform.user.dto.RegistrationResponse

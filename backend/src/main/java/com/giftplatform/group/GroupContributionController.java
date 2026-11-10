@@ -26,7 +26,7 @@ public class GroupContributionController {
  private final com.giftplatform.security.recovery.CredentialSessionVersionStore versions;
  private final com.giftplatform.security.recovery.EffectiveRecoveryPolicyService policies;
  private static final Pattern MOBILE=Pattern.compile("\\+?[1-9][0-9]{7,14}");
- private static final Pattern USER=Pattern.compile("[a-z][a-z0-9_]{2,39}");
+ private static final Pattern USER=Pattern.compile("[a-z0-9][a-z0-9_]{2,39}");
  private static final String MEMBER_SESSION="gift.group.member.";
  private static final String SESSION_KEY="gift.group.admin.";
  private static final String ACTIVITY_KEY="gift.group.activity.";
@@ -41,7 +41,8 @@ public class GroupContributionController {
  public GroupContributionController(JdbcTemplate db,EventRepository events,PasswordEncoder passwords,com.giftplatform.security.recovery.CredentialSessionVersionStore versions,com.giftplatform.security.recovery.EffectiveRecoveryPolicyService policies){this(db,events,passwords,versions,policies,new GroupReadinessService(db));}
  public GroupContributionController(JdbcTemplate db,EventRepository events,PasswordEncoder passwords,com.giftplatform.security.recovery.CredentialSessionVersionStore versions){this(db,events,passwords,versions,null);}
  @org.springframework.beans.factory.annotation.Autowired private com.giftplatform.monetization.CommercialAccessService commerce;
- public record Credentials(String username,String password,String pin,String confirmPin,String fullName,String email,String mobile,String emailVerificationToken){
+ public record Credentials(String username,String password,String pin,String confirmPin,String fullName,String email,String mobile,String emailVerificationToken,boolean termsAccepted){
+ public Credentials(String username,String password,String pin,String confirmPin,String fullName,String email,String mobile,String token){this(username,password,pin,confirmPin,fullName,email,mobile,token,false);}
  public Credentials(String username,String password,String pin,String confirmPin,String fullName,String email,String mobile){this(username,password,pin,confirmPin,fullName,email,mobile,null);}
  public Credentials(String username,String password){this(username,password,null,null,null,null,null);}
  public Credentials(String username,String password,String pin,String confirmPin){this(username,password,pin,confirmPin,null,null,null);}
@@ -103,15 +104,15 @@ public class GroupContributionController {
   if(!(epoch instanceof Long v)||v.longValue()!=versions.current("GROUP_ADMIN",id)){
    s.removeAttribute(SESSION_KEY+eventId);throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"Group session expired");
   }
-  s.setAttribute(ACTIVITY_KEY+eventId,now);Integer n=db.queryForObject("SELECT count(*) FROM gift_group_accounts WHERE id=? AND event_id=?",Integer.class,id,eventId);if(n==null||n!=1)throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);return id;}
+  if("1".equals(req.getHeader("X-Gift-User-Activity")))s.setAttribute(ACTIVITY_KEY+eventId,now);Integer n=db.queryForObject("SELECT count(*) FROM gift_group_accounts WHERE id=? AND event_id=?",Integer.class,id,eventId);if(n==null||n!=1)throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);return id;}
  @PostMapping("/register") @ResponseStatus(HttpStatus.CREATED) @Transactional
- public Map<String,String> register(@PathVariable UUID token,@RequestBody Credentials c){UUID e=event(token);if(c==null)throw bad("Credentials required");String u=username(c.username());String pw=c.password();if(pw==null||pw.length()<8||pw.length()>128||pw.isBlank())throw bad("Password must contain 8–128 characters");String pin=registrationPin(e,c.pin(),c.confirmPin());String fullName=text(c.fullName(),120,true);if(fullName.length()<2)throw bad("Full name must be at least two characters");
+ public Map<String,String> register(@PathVariable UUID token,@RequestBody Credentials c){UUID e=event(token);if(c==null)throw bad("Credentials required");String u=c.username();String pw=c.password();if(u==null||!u.matches(com.giftplatform.security.CredentialPolicy.USERNAME_PATTERN))throw bad(com.giftplatform.security.CredentialPolicy.USERNAME_MESSAGE);u=u.toLowerCase(Locale.ROOT);validateNewPassword(pw);requireConsent(c.termsAccepted());String pin=registrationPin(e,c.pin(),c.confirmPin());String fullName=text(c.fullName(),120,true);if(fullName.length()<2)throw bad("Full name must be at least two characters");
  String email=text(c.email(),254,true).toLowerCase(Locale.ROOT);
  if(!email.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$"))throw bad("Valid email required");
  String phone=mobile(c.mobile());
  // Mandatory contact collection does not imply verified ownership.
  // Contact-verification timestamps remain NULL until real independent verification.
- UUID accountId=UUID.randomUUID();if(pin!=null)ensureUniqueAdminPin(e,u,pin,null);try{db.update("INSERT INTO gift_group_accounts(id,event_id,username,password_hash,pin_hash,full_name,email,mobile,email_verified_at,mobile_verified_at) VALUES(?,?,?,?,?,?,?,?,NULL,NULL)",accountId,e,u,passwords.encode(pw),pin==null?null:passwords.encode(pin),fullName,email,phone);}catch(org.springframework.dao.DuplicateKeyException ex){throw new ResponseStatusException(HttpStatus.CONFLICT,"Username already exists");}if(readiness.emailEnabled()&&c.emailVerificationToken()!=null&&!c.emailVerificationToken().isBlank()&&signupEmails.consume(c.emailVerificationToken(),"GROUP_ADMIN",e,email))db.update("UPDATE gift_group_accounts SET email_verified_at=now() WHERE id=?",accountId);return Map.of("username",u);}
+ UUID accountId=UUID.randomUUID();if(pin!=null)ensureUniqueAdminPin(e,u,pin,null);try{db.update("INSERT INTO gift_group_accounts(id,event_id,username,password_hash,pin_hash,full_name,email,mobile,email_verified_at,mobile_verified_at) VALUES(?,?,?,?,?,?,?,?,NULL,NULL)",accountId,e,u,passwords.encode(pw),pin==null?null:passwords.encode(pin),fullName,email,phone);}catch(org.springframework.dao.DuplicateKeyException ex){throw new ResponseStatusException(HttpStatus.CONFLICT,"Username already exists");}if(readiness.emailEnabled()&&c.emailVerificationToken()!=null&&!c.emailVerificationToken().isBlank()&&signupEmails.consume(c.emailVerificationToken(),"GROUP_ADMIN",e,email))db.update("UPDATE gift_group_accounts SET email_verified_at=now() WHERE id=?",accountId);consent("GROUP_ADMIN",accountId);return Map.of("username",u);}
  @PostMapping("/login")
  public Map<String,String> login(@PathVariable UUID token,@RequestBody Credentials c,HttpServletRequest req){UUID e=event(token);if(c==null)throw bad("Credentials required");if(c.pin()!=null&&!c.pin().isBlank())requirePinAllowed(e);boolean pinLogin=c.pin()!=null&&!c.pin().isBlank();
   if(pinLogin&&!c.pin().matches("[0-9]{6}"))throw bad("PIN must be six digits");
@@ -178,7 +179,8 @@ public class GroupContributionController {
  public GroupView setup(@PathVariable UUID token,@RequestBody Setup s,HttpServletRequest req){UUID e=event(token),id=sessionAdmin(e,req);if(s==null)throw bad("Setup required");String name=text(s.name(),120,true),creator=text(s.creatorName(),120,true),mobile=text(s.creatorMobile(),20,true);if(!mobile.matches("\\+?[0-9 ]{8,20}"))throw bad("Invalid mobile number");if(s.independentGift()&&s.giftId()!=null)throw bad("Independent groups choose their own gift, outside the host wishlist");boolean fromWishlist=s.giftId()!=null;String gift=fromWishlist?null:text(s.giftName(),160,false),desc=fromWishlist?null:text(s.giftDescription(),500,false),link=fromWishlist?null:text(s.giftLink(),1000,false);if(link!=null&&!link.matches("https://[^\\s]+"))throw bad("Gift link must use HTTPS");if(!fromWishlist&&s.targetPaise()!=null&&(s.targetPaise()<=0||s.targetPaise()>100000000000L))throw bad("Invalid target amount");if(!fromWishlist&&(desc!=null||link!=null)&&gift==null)throw bad("Gift name required for gift details");if(!groups(id).isEmpty())throw new ResponseStatusException(HttpStatus.CONFLICT,"Group already created");UUID createdGroup=UUID.randomUUID();try{db.update("INSERT INTO gift_groups(id,event_id,admin_id,name,creator_name,creator_mobile,description,gift_name,gift_description,gift_link,target_paise,independent_gift) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",createdGroup,e,id,name,creator,mobile,text(s.description(),500,false),gift,desc,link,fromWishlist?null:s.targetPaise(),s.independentGift());}catch(org.springframework.dao.DuplicateKeyException ex){throw new ResponseStatusException(HttpStatus.CONFLICT,"Group already created");}if(s.giftId()!=null){if(giftLifecycle==null)throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Gift selection is unavailable");giftLifecycle.select(createdGroup,id,s.giftId());}return groups(id).get(0);}
 
  // Batch 7C.3: Membership is isolated from the creator/admin login.
- public record JoinRequest(String displayName,String mobile,String password,String confirmPassword,String pin,String confirmPin,String email,String emailVerificationToken){
+ public record JoinRequest(String displayName,String mobile,String password,String confirmPassword,String pin,String confirmPin,String email,String emailVerificationToken,boolean termsAccepted){
+ public JoinRequest(String displayName,String mobile,String password,String confirmPassword,String pin,String confirmPin,String email,String token){this(displayName,mobile,password,confirmPassword,pin,confirmPin,email,token,false);}
  public JoinRequest(String displayName,String mobile,String password,String confirmPassword,String pin,String confirmPin){this(displayName,mobile,password,confirmPassword,pin,confirmPin,null,null);}
  }
  public record MemberLogin(String displayName,String password,String pin,String username){
@@ -213,8 +215,11 @@ public class GroupContributionController {
   if(!MOBILE.matcher(m).matches())throw bad("Enter a valid international mobile number");
   return m;
  }
+ private void validateNewPassword(String value){try{com.giftplatform.security.CredentialPolicy.validatePassword(value);}catch(IllegalArgumentException ex){throw bad(ex.getMessage());}}
+ private void requireConsent(boolean accepted){if(!accepted)throw bad("Please agree to the Terms & Conditions and Privacy Policy.");}
+ private void consent(String kind,UUID id){db.update("INSERT INTO account_legal_consents(id,account_kind,account_id,terms_version,privacy_version) VALUES(?,?,?,?,?)",UUID.randomUUID(),kind,id,"2026-11-05","2026-11-05");}
  private String memberPassword(String value){
-  if(value==null||value.length()<10||value.length()>128||value.isBlank())throw bad("Member password must have 10–128 characters");
+  validateNewPassword(value);
   return value;
  }
  @GetMapping("/join/{groupId}")
@@ -237,6 +242,8 @@ public class GroupContributionController {
  public Map<String,String> join(@PathVariable UUID token,@PathVariable UUID groupId,@RequestBody JoinRequest request){
   Map<String,Object> group=publicGroup(token,groupId);requireMemberAccess(groupId);
   if(request==null)throw bad("Member details required");
+  requireConsent(request.termsAccepted());
+  if(request.displayName()==null||!request.displayName().matches(com.giftplatform.security.CredentialPolicy.USERNAME_PATTERN))throw bad(com.giftplatform.security.CredentialPolicy.USERNAME_MESSAGE);
   String name=memberName(request.displayName()),phone=mobile(request.mobile()),password=memberPassword(request.password());
   if(!password.equals(request.confirmPassword()))throw bad("Password confirmation does not match");
   String pin=registrationPin(event(token),request.pin(),request.confirmPin());if(pin!=null)ensureUniqueMemberPin(groupId,name.toLowerCase(Locale.ROOT),pin,null);
@@ -257,6 +264,7 @@ public class GroupContributionController {
   }catch(org.springframework.dao.DuplicateKeyException ex){throw new ResponseStatusException(HttpStatus.CONFLICT,"Display name already in use");}
   if(signupEmail!=null)db.update("UPDATE gift_group_members SET email=? WHERE id=?",signupEmail,memberId);
   if(emailVerified)db.update("UPDATE gift_group_members SET email_verified_at=now() WHERE id=?",memberId);
+  consent("GROUP_MEMBER",memberId);
   boolean auto="AUTO_JOIN".equals(group.get("join_policy"));return Map.of("status",auto?"APPROVED":"PENDING","message",auto?"You have joined the group. Sign in to continue.":"Your request has been sent to the group admin");
  }
  @PostMapping("/member-login/{groupId}")
@@ -273,12 +281,15 @@ public class GroupContributionController {
   if(rows.isEmpty()||!validLogin(request.password(),request.pin(),(String)rows.get(0).get("password_hash"),(String)rows.get(0).get("pin_hash"))){LOGIN_LIMITER.failed(loginKey,req.getRemoteAddr());throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"Invalid member credentials");}
   Map<String,Object> m=rows.get(0);
   if(!"APPROVED".equals(m.get("status")))throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Membership not approved");
-  LOGIN_LIMITER.succeeded(loginKey);HttpSession session=req.getSession(true);req.changeSessionId();session.setAttribute(MEMBER_SESSION+groupId,m.get("id"));session.setAttribute("gift.group.member.epoch."+groupId,versions.current("GROUP_MEMBER",(UUID)m.get("id")));
+  LOGIN_LIMITER.succeeded(loginKey);HttpSession session=req.getSession(true);req.changeSessionId();session.setAttribute(MEMBER_SESSION+groupId,m.get("id"));session.setAttribute("gift.group.member.activity."+groupId,System.currentTimeMillis());session.setAttribute("gift.group.member.epoch."+groupId,versions.current("GROUP_MEMBER",(UUID)m.get("id")));
   return Map.of("status","APPROVED","pinSetupRequired",m.get("pin_hash")==null?"true":"false");
  }
  UUID member(UUID groupId,HttpServletRequest req){
   HttpSession session=req.getSession(false);Object id=session==null?null:session.getAttribute(MEMBER_SESSION+groupId);
   if(!(id instanceof UUID memberId))throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+  long now=System.currentTimeMillis();Object last=session.getAttribute("gift.group.member.activity."+groupId);
+  if(last instanceof Long time&&(now-time<0||now-time>=GROUP_IDLE_TIMEOUT_MS)){session.removeAttribute(MEMBER_SESSION+groupId);session.removeAttribute("gift.group.member.activity."+groupId);throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"Member session expired after inactivity.");}
+  if(!(last instanceof Long)||"1".equals(req.getHeader("X-Gift-User-Activity")))session.setAttribute("gift.group.member.activity."+groupId,now);
   Object epoch=session.getAttribute("gift.group.member.epoch."+groupId);
   if(!(epoch instanceof Long v)||v.longValue()!=versions.current("GROUP_MEMBER",memberId)){
    session.removeAttribute(MEMBER_SESSION+groupId);throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"Member session expired");

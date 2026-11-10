@@ -21,6 +21,11 @@ public class GalleryAssetService {
  public List<AssetInfo> published(){return repo.findByPublishedTrueOrderByTitleAsc().stream().map(this::info).toList();}
  public List<AssetInfo> all(){requireAdmin();return repo.findAll().stream().map(this::info).toList();}
  public GalleryAsset publishedImage(UUID id){GalleryAsset a=get(id);if(!a.isPublished() || !"FREE".equals(a.getTier())) throw new ResponseStatusException(HttpStatus.NOT_FOUND);return a;}
+ public byte[] preview(UUID id){
+  actor.requireAuthenticatedUserId();GalleryAsset asset=get(id);
+  if(!asset.isPublished())throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+  return GalleryPreviewRenderer.watermarked(asset.getImagePng());
+ }
  public GalleryAsset purchasedImage(UUID id){
   UUID host=actor.requireAuthenticatedUserId();GalleryAsset asset=get(id);
   if(!asset.isPublished())throw new ResponseStatusException(HttpStatus.NOT_FOUND);
@@ -36,14 +41,17 @@ public class GalleryAssetService {
  public GalleryAsset adminImage(UUID id){requireAdmin();return get(id);}
  private GalleryAsset get(UUID id){return repo.findById(id).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));}
  private void requireAdmin(){if(!actor.isPlatformAdmin()) throw new ResponseStatusException(HttpStatus.FORBIDDEN);}
- @Transactional public AssetInfo upload(String category,String occasion,String title,byte[] image){
+ @Transactional public AssetInfo upload(String category,String occasion,String title,byte[] image){return upload(category,occasion,title,image,"FREE");}
+ @Transactional public AssetInfo upload(String category,String occasion,String title,byte[] image,String tier){
   requireAdmin();
+  if(!Set.of("FREE","PREMIUM").contains(tier==null?"":tier))throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Choose Free or Premium access");
   if(!Set.of("BACKGROUND","DECORATION").contains(category)||occasion==null||!occasion.matches("[A-Za-z0-9_-]{1,50}")
      ||title==null||title.isBlank()||title.length()>120) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid asset metadata");
   var processed=processor.process(image,category);
-  GalleryAsset asset=repo.save(new GalleryAsset(category,occasion,title.trim(),processed.png(),processed.width(),processed.height()));
+  GalleryAsset draft=new GalleryAsset(category,occasion,title.trim(),processed.png(),processed.width(),processed.height());draft.setTier(tier);
+  GalleryAsset asset=repo.save(draft);
   audit.recordChange(actor.requireAuthenticatedUserId(),AuditActorType.ADMIN,"INVITATION_ASSET",asset.getId(),AuditAction.CREATE,
-   null,Map.of("category",asset.getCategory(),"occasion",asset.getOccasion(),"title",asset.getTitle(),"published",false),null);
+   null,Map.of("category",asset.getCategory(),"occasion",asset.getOccasion(),"title",asset.getTitle(),"tier",asset.getTier(),"published",false),null);
   return info(asset);
  }
  @Transactional public AssetInfo publish(UUID id,boolean published){

@@ -1,3 +1,5 @@
+
+import {activeLocale} from './localization.mjs';
 export const EVENT_STATES = ['DRAFT', 'PUBLISHED', 'COMPLETED', 'CANCELLED'];
 export function summarizeEvents(events) {
   if (!Array.isArray(events)) throw new TypeError('Expected event list');
@@ -27,5 +29,5 @@ export function eventActions(event) {
 export function safeEventDate(date) {
   if (typeof date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return 'Date to be decided';
   const parsed = new Date(`${date}T12:00:00Z`);
-  return Number.isNaN(parsed.getTime()) || parsed.toISOString().slice(0,10) !== date ? 'Date to be decided' : new Intl.DateTimeFormat('en-IN',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'}).format(parsed);
+  return Number.isNaN(parsed.getTime()) || parsed.toISOString().slice(0,10) !== date ? 'Date to be decided' : new Intl.DateTimeFormat(activeLocale("en-IN"),{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'}).format(parsed);
 }

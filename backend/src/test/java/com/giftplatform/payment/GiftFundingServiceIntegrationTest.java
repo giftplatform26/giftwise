@@ -49,8 +49,8 @@ class GiftFundingServiceIntegrationTest {
 
         jdbc.update(
             """
-            INSERT INTO events(id,title,occasion_type,status,owner_id)
-            VALUES (?,?,?,?,?)
+            INSERT INTO events(id,title,occasion_type,status,owner_id,host_display_name)
+            VALUES (?,?,?,?,?,'Fixture host')
             """,
             event, "Funding Test", "BIRTHDAY", "PUBLISHED", user);
 

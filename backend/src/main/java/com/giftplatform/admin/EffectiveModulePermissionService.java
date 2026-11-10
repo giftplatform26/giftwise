@@ -21,7 +21,7 @@ public class EffectiveModulePermissionService {
  }
  public Map<String,Boolean> modules(UUID hostId){
   Map<String,Boolean> result=new LinkedHashMap<>();
-  for(String code:List.of("GROUP_GIFTING","GUEST_GIFTS","RSVP","GUEST_ATTENDANCE","WHATSAPP_SHARING","GUESTBOOK","SOCIAL_SHARING","MEMORY_ALBUM","AI_INVITATION"))result.put(code,false);
+  for(String code:List.of("GROUP_GIFTING","GUEST_GIFTS","RSVP","GUEST_ATTENDANCE","WHATSAPP_SHARING","GUESTBOOK","SOCIAL_SHARING","MEMORY_ALBUM","AI_INVITATION","CELEBRATION_PLANNING","EVENT_ESSENTIALS","EVENT_REUSE"))result.put(code,false);
   if(hostId==null)return Map.copyOf(result);
   db.query("SELECT p.module_code,(p.enabled AND COALESCE(h.enabled,FALSE)) AS enabled FROM platform_module_controls p LEFT JOIN platform_host_module_grants h ON h.module_code=p.module_code AND h.host_id=?",
     (org.springframework.jdbc.core.RowCallbackHandler)rs->{String code=rs.getString("module_code");if(result.containsKey(code))result.put(code,rs.getBoolean("enabled"));},hostId);
@@ -35,8 +35,18 @@ public class EffectiveModulePermissionService {
   return enabled(hostId,"MEMORY_ALBUM")&&Boolean.TRUE.equals(db.queryForObject("SELECT EXISTS(SELECT 1 FROM platform_event_album_settings a JOIN events e ON e.id=a.event_id WHERE a.event_id=? AND e.owner_id=? AND a.enabled)",Boolean.class,eventId,hostId));
  }
  public Map<String,Boolean> eventModules(UUID hostId,UUID eventId){
-  var result=new LinkedHashMap<>(modules(hostId));result.put("MEMORY_ALBUM",albumEnabled(hostId,eventId));result.put("AI_INVITATION",aiInvitationEnabled(hostId,eventId));return Map.copyOf(result);
+  var result=new LinkedHashMap<>(modules(hostId));result.put("MEMORY_ALBUM",albumEnabled(hostId,eventId));result.put("AI_INVITATION",aiInvitationEnabled(hostId,eventId));
+  for(String code:java.util.List.of("CELEBRATION_PLANNING","EVENT_ESSENTIALS","EVENT_REUSE"))result.put(code,eventEnabled(hostId,eventId,code));
+  boolean gifting=Boolean.TRUE.equals(db.queryForObject("SELECT EXISTS(SELECT 1 FROM events WHERE id=? AND owner_id=? AND gifting_enabled)",Boolean.class,eventId,hostId));
+  result.put("GIFTING_ENABLED",gifting);
+  if(!gifting){result.put("GROUP_GIFTING",false);result.put("GUEST_GIFTS",false);}
+  return Map.copyOf(result);
  }
+ public boolean eventEnabled(UUID hostId,UUID eventId,String code){
+  if("EVENT_ESSENTIALS".equals(code)&&!eventEnabled(hostId,eventId,"CELEBRATION_PLANNING"))return false;
+  return enabled(hostId,code)&&Boolean.TRUE.equals(db.queryForObject("SELECT EXISTS(SELECT 1 FROM platform_event_module_grants g JOIN events e ON e.id=g.event_id WHERE g.event_id=? AND e.owner_id=? AND g.module_code=? AND g.enabled)",Boolean.class,eventId,hostId,code));
+ }
+ public void requireEvent(UUID hostId,UUID eventId,String code){if(!eventEnabled(hostId,eventId,code))throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Feature unavailable for this event");}
  public void requireAlbum(UUID hostId,UUID eventId){
   if(!albumEnabled(hostId,eventId))throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Memory album unavailable");
  }

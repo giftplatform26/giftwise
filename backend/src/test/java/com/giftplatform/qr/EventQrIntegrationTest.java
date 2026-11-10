@@ -48,7 +48,7 @@ class EventQrIntegrationTest {
     }
     private UUID event(MockHttpSession host) throws Exception {
         var result = mvc.perform(post("/api/v1/events").session(host).with(csrf())
-                .contentType(MediaType.APPLICATION_JSON).content("{\"title\":\"Birthday\",\"occasionType\":\"BIRTHDAY\"}"))
+                .contentType(MediaType.APPLICATION_JSON).content("{\"title\":\"Birthday\",\"occasionType\":\"BIRTHDAY\",\"hostName\":\"Fixture host\",\"addressLine1\":\"1 Fixture Street\",\"city\":\"Bengaluru\",\"state\":\"Karnataka\",\"postalCode\":\"560001\",\"country\":\"India\",\"contactName\":\"Fixture contact\",\"contactPhone\":\"+919876543210\"}"))
                 .andExpect(status().isCreated()).andReturn();
         return UUID.fromString(mapper.readTree(result.getResponse().getContentAsString()).get("id").asText());
     }

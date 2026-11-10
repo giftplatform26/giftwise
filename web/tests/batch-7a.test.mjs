@@ -8,7 +8,10 @@ test('invalid email rejected',()=>assert.throws(()=>validateEvent({...valid,cont
 test('login supports a safe post-authentication redirect',()=>{
  const source=readFileSync('app/login/page.tsx','utf8');
  assert.match(source,/router\.replace\(/);
- assert.match(source,/dashboard/);
+ assert.match(source,/next\.startsWith\('\/'\)/);
+ assert.match(source,/next\.startsWith\('\/\/'\)/);
+ assert.match(source,/next\.startsWith\('\/admin'\)/);
+ assert.match(source,/'\/events'/);
 });
-test('shared navigation includes dashboard and sign out',()=>{const s=readFileSync('app/components/HostGlobalNav.tsx','utf8');assert.match(s,/href="\/dashboard"/);assert.match(s,/hostApi.logout/)});
+test('shared navigation includes dashboard and sign out',()=>{const shell=readFileSync('app/components/HostGlobalNav.tsx','utf8');assert.match(shell,/HostWorkspace/);const s=readFileSync('components/HostWorkspace.tsx','utf8');assert.match(s,/href:'\/dashboard'/);assert.match(s,/hostApi.logout/)});
 test('preview has back to events',()=>assert.match(readFileSync('app/events/[id]/preview/page.tsx','utf8'),/Back to Events/));

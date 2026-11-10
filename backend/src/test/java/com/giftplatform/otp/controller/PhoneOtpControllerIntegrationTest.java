@@ -25,7 +25,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 
-@SpringBootTest
+@SpringBootTest(properties="gift.verification.mobile.enabled=true")
 @AutoConfigureMockMvc
 class PhoneOtpControllerIntegrationTest {
 
@@ -117,7 +117,7 @@ class PhoneOtpControllerIntegrationTest {
     @Test
     void requestWithoutCsrfMustBeRejected() throws Exception {
         mvc.perform(post(REQUEST_URL)
-                        .with(authentication(customer()))
+                        .with(authentication(customer())).sessionAttr("gift.credential.epoch",0L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody()))
                 .andExpect(status().isForbidden());
@@ -136,7 +136,7 @@ class PhoneOtpControllerIntegrationTest {
         );
 
         mvc.perform(post(REQUEST_URL)
-                        .with(authentication(customer()))
+                        .with(authentication(customer())).sessionAttr("gift.credential.epoch",0L)
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody()))
@@ -160,7 +160,7 @@ class PhoneOtpControllerIntegrationTest {
         )).thenReturn(PhoneOtpIssuanceResult.phoneInUse());
 
         mvc.perform(post(REQUEST_URL)
-                        .with(authentication(customer()))
+                        .with(authentication(customer())).sessionAttr("gift.credential.epoch",0L)
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody()))
@@ -174,7 +174,7 @@ class PhoneOtpControllerIntegrationTest {
     @Test
     void invalidPhoneMustBeRejected() throws Exception {
         mvc.perform(post(REQUEST_URL)
-                        .with(authentication(customer()))
+                        .with(authentication(customer())).sessionAttr("gift.credential.epoch",0L)
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -188,7 +188,7 @@ class PhoneOtpControllerIntegrationTest {
     @Test
     void missingPhoneMustBeRejected() throws Exception {
         mvc.perform(post(REQUEST_URL)
-                        .with(authentication(customer()))
+                        .with(authentication(customer())).sessionAttr("gift.credential.epoch",0L)
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
@@ -215,7 +215,7 @@ class PhoneOtpControllerIntegrationTest {
             throws Exception {
 
         mvc.perform(post(VERIFY_URL)
-                        .with(authentication(customer()))
+                        .with(authentication(customer())).sessionAttr("gift.credential.epoch",0L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(verifyBody()))
                 .andExpect(status().isForbidden());
@@ -234,7 +234,7 @@ class PhoneOtpControllerIntegrationTest {
         );
 
         mvc.perform(post(VERIFY_URL)
-                        .with(authentication(customer()))
+                        .with(authentication(customer())).sessionAttr("gift.credential.epoch",0L)
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(verifyBody()))
@@ -258,7 +258,7 @@ class PhoneOtpControllerIntegrationTest {
         );
 
         mvc.perform(post(VERIFY_URL)
-                        .with(authentication(customer()))
+                        .with(authentication(customer())).sessionAttr("gift.credential.epoch",0L)
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(verifyBody()))
@@ -276,7 +276,7 @@ class PhoneOtpControllerIntegrationTest {
         );
 
         mvc.perform(post(VERIFY_URL)
-                        .with(authentication(customer()))
+                        .with(authentication(customer())).sessionAttr("gift.credential.epoch",0L)
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(verifyBody()))
@@ -290,7 +290,7 @@ class PhoneOtpControllerIntegrationTest {
             throws Exception {
 
         mvc.perform(post(VERIFY_URL)
-                        .with(authentication(customer()))
+                        .with(authentication(customer())).sessionAttr("gift.credential.epoch",0L)
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -313,7 +313,7 @@ class PhoneOtpControllerIntegrationTest {
         ));
 
         mvc.perform(post(REQUEST_URL)
-                        .with(authentication(customer()))
+                        .with(authentication(customer())).sessionAttr("gift.credential.epoch",0L)
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody()))
@@ -332,7 +332,7 @@ class PhoneOtpControllerIntegrationTest {
     @Test
     void ipRequestLimitStopsOrchestration() throws Exception {
         when(endpointLimits.isRequestBlocked(anyString())).thenReturn(true);
-        mvc.perform(post(REQUEST_URL).with(authentication(customer())).with(csrf())
+        mvc.perform(post(REQUEST_URL).with(authentication(customer())).sessionAttr("gift.credential.epoch",0L).with(csrf())
                 .contentType(MediaType.APPLICATION_JSON).content(requestBody()))
                 .andExpect(status().isTooManyRequests())
                 .andExpect(jsonPath("$.status").value("RETRY_LATER"));
@@ -342,7 +342,7 @@ class PhoneOtpControllerIntegrationTest {
     @Test
     void verificationLimitStopsVerificationService() throws Exception {
         when(endpointLimits.isVerificationBlocked(eq(userId), anyString())).thenReturn(true);
-        mvc.perform(post(VERIFY_URL).with(authentication(customer())).with(csrf())
+        mvc.perform(post(VERIFY_URL).with(authentication(customer())).sessionAttr("gift.credential.epoch",0L).with(csrf())
                 .contentType(MediaType.APPLICATION_JSON).content(verifyBody()))
                 .andExpect(status().isTooManyRequests())
                 .andExpect(jsonPath("$.status").value("RETRY_LATER"));
@@ -352,7 +352,7 @@ class PhoneOtpControllerIntegrationTest {
     @Test
     void forwardedForHeaderCannotOverrideRemoteAddress() throws Exception {
         when(endpointLimits.isRequestBlocked(anyString())).thenReturn(true);
-        mvc.perform(post(REQUEST_URL).with(authentication(customer())).with(csrf())
+        mvc.perform(post(REQUEST_URL).with(authentication(customer())).sessionAttr("gift.credential.epoch",0L).with(csrf())
                 .header("X-Forwarded-For", "203.0.113.123")
                 .contentType(MediaType.APPLICATION_JSON).content(requestBody()))
                 .andExpect(status().isTooManyRequests());

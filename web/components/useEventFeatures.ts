@@ -1,7 +1,7 @@
  'use client';
 import {useEffect,useState} from 'react';
 import {fetchEventFeatures,normalizeFeatures} from '../lib/event-features.mjs';
-export type EventFeatures=Record<'GROUP_GIFTING'|'RSVP'|'GUEST_ATTENDANCE'|'WHATSAPP_SHARING'|'GUESTBOOK',boolean>&{SOCIAL_SHARING?:boolean;GUEST_GIFTS?:boolean};
+export type EventFeatures=Record<'GROUP_GIFTING'|'RSVP'|'GUEST_ATTENDANCE'|'WHATSAPP_SHARING'|'GUESTBOOK',boolean>&{SOCIAL_SHARING?:boolean;GUEST_GIFTS?:boolean;GIFTING_ENABLED?:boolean;CELEBRATION_PLANNING?:boolean;EVENT_ESSENTIALS?:boolean;EVENT_REUSE?:boolean};
 export default function useEventFeatures(token:string,initial?:EventFeatures){
  const [features,setFeatures]=useState<EventFeatures>(()=>normalizeFeatures(initial));
  const [loading,setLoading]=useState(!initial);

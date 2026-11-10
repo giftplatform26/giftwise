@@ -1,0 +1,8 @@
+[Unit]
+Description=GiftWise daily backup during the approved maintenance window
+[Timer]
+OnCalendar=*-*-* 02:30:00 UTC
+Persistent=false
+Unit=giftwise-backup.service
+[Install]
+WantedBy=timers.target

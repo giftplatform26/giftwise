@@ -1,4 +1,4 @@
-# Giftwiser
+# GiftWise
 
 Gift and group contribution platform.
 
@@ -13,3 +13,7 @@ Copy `backend/src/main/resources/application.properties.example` to `application
 Run the backend with `cd backend && ./mvnw spring-boot:run`. For either frontend, run `npm ci` and `npm run dev` in its directory. See component documentation for service-specific configuration.
 
 Do not commit local credentials, email inboxes, database exports, backups or generated build output.
+
+## Current documentation
+
+Start with [the documentation index](DOCUMENTATION_INDEX.md) for the maintained technical, application and deployment guides. Historical backups have been moved outside this project without permanent deletion.

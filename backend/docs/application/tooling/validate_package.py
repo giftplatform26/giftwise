@@ -17,7 +17,8 @@ check('all declared API operations documented',all(('## '+x['id']+' —') in api
 check('all table/view objects documented',all(('## '+x['table_name']+'\n') in database for x in S['tables']),str(len(S['tables'])))
 check('all guard sites documented',all(('### '+x['id']+' —') in rules for x in B['guards']),str(len(B['guards'])))
 check('all source config keys documented',all(('## '+x['name']+'\n') in configuration for x in B['configuration']),str(len(B['configuration'])))
-check('migration baseline is V95',S['migration_version']=='95',S['migration_version'])
+latest_migration=max(int(re.match(r'V(\d+)',p.name).group(1)) for p in (ROOT/'src/main/resources/db/migration').glob('V*__*.sql'))
+check('schema export matches latest source migration',str(S['migration_version'])==str(latest_migration),S['migration_version'])
 for entry in B['javaFiles']:
  p=REPO/entry['source'];check('source hash '+entry['source'],p.exists() and hashlib.sha256(p.read_bytes()).hexdigest()==entry['sha256'])
 link_count=0

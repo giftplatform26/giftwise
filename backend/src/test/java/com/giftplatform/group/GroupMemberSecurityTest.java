@@ -18,7 +18,8 @@ class GroupMemberSecurityTest {
   private final EventRepository events=mock(EventRepository.class);
   private final GroupContributionController controller=new GroupContributionController(db,events,new BCryptPasswordEncoder(4),mock(com.giftplatform.security.recovery.CredentialSessionVersionStore.class));
   private final UUID token=UUID.randomUUID(),group=UUID.randomUUID();
-  private void published(){Event e=mock(Event.class);when(e.getStatus()).thenReturn(EventStatus.PUBLISHED);when(e.getId()).thenReturn(UUID.randomUUID());when(events.findByPublicToken(token)).thenReturn(Optional.of(e));}
+  private void published(){Event e=mock(Event.class);when(e.getStatus()).thenReturn(EventStatus.PUBLISHED);
+  org.mockito.Mockito.lenient().when(e.isGiftingEnabled()).thenReturn(true);when(e.getId()).thenReturn(UUID.randomUUID());when(events.findByPublicToken(token)).thenReturn(Optional.of(e));}
   @Test void anonymousCannotReviewMembers(){published();assertEquals(401,assertThrows(ResponseStatusException.class,()->controller.review(token,group,new GroupContributionController.Review(UUID.randomUUID(),"APPROVE"),new MockHttpServletRequest())).getStatusCode().value());}
   @Test void anonymousCannotPublish(){published();assertEquals(401,assertThrows(ResponseStatusException.class,()->controller.publish(token,group,new MockHttpServletRequest())).getStatusCode().value());}
   @Test void anonymousCannotListMemberContacts(){published();assertEquals(401,assertThrows(ResponseStatusException.class,()->controller.members(token,group,new MockHttpServletRequest())).getStatusCode().value());}

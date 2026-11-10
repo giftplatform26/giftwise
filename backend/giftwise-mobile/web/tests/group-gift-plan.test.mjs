@@ -1,0 +1,18 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {createRequire} from 'node:module';
+import {resolve,dirname} from 'node:path';
+import React from 'react';
+import {renderToStaticMarkup} from 'react-dom/server';
+import ts from 'typescript';
+const require=createRequire(import.meta.url);
+const source=readFileSync(resolve(dirname(new URL(import.meta.url).pathname),'../components/GroupGiftPlan.tsx'),'utf8');
+const compiled=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX,target:ts.ScriptTarget.ES2022}}).outputText;
+const module={exports:{}};new Function('require','module','exports',compiled)(name=>name==='./LocalizationProvider'?{useLocalizationRender:()=>{}}:require(name),module,module.exports);
+const Plan=module.exports.default;
+const base={groupId:'group',selectedGiftId:'',reserved:false,wishlist:[{id:'available',name:'Coffee maker',contributionEnabled:true},{id:'held',name:'Held gift',contributionEnabled:false}],call:async()=>{},onChange:async()=>{},busy:false,setBusy:()=>{}};
+const render=props=>renderToStaticMarkup(React.createElement(Plan,{...base,...props}));
+test('general collections can choose an available wishlist gift',()=>{const html=render({});assert.match(html,/General|general collection/);assert.match(html,/Coffee maker/);assert.doesNotMatch(html,/Held gift/);assert.match(html,/Add gift to our group/)});
+test('unverified creator selection clearly leaves the gift available',()=>{const html=render({selectedGiftId:'available',giftName:'Coffee maker'});assert.match(html,/Verify your creator email/);assert.match(html,/remains available/);assert.match(html,/Release gift/);assert.doesNotMatch(html,/Add gift to our group/)});
+test('reserved groups can release a gift while retaining contributions',()=>{const html=render({selectedGiftId:'available',giftName:'Coffee maker',reserved:true});assert.match(html,/held for your group/);assert.match(html,/Release gift/);assert.match(html,/contributions and their history stay safe/)});

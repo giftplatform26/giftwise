@@ -1,4 +1,17 @@
 export const BACKGROUND_GALLERY = Object.freeze([
+{"id": "orchid-poetry", "name": "Orchid Poetry", "occasion": "WEDDING", "category": "Floral", "tier": "FREE", "src": "/invitation-backgrounds/orchid-poetry.svg"},
+{"id": "celestial-lullaby", "name": "Celestial Lullaby", "occasion": "BABY_SHOWER", "category": "Playful", "tier": "FREE", "src": "/invitation-backgrounds/celestial-lullaby.svg"},
+{"id": "jaipur-palace", "name": "Jaipur Palace", "occasion": "ENGAGEMENT", "category": "Patterns", "tier": "FREE", "src": "/invitation-backgrounds/jaipur-palace.svg"},
+{"id": "botanical-letterpress", "name": "Botanical Letterpress", "occasion": "HOUSEWARMING", "category": "Botanical", "tier": "FREE", "src": "/invitation-backgrounds/botanical-letterpress.svg"},
+{"id": "carnival-arch", "name": "Carnival Arch", "occasion": "BIRTHDAY", "category": "Playful", "tier": "FREE", "src": "/invitation-backgrounds/carnival-arch.svg"},
+{"id": "garden-soiree", "name": "Garden Soiree", "occasion": "ANNIVERSARY", "category": "Floral", "tier": "FREE", "src": "/invitation-backgrounds/garden-soiree.svg"},
+{"id": "saffron-mandala", "name": "Saffron Mandala", "occasion": "FESTIVAL", "category": "Patterns", "tier": "FREE", "src": "/invitation-backgrounds/saffron-mandala.svg"},
+{"id": "peacock-pavilion", "name": "Peacock Pavilion", "occasion": "WEDDING", "category": "Botanical", "tier": "FREE", "src": "/invitation-backgrounds/peacock-pavilion.svg"},
+{"id": "lullaby-garden", "name": "Lullaby Garden", "occasion": "FIRST_BIRTHDAY", "category": "Playful", "tier": "FREE", "src": "/invitation-backgrounds/lullaby-garden.svg"},
+{"id": "vintage-letter", "name": "Vintage Letter", "occasion": "THANK_YOU", "category": "Patterns", "tier": "FREE", "src": "/invitation-backgrounds/vintage-letter.svg"},
+{"id": "rosewood-gala", "name": "Rosewood Gala", "occasion": "MILESTONE_BIRTHDAY", "category": "Floral", "tier": "FREE", "src": "/invitation-backgrounds/rosewood-gala.svg"},
+{"id": "paper-lanterns", "name": "Paper Lanterns", "occasion": "FESTIVAL", "category": "Playful", "tier": "FREE", "src": "/invitation-backgrounds/paper-lanterns.svg"},
+
   {
     "id": "rose-garden",
     "name": "Rose Garden",

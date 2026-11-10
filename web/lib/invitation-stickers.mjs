@@ -4,6 +4,31 @@ import {
 } from './platform-decorations.mjs';
 
 export const STICKERS = Object.freeze([
+  {id:'rose-spray',name:'Rose spray',category:'Floral'},
+  {id:'lotus',name:'Lotus',category:'Floral'},
+  {id:'peacock-feather',name:'Peacock feather',category:'Botanical'},
+  {id:'lace-medallion',name:'Lace medallion',category:'Frames'},
+  {id:'wedding-bells',name:'Wedding bells',category:'Love'},
+  {id:'love-doves',name:'Love doves',category:'Love'},
+  {id:'cupcake',name:'Cupcake',category:'Celebration'},
+  {id:'party-hat',name:'Party hat',category:'Celebration'},
+  {id:'baby-carriage',name:'Baby carriage',category:'Celebration'},
+  {id:'festive-lantern',name:'Festive lantern',category:'Celebration'},
+  {id:'music-notes',name:'Music notes',category:'Celebration'},
+  {id:'magnolia',name:'Magnolia',category:'Floral'},
+  {id:'golden-leaf',name:'Golden leaf',category:'Botanical'},
+  {id:'floral-corner',name:'Floral corner',category:'Frames'},
+  {id:'mandala-star',name:'Mandala star',category:'Frames'},
+  {id:'silk-banner',name:'Silk banner',category:'Frames'},
+
+  {id:'butterfly',name:'Butterfly',category:'Love'},
+  {id:'floral-wreath',name:'Floral wreath',category:'Floral'},
+  {id:'cherry-blossom',name:'Cherry blossom',category:'Floral'},
+  {id:'golden-sparkle',name:'Golden sparkle',category:'Celebration'},
+  {id:'ribbon-bow',name:'Ribbon bow',category:'Love'},
+  {id:'moon-stars',name:'Moon & stars',category:'Celebration'},
+  {id:'fern-sprig',name:'Fern sprig',category:'Botanical'},
+  {id:'vintage-frame',name:'Vintage frame',category:'Frames'},
   {id:'flower',name:'Flower',category:'Floral'},
   {id:'bouquet',name:'Bouquet',category:'Floral'},
   {id:'leaf',name:'Leaf',category:'Floral'},
@@ -18,9 +43,9 @@ export const STICKERS = Object.freeze([
   {id:'crown',name:'Crown',category:'Celebration'}
 ].map(s=>Object.freeze({...s,src:`/invitation-stickers/${s.id}.svg`})));
 export function stickerById(id){return STICKERS.find(s=>s.id===id)}
-export function validStickerElement(el){return el?.type==='sticker' && typeof el.stickerId==='string' && (stickerById(el.stickerId)?.src===el.src || validPlatformDecorationElement(el))}
+export function validStickerElement(el){return el?.type==='sticker' && typeof el.stickerId==='string' && (stickerById(el.stickerId)?.src===el.src || validPlatformDecorationElement(el) || /^upload:[a-f0-9-]{36}$/i.test(el.stickerId)&&el.src===`/backend/api/v1/invitation-uploads/${el.stickerId.slice(7)}/image`)}
 export function addSticker(design,id,authenticated=false){
-  const sticker=stickerById(id) ||
+  const sticker=stickerById(id) || (/^upload:[a-f0-9-]{36}$/i.test(id)?{id,src:`/backend/api/v1/invitation-uploads/${id.slice(7)}/image`}:null) ||
     (typeof id==='string' && id.startsWith('platform:')
       ? (() => {
           const assetId=id.slice('platform:'.length);

@@ -33,7 +33,7 @@ class GiftVisibilityPersistenceIntegrationTest {
         UUID owner = UUID.randomUUID();
         UUID event = UUID.randomUUID();
         jdbc.update("INSERT INTO users(id,email,password_hash,role) VALUES (?,?,?,?)", owner, owner + "@example.test", "test-hash", "CUSTOMER");
-        jdbc.update("INSERT INTO events(id,title,occasion_type,status,owner_id) VALUES (?,?,?,?,?)", event, "Test", "BIRTHDAY", "DRAFT", owner);
+        jdbc.update("INSERT INTO events(id,title,occasion_type,status,owner_id,host_display_name) VALUES (?,?,?,?,?,'Fixture host')", event, "Test", "BIRTHDAY", "DRAFT", owner);
         return event;
     }
     private UUID gift(UUID event) {

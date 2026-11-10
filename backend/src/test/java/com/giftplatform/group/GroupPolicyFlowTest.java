@@ -25,6 +25,7 @@ class GroupPolicyFlowTest {
  @BeforeEach void setup(){
   var signup=mock(SignupEmailVerificationService.class);when(signup.consume(anyString(),anyString(),any(),anyString())).thenReturn(true);org.springframework.test.util.ReflectionTestUtils.setField(controller,"signupEmails",signup);
   Event event=mock(Event.class);when(event.getId()).thenReturn(eventId);when(event.getStatus()).thenReturn(EventStatus.PUBLISHED);
+  org.mockito.Mockito.lenient().when(event.isGiftingEnabled()).thenReturn(true);
   when(events.findByPublicToken(token)).thenReturn(Optional.of(event));
   when(policies.effective(null,eventId)).thenReturn(new EffectiveRecoveryPolicyService.Policy(true,true,true,true,false));
   when(db.queryForObject("SELECT count(*) FROM gift_groups WHERE id=? AND event_id=?",Integer.class,groupId,eventId)).thenReturn(1);
@@ -33,20 +34,20 @@ class GroupPolicyFlowTest {
   when(db.queryForList(contains("SELECT name,description"),eq(groupId),eq(eventId))).thenReturn(List.of(Map.of("status","PUBLISHED","join_policy","AUTO_JOIN")));
  }
  @Test void disabledPinStillAllowsPasswordRegistration(){
-  controller.register(token,new GroupContributionController.Credentials("creator","Password123!",null,null,"Test Creator","creator@example.com","+919876543210","proof"));
-  verify(db).update(contains("INSERT INTO gift_group_accounts"),any(),eq(eventId),eq("creator"),any(),isNull(),eq("Test Creator"),eq("creator@example.com"),eq("+919876543210"));
+  controller.register(token,new GroupContributionController.Credentials("1creator","Password123!",null,null,"Test Creator","creator@example.com","+919876543210","proof",true));
+  verify(db).update(contains("INSERT INTO gift_group_accounts"),any(),eq(eventId),eq("1creator"),any(),isNull(),eq("Test Creator"),eq("creator@example.com"),eq("+919876543210"));
  }
  @Test void disabledPinStillAllowsMemberRegistration(){
-  controller.join(token,groupId,new GroupContributionController.JoinRequest("Test Member","+919876543210","Password123!","Password123!",null,null,"member@example.test","proof"));
-  verify(db).update(contains("INSERT INTO gift_group_members"),any(),eq(groupId),eq("Test Member"),eq("test member"),any(),any(),eq("APPROVED"),isNull());
+  controller.join(token,groupId,new GroupContributionController.JoinRequest("Test_member","+919876543210","Password123!","Password123!",null,null,"member@example.test","proof",true));
+  verify(db).update(contains("INSERT INTO gift_group_members"),any(),eq(groupId),eq("Test_member"),eq("test_member"),any(),any(),eq("APPROVED"),isNull());
  }
  @Test void optionalMemberVerificationAllowsJoiningWithoutEmail(){
-  controller.join(token,groupId,new GroupContributionController.JoinRequest("Optional Member","+919876543210","Password123!","Password123!",null,null,null,null));
-  verify(db).update(contains("INSERT INTO gift_group_members"),any(),eq(groupId),eq("Optional Member"),eq("optional member"),any(),any(),eq("APPROVED"),isNull());
+  controller.join(token,groupId,new GroupContributionController.JoinRequest("Optional_member","+919876543210","Password123!","Password123!",null,null,null,null,true));
+  verify(db).update(contains("INSERT INTO gift_group_members"),any(),eq(groupId),eq("Optional_member"),eq("optional_member"),any(),any(),eq("APPROVED"),isNull());
  }
  @Test void requiredMemberVerificationRejectsMissingProofBeforeAccountInsert(){
   when(db.queryForObject(contains("admin_enabled OR p.host_enabled"),eq(Boolean.class),eq(eventId))).thenReturn(true);
-  var error=assertThrows(ResponseStatusException.class,()->controller.join(token,groupId,new GroupContributionController.JoinRequest("Unverified Member","+919876543210","Password123!","Password123!",null,null,"member@example.test",null)));
+  var error=assertThrows(ResponseStatusException.class,()->controller.join(token,groupId,new GroupContributionController.JoinRequest("Unverified_member","+919876543210","Password123!","Password123!",null,null,"member@example.test",null,true)));
   assertEquals(400,error.getStatusCode().value());
   verify(db,never()).update(contains("INSERT INTO gift_group_members"),any(),any(),any(),any(),any(),any(),any(),any());
  }
@@ -67,15 +68,15 @@ class GroupPolicyFlowTest {
   assertEquals(403,error.getStatusCode().value());verifyNoInteractions(db);
  }
  @Test void disabledPinRejectsMemberLoginBeforeHashLookup(){
-  var error=assertThrows(ResponseStatusException.class,()->controller.memberLogin(token,groupId,new GroupContributionController.MemberLogin("Test Member",null,"123456"),new MockHttpServletRequest()));
+  var error=assertThrows(ResponseStatusException.class,()->controller.memberLogin(token,groupId,new GroupContributionController.MemberLogin("Test_member",null,"123456"),new MockHttpServletRequest()));
   assertEquals(403,error.getStatusCode().value());
   verify(db,never()).queryForList(contains("SELECT id,password_hash"),any(UUID.class),anyString());
  }
- @Test void passwordLoginUsesSingleAccountLookupWhenPinDisabled(){
+ @Test void legacyCredentialsStillSignInWhenNewPolicyIsStricter(){
   var request=new MockHttpServletRequest();request.setRemoteAddr(UUID.randomUUID().toString());request.addHeader("X-Group-Page-Id",UUID.randomUUID().toString());
-  String hash=new BCryptPasswordEncoder(4).encode("Password123!");UUID id=UUID.randomUUID();
-  when(db.queryForList(contains("WHERE event_id=? AND username=?"),eq(eventId),eq("creator"))).thenReturn(List.of(Map.of("id",id,"password_hash",hash)));
-  controller.login(token,new GroupContributionController.Credentials("creator","Password123!"),request);
+  String hash=new BCryptPasswordEncoder(4).encode("old");UUID id=UUID.randomUUID();
+  when(db.queryForList(contains("WHERE event_id=? AND username=?"),eq(eventId),eq("abc"))).thenReturn(List.of(Map.of("id",id,"password_hash",hash)));
+  controller.login(token,new GroupContributionController.Credentials("abc","old"),request);
   assertEquals(id,request.getSession().getAttribute("gift.group.admin."+eventId));
  }
  @Test void namedPinLoginChecksOnlyTheSelectedAccount(){
@@ -100,8 +101,8 @@ class GroupPolicyFlowTest {
  @Test void memberUsernameAndPinAuthenticateOnlyTheSelectedAccount(){
   when(policies.effective(null,eventId)).thenReturn(new EffectiveRecoveryPolicyService.Policy(true,true,true,true,true));
   UUID id=UUID.randomUUID();var request=new MockHttpServletRequest();request.setRemoteAddr(UUID.randomUUID().toString());
-  when(db.queryForList(contains("WHERE group_id=? AND username=?"),eq(groupId),eq("test member"))).thenReturn(List.of(Map.of("id",id,"password_hash","unused","pin_hash",new BCryptPasswordEncoder(4).encode("123456"),"status","APPROVED")));
-  controller.memberLogin(token,groupId,new GroupContributionController.MemberLogin(null,null,"123456","Test Member"),request);
+  when(db.queryForList(contains("WHERE group_id=? AND username=?"),eq(groupId),eq("test_member"))).thenReturn(List.of(Map.of("id",id,"password_hash","unused","pin_hash",new BCryptPasswordEncoder(4).encode("123456"),"status","APPROVED")));
+  controller.memberLogin(token,groupId,new GroupContributionController.MemberLogin(null,null,"123456","Test_member"),request);
   assertEquals(id,request.getSession().getAttribute("gift.group.member."+groupId));
   verify(db,never()).queryForList(contains("pin_hash IS NOT NULL"),any(UUID.class));
  }

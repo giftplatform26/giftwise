@@ -1,0 +1,27 @@
+[Unit]
+Description=GiftWise web application
+After=network-online.target giftwise-backend.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=giftwise
+Group=giftwise
+WorkingDirectory=/srv/giftwise/current/frontend
+EnvironmentFile=/etc/giftwise/web.env
+Environment=NODE_ENV=production
+Environment=HOSTNAME=127.0.0.1
+Environment=PORT=3000
+Environment=NEXT_TELEMETRY_DISABLED=1
+ExecStart=/usr/local/bin/node /srv/giftwise/current/frontend/server.js
+Restart=on-failure
+RestartSec=10
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/cache/giftwise
+UMask=0027
+
+[Install]
+WantedBy=multi-user.target

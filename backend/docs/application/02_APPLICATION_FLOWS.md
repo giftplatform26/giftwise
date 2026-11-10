@@ -1,6 +1,12 @@
 # Document 2 — Application Flow Guide
 
-Use this guide with the [technical specification](01_TECHNICAL_SPECIFICATION.md), [complete screen catalogue](SCREEN_CATALOGUE.md), [control catalogue](UI_CONTROLS.md) and [API catalogue](API_CATALOGUE.md). The route catalogue covers all 27 page routes and their shared/dynamic component composition. Named dialogs, modals and alternate tabs are covered by their control declarations even when they do not have standalone URLs.
+**Growth and performance update — 6 November 2026:** [Current implementation and rollout](releases/2026-11-06_GROWTH_AND_PERFORMANCE.md) covers the public home/demo, guided creation in both views, mobile invitations, consented sharing previews, bounded dashboard insights, approved-wishes keepsakes, image delivery and admin controls. Current schema head is V107. This update supersedes older route/default descriptions for the changed screens; it does not certify production deployment or live payments.
+
+**Localisation update:** [Platform localisation](releases/2026-11-02_LOCALIZATION.md) documents language hierarchy, all settings/fields/APIs, fallback, RTL, communication boundaries and validation evidence.
+
+**Implementation update:** [2026-11-02 controlled rollout](releases/2026-11-02_CELEBRATIONS_AND_SAFEGUARDS.md) documents new family/office occasions, three-level grants, invitation-only publishing, arrival/calendar details, repeat drafts, approved-wishes keepsakes and production safeguards. Read this with the refreshed source catalogues.
+
+Use this guide with the [technical specification](01_TECHNICAL_SPECIFICATION.md), [complete screen catalogue](SCREEN_CATALOGUE.md), [control catalogue](UI_CONTROLS.md) and [API catalogue](API_CATALOGUE.md). The route catalogue covers all 34 page routes and their shared/dynamic component composition. Named dialogs, modals and alternate tabs are covered by their control declarations even when they do not have standalone URLs.
 
 A “success” below means the specific step succeeded; it never automatically means paid, verified, published, delivered or shipped. Unavailable/conditional functionality is explicitly labelled. For every journey, inspect the operation's request model and exact guards before changing validation or examples.
 
@@ -320,3 +326,13 @@ All route-specific layouts, field/button IDs, component initial states and reque
 | Notification intent | Outbox/notification row recorded | PENDING is not SENT/DELIVERED; real transport outcomes must be explicit. |
 
 Minimum acceptance cases for each journey: happy path; required/format/length/amount boundaries; disabled capability; unauthenticated/other-owner/wrong-group scope; stale version; duplicate click/key/reference; interrupted request; empty data; missing provider/storage; and back/refresh/reopen after uncertainty. The historical full backend run observed 678 passing tests before this documentation work; this does not certify production load, browser compatibility, legal compliance or every source guard branch.
+
+## Discovery and event completion journeys
+
+A visitor reaches the public home, optionally explores the clearly fictional demo and registers when ready. Sample responses are local UI state, not persisted guest records. Signed-in hosts choose the guided event creator in either application view when enabled. They can navigate back, resume their browser-tab draft and replace suggested wording with their own. Creating the event produces a private draft; existing publishing checks still apply.
+
+To allow messaging previews, the administrator enables the global control and the host consents in the event's Design & QR screen. Without both gates, the link still opens but preview endpoints return unavailable. Turning either gate off stops new preview responses; previously fetched third-party previews may remain cached.
+
+After a celebration, hosts use existing thank-you, private-album and permission-controlled repeat-draft features. Public keepsakes require a separate admin switch, Guestbook access and host opt-in in Thank-you cards. The shareable page contains approved wishes only and has no RSVP, payment or upload action. Revoking consent, disabling the feature or making the event private/cancelled blocks new reads. Pending/hidden wishes and private photos never appear.
+
+Administrators configure these rollouts under Branding & appearance and inspect consented journey stage counts under Clicks & outcomes. The complete [operator and user procedures](releases/2026-11-06_GROWTH_AND_PERFORMANCE.md#host-and-guest-procedures) define expected errors and recovery.

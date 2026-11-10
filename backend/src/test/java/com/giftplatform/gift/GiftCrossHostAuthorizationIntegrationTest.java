@@ -44,7 +44,7 @@ class GiftCrossHostAuthorizationIntegrationTest {
 
     static final String PASSWORD = "SecurePassword123!";
     static final String GIFT = "{\"name\":\"Mixer\",\"description\":\"Kitchen appliance\",\"targetAmount\":10000.00}";
-    static final String EVENT = "{\"title\":\"Wedding\",\"occasionType\":\"WEDDING\"}";
+    static final String EVENT = "{\"title\":\"Wedding\",\"occasionType\":\"WEDDING\",\"hostName\":\"Fixture host\",\"addressLine1\":\"1 Fixture Street\",\"city\":\"Bengaluru\",\"state\":\"Karnataka\",\"postalCode\":\"560001\",\"country\":\"India\",\"contactName\":\"Fixture contact\",\"contactPhone\":\"+919876543210\"}";
 
     private MockHttpSession login() throws Exception {
         String email = "gift-host-" + UUID.randomUUID() + "@example.test";

@@ -82,7 +82,7 @@ public class PaymentOrderService {
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Event not found"));
 
-        if (event.getStatus() != EventStatus.PUBLISHED) {
+        if (event.getStatus() != EventStatus.PUBLISHED || !event.isGiftingEnabled()) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
                     "Event is not accepting contributions");

@@ -1,0 +1,50 @@
+{
+  "name": "giftwise-mobile",
+  "description": "GiftWise iOS, Android, and full shared web application",
+  "license": "0BSD",
+  "version": "0.3.0",
+  "main": "index.ts",
+  "dependencies": {
+    "expo": "~58.0.23",
+    "expo-build-properties": "~58.0.12",
+    "expo-clipboard": "~58.0.4",
+    "expo-dev-client": "~58.0.18",
+    "expo-file-system": "~58.0.13",
+    "expo-sharing": "~58.0.22",
+    "expo-splash-screen": "~58.0.13",
+    "expo-status-bar": "~58.0.4",
+    "expo-web-browser": "~58.0.7",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "react-native": "0.88.1",
+    "react-native-safe-area-context": "~5.11.1",
+    "react-native-web": "^0.21.4",
+    "react-native-webview": "14.0.1"
+  },
+  "devDependencies": {
+    "@types/react": "~19.3.0",
+    "eas-cli": "^27.4.1",
+    "typescript": "~6.0.3"
+  },
+  "scripts": {
+    "start": "expo start",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "web": "npm --prefix web run dev -- --port 3100 --hostname 0.0.0.0",
+    "typecheck": "tsc --noEmit",
+    "web:build": "npm --prefix web run build",
+    "web:start": "npm --prefix web run start -- --port 3100",
+    "web:test": "npm --prefix web test",
+    "test": "node --test tests/*.test.mjs",
+    "build:android": "eas build --platform android --profile android-preview",
+    "build:ios": "eas build --platform ios --profile ios-device",
+    "build:ios-simulator": "eas build --platform ios --profile ios-simulator",
+    "build:production": "eas build --platform all --profile production",
+    "build:check": "node tooling/check-release.mjs",
+    "build:android:local": "sh tooling/build-local-android.sh"
+  },
+  "private": true,
+  "engines": {
+    "node": "^22.13.0 || ^24.3.0 || >=26.0.0"
+  }
+}

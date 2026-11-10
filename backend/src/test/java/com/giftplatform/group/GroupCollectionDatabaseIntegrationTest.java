@@ -14,6 +14,7 @@ class GroupCollectionDatabaseIntegrationTest {
  @Container static PostgreSQLContainer postgres=new PostgreSQLContainer("postgres:17");
  static JdbcTemplate db;
  @BeforeAll static void migrate(){var ds=new DriverManagerDataSource(postgres.getJdbcUrl(),postgres.getUsername(),postgres.getPassword());Flyway.configure().dataSource(ds).load().migrate();db=new JdbcTemplate(ds);}
+ @org.junit.jupiter.api.BeforeEach void resetVerificationPolicy(){db.update("DELETE FROM platform_verification_settings");}
  @Test void invitationCanBeReadyBeforeCollectionPublicationAndPoliciesRemainHostScoped(){
   UUID host=UUID.randomUUID(),event=UUID.randomUUID(),admin=UUID.randomUUID(),group=UUID.randomUUID();
   db.update("INSERT INTO users(id,email,password_hash,role) VALUES(?,?,'hash','CUSTOMER')",host,host+"@example.test");
@@ -56,9 +57,11 @@ class GroupCollectionDatabaseIntegrationTest {
   var collections=new GroupGiftCollectionController(db,groups,actor);
   collections.reserve(token,group,new GroupGiftCollectionController.Reservation(gift),request);
   assertEquals(gift,db.queryForObject("SELECT reserved_gift_id FROM gift_groups WHERE id=?",UUID.class,group));
-  assertTrue(collections.report(event).isEmpty());
+  // Hosts can inspect collection progress before the group publishes its gift.
+  assertEquals(1,collections.report(event).size());
+  assertEquals("Something is Cooking",collections.report(event).getFirst().get("display_status"));
   assertTrue(collections.notifications(event).isEmpty());
-  assertThrows(org.springframework.web.server.ResponseStatusException.class,()->collections.details(event,group));
+  assertTrue(collections.details(event,group).isEmpty());
   groups.publish(token,group,request);
   assertEquals(1,collections.report(event).size());
   assertEquals("Surprise",collections.report(event).getFirst().get("gift_name"));

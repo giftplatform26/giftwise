@@ -34,6 +34,7 @@ class EventOptimisticLockIntegrationTest {
     @Test
     void staleWriterCannotOverwriteCommittedEventChange() {
         Event initial = new Event("Original", OccasionType.BIRTHDAY);
+initial.setHostDisplayName("Fixture host");
         EntityManager seed = emf.createEntityManager();
         try {
             seed.getTransaction().begin();

@@ -5,14 +5,15 @@ export const categories=['BACKGROUND','DECORATION'];
 export const occasions=['WEDDING','BIRTHDAY','BABY_SHOWER','HOUSEWARMING','ANNIVERSARY','OTHER'];
 export const assetImageUrl=id=>`${base}/${encodeURIComponent(id)}/image`;
 
-export function validateAsset({category,occasion,title,file}) {
+export function validateAsset({category,occasion,title,file,tier}) {
  if(!categories.includes(category))throw Error('Select a valid category');
  if(!/^[A-Za-z0-9_-]{1,50}$/.test(occasion||''))throw Error('Select a valid occasion');
  if(!title?.trim()||title.trim().length>120)throw Error('Title must contain 1–120 characters');
+ if(tier!==undefined&&!['FREE','PREMIUM'].includes(tier))throw Error('Choose Free or Premium access');
  if(!file)throw Error('Choose an image');
  if(!['image/png','image/jpeg','image/webp'].includes(file.type))throw Error('Choose a PNG, JPEG or WebP image');
  if(file.size>2*1024*1024)throw Error('Image must be 2 MB or smaller');
- return {category,occasion,title:title.trim(),file};
+ return {category,occasion,title:title.trim(),file,...(tier===undefined?{}:{tier})};
 }
 export async function galleryRequest(fetcher,{method='GET',path='',form, cookie, bootstrap=true}={}) {
  if(!['GET','POST'].includes(method))throw Error('Unsupported request method');
@@ -38,6 +39,7 @@ export const adminGallery={
   const valid=validateAsset(data);
   const form=new FormData();
   for(const key of ['category','occasion','title'])form.append(key,valid[key]);
+  if(valid.tier)form.append('tier',valid.tier);
   form.append('file',valid.file);
   return galleryRequest(fetcher,{method:'POST',form,...options});
  },

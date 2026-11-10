@@ -1,0 +1,40 @@
+{
+  "expo": {
+    "name": "GiftWise",
+    "slug": "giftwise-mobile",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/brand/app-icon.png",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#6336B5",
+        "foregroundImage": "./assets/brand/adaptive-foreground.png",
+        "monochromeImage": "./assets/brand/monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/brand/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#FCFAF6",
+          "image": "./assets/brand/splash-mark.png",
+          "imageWidth": 104,
+          "dark": {
+            "backgroundColor": "#171220",
+            "image": "./assets/brand/splash-mark.png"
+          }
+        }
+      ],
+      "expo-sharing",
+      "expo-web-browser"
+    ]
+  }
+}

@@ -20,7 +20,7 @@ public class CommercialAccessService {
     }
     public boolean premium(UUID host) {return has("HOST",host,"HOST_PLAN",host);}
     public boolean template(UUID host,UUID asset) {
-        return !pricing.enabled("PREMIUM_TEMPLATE") || premium(host) || has("HOST",host,"PREMIUM_TEMPLATE",asset);
+        return premium(host) || has("HOST",host,"PREMIUM_TEMPLATE",asset);
     }
     @Transactional
     public void requireEventCapacity(UUID host,UUID event) {

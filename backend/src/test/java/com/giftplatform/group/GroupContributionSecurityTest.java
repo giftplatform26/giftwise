@@ -30,6 +30,7 @@ class GroupContributionSecurityTest {
     eventId = UUID.randomUUID();
     Event event = mock(Event.class);
     when(event.getStatus()).thenReturn(EventStatus.PUBLISHED);
+  org.mockito.Mockito.lenient().when(event.isGiftingEnabled()).thenReturn(true);
     when(event.getId()).thenReturn(eventId);
     when(events.findByPublicToken(token)).thenReturn(Optional.of(event));
   }
