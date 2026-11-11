@@ -24,7 +24,7 @@ export function PreferredLanguage(){useLocalizationRender();const {catalog,busy,
 export default function LocalizationProvider({children}:{children:ReactNode}){useLocalizationRender();
  const path=usePathname();const [catalog,setCatalog]=useState<LanguageCatalog|null>(null),[busy,setBusy]=useState(false),[error,setError]=useState('');const request=useRef(0),control=useRef<AbortController|null>(null);
  const token=path.match(/^\/(?:e|groups)\/([0-9a-f-]{36})(?:\/|$)/i)?.[1];
- const hostWorkspace=path==='/'||path==='/dashboard'||path==='/events'||path.startsWith('/events/')||path==='/gifts'||path.startsWith('/host/')||['/ledger','/reminders','/referrals','/vendors','/helping'].includes(path)||path.startsWith('/helping/');
+ const hostWorkspace=path==='/'||path==='/dashboard'||path==='/events'||path.startsWith('/events/')||path==='/gifts'||path.startsWith('/host/')||['/ledger','/reminders','/referrals','/vendors','/helping','/collections','/partner'].includes(path)||path.startsWith('/helping/');
  useEffect(()=>{if(hostWorkspace)document.documentElement.style.setProperty('--gift-language-bar-height','0px')},[hostWorkspace]);
  const account=!token&&(path==='/'||path==='/dashboard'||path==='/events'||path.startsWith('/events/')||path==='/gifts'||path.startsWith('/host/')||path.startsWith('/admin'));
  const load=useCallback(async(guestChoice?:string)=>{const sequence=++request.current;control.current?.abort();const controller=new AbortController();control.current=controller;

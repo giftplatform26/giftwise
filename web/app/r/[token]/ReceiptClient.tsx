@@ -8,6 +8,7 @@ import {RECEIPT_STEPS,receiptStage} from '../../../lib/direct-transfer.mjs';
 import {inr} from '../../../lib/focused.mjs';
 import CustomReceipt,{type ReceiptDesign} from '../../../components/CustomReceipt';
 import SaveToLedger from '../../../components/SaveToLedger';
+import {ReceiptOffer} from '../../../components/InvitationGrowth';
 
 type Receipt={eventTitle:string;hostName:string|null;giftName:string|null;guestName:string;amountPaise:number;method:'UPI'|'BANK';
   paymentCode:string|null;referenceTail:string|null;status:string;createdAt:string;hostDecidedAt:string|null;invitationPath:string|null;
@@ -59,6 +60,7 @@ export default function ReceiptClient(){useLocalizationRender();
       {receipt.invitationPath&&<Link className="focusTextLink" href={receipt.invitationPath}>{localizeText('Back to the invitation')}</Link>}
     </div>
     {notice&&<p role="status">{notice}</p>}
+    <ReceiptOffer invitationPath={receipt.invitationPath}/>
     {!custom&&<p className="receiptFine">{localizeText('Money was sent directly from your account to the host. GiftWise does not hold or process this payment; the host confirms when it arrives.')}</p>}
   </section></div></main>;
 }

@@ -7,10 +7,12 @@ import {HostLanguageSwitcher,useLocalizationRender} from './LocalizationProvider
 import {createContext,useContext,useEffect,useId,useState,type ReactNode} from 'react';
 import {usePathname,useRouter,useSearchParams} from 'next/navigation';
 import Link from 'next/link';
-import {ShieldCheck,Activity,CalendarDays,CheckSquare,Eye,Pencil,Gift,Heart,Images,Landmark,LayoutDashboard,LogOut,Mail,PanelLeftClose,PanelLeftOpen,Plus,QrCode,ReceiptText,Sparkles,BookOpen,NotebookPen,MonitorPlay,CalendarRange,UsersRound,HandHeart,MessageCircle,CalendarHeart,Gift as GiftIcon2,Store,BookHeart,ListChecks,Wallet,Clock,DoorOpen,Megaphone,UserRound,Users,type LucideIcon} from 'lucide-react';
+import {ShieldCheck,Activity,CalendarDays,CheckSquare,Eye,Pencil,Gift,Heart,Images,Landmark,LayoutDashboard,LogOut,Mail,PanelLeftClose,PanelLeftOpen,Plus,QrCode,ReceiptText,Sparkles,BookOpen,NotebookPen,MonitorPlay,CalendarRange,UsersRound,HandHeart,MessageCircle,CalendarHeart,Gift as GiftIcon2,Store,BookHeart,ListChecks,Wallet,Clock,DoorOpen,Megaphone,Smartphone,Briefcase,Users2,Award,UserRound,Users,type LucideIcon} from 'lucide-react';
 import {hostApi,hostRequest} from '../lib/host-api.mjs';
 import {useGrowth} from './GrowthProvider';
 import {pendingReferral} from '../lib/reminders.mjs';
+import {pendingOffer} from '../lib/acquisition.mjs';
+import {saveFlash} from '../lib/flash.mjs';
 import {eventIdForRoute} from '../lib/focused.mjs';
 import './host-sidebar.css';
 type EventInfo={title:string;eventDate:string|null;status:string};
@@ -22,6 +24,8 @@ export default function HostWorkspace({children}:{children:ReactNode}){useLocali
  const path=usePathname(),query=useSearchParams(),router=useRouter(),eventId=eventIdForRoute(path,query.get('eventId'));
  const [name,setName]=useState(''),[collapsed,setCollapsed]=useState(false),[ready,setReady]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState('');
  const [hostFeatures,setHostFeatures]=useState<Record<string,boolean>>({}),[helping,setHelping]=useState(0);
+ // A first-celebration-free offer remembered from a guest page is claimed once after sign-in.
+ useEffect(()=>{let token:string|null=null;try{token=pendingOffer(localStorage)}catch{}if(!token)return;void hostRequest(fetch,'/v1/me/offers/first-free',{method:'POST',payload:{eventToken:token}}).then((r:{granted?:boolean;message?:string})=>{try{localStorage.removeItem('gift.offer');if(r?.message)saveFlash(sessionStorage,r.granted?'success':'info',r.message)}catch{}}).catch(()=>{try{localStorage.removeItem('gift.offer')}catch{}})},[]);
  // A friend's referral link remembered at sign-up is claimed once, then forgotten.
  useEffect(()=>{let code:string|null=null;try{code=pendingReferral(localStorage)}catch{}if(!code)return;void hostRequest(fetch,'/v1/me/referrals/claim',{method:'POST',payload:{code}}).then(()=>{try{localStorage.removeItem('gift.ref')}catch{}}).catch(()=>{})},[]);
  useEffect(()=>{let active=true;void fetch('/backend/api/v1/me/co-hosting',{credentials:'include',cache:'no-store'}).then(r=>r.ok?r.json():[]).then(list=>{if(active&&Array.isArray(list))setHelping(list.length)}).catch(()=>{});return()=>{active=false}},[]);
@@ -36,7 +40,7 @@ export default function HostWorkspace({children}:{children:ReactNode}){useLocali
  function showTooltip(element:HTMLElement,label:string){if(!collapsed)return;const rect=element.getBoundingClientRect();setTooltip({label,x:rect.right+10,y:rect.top+rect.height/2})}
  function navigate(){setTooltip(null);if(window.matchMedia('(max-width:700px)').matches)setCollapsed(true)}
  async function signOut(){if(busy)return;setBusy(true);setError('');try{await hostApi.logout(fetch);router.replace('/login');router.refresh()}catch(e){setError(e instanceof Error?e.message:'Sign out failed');setBusy(false)}}
- const account:Item[]=[{href:'/dashboard',label:'Overview',Icon:LayoutDashboard},{href:'/events',label:'Celebrations',Icon:CalendarDays},{href:'/events/new',label:'Create celebration',Icon:Plus},...(hostFeatures.GIFT_LEDGER?[{href:'/ledger',label:'Gift ledger',Icon:BookOpen}]:[]),...(helping>0?[{href:'/helping',label:'Celebrations I help with',Icon:HandHeart}]:[]),...(hostFeatures.OCCASION_REMINDERS?[{href:'/reminders',label:'Dates to remember',Icon:CalendarHeart}]:[]),...(hostFeatures.VENDOR_DIRECTORY?[{href:'/vendors',label:'Vendors',Icon:Store}]:[]),...(hostFeatures.HOST_REFERRALS?[{href:'/referrals',label:'Invite friends',Icon:GiftIcon2}]:[]),{href:'/host/payment-settings',label:'Receiving accounts',Icon:Landmark},{href:'/host/monetization',label:'Plans & partnerships',Icon:Sparkles},{href:'/host/account',label:'Account',Icon:UserRound}];
+ const account:Item[]=[{href:'/dashboard',label:'Overview',Icon:LayoutDashboard},{href:'/events',label:'Celebrations',Icon:CalendarDays},{href:'/events/new',label:'Create celebration',Icon:Plus},...(hostFeatures.GROUP_COLLECTIONS?[{href:'/collections',label:'Group gifts',Icon:Users2}]:[]),...(hostFeatures.PARTNER_ACCOUNTS?[{href:'/partner',label:'Partner workspace',Icon:Briefcase}]:[]),...(hostFeatures.GIFT_LEDGER?[{href:'/ledger',label:'Gift ledger',Icon:BookOpen}]:[]),...(helping>0?[{href:'/helping',label:'Celebrations I help with',Icon:HandHeart}]:[]),...(hostFeatures.OCCASION_REMINDERS?[{href:'/reminders',label:'Dates to remember',Icon:CalendarHeart}]:[]),...(hostFeatures.VENDOR_DIRECTORY?[{href:'/vendors',label:'Vendors',Icon:Store}]:[]),...(hostFeatures.HOST_REFERRALS?[{href:'/referrals',label:'Invite friends',Icon:GiftIcon2}]:[]),{href:'/host/payment-settings',label:'Receiving accounts',Icon:Landmark},{href:'/host/monetization',label:'Plans & partnerships',Icon:Sparkles},{href:'/host/account',label:'Account',Icon:UserRound}];
  const base=eventId?`/events/${eventId}`:'';
  const eventLinks:Item[]=eventId?[
   {href:base,label:'Celebration overview',Icon:CheckSquare},
@@ -60,6 +64,8 @@ export default function HostWorkspace({children}:{children:ReactNode}){useLocali
   {href:base+'/transactions',label:'Payment verification',Icon:ShieldCheck},
   ...(growth.CUSTOM_RECEIPTS?[{href:base+'/receipts',label:'Guest receipts',Icon:ReceiptText}]:[]),
   {href:base+'/qr',label:'Invitation design & QR',Icon:QrCode},
+  ...(features.STORY_CARDS?[{href:base+'/story-cards',label:'Status & Story cards',Icon:Smartphone}]:[]),
+  ...(features.CELEBRATION_SHOWCASE?[{href:base+'/showcase',label:'Share in showcase',Icon:Award}]:[]),
   {href:base+'/preview',label:'Preview invitation',Icon:Eye},
   {href:base+'/notifications',label:'Notification history',Icon:Mail},
   {href:base+'/thank-you',label:'Thank-you cards',Icon:Heart},

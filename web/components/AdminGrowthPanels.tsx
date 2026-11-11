@@ -51,3 +51,20 @@ export function AdminReferrals(){useLocalizationRender();
     <td>{r.status==='QUALIFIED'&&<button type="button" onClick={()=>void reward(r)}>{localizeText('Mark rewarded')}</button>}</td></tr>)}</tbody></table></div>}
  </section>;
 }
+
+type ShowcaseRow={eventId:string;eventTitle:string;hostName:string;displayTitle:string;blurb:string|null;city:string|null;status:string;submittedAt:string;wishes:{id:string;guestName:string;message:string}[]};
+export function AdminShowcase(){useLocalizationRender();
+ const [rows,setRows]=useState<ShowcaseRow[]>([]),[status,setStatus]=useState('PENDING'),[error,setError]=useState('');
+ const load=useCallback(async()=>{try{setRows(await admin(`/showcase?status=${status}`))}catch(e){setError(e instanceof Error?e.message:'Could not load')}},[status]);
+ useEffect(()=>{void load()},[load]);
+ async function decide(r:ShowcaseRow,decision:string){const note=decision==='REJECTED'?prompt(localizeText('Reason shown to the host (optional)'))??'':'';
+  try{await admin(`/showcase/${r.eventId}/review`,'POST',{decision,note});await load()}catch(e){setError(e instanceof Error?e.message:'Could not save')}}
+ return <section className="acPanel"><h2>{localizeText('Showcase submissions')}</h2><p>{localizeText('Hosts submit celebrations with up to six approved wishes. Nothing is public until you approve it. Check that wishes contain nothing private or inappropriate.')}</p>
+  {error&&<p role="alert">{localizeText(error)}</p>}
+  <div role="tablist">{['PENDING','APPROVED','REJECTED','WITHDRAWN'].map(s=><button key={s} type="button" role="tab" aria-selected={status===s} onClick={()=>setStatus(s)}>{localizeText(s.charAt(0)+s.slice(1).toLowerCase())}</button>)}</div>
+  {rows.length===0?<p>{localizeText('Nothing here.')}</p>:rows.map(r=><article key={r.eventId} style={{border:'1px solid #e6dfe2',borderRadius:12,padding:14,margin:'10px 0'}}>
+   <strong>{r.displayTitle}</strong> <small>({r.eventTitle} · {r.hostName}{r.city?` · ${r.city}`:''})</small>{r.blurb&&<p>{r.blurb}</p>}
+   <ul>{r.wishes.map(w=><li key={w.id}><strong>{w.guestName}</strong>: {w.message}</li>)}</ul>
+   {r.status==='PENDING'&&<div><button type="button" onClick={()=>void decide(r,'APPROVED')}>{localizeText('Approve')}</button> <button type="button" onClick={()=>void decide(r,'REJECTED')}>{localizeText('Reject')}</button></div>}</article>)}
+ </section>;
+}
