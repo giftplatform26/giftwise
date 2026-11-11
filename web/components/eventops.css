@@ -1,0 +1,63 @@
+/* Event-management tools: checklist, budget, run sheet, check-in, live updates. Builds on gift-books.css. */
+.eoProgress{display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:18px 20px;margin:0 0 20px;background:#fff;border:1px solid var(--focus-line,#e6dfe2);border-radius:18px}
+.eoProgress p{margin:2px 0 0;color:var(--focus-muted,#66565e);font-size:14px}
+.eoRing{--pct:0%;width:64px;height:64px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--focus-accent,#683c55) var(--pct),#efe5eb 0);flex-shrink:0}
+.eoRing strong{display:grid;place-items:center;width:48px;height:48px;border-radius:50%;background:#fff;font-size:14px}
+.eoMine{margin-left:auto}
+.eoBad{color:#8d233b;font-weight:650}
+.eoStarter{display:grid;gap:8px;text-align:left;background:linear-gradient(135deg,#fbf3f7,#fbf8f1);border-style:solid}
+.eoStarter h2{margin:0;color:var(--focus-ink,#30232b)}.eoStarter p{margin:0}
+.eoGroup{margin-top:14px}.eoGroup--overdue .gbSubhead{color:#8d233b}
+.eoTasks,.eoRun{list-style:none;margin:0;padding:0;background:#fff;border:1px solid var(--focus-line,#e6dfe2);border-radius:16px;overflow:hidden}
+.eoTasks li,.eoRun li{display:flex;align-items:center;gap:12px;padding:6px 14px;min-height:60px}
+.eoTasks li+li,.eoRun li+li{border-top:1px solid var(--focus-line,#e6dfe2)}
+.eoTasks li.is-done strong,.eoRun li.is-done strong{text-decoration:line-through;color:var(--focus-muted,#66565e)}
+.eoTick input{width:26px!important;height:26px;min-height:26px!important;cursor:pointer}
+.eoTaskBody{flex:1;display:grid;gap:2px;text-align:left;background:none!important;border:0!important;padding:8px 0!important;min-height:auto!important;min-width:0}
+.eoTaskBody small{color:var(--focus-muted,#66565e);font-size:13px;overflow:hidden;text-overflow:ellipsis}
+.eoDue{font-size:13px;font-weight:650;padding:3px 10px;border-radius:20px;background:#f5eff2;white-space:nowrap}.eoDue--late{background:#f6e3e7;color:#8d233b}
+/* Budget */
+.eoBudgetTop{display:grid;grid-template-columns:minmax(220px,.8fr) 2fr;gap:14px;margin-bottom:20px;align-items:start}
+.eoTotal{display:grid;gap:8px;padding:16px 18px;background:#fff;border:1px solid var(--focus-line,#e6dfe2);border-radius:16px}
+.eoTotal label{display:grid;gap:6px;font-weight:600;font-size:14px}.eoTotal input{font-size:20px;font-weight:700}
+.eoHealth{margin:0;font-weight:650;font-size:14px}.eoHealth--good{color:#1f5b33}.eoHealth--warning{color:#7a5200}.eoHealth--danger{color:#8d233b}.eoHealth--neutral{color:var(--focus-muted,#66565e)}
+.eoBar{display:flex;height:10px;border-radius:10px;background:#efe5eb;overflow:hidden}.eoBar span{display:block;height:100%}
+.eoBar--paid{background:#2f9e5b}.eoBar--booked{background:#e0a84a}
+.eoBudgetTop .gbStats{margin:0}
+.eoDues .gbRows{border-color:#efd9a6}
+.eoCat{margin-top:12px}.eoCat .gbSubhead small{font-weight:400}
+/* Run sheet */
+.eoShare{display:grid;gap:12px}
+.eoRunDay{margin-top:14px}
+.eoRunTime{min-width:78px;font-weight:750;font-variant-numeric:tabular-nums;color:var(--focus-accent,#683c55)}
+.eoPublic{max-width:760px;margin:0 auto;padding:32px 20px 60px;font-family:Inter,ui-sans-serif,system-ui,sans-serif;color:#30232b}
+.eoPublic h1{font:500 clamp(28px,4vw,40px)/1.2 Georgia,serif;margin:6px 0 18px}.eoPublic h2{font-size:16px;margin:22px 0 8px;color:#683c55}
+.eoFine{font-size:12px;color:#66565e;margin-top:20px}
+/* Check-in: built for one hand at the door */
+.eoCheckin{max-width:720px}
+.eoHeadcount{display:grid;gap:8px;padding:18px 20px;margin-bottom:14px;border-radius:18px;background:linear-gradient(135deg,#f4fbf6,#fbf8f1);border:1px solid #cfe7d6}
+.eoHeadcount>div:first-child{display:flex;align-items:baseline;gap:10px}.eoHeadcount strong{font-size:44px;line-height:1;letter-spacing:-.03em}
+.eoHeadcount p{margin:0;font-size:14px;color:var(--focus-muted,#66565e)}
+.eoSearch{position:sticky;top:0;z-index:5;padding:8px 0;background:var(--focus-paper,#fcfaf7)}
+.eoSearch input{width:100%;font-size:20px!important;min-height:56px!important;border-radius:14px!important}
+.eoGuests li>button{min-height:68px}
+.eoCheckBtn{padding:8px 16px;border-radius:12px;background:var(--focus-accent,#683c55);color:#fff;font-weight:700;white-space:nowrap}
+.eoArrived{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:#e3f4e8;color:#1f5b33;font-weight:800}
+.eoWalkIn{width:100%;padding:16px!important;border:0!important;background:#fbf7f9!important;color:var(--focus-accent,#683c55);font-weight:700;text-align:left}
+.eoPick h2{margin:0;font-size:24px}.eoPick h2 small{font-size:14px;font-weight:400;color:var(--focus-muted,#66565e)}
+.eoParty{display:flex;align-items:center;gap:14px;font-weight:600}
+.eoParty button{width:52px;height:52px;min-height:52px!important;border-radius:50%!important;font-size:24px;padding:0!important}
+.eoParty strong{min-width:40px;text-align:center;font-size:28px}
+/* Guest-facing live updates */
+.luBanner{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;max-width:1050px;margin:12px auto;padding:12px 18px;border-radius:14px;background:#fff8e6;border:1px solid #f0d797}
+.luBanner p{margin:0;flex:1;min-width:220px}.luBanner .focusPrimary{text-decoration:none}
+.luDot{display:inline-block;width:9px;height:9px;margin-right:8px;border-radius:50%;background:#d9534f;animation:luPulse 1.6s infinite;vertical-align:middle}
+@keyframes luPulse{50%{opacity:.35}}
+/* Catering and return gifts additions */
+.fnMeals{grid-column:1/-1;display:flex;gap:10px;flex-wrap:wrap}
+.fnMeals span{padding:6px 12px;border-radius:12px;background:#f3f8ef;font-size:14px}.fnMeals strong{font-size:16px}
+.rgTick{display:flex!important;align-items:center;gap:6px;padding:0 14px;font-size:12px;color:var(--focus-muted,#66565e);white-space:nowrap}
+.gbRows li:has(.rgTick){display:flex;align-items:center}.gbRows li:has(.rgTick)>button{flex:1}
+@media(max-width:760px){.eoBudgetTop{grid-template-columns:1fr}.eoMine{margin-left:0}}
+@media(prefers-reduced-motion:reduce){.luDot{animation:none}}
+@media print{.no-print,.hostSidebar,.hostIdentity,.focusPageHeading button{display:none!important}.eoRun li{break-inside:avoid}}
