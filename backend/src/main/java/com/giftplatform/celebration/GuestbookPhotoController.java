@@ -34,6 +34,8 @@ public class GuestbookPhotoController {
  private Event published(UUID token){return events.findByPublicToken(token)
    .filter(e->e.getStatus()==EventStatus.PUBLISHED)
    .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));}
+ @org.springframework.beans.factory.annotation.Autowired private com.giftplatform.cohost.EventAccess access;
+ private Event guests(UUID id){return access.require(id,com.giftplatform.cohost.EventAccess.Capability.GUESTS,null).event();}
  private Event owned(UUID id){UUID user=actor.requireAuthenticatedUserId();return events.findById(id)
    .filter(e->user.equals(e.getOwnerId()))
    .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));}
@@ -121,7 +123,7 @@ public class GuestbookPhotoController {
  @GetMapping("/api/public/celebrations/{token}/wishes/{wishId}/photo")
  public ResponseEntity<byte[]> publicPhoto(@PathVariable UUID token,@PathVariable UUID wishId){Event e=published(token);permissions.require(e.getOwnerId(),"GUESTBOOK");return photo(wishId,e.getId(),true);}
  @GetMapping("/api/v1/events/{id}/wishes/{wishId}/photo")
- public ResponseEntity<byte[]> hostPhoto(@PathVariable UUID id,@PathVariable UUID wishId){Event e=owned(id);permissions.require(e.getOwnerId(),"GUESTBOOK");return photo(wishId,id,false);}
+ public ResponseEntity<byte[]> hostPhoto(@PathVariable UUID id,@PathVariable UUID wishId){Event e=guests(id);permissions.require(e.getOwnerId(),"GUESTBOOK");return photo(wishId,id,false);}
  @GetMapping("/api/v1/events/{id}/album/{wishId}/photo")
  public ResponseEntity<byte[]> albumPhoto(@PathVariable UUID id,@PathVariable UUID wishId){
   Event e=owned(id);permissions.requireAlbum(e.getOwnerId(),id);return photo(wishId,id,false);

@@ -114,13 +114,13 @@
 
 /* Compact guest checkout layout v2 */
 .loveModalBackdrop{padding:10px;overscroll-behavior:contain}
-.loveModal{position:relative;align-items:start;width:min(900px,calc(100vw - 20px));max-height:calc(100dvh - 20px);overflow-y:auto;overscroll-behavior:contain;padding:16px;gap:14px;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr)}
+.loveModal{position:relative;align-items:flex-start;width:min(900px,calc(100vw - 20px));max-height:calc(100dvh - 20px);overflow-y:auto;overscroll-behavior:contain;padding:16px;gap:14px;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr)}
 .loveModalGift{padding:14px;min-width:0}
 .loveModalGift h2{font-size:clamp(20px,2.5vw,27px);margin:0 0 6px}
 .loveModalGift p{margin:0;line-height:1.35;font-size:13px;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden}
 .loveModalMetrics{margin-top:12px;gap:7px;font-size:12px}
 .loveCheckout{margin:0;max-width:none;padding:10px;border:1px solid #e8d8df;border-radius:16px;background:#fff;color:#332b35;min-width:0}
-.loveCheckoutHeader{display:flex;align-items:start;justify-content:space-between;gap:8px;margin-bottom:10px}
+.loveCheckoutHeader{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:10px}
 .loveCheckoutHeader h2{font:normal clamp(19px,2.4vw,25px) Georgia,serif;margin:0 0 3px}
 .loveCheckoutHeader p{font-size:11px;color:#70636c;margin:0}
 .loveCheckout .loveModalClose{position:static;flex-shrink:0;display:grid;place-items:center;width:34px;height:34px;border-radius:50%;border:1px solid #e5d6dd;background:white;color:#493443;cursor:pointer}

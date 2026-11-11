@@ -20,4 +20,8 @@ public class GuestDirectTransferController {
   @RequestBody GuestDirectTransferService.ClaimRequest request){
   return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(service.claim(token,request));
  }
+ @GetMapping("/receipts/{receiptToken}")
+ public ResponseEntity<GuestDirectTransferService.Receipt> receipt(@PathVariable UUID receiptToken){
+  return ResponseEntity.ok().cacheControl(CacheControl.noStore()).header("X-Robots-Tag","noindex").body(service.receipt(receiptToken));
+ }
 }

@@ -9,8 +9,13 @@ test('verified label requires captured checkout and server verification time',()
 test('manual transfer reports cannot be mistaken for verified funds',()=>{
  for(const status of ['REPORTED_UNVERIFIED','PENDING','CAPTURED','VERIFIED']){
  const state=paymentStatus({source:'DIRECT_TRANSFER',status,verifiedAt:'2026-10-30'});
- assert.equal(state.step,1);assert.match(state.label,/awaiting verification/);
+ assert.equal(state.step,1);assert.match(state.label,/Waiting for you to confirm/);assert.notEqual(state.tone,'success');
  }
+});
+test('host-confirmed transfers say the host confirmed them, never provider verification',()=>{
+ const state=paymentStatus({source:'DIRECT_TRANSFER',status:'HOST_CONFIRMED'});
+ assert.equal(state.tone,'success');assert.match(state.label,/confirmed by you/);assert.doesNotMatch(state.label,/verified/i);
+ assert.equal(paymentStatus({source:'DIRECT_TRANSFER',status:'REJECTED'}).label,'Marked not received');
 });
 test('refunds and failures do not show payment verified',()=>{
  for(const status of ['REFUNDED','PARTIALLY_REFUNDED','FAILED','CANCELLED','REJECTED'])assert.notEqual(paymentStatus({source:'CHECKOUT',status,verifiedAt:'2026-10-30'}).label,'Payment verified');

@@ -16,6 +16,24 @@ public class PaymentControlController {
     public ResponseEntity<PaymentControlService.View> read(@RequestParam(defaultValue="PLATFORM") String scope,@RequestParam(required=false) UUID scopeId){return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(controls.read(scope,scopeId));}
     @PutMapping("/api/admin/console/payments/controls/{channel}")
     public PaymentControlService.View change(@PathVariable String channel,@RequestParam(defaultValue="PLATFORM") String scope,@RequestParam(required=false) UUID scopeId,@RequestBody PaymentControlService.Change input){return controls.change(scope,scopeId,channel,input);}
+    @org.springframework.beans.factory.annotation.Value("${gift.payment.razorpay.key-id:}") private String razorpayKeyId;
+    @org.springframework.beans.factory.annotation.Value("${gift.payment.razorpay.key-secret:}") private String razorpayKeySecret;
+    public record RazorpayStatus(boolean configured,String mode,boolean checkoutSupported,boolean platformEnabled,String message){}
+    /** Admin view of Razorpay readiness. Never returns key material. Live keys are not yet supported by checkout. */
+    @GetMapping("/api/admin/console/payments/razorpay-status")
+    public ResponseEntity<RazorpayStatus> razorpayStatus(){
+        controls.admin();
+        boolean keys=razorpayKeyId!=null&&!razorpayKeyId.isBlank()&&razorpayKeySecret!=null&&!razorpayKeySecret.isBlank();
+        String mode=!keys?"NOT_CONFIGURED":razorpayKeyId.startsWith("rzp_test_")?"TEST":razorpayKeyId.startsWith("rzp_live_")?"LIVE":"UNKNOWN";
+        boolean supported="TEST".equals(mode);
+        boolean enabled=Boolean.TRUE.equals(controls.platform().get("RAZORPAY"));
+        String message=switch(mode){
+            case "TEST"->"Test keys are configured. Guests see Razorpay as a test-mode option when enabled.";
+            case "LIVE"->"Live keys are configured, but live checkout is not enabled in this version, so guests will not see Razorpay.";
+            case "NOT_CONFIGURED"->"Add Razorpay keys to the backend environment before enabling checkout.";
+            default->"The configured key ID is not recognised.";};
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(new RazorpayStatus(keys,mode,supported,enabled,message));
+    }
     @GetMapping("/api/admin/console/payments/history")
     public List<Map<String,Object>> history(@RequestParam(defaultValue="50") int limit,@RequestParam(defaultValue="9223372036854775807") long beforeRevision){return controls.history(limit,beforeRevision);}
     @GetMapping("/api/admin/console/payments/routing-commission")

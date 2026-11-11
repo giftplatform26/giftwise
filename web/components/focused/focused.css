@@ -48,8 +48,9 @@
 .focusInvitation .focusGiftActions{margin-top:auto;padding-top:8px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .focusInvitation .focusGiftContribute{flex:1 1 140px;min-height:44px;justify-content:center}
 .focusInvitation .focusGiftActions .gc-entry{all:unset;display:contents}
-.focusInvitation .focusGiftActions .gc-launch{flex:1 1 140px;min-height:44px;padding:10px 14px;border-radius:12px;border:1px solid #d9cce3;background:#fff;color:#4a3466;font-weight:650;cursor:pointer}
-.focusInvitation .focusGiftActions .gc-launch:hover{background:#f6f0fb}
+/* Secondary action: outline, so Contribute stays the clear primary (overrides brand/group !important fills). */
+.focusInvitation .focusGiftActions .gc-entry .gc-launch{flex:1 1 140px;min-height:44px;margin:0;display:inline-flex;align-items:center;justify-content:center;text-align:center;padding:10px 14px;border-radius:12px;border:1px solid #d9cce3!important;background:#fff!important;color:#4a3466!important;-webkit-text-fill-color:#4a3466!important;font-weight:650;cursor:pointer;box-shadow:none}
+.focusInvitation .focusGiftActions .gc-entry .gc-launch:hover{background:#f6f0fb!important;color:#4a3466!important;box-shadow:none}
 .focusInvitation .focusGiftActions .focusGiftComplete{flex:1 1 100%;margin:0;text-align:center}
 .focusInvitation .guest-actions{flex-wrap:wrap;gap:8px}
 .focusInvitation .guest-actions>*{min-height:44px}
@@ -64,3 +65,18 @@
   .focusInvitation .guest-actions>*{flex:1 1 calc(50% - 8px)}
 }
 @media(prefers-reduced-motion:reduce){.focusInvitation *{scroll-behavior:auto;transition:none!important}}
+
+/* ---- Direct UPI / bank transfer: payment code, reference entry and receipt ---- */
+.directCode{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;padding:12px 14px;border-radius:14px;background:#f4eefb;border:1px dashed #b9a2dc;margin:0 0 12px}
+.directCode span{font-size:13px;color:#5c4e6b}
+.directCode strong{font-size:20px;letter-spacing:1.5px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#35205b}
+.directCode small{flex:1 1 100%;font-size:12px;color:#6f657b}
+.directReferenceRow{display:flex;gap:8px;align-items:stretch}
+.directReferenceRow input{flex:1;min-width:0;letter-spacing:.5px}
+.directReferenceRow button{flex:none;min-height:44px;padding:0 14px;border-radius:10px}
+.directNote{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.directNote strong{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.directStatus{display:inline-block;padding:6px 12px;border-radius:999px;font-weight:700;font-size:14px}
+.directStatus--pending{background:#fff4dc;color:#7a5200}
+.directReceiptActions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:center;margin:8px 0}
+.directReceiptActions>*{min-height:44px}

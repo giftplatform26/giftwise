@@ -6,7 +6,7 @@ import {useLocalizationRender} from './LocalizationProvider';
 import {useEffect,useState} from 'react';
 import {bootstrapCsrf} from '../lib/host-api.mjs';
 import {csrfToken} from '../lib/gift-api.mjs';
-const names:Record<string,string>={CELEBRATION_PLANNING:'Simple celebrations & optional gifting',EVENT_ESSENTIALS:'Venue details & calendar',EVENT_REUSE:'Repeat as a new draft'};
+const names:Record<string,string>={MEMORY_BOOK:'Printable memory book',EXPERIENCE_GIFTS:'Experience & charity wishes',WHATSAPP_MESSAGING:'WhatsApp invitations & replies',EVENT_FUNCTIONS:'Multi-function schedule',CO_HOSTS:'Co-hosts & gift-desk helpers',LIVE_WALL:'Live venue wall',SHAGUN_REGISTER:'Shagun / gift register',CELEBRATION_PLANNING:'Simple celebrations & optional gifting',EVENT_ESSENTIALS:'Venue details & calendar',EVENT_REUSE:'Repeat as a new draft'};
 type Grant={module:string;eventEnabled:boolean;hostAvailable:boolean;effectiveEnabled:boolean};
 export default function AdminEventModules({eventId}:{eventId:string}){useLocalizationRender();
  const [grants,setGrants]=useState<Grant[]>([]),[error,setError]=useState(''),[busy,setBusy]=useState(false),[opened,setOpened]=useState(false);

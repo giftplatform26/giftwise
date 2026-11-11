@@ -16,4 +16,10 @@ public class GuestVerifiedDestinationController {
   return ResponseEntity.ok().cacheControl(CacheControl.noStore()).header("X-Content-Type-Options","nosniff")
    .body(service.list(token));
  }
+ @GetMapping("/{token}/payment-qr")
+ public ResponseEntity<GuestVerifiedDestinationService.PaymentQr> paymentQr(@PathVariable UUID token,@RequestParam UUID destinationId,
+   @RequestParam long amountPaise,@RequestParam String code){
+  return ResponseEntity.ok().cacheControl(CacheControl.noStore()).header("X-Content-Type-Options","nosniff")
+   .body(service.paymentQr(token,destinationId,amountPaise,code));
+ }
 }

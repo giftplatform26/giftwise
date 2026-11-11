@@ -1,0 +1,33 @@
+.lw{--lw-bg:#14101c;--lw-ink:#fbf6ff;--lw-muted:#c9bdd6;--lw-accent:#f3c46b;--lw-card:#ffffff10;position:fixed;inset:0;display:grid;grid-template-rows:auto 1fr auto;gap:2vh;padding:4vh 5vw;background:var(--lw-bg);color:var(--lw-ink);font-family:Inter,ui-sans-serif,system-ui,sans-serif;overflow:hidden;cursor:none}
+.lw--night{background:radial-gradient(ellipse at 20% 0%,#3a2552 0%,transparent 55%),radial-gradient(ellipse at 90% 100%,#4a2a3c 0%,transparent 50%),#14101c}
+.lw--ivory{--lw-bg:#fbf7ef;--lw-ink:#2d2420;--lw-muted:#7a6a5d;--lw-accent:#9a6b2f;--lw-card:#ffffffcc;background:radial-gradient(ellipse at 10% 0%,#f3e6cf 0%,transparent 55%),#fbf7ef}
+.lw--festive{--lw-bg:#3b0f2a;--lw-ink:#fff8ee;--lw-muted:#ffd9c2;--lw-accent:#ffcf4d;--lw-card:#ffffff14;background:radial-gradient(circle at 15% 20%,#c2185b66 0%,transparent 40%),radial-gradient(circle at 85% 80%,#ff8f0055 0%,transparent 40%),linear-gradient(135deg,#3b0f2a,#5a1236)}
+.lwCenter{place-items:center;text-align:center;grid-template-rows:1fr}
+.lwCenter h1{font:500 clamp(28px,4vw,56px)/1.2 Georgia,serif;margin:.4em 0}
+.lwCenter p{color:var(--lw-muted);font-size:clamp(16px,1.6vw,24px)}
+.lwTop{display:flex;justify-content:space-between;align-items:flex-start;gap:3vw}
+.lwTop h1{margin:0;font:500 clamp(26px,3.6vw,60px)/1.15 Georgia,serif;letter-spacing:-.01em}
+.lwEyebrow{margin:0 0 .6vh;text-transform:uppercase;letter-spacing:.25em;font-size:clamp(11px,1vw,16px);font-weight:700;color:var(--lw-accent)}
+.lwOffline{font-size:14px;padding:6px 14px;border-radius:30px;background:#0006;color:#fff}
+.lwSlide{position:relative;display:grid;place-items:center;min-height:0;animation:lwIn .9s cubic-bezier(.2,.7,.2,1) both}
+.lwSlide figure{margin:0;max-width:min(1200px,88vw);text-align:center}
+.lwSlide blockquote{margin:0;font:400 clamp(28px,4.4vw,84px)/1.3 Georgia,serif;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;overflow:hidden}
+.lwSlide blockquote::before{content:'“';color:var(--lw-accent)}.lwSlide blockquote::after{content:'”';color:var(--lw-accent)}
+.lwSlide figcaption{margin-top:3vh;font-size:clamp(18px,2vw,36px);color:var(--lw-muted);font-weight:600}
+.lwSlide--photo{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:4vw;align-items:center}
+.lwSlide--photo img{width:100%;max-height:62vh;object-fit:contain;border-radius:2vh;box-shadow:0 30px 80px #0007;background:var(--lw-card)}
+.lwSlide--photo figure{text-align:left}
+.lwSlide--photo blockquote{font-size:clamp(22px,3vw,56px);-webkit-line-clamp:7}
+.lwNewBadge{position:absolute;top:0;left:50%;transform:translateX(-50%);padding:.5vh 1.4vw;border-radius:40px;background:var(--lw-accent);color:#241a10;font-weight:800;letter-spacing:.12em;text-transform:uppercase;font-size:clamp(12px,1.1vw,18px);animation:lwPulse 1.6s ease-in-out 3}
+.lwEmpty{display:grid;place-content:center;text-align:center}
+.lwEmpty h2{font:500 clamp(30px,4vw,68px)/1.2 Georgia,serif;margin:0}
+.lwEmpty p{color:var(--lw-muted);font-size:clamp(16px,1.8vw,28px)}
+.lwFoot{display:flex;justify-content:space-between;align-items:flex-end;gap:3vw}
+.lwDots{display:flex;gap:8px;flex-wrap:wrap;max-width:50vw}.lwDots span{width:8px;height:8px;border-radius:50%;background:var(--lw-muted);opacity:.35;transition:opacity .4s,transform .4s}.lwDots span.on{opacity:1;transform:scale(1.4);background:var(--lw-accent)}
+.lwJoin{display:flex;align-items:center;gap:16px;margin-left:auto;padding:12px 18px 12px 12px;border-radius:18px;background:var(--lw-card);backdrop-filter:blur(6px)}
+.lwJoin img{width:clamp(90px,9vw,150px);height:auto;border-radius:10px;background:#fff;padding:6px}
+.lwJoin p{margin:0;display:grid;gap:4px}.lwJoin strong{font-size:clamp(16px,1.5vw,26px)}.lwJoin span{color:var(--lw-muted);font-size:clamp(12px,1vw,18px)}
+@keyframes lwIn{from{opacity:0;transform:translateY(3vh) scale(.98)}to{opacity:1;transform:none}}
+@keyframes lwPulse{50%{transform:translateX(-50%) scale(1.08)}}
+@media(orientation:portrait){.lwSlide--photo{grid-template-columns:1fr;gap:3vh}.lwSlide--photo figure{text-align:center}.lwSlide--photo img{max-height:45vh}}
+@media(prefers-reduced-motion:reduce){.lwSlide,.lwNewBadge{animation:none}}

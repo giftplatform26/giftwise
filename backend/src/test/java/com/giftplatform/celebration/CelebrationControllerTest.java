@@ -33,7 +33,8 @@ class CelebrationControllerTest {
     events=mock(EventRepository.class);
     actor=mock(ActorContext.class);
     request=mock(HttpServletRequest.class);
-    controller=new CelebrationController(db,events,actor,mock(EffectiveModulePermissionService.class));
+    EffectiveModulePermissionService permissions=mock(EffectiveModulePermissionService.class);
+    controller=new CelebrationController(db,events,actor,permissions,new com.giftplatform.cohost.EventAccess(db,events,actor,permissions));
     token=UUID.randomUUID(); eventId=UUID.randomUUID(); ownerId=UUID.randomUUID();
     event=new Event("Birthday",OccasionType.BIRTHDAY);
     when(request.getRemoteAddr()).thenReturn("127.0.0.1");
@@ -81,7 +82,8 @@ class CelebrationControllerTest {
     when(actor.requireAuthenticatedUserId()).thenReturn(ownerId);
     when(events.findById(eventId)).thenReturn(Optional.of(event));
     assertEquals(404,assertThrows(ResponseStatusException.class,()->controller.moderate(eventId,UUID.randomUUID(),"APPROVED")).getStatusCode().value());
-    verifyNoInteractions(db);
+    // Only the read-only co-host lookup may run; nothing is written.
+    verify(db,never()).update(org.mockito.ArgumentMatchers.anyString(),org.mockito.ArgumentMatchers.<Object[]>any());
   }
   @Test void missingPublishedTokenReturns404() {
     when(events.findByPublicToken(token)).thenReturn(Optional.empty());

@@ -7,16 +7,18 @@ import {useLocalizationRender} from './LocalizationProvider';
 import {useEffect,useState} from 'react';
 import './guest-upi-qr.css';
 import {useExperience} from './ExperienceProvider';
+import {PAYMENT_CODE_PATTERN,paymentNote} from '../lib/direct-transfer.mjs';
 type Destination={id:string;method:'UPI'|'BANK';preferred:boolean;label:string;upiId:string|null;
   qrPngBase64:string|null;beneficiaryName:string|null;accountNumber:string|null;ifsc:string|null};
-export default function GuestVerifiedDestination({token,method,destinationId,onSelect,amountPaise,inlineQr=false}:{
-  token:string;method:'upi'|'bank';destinationId:string;onSelect:(id:string)=>void;amountPaise?:number;inlineQr?:boolean}){useLocalizationRender();
+export default function GuestVerifiedDestination({token,method,destinationId,onSelect,amountPaise,inlineQr=false,paymentCode=''}:{
+  token:string;method:'upi'|'bank';destinationId:string;onSelect:(id:string)=>void;amountPaise?:number;inlineQr?:boolean;paymentCode?:string}){useLocalizationRender();
   const {mode}=useExperience();const focused=mode==='FOCUSED'||inlineQr;const [copyNotice,setCopyNotice]=useState('');
   const [rows,setRows]=useState<Destination[]>([]);
   const [loading,setLoading]=useState(true);
   const [error,setError]=useState('');
   const [retry,setRetry]=useState(0);
   const [qrOpen,setQrOpen]=useState(false);
+  const [paymentQr,setPaymentQr]=useState<{qrPngBase64:string;upiLink:string}|null>(null);
   useEffect(()=>{let active=true;setLoading(true);setError('');
     fetch(`/backend/api/public/payments/verified-destinations/${encodeURIComponent(token)}`,
       {credentials:'same-origin',cache:'no-store'})
@@ -29,6 +31,18 @@ export default function GuestVerifiedDestination({token,method,destinationId,onS
   const eligible=rows.filter(d=>d.method===method.toUpperCase() && d.preferred && (method==='bank' || Boolean(d.qrPngBase64 && d.upiId)));
   const selected=eligible.find(d=>d.id===destinationId);
   useEffect(()=>{setQrOpen(method==='upi' && Boolean(selected?.qrPngBase64))},[method,selected?.id,selected?.qrPngBase64]);
+  // One-payment QR and link with the amount and payment code pre-filled (falls back to the host's plain QR).
+  const validAmount=!!amountPaise&&Number.isSafeInteger(amountPaise)&&amountPaise>=100;
+  useEffect(()=>{setPaymentQr(null);if(method!=='upi'||!selected||!validAmount||!PAYMENT_CODE_PATTERN.test(paymentCode))return;let active=true;
+    const query=new URLSearchParams({destinationId:selected.id,amountPaise:String(amountPaise),code:paymentCode});
+    fetch(`/backend/api/public/payments/verified-destinations/${encodeURIComponent(token)}/payment-qr?${query}`,{credentials:'same-origin',cache:'no-store'})
+      .then(r=>r.ok?r.json():null).then(value=>{if(active&&value&&typeof value.qrPngBase64==='string'&&/^upi:\/\/pay\?/.test(value.upiLink))setPaymentQr(value)}).catch(()=>{});
+    return()=>{active=false};
+  },[token,method,selected?.id,amountPaise,paymentCode,validAmount]);
+  const note=PAYMENT_CODE_PATTERN.test(paymentCode)?paymentNote(paymentCode):'';
+  const fallbackLink=`upi://pay?pa=${encodeURIComponent(selected?.upiId||'')}&cu=INR${validAmount?`&am=${(amountPaise!/100).toFixed(2)}`:''}${note?`&tn=${encodeURIComponent(note)}`:''}`;
+  const qrImage=paymentQr?.qrPngBase64||selected?.qrPngBase64||'';
+  function copy(text:string,done:string){trackedCopy(text).then(()=>setCopyNotice(done)).catch(()=>setCopyNotice('Select the text above to copy it.'))}
   useEffect(()=>{
     const preferred=eligible.find(d=>d.preferred)??eligible[0];
     if(!eligible.some(d=>d.id===destinationId))onSelect(preferred?.id??'');
@@ -45,7 +59,7 @@ export default function GuestVerifiedDestination({token,method,destinationId,onS
             {eligible.map(d=><option key={d.id} value={d.id}>{d.label}{d.preferred?localize("ui.3089404fe2df7d81",{defaultValue:" (Preferred)"}):''}</option>)}
           </select>
         </label>
-        {selected?.method==='UPI'&&selected.qrPngBase64&&focused&&<div className="focusInlineQr"><p>{localize("ui.dda0bcdd5e698853",{defaultValue:"UPI ID: "})}<strong>{selected.upiId}</strong></p><a className="focusPrimary" href={`upi://pay?pa=${encodeURIComponent(selected.upiId||'')}&cu=INR${amountPaise&&Number.isSafeInteger(amountPaise)&&amountPaise>0?`&am=${(amountPaise/100).toFixed(2)}`:''}`}>{localize("ui.ea08259d6058041b",{defaultValue:"Open UPI app"})}</a><details><summary>{localize("ui.25092f9e4517c617",{defaultValue:"Pay using another device"})}</summary><img src={`data:image/png;base64,${selected.qrPngBase64}`} alt={localize("ui.975f4798eb2bf5e0",{defaultValue:"Selected recipient UPI payment QR"})} width={240} height={240}/><a download="payment-qr.png" href={`data:image/png;base64,${selected.qrPngBase64}`}>{localize("ui.4f1a8fb78985c377",{defaultValue:"Save QR image"})}</a></details><button type="button" onClick={()=>trackedCopy(selected.upiId||'').then(()=>setCopyNotice('UPI ID copied.')).catch(()=>setCopyNotice('Select the UPI ID above to copy it.'))}>{localize("ui.56cab81c15312e7c",{defaultValue:"Copy UPI ID"})}</button>{copyNotice&&<p role="status">{copyNotice}</p>}<p className="finePrint">{localize("ui.424a9b44f3180dd2",{defaultValue:"Check the recipient and amount in your payment app. Return here with your transaction reference."})}</p></div>}
+        {selected?.method==='UPI'&&selected.qrPngBase64&&focused&&<div className="focusInlineQr"><p>{localize("ui.dda0bcdd5e698853",{defaultValue:"UPI ID: "})}<strong>{selected.upiId}</strong></p><a className="focusPrimary" href={paymentQr?.upiLink||fallbackLink}>{localize("ui.ea08259d6058041b",{defaultValue:"Open UPI app"})}</a><details><summary>{localize("ui.25092f9e4517c617",{defaultValue:"Pay using another device"})}</summary><img src={`data:image/png;base64,${qrImage}`} alt={localize("ui.975f4798eb2bf5e0",{defaultValue:"Selected recipient UPI payment QR"})} width={240} height={240}/>{paymentQr&&<p className="finePrint">{localizeText('This QR already includes the amount and your payment code.')}</p>}<a download="payment-qr.png" href={`data:image/png;base64,${qrImage}`}>{localize("ui.4f1a8fb78985c377",{defaultValue:"Save QR image"})}</a></details><button type="button" onClick={()=>copy(selected.upiId||'','UPI ID copied.')}>{localize("ui.56cab81c15312e7c",{defaultValue:"Copy UPI ID"})}</button>{copyNotice&&<p role="status">{localizeText(copyNotice)}</p>}<p className="finePrint">{note?localizeText('Keep the note “{{note}}” in your UPI app so the host can find your payment. Then come back here with the 12-digit UPI reference.').replace('{{note}}',note):localize("ui.424a9b44f3180dd2",{defaultValue:"Check the recipient and amount in your payment app. Return here with your transaction reference."})}</p></div>}
         {selected?.method==='UPI'&&selected.qrPngBase64&&!focused&&<div>
           <button type="button" onClick={()=>setQrOpen(true)}>{localize("ui.a3c4e7c1a522f3dc",{defaultValue:"Show UPI QR"})}</button>
           {!focused&&qrOpen&&<div className="guestUpiQrOverlay" role="presentation" onClick={()=>setQrOpen(false)}>
@@ -63,6 +77,8 @@ export default function GuestVerifiedDestination({token,method,destinationId,onS
           <p>{localize("ui.c869ac7b408d76c2",{defaultValue:"Beneficiary: "})}<strong>{selected.beneficiaryName}</strong></p>
           <p>{localize("ui.883ceeb999b93b8b",{defaultValue:"Account number: "})}<strong>{selected.accountNumber}</strong></p>
           <p>{localize("ui.0e467d616fa1b829",{defaultValue:"IFSC: "})}<strong>{selected.ifsc}</strong></p>
+          {note&&<p className="directNote">{localizeText('Add this to the transfer remarks:')} <strong>{note}</strong> <button type="button" onClick={()=>copy(note,'Remarks copied.')}>{localizeText('Copy')}</button></p>}
+          {copyNotice&&<p role="status">{localizeText(copyNotice)}</p>}
           <p>{localize("ui.50a6acb0ce6978cc",{defaultValue:"Use your banking app to make the transfer. Keep the UTR for confirmation."})}</p>
         </div>}
       </>}

@@ -78,6 +78,17 @@ public final class UpiQrPayload {
             "&pn=" + encode(payeeName.trim()) + "&cu=INR";
     }
 
+    /**
+     * Build a single-payment link/QR with the amount and a note (e.g. "GiftWise GW-7K3P9Q") pre-filled.
+     * Guests can still edit them in their UPI app; the host confirms receipt separately.
+     */
+    public static String generatePayment(String verifiedUpiId, String payeeName, long amountPaise, String note) {
+        if (amountPaise < 100 || amountPaise > 100_000_000L) throw new IllegalArgumentException("Invalid amount");
+        if (note == null || !note.matches("[A-Za-z0-9 \\-]{1,50}")) throw new IllegalArgumentException("Invalid note");
+        String amount = java.math.BigDecimal.valueOf(amountPaise, 2).toPlainString();
+        return generate(verifiedUpiId, payeeName) + "&am=" + amount + "&tn=" + encode(note);
+    }
+
     private static String decode(String value) {
         try { return URLDecoder.decode(value, StandardCharsets.UTF_8); }
         catch (IllegalArgumentException ex) { throw new IllegalArgumentException("Malformed UPI encoding"); }

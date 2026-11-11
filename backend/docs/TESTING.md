@@ -49,3 +49,13 @@ Do not disable PostgreSQL tests or replace them with an in-memory database to ma
 - Fresh PostgreSQL databases successfully applied all 106 migrations.
 - The readiness consent SQL migration is V106; the existing V102 Java stationery migration is unchanged. Use a clean build once after updating to remove old compiled test classes and the stale V102 SQL resource.
 - These results cover the listed targets, not a claim that every integration class has been run.
+
+## Growth features suites (2026-11-11)
+
+Targeted integration suites for the G1–G4 features (Docker required):
+
+```sh
+./mvnw test -Dtest='LiveWallRegisterLedgerIntegrationTest,CoHostFunctionsIntegrationTest,WhatsAppIntegrationTest,GrowthBatchFourIntegrationTest'
+```
+
+They cover the platform/host/event switches, co-host roles, register idempotency and CSV safety, WhatsApp webhook signatures and opt-outs, referral rules, yearly re-hosting and the charity payment guard. The WhatsApp suite disables the background worker and calls it directly.

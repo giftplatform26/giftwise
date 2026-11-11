@@ -41,7 +41,7 @@ public class PublicGiftProgressController {
               JOIN guest_direct_transfer_claims cl ON cl.id=a.claim_id
               JOIN gifts g ON g.id=a.gift_id AND g.event_id=a.event_id
               WHERE a.event_id=? AND a.gift_id IS NOT NULL
-                AND cl.status='AWAITING_VERIFICATION'
+                AND cl.status IN ('AWAITING_VERIFICATION','HOST_CONFIRMED')
                 AND g.status='ACTIVE' AND g.visibility='PUBLIC'
               GROUP BY a.gift_id
             ) combined

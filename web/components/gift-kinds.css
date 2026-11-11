@@ -1,0 +1,12 @@
+.gkBadge{display:inline-block;margin-bottom:6px;padding:3px 10px;border-radius:30px;font-size:12px;font-weight:700;letter-spacing:.02em}
+.gkBadge--experience{background:#efe7fb;color:#4b2a86}.gkBadge--charity{background:#e6f4ec;color:#1f5b33}
+.gkCharity{display:grid;gap:6px;width:100%}.gkCharity a{justify-content:center;text-decoration:none}.gkCharity small{font-size:12px;color:var(--focus-muted,#66565e)}
+.gkToggle{background:none;border:1px dashed #cdb9c5;border-radius:20px;padding:4px 12px;font-size:12px;cursor:pointer;color:#5b2e46}
+.gkEditor{display:grid;gap:8px;padding:10px;border:1px solid #e6dfe2;border-radius:12px;background:#fcf9fb;margin-top:8px}
+.gkEditor input{width:100%;padding:8px 10px;border:1px solid #c5b8bf;border-radius:8px}.gkEditor small{color:#66565e;font-size:12px}
+.gkKinds{display:flex;gap:4px;padding:3px;border-radius:10px;background:#f1e9ee;width:fit-content}
+.gkKinds label{position:relative}.gkKinds input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.gkKinds span{display:block;padding:6px 12px;border-radius:8px;font-size:13px;cursor:pointer}
+.gkKinds input:checked+span{background:#fff;font-weight:700;color:#5b2e46;box-shadow:0 1px 3px #0002}
+.gkKinds input:focus-visible+span{outline:3px solid #81566d;outline-offset:2px}
+.gkActions{display:flex;gap:8px}

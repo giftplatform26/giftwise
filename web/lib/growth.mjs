@@ -5,7 +5,8 @@ export const GROWTH_FEATURES={
  SHARE_PREVIEWS:['Rich sharing previews','Allow hosts to opt in to title, occasion and date previews in messaging services.'],
  PUBLIC_KEEPSAKES:['Shareable approved-wishes keepsakes','Allow hosts to share approved guestbook messages after an event. Private albums and photos remain private.'],
  GUEST_DISCOVERY:['Guest discovery link','Show an unobtrusive create-your-own invitation link on guest pages.'],
- INTERACTION_ANALYTICS:['Optional interaction analytics','Allow consented browser and server interaction collection. Disabling stops new collection; existing reports remain.']
+ INTERACTION_ANALYTICS:['Optional interaction analytics','Allow consented browser and server interaction collection. Disabling stops new collection; existing reports remain.'],
+ CUSTOM_RECEIPTS:['Custom guest receipts','Let hosts design branded receipts (layout, colours, logo, header and footer) and turn them on per event. Every guest payment always gets a unique receipt number.']
 };
 export function normalizeGrowth(value){return Object.fromEntries(Object.keys(GROWTH_FEATURES).map(key=>[key,value?.features?.[key]===true]));}
 export const occasionStarters={

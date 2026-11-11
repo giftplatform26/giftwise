@@ -21,7 +21,7 @@ public class EffectiveModulePermissionService {
  }
  public Map<String,Boolean> modules(UUID hostId){
   Map<String,Boolean> result=new LinkedHashMap<>();
-  for(String code:List.of("GROUP_GIFTING","GUEST_GIFTS","RSVP","GUEST_ATTENDANCE","WHATSAPP_SHARING","GUESTBOOK","SOCIAL_SHARING","MEMORY_ALBUM","AI_INVITATION","CELEBRATION_PLANNING","EVENT_ESSENTIALS","EVENT_REUSE"))result.put(code,false);
+  for(String code:List.of("GROUP_GIFTING","GUEST_GIFTS","RSVP","GUEST_ATTENDANCE","WHATSAPP_SHARING","GUESTBOOK","SOCIAL_SHARING","MEMORY_ALBUM","AI_INVITATION","CELEBRATION_PLANNING","EVENT_ESSENTIALS","EVENT_REUSE","LIVE_WALL","SHAGUN_REGISTER","GIFT_LEDGER","EVENT_FUNCTIONS","CO_HOSTS","WHATSAPP_MESSAGING","OCCASION_REMINDERS","HOST_REFERRALS","YEARLY_REHOST","MEMORY_BOOK","VENDOR_DIRECTORY","EXPERIENCE_GIFTS"))result.put(code,false);
   if(hostId==null)return Map.copyOf(result);
   db.query("SELECT p.module_code,(p.enabled AND COALESCE(h.enabled,FALSE)) AS enabled FROM platform_module_controls p LEFT JOIN platform_host_module_grants h ON h.module_code=p.module_code AND h.host_id=?",
     (org.springframework.jdbc.core.RowCallbackHandler)rs->{String code=rs.getString("module_code");if(result.containsKey(code))result.put(code,rs.getBoolean("enabled"));},hostId);
@@ -36,7 +36,7 @@ public class EffectiveModulePermissionService {
  }
  public Map<String,Boolean> eventModules(UUID hostId,UUID eventId){
   var result=new LinkedHashMap<>(modules(hostId));result.put("MEMORY_ALBUM",albumEnabled(hostId,eventId));result.put("AI_INVITATION",aiInvitationEnabled(hostId,eventId));
-  for(String code:java.util.List.of("CELEBRATION_PLANNING","EVENT_ESSENTIALS","EVENT_REUSE"))result.put(code,eventEnabled(hostId,eventId,code));
+  for(String code:EventModuleGrantsController.CODES)result.put(code,eventEnabled(hostId,eventId,code));
   boolean gifting=Boolean.TRUE.equals(db.queryForObject("SELECT EXISTS(SELECT 1 FROM events WHERE id=? AND owner_id=? AND gifting_enabled)",Boolean.class,eventId,hostId));
   result.put("GIFTING_ENABLED",gifting);
   if(!gifting){result.put("GROUP_GIFTING",false);result.put("GUEST_GIFTS",false);}

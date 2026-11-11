@@ -24,6 +24,8 @@ public class PaymentControlService {
         return effective((UUID)rows.getFirst().get("owner_id"),eventId);
     }
     public Map<String,Boolean> host(UUID hostId){return effective(hostId,null);}
+    /** Platform-wide channel settings, before any host or event override. */
+    public Map<String,Boolean> platform(){return effective(null,null);}
     private Map<String,Boolean> effective(UUID host,UUID event){
         var rows=db.queryForList("SELECT scope,channel,enabled FROM payment_channel_controls WHERE (scope='PLATFORM' AND scope_id=?) OR (scope='HOST' AND scope_id=?) OR (scope='EVENT' AND scope_id=?)",PLATFORM,host,event);
         Map<String,Boolean> result=new LinkedHashMap<>();

@@ -12,6 +12,7 @@ import {useEffect,useRef,useState} from 'react';
 import {useExperience} from './ExperienceProvider';
 import FocusedCheckout from './focused/Checkout';
 import GuestVerifiedDestination from './GuestVerifiedDestination';
+import {newPaymentCode,normaliseReference,referenceProblem} from '../lib/direct-transfer.mjs';
 
 type Gift = {id:string;name:string;targetAmount:number};
 type Checkout = {localOrderId:string;razorpayOrderId:string;razorpayKeyId:string;amountPaise:number;currency:string;status:string;platformFeePaise:number;hostReceivesPaise:number};
@@ -80,16 +81,11 @@ export default function GuestContributionCheckout({token,gifts,selectedGiftId=''
   const availableDirect=directDestinations.filter(d=>d.available);
   // Direct transfers remain unavailable unless the server explicitly offers an eligible destination.
   const canUseDirect=(method:'upi'|'bank')=>availableDirect.some(d=>d.method===method.toUpperCase());
+  const [paymentCode]=useState(()=>newPaymentCode());
+  const [directReceipt,setDirectReceipt]=useState<{receiptToken:string;paymentCode:string}|null>(null);
   const referenceValue=transferReference.trim();
-  const referenceError=!referenceValue
-    ? 'Enter the UPI transaction ID or bank UTR after completing the transfer.'
-    : referenceValue.length<8
-      ? 'Transaction reference is too short. Enter 8–40 characters using letters, numbers, or hyphens.'
-      : referenceValue.length>40
-        ? 'Transaction reference is too long. Maximum 40 characters.'
-        : !/^[A-Za-z0-9-]{8,40}$/.test(referenceValue)
-          ? 'Transaction reference can contain only letters, numbers, and hyphens (no spaces or symbols).'
-          : '';
+  // UPI references are exactly 12 digits; bank references vary (validated the same way on the server).
+  const referenceError=referenceProblem(paymentMethod==='upi'?'upi':'bank',referenceValue);
   async function reportDirectPayment(){
     if(!eventId||!validAmount||!name.trim()||busy||!directDestinationId||!canUseDirect(paymentMethod==='upi'?'upi':'bank')||!transferReference.trim())return;
     if(referenceError){setError(referenceError);return;}
@@ -97,10 +93,11 @@ export default function GuestContributionCheckout({token,gifts,selectedGiftId=''
     recordFlow('guest_contribution','started');setBusy(true);setError('');setDirectStatus('');
     try{
       if(!requestKey.current)requestKey.current=crypto.randomUUID();
-      const result=await json<{claimId:string;status:string;message:string}>(`/backend/api/public/payments/direct/${encodeURIComponent(token)}/claims`,{
+      const result=await json<{claimId:string;status:string;message:string;receiptToken?:string;paymentCode?:string}>(`/backend/api/public/payments/direct/${encodeURIComponent(token)}/claims`,{
         method:'POST',headers:await csrfHeader(),body:JSON.stringify({destinationId:directDestinationId,
           method:paymentMethod==='upi'?'UPI':'BANK',giftId:giftId||null,amountPaise,
-          guestName:name.trim(),guestEmail:email.trim()||null,guestPhone:phone.trim()||null,transactionReference:transferReference.trim(),idempotencyKey:requestKey.current})});
+          guestName:name.trim(),guestEmail:email.trim()||null,guestPhone:phone.trim()||null,transactionReference:transferReference.trim(),idempotencyKey:requestKey.current,paymentCode})});
+      setDirectReceipt({receiptToken:result.receiptToken||'',paymentCode:result.paymentCode||paymentCode});
       completeAction(interaction,'SUCCESS','TRANSFER_REPORT_SUBMITTED_UNVERIFIED');recordFlow('guest_contribution','submitted_unverified');setDirectStatus(`Thank you for sharing your love! Your gift details have been submitted successfully. Reference: ${result.claimId}`);
     }catch(e){completeAction(interaction,'FAILURE','TRANSFER_REPORT_FAILED');recordFlow('guest_contribution','failed');setError(e instanceof Error?e.message:'Unable to submit payment report')}
     finally{setBusy(false)}
@@ -137,7 +134,7 @@ export default function GuestContributionCheckout({token,gifts,selectedGiftId=''
       onProviderVisibilityChange?.(true);instance.open();
     }catch(e){completeAction(interaction,'FAILURE','CHECKOUT_REQUEST_FAILED');setPricing(null);setPricingError('Checkout could not start. Refresh fees before retrying.');onProviderVisibilityChange?.(false);recordFlow('guest_contribution','failed');setError(e instanceof Error?e.message:'Unable to start payment');setBusy(false)}
   }
-  if(mode==='FOCUSED')return <><div aria-live="polite">{destinationsLoading&&<p role="status">{localize("ui.587f32a685d7c85e",{defaultValue:"Loading payment methods…"})}</p>}{destinationsError&&<p role="alert">{destinationsError} <button type="button" onClick={()=>setDestinationRetry(v=>v+1)}>{localize("ui.942087cc2d41e013",{defaultValue:"Retry"})}</button></p>}</div><FocusedCheckout token={token} amount={amount} name={name} email={email} phone={phone} method={paymentMethod} busy={busy} error={error} valid={validAmount} ready={!!eventId&&quoteReady&&razorpayAllowed} razorpayAllowed={razorpayAllowed} pricingNotice={pricingNotice} totalPaise={pricing?.totalPaise} gift={!!giftId} destination={directDestinationId} reference={transferReference} referenceError={referenceError} reported={directStatus} receipt={receipt} available={canUseDirect} setAmount={v=>{setAmount(v);requestKey.current=''}} setName={v=>{setName(v);requestKey.current=''}} setEmail={v=>{setEmail(v);requestKey.current=''}} setPhone={v=>{setPhone(v);requestKey.current=''}} setMethod={v=>{setPaymentMethod(v);setDirectDestinationId('');setDirectStatus('');requestKey.current=''}} setDestination={v=>{setDirectDestinationId(v);requestKey.current='';setDirectStatus('')}} setReference={v=>{setTransferReference(v);requestKey.current='';setError('')}} submit={submit} report={()=>void reportDirectPayment()} close={onClose}/></>;
+  if(mode==='FOCUSED')return <><div aria-live="polite">{destinationsLoading&&<p role="status">{localize("ui.587f32a685d7c85e",{defaultValue:"Loading payment methods…"})}</p>}{destinationsError&&<p role="alert">{destinationsError} <button type="button" onClick={()=>setDestinationRetry(v=>v+1)}>{localize("ui.942087cc2d41e013",{defaultValue:"Retry"})}</button></p>}</div><FocusedCheckout token={token} amount={amount} name={name} email={email} phone={phone} method={paymentMethod} busy={busy} error={error} valid={validAmount} ready={!!eventId&&quoteReady&&razorpayAllowed} razorpayAllowed={razorpayAllowed} pricingNotice={pricingNotice} totalPaise={pricing?.totalPaise} gift={!!giftId} destination={directDestinationId} reference={transferReference} referenceError={referenceError} reported={directStatus} paymentCode={paymentCode} directReceipt={directReceipt} receipt={receipt} available={canUseDirect} setAmount={v=>{setAmount(v);requestKey.current=''}} setName={v=>{setName(v);requestKey.current=''}} setEmail={v=>{setEmail(v);requestKey.current=''}} setPhone={v=>{setPhone(v);requestKey.current=''}} setMethod={v=>{setPaymentMethod(v);setDirectDestinationId('');setDirectStatus('');requestKey.current=''}} setDestination={v=>{setDirectDestinationId(v);requestKey.current='';setDirectStatus('')}} setReference={v=>{setTransferReference(normaliseReference(paymentMethod==='upi'?'upi':'bank',v));requestKey.current='';setError('')}} submit={submit} report={()=>void reportDirectPayment()} close={onClose}/></>;
   return <section id="contribute" aria-label={localize("ui.f03be6fa028cbdd8",{defaultValue:"Contribute to celebration"})} className="loveCheckout">
     <div className="loveCheckoutHeader"><div><h2>{localize("ui.c643cf7e27505d20",{defaultValue:"Share a Gift with Love ❤️"})}</h2><p>{localize("ui.ecf968003d31f7a8",{defaultValue:"Razorpay: card, UPI and netbanking · Direct transfers to the host when enabled"})}</p></div>{onClose&&<button type="button" onClick={onClose} aria-label={localize("ui.cd1fde315c4e8998",{defaultValue:"Close contribution popup"})} className="loveModalClose">✕</button>}</div>
     {directStatus?<div role="status" className="loveCheckoutReceipt">

@@ -1,0 +1,39 @@
+/* Host-designed guest receipts. --receipt-accent is set per receipt. Four layouts share one structure. */
+.customReceipt{--receipt-accent:#6336b5;position:relative;width:100%;max-width:520px;margin:0 auto;background:#fff;color:#2c2233;border-radius:20px;overflow:hidden;
+  border:1px solid #e3d9ec;border:1px solid color-mix(in srgb,var(--receipt-accent) 25%,#fff);box-shadow:0 16px 44px #2c223318;font-size:15px;line-height:1.5}
+.customReceiptHeader{padding:28px 24px 20px;text-align:center;background:#f6f2fb;background:color-mix(in srgb,var(--receipt-accent) 10%,#fff)}
+.customReceiptLogo{display:block;margin:0 auto 12px;max-width:96px;max-height:96px;width:auto;height:auto;object-fit:contain}
+.customReceiptTitle{margin:0;font-size:12px;letter-spacing:2px;text-transform:uppercase;font-weight:800;color:var(--receipt-accent)}
+.customReceiptHeader h2{margin:8px 0 2px;font-size:clamp(22px,5.5vw,30px);line-height:1.2;overflow-wrap:anywhere}
+.customReceiptSubtext{margin:0;color:#6b5f74;overflow-wrap:anywhere}
+.customReceiptPending{margin:0;padding:8px 16px;text-align:center;font-weight:700;font-size:13px;background:#fff4dc;color:#7a5200;border-block:1px dashed #e9c66f}
+.customReceiptAmount{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:18px 24px;border-bottom:1px solid #f0eaf3}
+.customReceiptAmount span{color:#6b5f74}.customReceiptAmount strong{font-size:clamp(26px,7vw,34px);color:var(--receipt-accent)}
+.customReceiptRows{margin:0;padding:8px 24px 4px}
+.customReceiptRows div{display:flex;justify-content:space-between;gap:16px;padding:8px 0;border-bottom:1px dotted #e6dfeb}
+.customReceiptRows dt{color:#6b5f74;flex:none}.customReceiptRows dd{margin:0;text-align:right;font-weight:600;overflow-wrap:anywhere}
+.customReceiptThanks{margin:16px 24px 0;font-style:italic;text-align:center;white-space:pre-line;overflow-wrap:anywhere}
+.customReceiptSignature{margin:18px 24px 0;text-align:right}
+.customReceiptSignature span{display:inline-block;min-width:160px;padding-top:6px;border-top:1px solid #b9adc2;font-weight:600;text-align:center}
+.customReceiptFooter{margin-top:20px;padding:16px 24px 22px;background:#faf8fb;border-top:1px solid #f0eaf3;text-align:center}
+.customReceiptFooter p{margin:0 0 6px;white-space:pre-line;overflow-wrap:anywhere}
+.customReceiptFine{font-size:11px;color:#8a7f93}
+
+/* Elegant: serif, thin accent rules, gold-friendly. */
+.customReceipt--elegant{font-family:Georgia,'Times New Roman',serif;border-radius:6px}
+.customReceipt--elegant .customReceiptHeader{background:#fff;border-bottom:3px double var(--receipt-accent)}
+.customReceipt--elegant .customReceiptTitle{letter-spacing:4px;font-weight:600}
+/* Festive: bold colour band and confetti dots. */
+.customReceipt--festive .customReceiptHeader{background:var(--receipt-accent);color:#fff;
+  background-image:radial-gradient(#ffffff40 2px,transparent 2.5px),radial-gradient(#ffffff26 3px,transparent 3.5px);background-size:28px 28px,46px 46px;background-position:0 0,14px 20px}
+.customReceipt--festive .customReceiptTitle,.customReceipt--festive .customReceiptSubtext{color:#fffffff0}
+.customReceipt--festive .customReceiptFooter{background:#faf6fc;background:color-mix(in srgb,var(--receipt-accent) 8%,#fff)}
+/* Minimal: no fills, left aligned, like a clean invoice. */
+.customReceipt--minimal{border-radius:4px;box-shadow:none;border-color:#ddd}
+.customReceipt--minimal .customReceiptHeader{background:#fff;text-align:left;border-bottom:2px solid var(--receipt-accent)}
+.customReceipt--minimal .customReceiptLogo{margin:0 0 10px}
+.customReceipt--minimal .customReceiptFooter{background:#fff;text-align:left}
+
+.customReceipt--preview{pointer-events:none}
+@media(max-width:420px){.customReceiptHeader,.customReceiptAmount,.customReceiptRows,.customReceiptFooter{padding-inline:16px}.customReceiptThanks,.customReceiptSignature{margin-inline:16px}}
+@media print{.customReceipt{box-shadow:none;max-width:none;break-inside:avoid;-webkit-print-color-adjust:exact;print-color-adjust:exact}}

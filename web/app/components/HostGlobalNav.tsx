@@ -10,7 +10,7 @@ import HostWorkspace from '../../components/HostWorkspace';
 import FocusedHostShell from '../../components/focused/HostShell';
 function HostNavigation({children}:{children:ReactNode}){useLocalizationRender();
  const path=usePathname(),{mode}=useExperience();
- const host=path==='/studio'||path==='/dashboard'||path==='/events'||path.startsWith('/events/')||path==='/gifts'||path.startsWith('/host/');
+ const host=path==='/studio'||path==='/dashboard'||path==='/events'||path.startsWith('/events/')||path==='/gifts'||path==='/ledger'||path==='/reminders'||path==='/referrals'||path==='/vendors'||path==='/helping'||path.startsWith('/helping/')||path.startsWith('/host/');
  if(!host)return <>{children}</>;
  return <HostWorkspace>{mode==='FOCUSED'?<FocusedHostShell>{children}</FocusedHostShell>:children}</HostWorkspace>;
 }

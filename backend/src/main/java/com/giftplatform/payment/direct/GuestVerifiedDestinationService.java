@@ -80,4 +80,17 @@ public class GuestVerifiedDestinationService {
     },host,owners.get(0)[0]);
   return controls==null?List.copyOf(out):out.stream().filter(d->Boolean.TRUE.equals(controls.event(owners.get(0)[0]).get(d.method()))).toList();
  }
+ public record PaymentQr(String qrPngBase64,String upiLink){}
+ /** QR and UPI link for one contribution with the amount and payment code pre-filled; only for an eligible UPI destination. */
+ @Transactional(readOnly=true)
+ public PaymentQr paymentQr(UUID token,UUID destinationId,long amountPaise,String paymentCode){
+  if(destinationId==null||paymentCode==null||!paymentCode.matches(GuestDirectTransferService.PAYMENT_CODE)||amountPaise<100||amountPaise>100_000_000L)
+   throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid payment details");
+  Destination upi=list(token).stream().filter(d->"UPI".equals(d.method())&&destinationId.equals(d.id())).findFirst()
+   .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"Eligible UPI destination unavailable"));
+  String note="GiftWise "+paymentCode;
+  String link=com.giftplatform.hostpayment.qr.UpiQrPayload.generatePayment(upi.upiId(),"Gift recipient",amountPaise,note);
+  byte[] png=UpiQrImageCodec.generatePaymentPng(upi.upiId(),"Gift recipient",amountPaise,note);
+  return new PaymentQr(Base64.getEncoder().encodeToString(png),link);
+ }
 }

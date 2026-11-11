@@ -32,8 +32,8 @@ public class HostContributionReportService {
     if(!"ALL".equals(status) && !status.equals(e.verificationStatus())) return false;
     return switch(type) {
       case "ALL" -> true;
-      case "GIFT" -> e.giftPaise()>0 || ("VERIFICATION_PENDING".equals(e.verificationStatus()) && e.giftId()!=null);
-      case "WALLET" -> e.walletPaise()>0 || ("VERIFICATION_PENDING".equals(e.verificationStatus()) && e.giftId()==null);
+      case "GIFT" -> e.giftPaise()>0 || (Set.of("VERIFICATION_PENDING","HOST_CONFIRMED").contains(e.verificationStatus()) && e.giftId()!=null);
+      case "WALLET" -> e.walletPaise()>0 || (Set.of("VERIFICATION_PENDING","HOST_CONFIRMED").contains(e.verificationStatus()) && e.giftId()==null);
       default -> false;
     };
   }
@@ -99,7 +99,7 @@ public class HostContributionReportService {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Search must be at most 120 characters");
     if(eventId==null || limit<1 || limit>100 || offset<0 || offset>100000 ||
       !Set.of("ALL","GIFT","WALLET").contains(type) ||
-      !Set.of("ALL","VERIFICATION_PENDING","VERIFIED","FAILED","CANCELLED").contains(status))
+      !Set.of("ALL","VERIFICATION_PENDING","HOST_CONFIRMED","VERIFIED","FAILED","CANCELLED").contains(status))
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid report filters");
     if(from!=null && to!=null && from.isAfter(to))
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid date range");
@@ -122,8 +122,8 @@ public class HostContributionReportService {
     }
     if(giftId!=null){filter.append(" AND gift_id=?");args.add(giftId);}
     if(!"ALL".equals(status)){filter.append(" AND verification_status=?");args.add(status);}
-    if("GIFT".equals(type))filter.append(" AND (gift_paise>0 OR (verification_status='VERIFICATION_PENDING' AND gift_id IS NOT NULL))");
-    if("WALLET".equals(type))filter.append(" AND (wallet_paise>0 OR (verification_status='VERIFICATION_PENDING' AND gift_id IS NULL))");
+    if("GIFT".equals(type))filter.append(" AND (gift_paise>0 OR (verification_status IN ('VERIFICATION_PENDING','HOST_CONFIRMED') AND gift_id IS NOT NULL))");
+    if("WALLET".equals(type))filter.append(" AND (wallet_paise>0 OR (verification_status IN ('VERIFICATION_PENDING','HOST_CONFIRMED') AND gift_id IS NULL))");
     if(from!=null){filter.append(" AND created_at>=?");args.add(from.atStartOfDay().atOffset(java.time.ZoneOffset.UTC));}
     if(to!=null){filter.append(" AND created_at<?");args.add(to.plusDays(1).atStartOfDay().atOffset(java.time.ZoneOffset.UTC));}
     String gp="WALLET".equals(type)?"0":"gift_paise";
@@ -132,12 +132,12 @@ public class HostContributionReportService {
     String pendingIncluded="ALL".equals(type)?included:
       "CASE WHEN source='RAZORPAY' AND ("+included+")=0 AND gift_id IS "+("GIFT".equals(type)?"NOT NULL":"NULL")+" THEN amount_paise ELSE "+included+" END";
     String aggregate="SELECT count(*) AS matching_count, "+
-      "COALESCE(SUM("+pendingIncluded+") FILTER (WHERE verification_status='VERIFICATION_PENDING'),0) AS pending, "+
+      "COALESCE(SUM("+pendingIncluded+") FILTER (WHERE verification_status IN ('VERIFICATION_PENDING','HOST_CONFIRMED')),0) AS pending, "+
       "COALESCE(SUM("+included+") FILTER (WHERE verification_status='VERIFIED'),0) AS verified, "+
       "COALESCE(SUM("+gp+") FILTER (WHERE verification_status='VERIFIED'),0) AS gift, "+
       "COALESCE(SUM("+wp+") FILTER (WHERE verification_status='VERIFIED'),0) AS wallet, "+
-      "COALESCE(SUM("+gp+") FILTER (WHERE verification_status='VERIFICATION_PENDING' AND source IN ('MANUAL','GROUP')),0) AS reported_gift, "+
-      "COALESCE(SUM("+wp+") FILTER (WHERE verification_status='VERIFICATION_PENDING' AND source IN ('MANUAL','GROUP')),0) AS reported_wallet FROM report_rows";
+      "COALESCE(SUM("+gp+") FILTER (WHERE verification_status IN ('VERIFICATION_PENDING','HOST_CONFIRMED') AND source IN ('MANUAL','GROUP')),0) AS reported_gift, "+
+      "COALESCE(SUM("+wp+") FILTER (WHERE verification_status IN ('VERIFICATION_PENDING','HOST_CONFIRMED') AND source IN ('MANUAL','GROUP')),0) AS reported_wallet FROM report_rows";
     long[] totals=jdbc.queryForObject(rows+aggregate+filter,(rs,i)->new long[]{rs.getLong("matching_count"),rs.getLong("pending"),rs.getLong("verified"),rs.getLong("gift"),rs.getLong("wallet"),rs.getLong("reported_gift"),rs.getLong("reported_wallet")},args.toArray());
     List<Object> pageArgs=new ArrayList<>(args);pageArgs.add(limit);pageArgs.add(offset);
     List<Entry> entries=jdbc.query(rows+"SELECT * FROM report_rows"+filter+" ORDER BY created_at DESC,id DESC LIMIT ? OFFSET ?",
@@ -149,7 +149,7 @@ public class HostContributionReportService {
     // Selected gift progress remains independent of report filters and pagination.
     long[] selected=giftId==null?new long[]{0,0}:jdbc.queryForObject(rows+
       "SELECT COALESCE(SUM(gift_paise) FILTER (WHERE verification_status='VERIFIED'),0), "+
-      "COALESCE(SUM(gift_paise) FILTER (WHERE verification_status='VERIFICATION_PENDING' AND source IN ('MANUAL','GROUP')),0) FROM report_rows WHERE gift_id=?",
+      "COALESCE(SUM(gift_paise) FILTER (WHERE verification_status IN ('VERIFICATION_PENDING','HOST_CONFIRMED') AND source IN ('MANUAL','GROUP')),0) FROM report_rows WHERE gift_id=?",
       (rs,i)->new long[]{rs.getLong(1),rs.getLong(2)},eventId,eventId,eventId,giftId);
     return new Report(eventId,totals[1],totals[2],totals[3],totals[4],entries,gifts,giftId,target,
       totals[0],totals[5],totals[6],selected[0],selected[1]);
@@ -189,6 +189,7 @@ public class HostContributionReportService {
                COALESCE(a.wallet_paise,cl.amount_paise),
                CASE WHEN cl.status='REJECTED' THEN 'FAILED'
                     WHEN cl.status='EXPIRED' THEN 'CANCELLED'
+                    WHEN cl.status='HOST_CONFIRMED' THEN 'HOST_CONFIRMED'
                     ELSE 'VERIFICATION_PENDING' END,
                cl.created_at
         FROM guest_direct_transfer_claims cl

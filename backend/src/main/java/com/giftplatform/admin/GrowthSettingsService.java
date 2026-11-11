@@ -10,7 +10,7 @@ import java.util.*;
 
 @Service
 public class GrowthSettingsService {
- public static final Set<String> CODES=Set.of("OCCASION_STARTERS","SMART_DASHBOARD","PUBLIC_DEMO","SHARE_PREVIEWS","GUEST_DISCOVERY","PUBLIC_KEEPSAKES","INTERACTION_ANALYTICS");
+ public static final Set<String> CODES=Set.of("OCCASION_STARTERS","SMART_DASHBOARD","PUBLIC_DEMO","SHARE_PREVIEWS","GUEST_DISCOVERY","PUBLIC_KEEPSAKES","INTERACTION_ANALYTICS","CUSTOM_RECEIPTS");
  private final JdbcTemplate db;
  private final ActorContext actor;
  public GrowthSettingsService(JdbcTemplate db,ActorContext actor){this.db=db;this.actor=actor;}

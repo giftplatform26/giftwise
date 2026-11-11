@@ -37,8 +37,16 @@ public final class UpiQrImageCodec {
 
     /** Generate an amount-free UPI QR. Caller MUST authorize verified account ownership. */
     public static byte[] generatePng(String verifiedUpiId, String payeeName) {
+        return render(UpiQrPayload.generate(verifiedUpiId, payeeName));
+    }
+
+    /** QR for one contribution: amount and payment-code note pre-filled. Caller MUST authorize the destination. */
+    public static byte[] generatePaymentPng(String verifiedUpiId, String payeeName, long amountPaise, String note) {
+        return render(UpiQrPayload.generatePayment(verifiedUpiId, payeeName, amountPaise, note));
+    }
+
+    private static byte[] render(String payload) {
         try {
-            String payload = UpiQrPayload.generate(verifiedUpiId, payeeName);
             BitMatrix bits = new MultiFormatWriter().encode(
                 payload, BarcodeFormat.QR_CODE, 420, 420,
                 Map.of(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.M,

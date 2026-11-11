@@ -102,7 +102,9 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf
                         .ignoringRequestMatchers(
                                 "/api/webhooks/razorpay",
+                                "/api/webhooks/whatsapp",
                                 "/api/public/celebrations/*/rsvp",
+                                "/api/public/celebrations/*/functions/rsvp",
                                 "/api/public/celebrations/*/wishes",
                                  "/api/public/celebrations/*/wishes/photo"
                         )
@@ -133,9 +135,11 @@ public class SecurityConfig {
                                 "/api/public/keepsakes/*", "/api/public/growth-settings", "/api/public/events/*/share-preview", "/api/public/events/*/share-preview.png", "/api/public/localization/catalog", "/api/public/events/*/celebration-details", "/api/public/events/*/calendar", "/api/public/verification-settings", "/api/public/events/*", "/api/public/events/*/features", "/api/public/events/*/gifts/*/photo", "/api/public/experience"
                         ).permitAll()
                          .requestMatchers(HttpMethod.GET,
-                                 "/api/public/celebrations/*/wishes").permitAll()
+                                 "/api/public/celebrations/*/wishes",
+                                 "/api/public/celebrations/*/functions").permitAll()
                          .requestMatchers(HttpMethod.POST,
                                  "/api/public/celebrations/*/rsvp",
+                                 "/api/public/celebrations/*/functions/rsvp",
                                  "/api/public/celebrations/*/wishes",
                                   "/api/public/celebrations/*/wishes/photo").permitAll()
                           .requestMatchers(HttpMethod.GET,
@@ -153,7 +157,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST,
                                 "/api/public/payments/direct/*/claims").permitAll()
                         .requestMatchers(HttpMethod.GET,
-                                "/api/public/payments/verified-destinations/*").permitAll()
+                                "/api/public/payments/verified-destinations/*",
+                                "/api/public/payments/verified-destinations/*/payment-qr",
+                                "/api/public/payments/direct/receipts/*").permitAll()
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/api/public/payments/context/*",
@@ -175,6 +181,7 @@ public class SecurityConfig {
                                 HttpMethod.POST,
                                 "/api/webhooks/razorpay"
                         ).permitAll()
+                        .requestMatchers("/api/webhooks/whatsapp").permitAll()
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/api/auth/me",
@@ -192,6 +199,8 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/host/group-member-email-policy", "/api/v1/events", "/api/v1/events/**"
                         ).authenticated()
+                        .requestMatchers("/api/v1/me/**").authenticated()
+                        .requestMatchers(HttpMethod.GET,"/api/public/live/*","/api/public/live/*/join-qr.png","/api/public/events/*/gift-kinds").permitAll()
                         .requestMatchers(
                                 "/api/v1/host/notifications",
                                 "/api/v1/host/notifications/**"

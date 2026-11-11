@@ -6,6 +6,7 @@ import {useLocalizationRender} from './LocalizationProvider';
 
 import {useState} from 'react';
 import {CalendarPlus,MessageCircle} from 'lucide-react';
+import GroupContribution from './GroupContribution';
 import useEventFeatures,{type EventFeatures} from './useEventFeatures';
 import {calendarInvitation} from '../lib/invitation-sharing.mjs';
 import './guest-actions.css';
@@ -23,6 +24,6 @@ export default function GuestActions({token,title,date,features:initial,onContri
   }catch{completeAction(interaction,'FAILURE','CALENDAR_DOWNLOAD_FAILED');setNotice('Could not download the calendar invitation.');}
  }
 
- // Contributing and group gifting live on the wishlist cards; the hero keeps only the main CTA and these extras.
- return <div className="guest-action-area"><nav className="guest-actions" aria-label={localize("ui.cffd89a6e999001d",{defaultValue:"Ways to celebrate"})}>{(features.RSVP||features.GUESTBOOK)&&<a href="#guest-celebration"><MessageCircle size={17}/> {features.RSVP&&features.GUESTBOOK?localize("ui.a7bae23613d3952f",{defaultValue:"RSVP & wishes"}):features.RSVP?localize("ui.1dfe8a8e0cb2d1da",{defaultValue:"RSVP"}):localize("ui.9b2c93eb39dfb1fa",{defaultValue:"Leave wishes"})}</a>}{date&&<button type="button" onClick={saveDate}><CalendarPlus size={17}/> {localize("ui.fc40890ffdf9eb33",{defaultValue:" Save the date"})}</button>}</nav>{notice&&<p role="status" className="guest-action-notice">{localizeText(notice)}</p>}</div>;
+ // Individual contributions start from the wishlist (hero "Choose a gift"); a group can be started here or from any gift card.
+ return <div className="guest-action-area"><nav className="guest-actions" aria-label={localize("ui.cffd89a6e999001d",{defaultValue:"Ways to celebrate"})}>{features.GIFTING_ENABLED!==false&&features.GROUP_GIFTING&&<GroupContribution token={token} compact/>}{(features.RSVP||features.GUESTBOOK)&&<a href="#guest-celebration"><MessageCircle size={17}/> {features.RSVP&&features.GUESTBOOK?localize("ui.a7bae23613d3952f",{defaultValue:"RSVP & wishes"}):features.RSVP?localize("ui.1dfe8a8e0cb2d1da",{defaultValue:"RSVP"}):localize("ui.9b2c93eb39dfb1fa",{defaultValue:"Leave wishes"})}</a>}{date&&<button type="button" onClick={saveDate}><CalendarPlus size={17}/> {localize("ui.fc40890ffdf9eb33",{defaultValue:" Save the date"})}</button>}</nav>{notice&&<p role="status" className="guest-action-notice">{localizeText(notice)}</p>}</div>;
 }

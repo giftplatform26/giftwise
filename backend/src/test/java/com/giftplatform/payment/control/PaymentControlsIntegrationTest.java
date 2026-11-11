@@ -66,7 +66,8 @@ class PaymentControlsIntegrationTest {
     @Test void manualUpiAndBankReportsAreRejectedBeforeDestinationLookupWhenDisabled(){
         for(String method:List.of("UPI","BANK")){
             change("EVENT",event,method,false);
-            var request=new GuestDirectTransferService.ClaimRequest(UUID.randomUUID(),method,null,10000,"Guest",null,null,"REF123456789",UUID.randomUUID().toString());
+            // UPI references are 12 digits; use a well-formed one so the disabled-channel check is what rejects it.
+            var request=new GuestDirectTransferService.ClaimRequest(UUID.randomUUID(),method,null,10000,"Guest",null,null,method.equals("UPI")?"123456789012":"REF123456789",UUID.randomUUID().toString());
             var error=assertThrows(ResponseStatusException.class,()->direct.claim(token,request));
             assertEquals(409,error.getStatusCode().value());assertTrue(error.getReason().contains(method));
         }

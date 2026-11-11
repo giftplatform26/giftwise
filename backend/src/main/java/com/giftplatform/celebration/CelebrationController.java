@@ -24,8 +24,9 @@ public class CelebrationController {
  private final EventRepository events;
  private final ActorContext actor;
  private final EffectiveModulePermissionService permissions;
- public CelebrationController(JdbcTemplate db, EventRepository events, ActorContext actor, EffectiveModulePermissionService permissions) {
-  this.db=db;this.events=events;this.actor=actor;this.permissions=permissions;
+ private final com.giftplatform.cohost.EventAccess access;
+ public CelebrationController(JdbcTemplate db, EventRepository events, ActorContext actor, EffectiveModulePermissionService permissions, com.giftplatform.cohost.EventAccess access) {
+  this.db=db;this.events=events;this.actor=actor;this.permissions=permissions;this.access=access;
  }
  public record RsvpRequest(String guestName,String guestEmail,String attendance,Integer partySize) {}
  public record WishRequest(String guestName,String message) {}
@@ -37,10 +38,9 @@ public class CelebrationController {
   return events.findByPublicToken(token).filter(e->e.getStatus()==EventStatus.PUBLISHED)
    .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
  }
+ /** Owner, or a co-host whose role includes guests and wishes. */
  private Event owned(UUID id) {
-  UUID user=actor.requireAuthenticatedUserId();
-  return events.findById(id).filter(e->user.equals(e.getOwnerId()))
-   .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
+  return access.require(id,com.giftplatform.cohost.EventAccess.Capability.GUESTS,null).event();
  }
  private String field(String value,int max,String label) {
   if(value==null || value.isBlank() || value.strip().length()>max || value.chars().anyMatch(c->Character.isISOControl(c) && c!='\n'))

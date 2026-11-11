@@ -44,7 +44,7 @@ export async function bootstrapCsrf(fetcher) {
  * @param {{method?:string,payload?:unknown,cookie?:string,bootstrap?:boolean}} [options]
  */
 export async function hostRequest(fetcher,route,{method='GET',payload,cookie='',bootstrap=true}={}) {
- if(!route.startsWith('/auth/')&&!route.startsWith('/v1/events')) throw Error('Unsupported host API route');
+ if(!route.startsWith('/auth/')&&!route.startsWith('/v1/events')&&!route.startsWith('/v1/me/')) throw Error('Unsupported host API route');
  if(!['GET','POST','PUT'].includes(method)) throw Error('Unsupported method');
  if(method!=='GET' && bootstrap) await bootstrapCsrf(fetcher);
  const token=csrfToken(cookie || (typeof document!=='undefined'?document.cookie:''));

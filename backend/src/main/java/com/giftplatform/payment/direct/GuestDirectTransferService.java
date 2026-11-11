@@ -18,6 +18,7 @@ import org.springframework.web.server.ResponseStatusException;
 public class GuestDirectTransferService {
  @org.springframework.beans.factory.annotation.Autowired private com.giftplatform.payment.control.PaymentControlService controls;
  private final JdbcTemplate jdbc;
+ @org.springframework.beans.factory.annotation.Autowired(required=false) private com.giftplatform.payment.receipt.ReceiptTemplateService receipts;
  private final com.giftplatform.notification.ManualClaimNotificationService notifications;
  private final boolean enabled;
  @org.springframework.beans.factory.annotation.Autowired
@@ -29,8 +30,18 @@ public class GuestDirectTransferService {
  }
  public record Destination(UUID id,String method,String masked,boolean available) {}
  public record ClaimRequest(UUID destinationId,String method,UUID giftId,long amountPaise,
-                            String guestName,String guestEmail,String guestPhone,String transactionReference,String idempotencyKey) {}
- public record ClaimResult(UUID claimId,String status,String message) {}
+                            String guestName,String guestEmail,String guestPhone,String transactionReference,String idempotencyKey,String paymentCode) {
+  public ClaimRequest(UUID destinationId,String method,UUID giftId,long amountPaise,String guestName,String guestEmail,String guestPhone,String transactionReference,String idempotencyKey){
+   this(destinationId,method,giftId,amountPaise,guestName,guestEmail,guestPhone,transactionReference,idempotencyKey,null);
+  }
+ }
+ public record ClaimResult(UUID claimId,String status,String message,UUID receiptToken,String paymentCode) {
+  public ClaimResult(UUID claimId,String status,String message){this(claimId,status,message,null,null);}
+ }
+ /** Code guests keep in the UPI/bank payment note so hosts can match their statement. Excludes look-alike characters. */
+ public static final String PAYMENT_CODE="GW-[A-HJ-NP-Z2-9]{6}";
+ /** States that count toward displayed gift progress: reported by the guest, or confirmed received by the host. */
+ public static final String DISPLAYED_STATUSES="('AWAITING_VERIFICATION','HOST_CONFIRMED')";
  public GuestDirectTransferService(JdbcTemplate jdbc,
   boolean enabled, boolean reconciliationEnabled) {
   
@@ -70,7 +81,10 @@ public class GuestDirectTransferService {
     !java.util.Set.of("UPI","BANK").contains(r.method()) ||
     r.amountPaise()<100 || r.amountPaise()>100000000 ||
     r.guestName()==null || r.guestName().isBlank() || r.guestName().length()>200 ||
-    r.transactionReference()==null || !r.transactionReference().matches("[A-Za-z0-9\\-]{8,40}") ||
+    r.transactionReference()==null || !r.transactionReference().strip().matches("[A-Za-z0-9\\-]{8,40}") ||
+    // UPI references (UTR/RRN) are always 12 digits; bank NEFT/IMPS/RTGS references vary.
+    ("UPI".equals(r.method()) && !r.transactionReference().strip().matches("[0-9]{12}")) ||
+    (r.paymentCode()!=null && !r.paymentCode().matches(PAYMENT_CODE)) ||
     (r.guestEmail()!=null && (r.guestEmail().length()>320 || !r.guestEmail().matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$"))) ||
     (r.guestPhone()!=null && (r.guestPhone().length()>30 || !r.guestPhone().matches("[+0-9 ()-]{5,30}"))) ||
     r.idempotencyKey()==null || !r.idempotencyKey().matches("[A-Za-z0-9-]{8,120}"))
@@ -94,9 +108,9 @@ public class GuestDirectTransferService {
   jdbc.queryForObject("SELECT pg_advisory_xact_lock(hashtextextended(?,0))",Object.class,
    "guest-direct:"+eventId+":"+r.idempotencyKey());
   List<ClaimResult> prior=jdbc.query("""
-   SELECT id,status FROM guest_direct_transfer_claims WHERE event_id=? AND client_key=?
+   SELECT id,status,receipt_token,payment_code FROM guest_direct_transfer_claims WHERE event_id=? AND client_key=?
    """,(rs,i)->new ClaimResult(rs.getObject(1,UUID.class),rs.getString(2),
-     "Guest report received; payment is not verified"),eventId,r.idempotencyKey());
+     "Guest report received; payment is not verified",rs.getObject(3,UUID.class),rs.getString(4)),eventId,r.idempotencyKey());
   if(!prior.isEmpty()) {
    Integer matching=jdbc.queryForObject("""
     SELECT COUNT(*) FROM guest_direct_transfer_claims WHERE id=? AND destination_id=?
@@ -119,16 +133,20 @@ public class GuestDirectTransferService {
    if(locked.size()!=1) throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Gift unavailable");
    if(Boolean.TRUE.equals(jdbc.queryForObject("SELECT EXISTS(SELECT 1 FROM gift_groups WHERE reserved_gift_id=?)",Boolean.class,r.giftId())))throw new ResponseStatusException(HttpStatus.CONFLICT,"A surprise is waiting for this gift");
   }
-  UUID id=UUID.randomUUID();
+  UUID id=UUID.randomUUID(),receipt=UUID.randomUUID();
+  // Unique per event, assigned once; rolled back with the claim if the insert fails.
+  String receiptNumber=receipts==null?null:receipts.assignNumber(eventId);
+  String trimmed=r.transactionReference().strip().toUpperCase(java.util.Locale.ROOT);
+  String tail=trimmed.substring(Math.max(0,trimmed.length()-6));
   try {
    jdbc.update("""
     INSERT INTO guest_direct_transfer_claims
-      (id,event_id,gift_id,destination_id,method,amount_paise,guest_name,reference_hash,client_key,guest_email,guest_phone)
-    VALUES(?,?,?,?,?,?,?,?,?,?,?)
+      (id,event_id,gift_id,destination_id,method,amount_paise,guest_name,reference_hash,client_key,guest_email,guest_phone,payment_code,reference_tail,receipt_token,receipt_number)
+    VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
     """,id,eventId,r.giftId(),r.destinationId(),r.method(),r.amountPaise(),
-    r.guestName().strip(),reference,r.idempotencyKey(),clean(r.guestEmail()),clean(r.guestPhone()));
+    r.guestName().strip(),reference,r.idempotencyKey(),clean(r.guestEmail()),clean(r.guestPhone()),r.paymentCode(),tail,receipt,receiptNumber);
   } catch(org.springframework.dao.DataIntegrityViolationException e) {
-   throw new ResponseStatusException(HttpStatus.CONFLICT,"Reference already submitted");
+   throw new ResponseStatusException(HttpStatus.CONFLICT,"This transaction reference or payment code was already submitted");
   }
   // Display-only allocation: not a verified contribution or financial posting.
   long giftPart=0L;
@@ -144,7 +162,7 @@ public class GuestDirectTransferService {
    Long manual=jdbc.queryForObject("""
      SELECT COALESCE(SUM(a.gift_paise),0) FROM guest_manual_display_allocations a
      JOIN guest_direct_transfer_claims cl ON cl.id=a.claim_id
-     WHERE a.event_id=? AND a.gift_id=? AND cl.status='AWAITING_VERIFICATION'
+     WHERE a.event_id=? AND a.gift_id=? AND cl.status IN """+DISPLAYED_STATUSES+"""
      """,Long.class,eventId,r.giftId());
    long remaining=Math.max(0L,target-Math.addExact(captured==null?0:captured,manual==null?0:manual));
    giftPart=Math.min(remaining,r.amountPaise());
@@ -155,7 +173,33 @@ public class GuestDirectTransferService {
     """,id,eventId,r.giftId(),giftPart,r.amountPaise()-giftPart);
   if(notifications!=null) notifications.enqueue(eventId,id,r.guestName().strip(),clean(r.guestEmail()),clean(r.guestPhone()),r.amountPaise(),r.giftId());
   return new ClaimResult(id,"AWAITING_VERIFICATION",
-   "Guest report received; payment is not verified");
+   "Guest report received; payment is not verified",receipt,r.paymentCode());
+ }
+ public record Receipt(String eventTitle,String hostName,String giftName,String guestName,long amountPaise,String method,
+   String paymentCode,String referenceTail,String status,java.time.OffsetDateTime createdAt,java.time.OffsetDateTime hostDecidedAt,String invitationPath,
+   String receiptNumber,java.time.LocalDate eventDate,com.giftplatform.payment.receipt.ReceiptTemplateService.Template design) {}
+ /** Guest receipt by unguessable token. Works after the event closes; shows the host's decision, never provider verification. */
+ @Transactional(readOnly=true)
+ public Receipt receipt(UUID receiptToken){
+  if(receiptToken==null)throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Receipt not found");
+  List<Receipt> rows=jdbc.query("""
+    SELECT e.title,e.host_display_name,g.name,c.guest_name,c.amount_paise,c.method,c.payment_code,c.reference_tail,c.status,
+           c.created_at,c.host_decided_at,CASE WHEN e.status='PUBLISHED' THEN '/e/'||e.public_token ELSE NULL END,
+           c.receipt_number,e.event_date,e.id
+    FROM guest_direct_transfer_claims c JOIN events e ON e.id=c.event_id LEFT JOIN gifts g ON g.id=c.gift_id
+    WHERE c.receipt_token=?
+    """,(rs,i)->new Receipt(rs.getString(1),rs.getString(2),rs.getString(3),rs.getString(4),rs.getLong(5),rs.getString(6),rs.getString(7),
+      rs.getString(8),rs.getString(9),rs.getObject(10,java.time.OffsetDateTime.class),rs.getObject(11,java.time.OffsetDateTime.class),rs.getString(12),
+      rs.getString(13),rs.getObject(14,java.time.LocalDate.class),
+      receipts==null?null:receipts.forPublicReceipt(rs.getObject(15,UUID.class)).map(t->withoutInternals(t)).orElse(null)),receiptToken);
+  if(rows.size()!=1)throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Receipt not found");
+  return rows.get(0);
+ }
+ /** Public receipts never expose the host's next number or edit version. */
+ private static com.giftplatform.payment.receipt.ReceiptTemplateService.Template withoutInternals(com.giftplatform.payment.receipt.ReceiptTemplateService.Template t){
+  return new com.giftplatform.payment.receipt.ReceiptTemplateService.Template(true,true,t.layout(),t.accentColor(),t.title(),t.headerText(),t.headerSubtext(),
+   t.thankYouMessage(),t.footerText(),t.signatureName(),t.referencePrefix(),t.showGuestName(),t.showGiftName(),t.showEventDate(),t.showPaymentMethod(),
+   t.showPaymentCode(),t.logoDataUrl(),0,null);
  }
  private static String clean(String value) { return value==null || value.isBlank()?null:value.strip(); }
  private static String sha256(String value) {
