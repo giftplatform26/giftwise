@@ -8,9 +8,9 @@ import {inr} from '../../../../lib/focused.mjs';
 import {GIFT_KINDS,KIND_LABEL,QUICK_AMOUNTS,parseRupees,rupeesInput,entryProblem,newClientKey,filterEntries} from '../../../../lib/register.mjs';
 import '../../../../components/gift-books.css';
 
-type Entry={id:string;giverName:string;giverPhone:string|null;side:string|null;kind:string;amountPaise:number|null;itemDescription:string|null;note:string|null;createdAt:string;version:number};
+type Entry={id:string;giverName:string;giverPhone:string|null;side:string|null;kind:string;amountPaise:number|null;itemDescription:string|null;note:string|null;createdAt:string;version:number;returnGiftAt?:string|null};
 type Online={id:string;giverName:string;amountPaise:number;kind:string;createdAt:string};
-type Register={entries:Entry[];online:Online[];totals:{inPersonPaise:number;onlinePaise:number;itemGifts:number;givers:number};sides:{side:string|null;amountPaise:number;entries:number}[];sideSuggestions:string[];nameSuggestions:string[];canManage:boolean};
+type Register={entries:Entry[];online:Online[];totals:{inPersonPaise:number;onlinePaise:number;itemGifts:number;givers:number};sides:{side:string|null;amountPaise:number;entries:number}[];sideSuggestions:string[];nameSuggestions:string[];canManage:boolean;returnGifts?:boolean;returnGiftsGiven?:number};
 type Draft={giverName:string;giverPhone:string;side:string;kind:string;amount:string;itemDescription:string;note:string};
 type Queued={clientKey:string;payload:Record<string,unknown>};
 const blank=(side=''):Draft=>({giverName:'',giverPhone:'',side,kind:'ENVELOPE',amount:'',itemDescription:'',note:''});
@@ -56,6 +56,8 @@ export default function GiftRegister(){useLocalizationRender();
  async function remove(entry:Entry,offerUndo=true){try{await hostRequest(fetch,`${route}/${entry.id}/delete`,{method:'POST'});if(editing?.id===entry.id){setEditing(null);setDraft(blank())}
   setToast(offerUndo?{text:localizeText('Removed {{name}}.').replace('{{name}}',entry.giverName),undo:()=>void restore(entry)}:{text:localizeText('Entry removed.')});await load()}
   catch(err){setError(err instanceof Error?err.message:'Could not remove the entry')}}
+ async function returnGift(entry:Entry,given:boolean){setData(d=>d&&{...d,entries:d.entries.map(x=>x.id===entry.id?{...x,returnGiftAt:given?new Date().toISOString():null}:x)});
+  try{await hostRequest(fetch,`${route}/${entry.id}/return-gift`,{method:'POST',payload:{given}});await load()}catch(err){setError(err instanceof Error?err.message:'Could not update');void load()}}
  async function restore(entry:Entry){try{await hostRequest(fetch,`${route}/${entry.id}/restore`,{method:'POST'});setToast({text:localizeText('Entry restored.')});await load()}catch(err){setError(err instanceof Error?err.message:'Could not restore')}}
 
  function startEdit(entry:Entry){setEditing(entry);setFormError('');setMore(Boolean(entry.giverPhone||entry.itemDescription||entry.note));
@@ -76,7 +78,7 @@ export default function GiftRegister(){useLocalizationRender();
    <div><span>{localizeText('In person')}</span><strong>{inr(data.totals.inPersonPaise)}</strong></div>
    <div><span>{localizeText('Confirmed online')}</span><strong>{inr(data.totals.onlinePaise)}</strong></div>
    <div><span>{localizeText('Givers')}</span><strong>{data.totals.givers}</strong></div>
-   <div><span>{localizeText('Gift items')}</span><strong>{data.totals.itemGifts}</strong></div></section>}
+   <div><span>{localizeText(data.returnGifts?'Return gifts given':'Gift items')}</span><strong>{data.returnGifts?`${data.returnGiftsGiven??0}/${data.entries.length}`:data.totals.itemGifts}</strong></div></section>}
 
   <form className={`gbEntry${editing?' gbEntry--editing':''}`} onSubmit={editing?update:add} aria-label={editing?localizeText('Edit entry'):localizeText('Add an entry')} noValidate>
    <h2>{editing?localizeText('Edit entry'):localizeText('Add an entry')}</h2>
@@ -107,7 +109,8 @@ export default function GiftRegister(){useLocalizationRender();
    {view!=='ONLINE'&&(entries.length===0?<p className="gbEmpty">{query?localizeText('No entries match your search.'):localizeText('Nothing recorded yet. The first envelope is the hardest!')}</p>:
     <ul className="gbRows">{entries.map(e=><li key={e.id}><button type="button" disabled={!data.canManage} onClick={()=>startEdit(e)} aria-label={data.canManage?localizeText('Edit {{name}}').replace('{{name}}',e.giverName):e.giverName}>
      <span className="gbWho"><strong>{e.giverName}</strong><small>{[e.side,KIND_LABEL[e.kind]&&localizeText(KIND_LABEL[e.kind]),time(e.createdAt)].filter(Boolean).join(' · ')}</small></span>
-     <span className="gbWhat">{e.amountPaise!=null&&<strong>{inr(e.amountPaise)}</strong>}{e.itemDescription&&<small>{e.itemDescription}</small>}</span></button></li>)}</ul>)}
+     <span className="gbWhat">{e.amountPaise!=null&&<strong>{inr(e.amountPaise)}</strong>}{e.itemDescription&&<small>{e.itemDescription}</small>}</span></button>
+     {data.returnGifts&&<label className="rgTick" title={localizeText('Return gift given')}><input type="checkbox" checked={Boolean(e.returnGiftAt)} onChange={ev=>void returnGift(e,ev.target.checked)}/><span>{localizeText('Return gift')}</span></label>}</li>)}</ul>)}
    {view!=='IN_PERSON'&&online.length>0&&<><h3 className="gbSubhead">{localizeText('Confirmed online gifts')}</h3><ul className="gbRows gbRows--online">{online.map(o=><li key={o.id}><div>
      <span className="gbWho"><strong>{o.giverName}</strong><small>{localizeText(KIND_LABEL[o.kind]??'Online gift')} · {time(o.createdAt)}</small></span>
      <span className="gbWhat"><strong>{inr(o.amountPaise)}</strong></span></div></li>)}</ul></>}

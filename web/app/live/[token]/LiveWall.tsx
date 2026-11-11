@@ -6,7 +6,7 @@ import {useLocalizationRender} from '../../../components/LocalizationProvider';
 import {nextSlides} from '../../../lib/register.mjs';
 
 type Item={id:string;guestName:string;message:string|null;photoUrl:string|null;createdAt:string};
-type Wall={eventTitle:string;hostName:string|null;headline:string|null;theme:string;showJoinQr:boolean;slideSeconds:number;invitationPath:string;items:Item[]};
+type Wall={eventTitle:string;hostName:string|null;headline:string|null;theme:string;showJoinQr:boolean;slideSeconds:number;invitationPath:string;items:Item[];announcement?:string|null};
 const POLL_MS=15000;
 const safePhoto=(u:string|null)=>u&&/^\/backend\/api\/public\/celebrations\/[0-9a-f-]{36}\/wishes\/[0-9a-f-]{36}\/photo$/i.test(u)?u:null;
 
@@ -39,6 +39,7 @@ export default function LiveWall(){useLocalizationRender();
  return <main className={`lw lw--${wall.theme.toLowerCase()}`} onDoubleClick={()=>void document.documentElement.requestFullscreen?.()}>
   <header className="lwTop"><div><p className="lwEyebrow">{wall.hostName?localizeText('Celebrating with {{name}}').replace('{{name}}',wall.hostName):localizeText('Live wishes')}</p><h1>{wall.headline||wall.eventTitle}</h1></div>
    {state==='offline'&&<span className="lwOffline" role="status">{localizeText('Reconnecting…')}</span>}</header>
+  {wall.announcement&&<p className="lwTicker" role="status"><span aria-hidden="true">📣</span> {wall.announcement}</p>}
   {!slide?<section className="lwEmpty"><h2>{localizeText('Be the first to send your wishes!')}</h2>{wall.showJoinQr&&<p>{localizeText('Scan the code to write a message or share a photo.')}</p>}</section>:
    <section key={slide.id} className={`lwSlide${photo?' lwSlide--photo':''}${isNew?' is-new':''}`} aria-live="polite">
     {isNew&&<span className="lwNewBadge">{localizeText('Just in')}</span>}

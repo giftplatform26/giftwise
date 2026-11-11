@@ -48,6 +48,7 @@ export function rsvpPayload({guestName, guestEmail, answers}) {
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw Error('Enter a valid email so you can change your answer later');
   const list = Object.entries(answers ?? {}).filter(([, a]) => a?.attendance).map(([functionId, a]) => ({
     functionId, attendance: a.attendance, partySize: a.attendance === 'NO' ? 0 : Math.min(10, Math.max(1, Number(a.partySize) || 1)),
+    ...(a.mealChoice && a.attendance !== 'NO' ? {mealChoice: a.mealChoice} : {}),
   }));
   if (!list.length) throw Error('Choose an answer for at least one function');
   return {guestName: name, guestEmail: email, answers: list};

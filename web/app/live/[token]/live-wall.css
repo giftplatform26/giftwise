@@ -31,3 +31,4 @@
 @keyframes lwPulse{50%{transform:translateX(-50%) scale(1.08)}}
 @media(orientation:portrait){.lwSlide--photo{grid-template-columns:1fr;gap:3vh}.lwSlide--photo figure{text-align:center}.lwSlide--photo img{max-height:45vh}}
 @media(prefers-reduced-motion:reduce){.lwSlide,.lwNewBadge{animation:none}}
+.lwTicker{position:absolute;left:50%;top:15vh;transform:translateX(-50%);z-index:2;margin:0;max-width:90vw;padding:1vh 2vw;border-radius:40px;background:var(--lw-accent);color:#241a10;font-weight:700;font-size:clamp(16px,1.8vw,30px);text-align:center;box-shadow:0 10px 30px #0004}

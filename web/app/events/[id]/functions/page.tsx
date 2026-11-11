@@ -5,11 +5,12 @@ import {localizeText} from '../../../../lib/localization.mjs';
 import {useLocalizationRender} from '../../../../components/LocalizationProvider';
 import {hostRequest} from '../../../../lib/host-api.mjs';
 import {FUNCTION_PRESETS,functionWhen,functionProblem} from '../../../../lib/functions.mjs';
+import {MEAL_LABEL} from '../../../../lib/eventops.mjs';
 import '../../../../components/gift-books.css';
 import '../../../../components/functions.css';
 
 type Fn={id:string;name:string;functionDate:string|null;startTime:string|null;endTime:string|null;venueName:string|null;venueAddress:string|null;mapUrl:string|null;dressCode:string|null;notes:string|null;rsvpEnabled:boolean;sortOrder:number;version:number};
-type Row={function:Fn;counts:{yes:number;maybe:number;no:number;guests:number};responses:{guestName:string;guestEmail:string;attendance:string;partySize:number}[]};
+type Row={function:Fn;counts:{yes:number;maybe:number;no:number;guests:number;meals?:Record<string,number>};responses:{guestName:string;guestEmail:string;attendance:string;partySize:number;mealChoice?:string|null}[]};
 type Draft={name:string;functionDate:string;startTime:string;endTime:string;venueName:string;venueAddress:string;mapUrl:string;dressCode:string;notes:string;rsvpEnabled:boolean};
 const blank=():Draft=>({name:'',functionDate:'',startTime:'',endTime:'',venueName:'',venueAddress:'',mapUrl:'',dressCode:'',notes:'',rsvpEnabled:true});
 const fromFn=(f:Fn):Draft=>({name:f.name,functionDate:f.functionDate??'',startTime:f.startTime?.slice(0,5)??'',endTime:f.endTime?.slice(0,5)??'',venueName:f.venueName??'',venueAddress:f.venueAddress??'',mapUrl:f.mapUrl??'',dressCode:f.dressCode??'',notes:f.notes??'',rsvpEnabled:f.rsvpEnabled});
@@ -65,7 +66,7 @@ export default function Functions(){useLocalizationRender();
      {f.dressCode&&<p className="fnDress">{localizeText('Dress code')}: {f.dressCode}</p>}</div>
     <div className="fnSide">{f.rsvpEnabled?<button type="button" className="fnCounts" aria-expanded={open===f.id} onClick={()=>setOpen(open===f.id?null:f.id)}><strong>{r.counts.guests}</strong><span>{localizeText('guests coming')}</span><small>{r.counts.yes} {localizeText('yes')} · {r.counts.maybe} {localizeText('maybe')} · {r.counts.no} {localizeText('no')}</small></button>:<p className="fnNoRsvp">{localizeText('No RSVP')}</p>}
      <div className="fnTools"><button type="button" aria-label={localizeText('Move up')} disabled={i===0} onClick={()=>void move(i,-1)}>↑</button><button type="button" aria-label={localizeText('Move down')} disabled={i===rows.length-1} onClick={()=>void move(i,1)}>↓</button><button type="button" onClick={()=>start(f)}>{localizeText('Edit')}</button></div></div>
-    {open===f.id&&<div className="fnResponses">{r.responses.length===0?<p className="gbFine">{localizeText('No answers yet.')}</p>:<ul>{r.responses.map(x=><li key={x.guestEmail}><span>{x.guestName}</span><small>{localizeText(ATT[x.attendance])}{x.attendance!=='NO'?` · ${x.partySize}`:''}</small></li>)}</ul>}</div>}
+    {open===f.id&&r.counts.meals&&Object.keys(r.counts.meals).length>0&&<div className="fnMeals" aria-label={localizeText('Catering headcount')}>{Object.entries(r.counts.meals).map(([k,n])=><span key={k}><strong>{n}</strong> {localizeText(MEAL_LABEL[k]??k)}</span>)}</div>}{open===f.id&&<div className="fnResponses">{r.responses.length===0?<p className="gbFine">{localizeText('No answers yet.')}</p>:<ul>{r.responses.map(x=><li key={x.guestEmail}><span>{x.guestName}</span><small>{localizeText(ATT[x.attendance])}{x.attendance!=='NO'?` · ${x.partySize}`:''}{x.mealChoice?` · ${localizeText(MEAL_LABEL[x.mealChoice]??x.mealChoice)}`:''}</small></li>)}</ul>}</div>}
    </article>}</li>})}</ol>}
   {rows&&rows.length>0&&editing===null&&<div className="gbChips fnMore">{FUNCTION_PRESETS.filter((p:string)=>!used.has(localizeText(p).toLowerCase())).slice(0,5).map((p:string)=><button key={p} type="button" onClick={()=>start('new',localizeText(p))}>+ {localizeText(p)}</button>)}</div>}
  </main>;

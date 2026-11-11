@@ -26,7 +26,11 @@ export default function HelpingHub(){useLocalizationRender();
    [can.has('REGISTER_ADD')&&h.features.SHAGUN_REGISTER,`/helping/${h.eventId}/register`,'Gift register'],
    [can.has('GUESTS')&&(h.features.RSVP||h.features.GUESTBOOK),`/helping/${h.eventId}/celebration`,'Guests & wishes'],
    [can.has('LIVE_WALL')&&h.features.LIVE_WALL,`/helping/${h.eventId}/live-wall`,'Live venue wall'],
-   [can.has('FUNCTIONS')&&h.features.EVENT_FUNCTIONS,`/helping/${h.eventId}/functions`,'Schedule & functions']];
+   [can.has('FUNCTIONS')&&h.features.EVENT_FUNCTIONS,`/helping/${h.eventId}/functions`,'Schedule & functions'],
+   [can.has('CHECKIN')&&h.features.GUEST_CHECKIN,`/helping/${h.eventId}/checkin`,'Guest check-in'],
+   [can.has('PLANNING')&&h.features.PLANNING_CHECKLIST,`/helping/${h.eventId}/checklist`,'Planning checklist'],
+   [can.has('PLANNING')&&h.features.RUN_SHEET,`/helping/${h.eventId}/run-sheet`,'Run sheet'],
+   [can.has('UPDATES')&&h.features.LIVE_UPDATES,`/helping/${h.eventId}/updates`,'Live updates']];
    const open=tools.filter(t=>t[0]);
    return <article key={h.eventId} className="hpCard"><p className="focusEyebrow">{localizeText(h.role==='CO_HOST'?'Co-host':'Gift-desk helper')}</p><h2>{h.title}</h2>
     <p className="gbFine">{[h.hostName&&localizeText('Hosted by {{name}}').replace('{{name}}',h.hostName),day(h.eventDate)].filter(Boolean).join(' · ')}</p>

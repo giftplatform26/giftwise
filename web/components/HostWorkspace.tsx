@@ -7,7 +7,7 @@ import {HostLanguageSwitcher,useLocalizationRender} from './LocalizationProvider
 import {createContext,useContext,useEffect,useId,useState,type ReactNode} from 'react';
 import {usePathname,useRouter,useSearchParams} from 'next/navigation';
 import Link from 'next/link';
-import {ShieldCheck,Activity,CalendarDays,CheckSquare,Eye,Pencil,Gift,Heart,Images,Landmark,LayoutDashboard,LogOut,Mail,PanelLeftClose,PanelLeftOpen,Plus,QrCode,ReceiptText,Sparkles,BookOpen,NotebookPen,MonitorPlay,CalendarRange,UsersRound,HandHeart,MessageCircle,CalendarHeart,Gift as GiftIcon2,Store,BookHeart,UserRound,Users,type LucideIcon} from 'lucide-react';
+import {ShieldCheck,Activity,CalendarDays,CheckSquare,Eye,Pencil,Gift,Heart,Images,Landmark,LayoutDashboard,LogOut,Mail,PanelLeftClose,PanelLeftOpen,Plus,QrCode,ReceiptText,Sparkles,BookOpen,NotebookPen,MonitorPlay,CalendarRange,UsersRound,HandHeart,MessageCircle,CalendarHeart,Gift as GiftIcon2,Store,BookHeart,ListChecks,Wallet,Clock,DoorOpen,Megaphone,UserRound,Users,type LucideIcon} from 'lucide-react';
 import {hostApi,hostRequest} from '../lib/host-api.mjs';
 import {useGrowth} from './GrowthProvider';
 import {pendingReferral} from '../lib/reminders.mjs';
@@ -42,6 +42,9 @@ export default function HostWorkspace({children}:{children:ReactNode}){useLocali
   {href:base,label:'Celebration overview',Icon:CheckSquare},
   {href:base+'/edit',label:'Event details',Icon:Pencil},
   ...(features.EVENT_FUNCTIONS?[{href:base+'/functions',label:'Schedule & functions',Icon:CalendarRange}]:[]),
+  ...(features.PLANNING_CHECKLIST?[{href:base+'/checklist',label:'Planning checklist',Icon:ListChecks}]:[]),
+  ...(features.EVENT_BUDGET?[{href:base+'/budget',label:'Budget',Icon:Wallet}]:[]),
+  ...(features.RUN_SHEET?[{href:base+'/run-sheet',label:'Run sheet',Icon:Clock}]:[]),
   ...(features.CO_HOSTS?[{href:base+'/co-hosts',label:'Co-hosts & helpers',Icon:UsersRound}]:[]),
   ...(features.WHATSAPP_MESSAGING?[{href:base+'/whatsapp',label:'WhatsApp messages',Icon:MessageCircle}]:[]),
   ...((features.CELEBRATION_PLANNING||features.EVENT_REUSE)?[{href:base+'/planning',label:'Celebration settings',Icon:Sparkles}]:[]),
@@ -50,6 +53,8 @@ export default function HostWorkspace({children}:{children:ReactNode}){useLocali
   ...((features.RSVP||features.GUESTBOOK)?[{href:base+'/celebration',label:'Guests & responses',Icon:Users}]:[]),
   ...(features.MEMORY_ALBUM?[{href:base+'/album',label:'Memory album',Icon:Images}]:[]),
   ...(features.LIVE_WALL?[{href:base+'/live-wall',label:'Live venue wall',Icon:MonitorPlay}]:[]),
+  ...(features.GUEST_CHECKIN?[{href:base+'/checkin',label:'Guest check-in',Icon:DoorOpen}]:[]),
+  ...(features.LIVE_UPDATES?[{href:base+'/updates',label:'Live updates',Icon:Megaphone}]:[]),
   {href:base+'/contributions',label:'Contribution report',Icon:Activity},
   ...(features.SHAGUN_REGISTER?[{href:base+'/register',label:'Gift register',Icon:NotebookPen}]:[]),
   {href:base+'/transactions',label:'Payment verification',Icon:ShieldCheck},

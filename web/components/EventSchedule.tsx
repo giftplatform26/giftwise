@@ -3,15 +3,16 @@ import {useEffect,useState} from 'react';
 import {localizeText} from '../lib/localization.mjs';
 import {useLocalizationRender} from './LocalizationProvider';
 import {functionWhen,groupByDay,rsvpPayload} from '../lib/functions.mjs';
+import {MEAL_CHOICES} from '../lib/eventops.mjs';
 import './functions.css';
 
 type Fn={id:string;name:string;functionDate:string|null;startTime:string|null;endTime:string|null;venueName:string|null;venueAddress:string|null;mapUrl:string|null;dressCode:string|null;notes:string|null;rsvpEnabled:boolean};
-type Answer={attendance?:'YES'|'MAYBE'|'NO';partySize?:number};
+type Answer={attendance?:'YES'|'MAYBE'|'NO';partySize?:number;mealChoice?:string};
 const safeMap=(u:string|null)=>u&&/^https:\/\/[^\s<>"]+$/.test(u)?u:null;
 const dayTitle=(d:string|null)=>d?new Intl.DateTimeFormat(undefined,{weekday:'long',day:'numeric',month:'long'}).format(new Date(`${d}T12:00:00`)):localizeText('Date to be announced');
 
 /** Guest view: the function-by-function schedule with one RSVP form covering every function. */
-export default function EventSchedule({token}:{token:string}){useLocalizationRender();
+export default function EventSchedule({token,meals=false}:{token:string;meals?:boolean}){useLocalizationRender();
  const [fns,setFns]=useState<Fn[]>([]),[answers,setAnswers]=useState<Record<string,Answer>>({}),[name,setName]=useState(''),[email,setEmail]=useState('');
  const [busy,setBusy]=useState(false),[result,setResult]=useState(''),[ok,setOk]=useState(false),[showForm,setShowForm]=useState(false);
  useEffect(()=>{let active=true;fetch(`/backend/api/public/celebrations/${encodeURIComponent(token)}/functions`,{cache:'no-store'}).then(r=>r.ok?r.json():[]).then(v=>{if(active&&Array.isArray(v))setFns(v)}).catch(()=>{});return()=>{active=false}},[token]);
@@ -34,6 +35,7 @@ export default function EventSchedule({token}:{token:string}){useLocalizationRen
    {rsvpable.map(f=>{const a=answers[f.id]??{};return <fieldset key={f.id} className="esAnswer"><legend>{f.name}<small>{functionWhen(f)}</small></legend>
     <div className="esChoices">{(['YES','MAYBE','NO'] as const).map(v=><label key={v}><input type="radio" name={`a-${f.id}`} checked={a.attendance===v} onChange={()=>answer(f.id,{attendance:v})}/><span>{localizeText(v==='YES'?'Yes':v==='MAYBE'?'Maybe':'No')}</span></label>)}</div>
     {a.attendance&&a.attendance!=='NO'&&<label className="esParty">{localizeText('How many of you?')}<select value={a.partySize??1} onChange={e=>answer(f.id,{partySize:Number(e.target.value)})}>{Array.from({length:10},(_,i)=><option key={i+1} value={i+1}>{i+1}</option>)}</select></label>}
+    {meals&&a.attendance&&a.attendance!=='NO'&&<label className="esParty">{localizeText('Meal preference')}<select value={a.mealChoice??''} onChange={e=>answer(f.id,{mealChoice:e.target.value})}><option value="">{localizeText('Choose')}</option>{MEAL_CHOICES.map(([k,l]:[string,string])=><option key={k} value={k}>{localizeText(l)}</option>)}</select></label>}
    </fieldset>})}
    <div className="esWho"><label>{localizeText('Your name')}<input value={name} maxLength={120} autoComplete="name" onChange={e=>setName(e.target.value)}/></label>
     <label>{localizeText('Email')}<input type="email" value={email} maxLength={254} autoComplete="email" onChange={e=>setEmail(e.target.value)}/><small>{localizeText('Use the same email to change your answers later.')}</small></label></div>
