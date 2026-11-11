@@ -26,7 +26,7 @@ public class ShagunRegisterController {
     public static final String MODULE = "SHAGUN_REGISTER";
 
     /** Confirmed online gifts only: verified provider captures and direct transfers the host confirmed. */
-    static final String CONFIRMED_ONLINE = """
+    public static final String CONFIRMED_ONLINE = """
         SELECT c.id, c.event_id, c.guest_name AS giver_name, c.amount_paise, 'ONLINE'::text AS kind, c.created_at
         FROM contributions c JOIN payment_orders po ON po.id=c.payment_order_id
         WHERE po.provider='RAZORPAY' AND po.status='CAPTURED' AND EXISTS (

@@ -1,0 +1,58 @@
+/* Try without account, story cards, collections, partners, first-free offer, showcase. */
+.tyPage{max-width:1100px;margin:0 auto;padding:32px 20px 80px;font-family:Inter,ui-sans-serif,system-ui,sans-serif;color:#30232b}
+.tyHead{text-align:center;max-width:640px;margin:0 auto 24px}.tyHead h1{font:500 clamp(30px,4vw,44px)/1.15 Georgia,serif;margin:6px 0}.tyHead p{color:#66565e}
+.tyCard{max-width:520px;margin:60px auto;padding:28px;border-radius:20px;background:#fff;border:1px solid #e6dfe2;display:grid;gap:12px;text-align:center}
+.tyGrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,380px);gap:28px;align-items:start}
+.tyForm label{display:grid;gap:6px;font-weight:600;font-size:14px}
+.tySteps{display:flex;gap:6px}.tySteps span{flex:1;height:5px;border-radius:5px;background:#ece3e8}.tySteps span.on{background:var(--focus-accent,#683c55)}
+.tyOccasions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.tyOccasions label{position:relative;font-weight:500!important}.tyOccasions input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.tyOccasions span{display:block;padding:12px 10px;border:1px solid #e6dfe2;border-radius:12px;text-align:center;font-size:14px;cursor:pointer;background:#fff}
+.tyOccasions input:checked+span{border-color:var(--focus-accent,#683c55);background:#fbf3f7;box-shadow:0 0 0 2px var(--focus-accent,#683c55) inset;font-weight:700}
+.tyOccasions input:focus-visible+span{outline:3px solid #81566d;outline-offset:2px}
+.tyPreview{position:sticky;top:20px}
+.tyPhone{border-radius:34px;border:10px solid #2d2129;overflow:hidden;background:#fffaf3;box-shadow:0 30px 60px #30232b33;min-height:560px}
+.tyArt{height:190px;background:#f3e6dc center/cover;display:flex;align-items:flex-start;justify-content:center;padding-top:20px}
+.tyArt .focusEyebrow{background:#fffdf8e8;padding:6px 14px;border-radius:30px}
+.tyBody{padding:20px 22px 28px;text-align:center;display:grid;gap:8px}
+.tyBody h3{margin:0;font:500 28px/1.2 Georgia,serif;overflow-wrap:anywhere}.tyHost,.tyDate{margin:0;color:#66565e;font-size:14px}
+.tyNote{margin:6px 0;font-size:14px;white-space:pre-line;overflow-wrap:anywhere}
+.tyBtn{display:block;padding:12px;border-radius:12px;background:#683c55;color:#fff;font-weight:700;font-size:14px}.tyBtn--ghost{background:#fff;color:#683c55;border:1px solid #d9c6d1}
+/* Story cards */
+.scMaker{display:grid;gap:14px;justify-items:center}
+.scCanvas{width:min(100%,320px);height:auto;aspect-ratio:9/16;border-radius:18px;box-shadow:0 20px 50px #30232b2e;background:#fffaf3}
+.scActions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+/* Collections on the guest page */
+.cxHero{max-width:760px;margin:16px auto;padding:22px;border-radius:20px;background:linear-gradient(135deg,#fff7ea,#fbeef4);border:1px solid #efd9c4;display:grid;gap:10px;text-align:center}
+.cxHero h2{margin:0;font:500 clamp(26px,4vw,36px)/1.2 Georgia,serif}.cxBy,.cxMeta{margin:0;color:#66565e;font-size:14px}.cxStats{margin:0}
+.cxHero .focusPrimary{justify-self:center;text-decoration:none}
+.cxCreated{display:grid;gap:10px}
+.cxExtras{max-width:860px;margin:24px auto;padding:0 20px;display:grid;gap:16px}
+.cxShare{display:grid;justify-items:center}
+.cxCredit{display:flex;align-items:center;justify-content:center;gap:10px;margin:0;font-size:14px;color:#66565e}.cxCredit img{border-radius:8px;object-fit:contain;background:#fff}
+.cxOffer{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:16px 18px;border-radius:16px;background:#f1f7ff;border:1px solid #cddcf3}
+.cxOffer p{margin:2px 0 0;font-size:14px;color:#3d4b63}.cxOffer .focusPrimary{text-decoration:none}
+/* Partners */
+.ptCard{display:grid;gap:12px;padding:20px;margin-bottom:18px;background:#fff;border:1px solid #e6dfe2;border-radius:18px}
+.ptBrand{display:flex;align-items:center;gap:14px;border-left:5px solid;padding-left:14px}.ptBrand h2{margin:0}.ptBrand img{border-radius:12px;object-fit:contain}
+.ptMono{display:inline-grid;place-items:center;width:64px;height:64px;border-radius:16px;color:#fff;font:700 28px/1 Georgia,serif}
+.ptSlug{display:flex;align-items:center;gap:4px}.ptSlug span{color:#66565e;font-family:ui-monospace,monospace}.ptSlug input{flex:1}
+.ptColor{display:flex!important;align-items:center;gap:10px}.ptColor input{width:56px;height:40px;padding:2px}
+.jtList{margin:0;padding-left:20px;display:grid;gap:6px;color:#4a3c43}
+.ppPage{max-width:1050px;margin:0 auto;padding:32px 20px 80px;font-family:Inter,ui-sans-serif,system-ui,sans-serif;color:#30232b}
+.ppHero{display:grid;justify-items:center;text-align:center;gap:8px;padding:30px 20px;border-radius:24px;background:linear-gradient(160deg,#fbf3f7,#fffaf3);margin-bottom:28px}
+.ppHero img{border-radius:20px;object-fit:contain;background:#fff}.ppHero h1{margin:0;font:500 clamp(30px,4vw,44px)/1.15 Georgia,serif}
+.ppBio{max-width:620px;color:#5d4f57;margin:0}.ppPage h2{font:500 26px/1.2 Georgia,serif}
+.ppFoot{text-align:center;margin-top:30px;font-size:14px}
+/* Showcase */
+.shStrip{max-width:1100px;margin:40px auto;padding:0 20px}.shHead{display:flex;justify-content:space-between;align-items:baseline;gap:12px}.shHead h2{font:500 28px/1.2 Georgia,serif}
+.shGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px}
+.shCard{background:#fff;border:1px solid #e6dfe2;border-radius:20px;overflow:hidden;display:grid}
+.shArt{height:170px;background:#f3e6dc center/cover}
+.shBody{padding:18px 20px;display:grid;gap:6px}.shBody h3{margin:0;font:500 22px/1.25 Georgia,serif}.shBody p{margin:0;color:#66565e;font-size:14px}
+.shBody blockquote{margin:6px 0 0;padding-left:12px;border-left:3px solid #e2c7d4;font-style:italic;font-size:14px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.shBody cite{font-style:normal;color:#8a7a82}.shPartner{font-size:13px!important}
+.shStatus{display:inline-block;padding:6px 14px;border-radius:30px;font-weight:650;font-size:14px}
+.shStatus--neutral{background:#f1edef}.shStatus--warning{background:#fff2d6;color:#6b4c0c}.shStatus--good{background:#e3f4e8;color:#1f5b33}.shStatus--danger{background:#f6e3e7;color:#8d233b}
+.shWishes{display:grid;gap:8px;border:1px solid #e6dfe2;border-radius:14px;padding:14px}.shWishes label span{font-weight:400}
+@media(max-width:860px){.tyGrid{grid-template-columns:1fr}.tyPreview{position:static;order:-1}.tyPhone{min-height:0}.tyOccasions{grid-template-columns:1fr 1fr}}

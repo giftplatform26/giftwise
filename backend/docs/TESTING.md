@@ -55,9 +55,11 @@ Do not disable PostgreSQL tests or replace them with an in-memory database to ma
 Targeted integration suites for the G1–G4 features (Docker required):
 
 ```sh
-./mvnw test -Dtest='LiveWallRegisterLedgerIntegrationTest,CoHostFunctionsIntegrationTest,WhatsAppIntegrationTest,GrowthBatchFourIntegrationTest,EventManagementIntegrationTest'
+./mvnw test -Dtest='LiveWallRegisterLedgerIntegrationTest,CoHostFunctionsIntegrationTest,WhatsAppIntegrationTest,GrowthBatchFourIntegrationTest,EventManagementIntegrationTest,AcquisitionIntegrationTest'
 ```
 
 They cover the platform/host/event switches, co-host roles, register idempotency and CSV safety, WhatsApp webhook signatures and opt-outs, referral rules, yearly re-hosting and the charity payment guard. The WhatsApp suite disables the background worker and calls it directly.
 
 For browser testing, run the web app as a production build: `cd web && npm run preview`. Development mode (`npm run dev`) compiles each page on its first visit (0.7–3.9 s measured), which looks like slowness but isn't representative.
+
+`./mvnw test` runs unit tests only. To run every integration class: `./mvnw test-compile failsafe:integration-test failsafe:verify` (about 25 minutes, Docker required).

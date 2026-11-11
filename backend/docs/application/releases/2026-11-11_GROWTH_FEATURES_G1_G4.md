@@ -1,6 +1,6 @@
-# GiftWise growth and event-management release (G1–G5) — 11 November 2026
+# GiftWise growth, event-management and acquisition release (G1–G6) — 11 November 2026
 
-Twenty-two opt-in features that make GiftWise useful before, during and after a celebration, and bring guests back as hosts. Every feature reuses the existing module-permission system and **starts switched off**. Migrations V113–V117 are additive. This release also contains the direct-transfer payment codes, host confirmation and custom receipts work (V111–V112).
+Twenty-eight opt-in features that make GiftWise useful before, during and after a celebration, and bring guests back as hosts. Every feature reuses the existing module-permission system and **starts switched off**. Migrations V113–V118 are additive. This release also contains the direct-transfer payment codes, host confirmation and custom receipts work (V111–V112).
 
 ## Switch model
 
@@ -33,6 +33,12 @@ A feature is available only when every applicable level is on. Turning any level
 | `GUEST_CHECKIN` | platform, host, event | `/events/[id]/checkin` (co-hosts and gift desk too) |
 | `LIVE_UPDATES` | platform, host, event | `/events/[id]/updates`; banner on the invitation, ticker on the live wall |
 | `RETURN_GIFTS` | platform, host, event | "Return gift" tick on gift register rows |
+| `TRY_WITHOUT_ACCOUNT` | platform only | `/try` (visitors have no host account or event yet, so host and event switches don't apply) |
+| `STORY_CARDS` | platform, host, event | Host: `/events/[id]/story-cards`. Guests: "Share this invitation to your Status" on the invitation |
+| `PARTNER_ACCOUNTS` | platform, host (the partner), event (branding and access) | `/partner`, client handover `/handover/[token]`, public page `/p/[slug]`, "Planned by" on invitations |
+| `GROUP_COLLECTIONS` | platform, host, event (each collection) | `/collections`; guest page header on the collection's invitation link |
+| `GUEST_FIRST_FREE` | platform, host, event | Offer on invitations and receipts of enabled events; claimed automatically after sign-up |
+| `CELEBRATION_SHOWCASE` | platform, host, event + admin approval | Host: `/events/[id]/showcase`. Admin: Admin → Monetization → Showcase submissions. Public: `/showcase` and the home page |
 
 The live wall also needs `GUESTBOOK` (it shows guestbook wishes).
 
@@ -84,6 +90,20 @@ Payments, receiving accounts, invitation design, event details and deletion rema
 
 Co-host roles now include: co-host → planning checklist, run sheet, check-in and live updates; gift-desk helper → check-in. The budget stays with the owner.
 
+## Customer acquisition (G6, migration V118)
+
+**Try without an account.** `/try` lets a visitor pick the occasion, title, host name, date and city with a live phone preview. The draft stays on the device for 7 days. "Save & share" asks for a free account; after sign-up or sign-in, `/try/claim` moves the draft into the normal creator, which then creates the event as usual. The home page shows "Try it free — no sign-up" when on. Sign-up now forwards `next` to sign-in, which also fixes the return path for receipt and invite links.
+
+**Status and Story cards.** 1080×1920 images drawn in the browser: Invitation, Countdown ("5 days to go"), Thank you and Happening now, using the occasion artwork, title, date, host and the invitation link, with a small "Made with GiftWise" line. "Share to Status" shares the image file where the phone supports it, otherwise downloads it. Guests get the invitation card on the invitation page.
+
+**Planner and venue partners.** A host granted `PARTNER_ACCOUNTS` creates a business profile (name, type, city, phone, website, colour, logo, page address) and a public page at `/p/[slug]`. Partners create celebrations as usual, then press "Hand over" to get a one-time link (hashed, 14 days). When the client accepts: the client becomes the owner, the partner becomes a PARTNER co-host (co-host abilities, no payments or budget), and the client receives the partner's host-level feature grants so the celebration keeps working (audited as `PARTNER_HANDOVER`; the admin can change grants any time). Handover is refused once receiving accounts, payments or gift reports exist, because money is tied to the owner. Guests see "Planned by …" when the event switch is on.
+
+**Office and group gifts.** `/collections` creates a collection in three steps: who it's for and the occasion, a target and closing date, and one of the organiser's confirmed UPI or bank accounts. It becomes a published event of kind `COLLECTION` with one gift, so contributions use direct transfers, payment codes, receipts and host confirmation unchanged, and the existing publish checks apply. Its event switch starts on so the admin can switch off an individual collection. The guest page shows a header with the recipient, confirmed progress (if the organiser allows), contributor count and closing date. Guests' wishes form the card.
+
+**First celebration free for guests.** On invitations and receipts of enabled events, guests see "Planning your own celebration? Start free". After sign-up the claim runs once: the account must be under 14 days old, never have published a celebration and never claimed before, and can't be the inviting host. It grants premium (`HOST_PLAN`) for `gift.offers.first-free-days` (default 90) through a zero-value `FREE` commercial order and entitlement, so every premium check honours it.
+
+**Celebration showcase.** Hosts submit a published celebration with a public title, city, one line and up to six approved wishes, after confirming consent. Submissions wait for platform-admin approval; any edit sends them back for review; hosts can withdraw at any time. Public cards show first names only, never amounts, contacts or unapproved photos. Approved items appear on `/showcase`, the home page and the partner's page.
+
 ## Configuration
 
 | Property | Default | Purpose |
@@ -97,6 +117,7 @@ Co-host roles now include: co-host → planning checklist, run sheet, check-in a
 | `gift.whatsapp.default-country-code` | `91` | Country code for 10-digit numbers. |
 | `gift.whatsapp.batch-size`, `gift.whatsapp.worker-delay-ms` | `20`, `10000` | Delivery worker pace. |
 | `gift.referrals.reward-text` | "A free premium celebration…" | Shown to hosts on `/referrals`. |
+| `gift.offers.first-free-days` | `90` | Premium days granted by the first-celebration-free offer (1–365). |
 | `gift.guest-base-url` | existing | Used in WhatsApp links, wall QR codes and referral links. |
 
 ### WhatsApp templates to submit to Meta
@@ -115,15 +136,15 @@ The mobile app loads the main web application, so all host and guest features ab
 
 ## Verification performed (11 November 2026)
 
-- Backend, full: 686 unit tests (`./mvnw test`) and 719 PostgreSQL integration tests across all 78 integration classes (`./mvnw test-compile failsafe:integration-test failsafe:verify`), all passing. Note: `./mvnw test` alone does not run the `*IntegrationTest` classes.
-- New integration suites: `LiveWallRegisterLedgerIntegrationTest` (10), `CoHostFunctionsIntegrationTest` (8), `WhatsAppIntegrationTest` (8), `GrowthBatchFourIntegrationTest` (7), `EventManagementIntegrationTest` (8).
-- Web: 478 unit tests passing, TypeScript clean, production build compiled (all new routes).
+- Backend, full: 686 unit tests (`./mvnw test`) and 726 PostgreSQL integration tests across all 79 integration classes (`./mvnw test-compile failsafe:integration-test failsafe:verify`), all passing. Note: `./mvnw test` alone does not run the `*IntegrationTest` classes.
+- New integration suites: `LiveWallRegisterLedgerIntegrationTest` (10), `CoHostFunctionsIntegrationTest` (8), `WhatsAppIntegrationTest` (8), `GrowthBatchFourIntegrationTest` (7), `EventManagementIntegrationTest` (8), `AcquisitionIntegrationTest` (7).
+- Web: 483 unit tests passing, TypeScript clean, production build compiled (all new routes).
 - Mobile: 14 tests passing.
 - Not yet performed: browser acceptance on desktop and phones, live WhatsApp delivery (needs Meta approval), and physical-device checks.
 
 ## Rollout checklist
 
-1. Deploy backend (Flyway applies V111–V117) and web together.
+1. Deploy backend (Flyway applies V111–V118) and web together.
 2. In Admin, enable one feature at platform level, grant it to a test host and test event, and try it end to end.
 3. For WhatsApp, keep `DEV_OUTBOX` until templates are approved; then set `META_CLOUD`, the credentials, and the webhook in the Meta dashboard.
 4. Add a few verified vendors before enabling `VENDOR_DIRECTORY`.

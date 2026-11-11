@@ -11,7 +11,7 @@ import java.util.*;
 @RestController
 @RequestMapping("/api/admin/console/events/{eventId}/modules")
 public class EventModuleGrantsController {
- public static final Set<String> CODES=Set.of("CELEBRATION_PLANNING","EVENT_ESSENTIALS","EVENT_REUSE","LIVE_WALL","SHAGUN_REGISTER","EVENT_FUNCTIONS","CO_HOSTS","WHATSAPP_MESSAGING","MEMORY_BOOK","EXPERIENCE_GIFTS","PLANNING_CHECKLIST","EVENT_BUDGET","RUN_SHEET","CATERING_HEADCOUNT","GUEST_CHECKIN","LIVE_UPDATES","RETURN_GIFTS");
+ public static final Set<String> CODES=Set.of("CELEBRATION_PLANNING","EVENT_ESSENTIALS","EVENT_REUSE","LIVE_WALL","SHAGUN_REGISTER","EVENT_FUNCTIONS","CO_HOSTS","WHATSAPP_MESSAGING","MEMORY_BOOK","EXPERIENCE_GIFTS","PLANNING_CHECKLIST","EVENT_BUDGET","RUN_SHEET","CATERING_HEADCOUNT","GUEST_CHECKIN","LIVE_UPDATES","RETURN_GIFTS","STORY_CARDS","PARTNER_ACCOUNTS","GROUP_COLLECTIONS","GUEST_FIRST_FREE","CELEBRATION_SHOWCASE");
  private final JdbcTemplate db;private final ActorContext actor;private final EffectiveModulePermissionService permissions;
  public EventModuleGrantsController(JdbcTemplate db,ActorContext actor,EffectiveModulePermissionService permissions){this.db=db;this.actor=actor;this.permissions=permissions;}
  private UUID owner(UUID event){if(!actor.isPlatformAdmin())throw new ResponseStatusException(HttpStatus.FORBIDDEN);actor.requireAuthenticatedUserId();return db.query("SELECT owner_id FROM events WHERE id=?",(rs,i)->rs.getObject(1,UUID.class),event).stream().findFirst().orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));}

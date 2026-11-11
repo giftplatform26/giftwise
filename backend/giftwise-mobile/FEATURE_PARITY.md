@@ -11,7 +11,7 @@ The mobile app retains the shared host and guest experience. Platform administra
 - Guests/RSVP/attendance, guestbook, memory albums, notification history and thank-you cards.
 - Invitation studio, templates/backgrounds/stickers, AI tools where enabled, file exports and sharing.
 - Existing host plans/partnerships, localization and feature eligibility.
-- Growth features (when switched on by the platform admin): live venue wall, gift register, gift ledger, multi-function schedule, co-hosts and gift-desk helpers, WhatsApp messages, dates to remember, invite friends, yearly re-hosting, memory book, vendor directory, experience and charity wishes, planning checklist, budget, run sheet, catering headcount, entry check-in, live updates and return gifts. See `backend/docs/application/releases/2026-11-11_GROWTH_FEATURES_G1_G4.md`.
+- Growth features (when switched on by the platform admin): live venue wall, gift register, gift ledger, multi-function schedule, co-hosts and gift-desk helpers, WhatsApp messages, dates to remember, invite friends, yearly re-hosting, memory book, vendor directory, experience and charity wishes, planning checklist, budget, run sheet, catering headcount, entry check-in, live updates, return gifts, try without an account, Status and Story cards, partner workspace and handover, group gifts, the first-celebration-free offer and the showcase. See `backend/docs/application/releases/2026-11-11_GROWTH_FEATURES_G1_G4.md`.
 
 These functions reuse existing backend contracts and permissions. Source availability does not certify every payment/provider workflow on every device.
 

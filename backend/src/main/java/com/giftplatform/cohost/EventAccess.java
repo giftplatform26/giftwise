@@ -25,7 +25,10 @@ public class EventAccess {
     static final Map<String, Set<Capability>> ROLES = Map.of(
         "CO_HOST", Set.of(Capability.REGISTER_ADD, Capability.REGISTER_MANAGE, Capability.GUESTS, Capability.LIVE_WALL, Capability.FUNCTIONS,
             Capability.PLANNING, Capability.CHECKIN, Capability.UPDATES),
-        "GIFT_DESK", Set.of(Capability.REGISTER_ADD, Capability.CHECKIN));
+        "GIFT_DESK", Set.of(Capability.REGISTER_ADD, Capability.CHECKIN),
+        // A planner or venue partner keeps co-host abilities after handing an event over to the client.
+        "PARTNER", Set.of(Capability.REGISTER_ADD, Capability.REGISTER_MANAGE, Capability.GUESTS, Capability.LIVE_WALL, Capability.FUNCTIONS,
+            Capability.PLANNING, Capability.CHECKIN, Capability.UPDATES));
 
     public record Access(Event event, UUID userId, boolean owner, String role) {
         public boolean can(Capability c) { return owner || (role != null && ROLES.getOrDefault(role, Set.of()).contains(c)); }
