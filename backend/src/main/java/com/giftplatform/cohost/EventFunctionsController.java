@@ -39,10 +39,10 @@ public class EventFunctionsController {
                         String mapUrl, String dressCode, String notes, Boolean rsvpEnabled, Long version) {}
     public record Function(UUID id, String name, LocalDate functionDate, LocalTime startTime, LocalTime endTime, String venueName,
                            String venueAddress, String mapUrl, String dressCode, String notes, boolean rsvpEnabled, int sortOrder, long version) {}
-    public record Counts(long yes, long maybe, long no, long guests) {}
-    public record Response(String guestName, String guestEmail, String attendance, int partySize) {}
+    public record Counts(long yes, long maybe, long no, long guests, Map<String, Long> meals) {}
+    public record Response(String guestName, String guestEmail, String attendance, int partySize, String mealChoice) {}
     public record HostFunction(Function function, Counts counts, List<Response> responses) {}
-    public record GuestAnswer(UUID functionId, String attendance, Integer partySize) {}
+    public record GuestAnswer(UUID functionId, String attendance, Integer partySize, String mealChoice) {}
     public record GuestRsvp(String guestName, String guestEmail, List<GuestAnswer> answers) {}
 
     // ---- Host ----
@@ -51,12 +51,15 @@ public class EventFunctionsController {
     public ResponseEntity<List<HostFunction>> list(@PathVariable UUID id) {
         access.require(id, EventAccess.Capability.FUNCTIONS, MODULE);
         List<HostFunction> out = functions(id).stream().map(f -> {
-            List<Response> responses = db.query("SELECT guest_name,guest_email,attendance,party_size FROM event_function_rsvps WHERE function_id=? ORDER BY updated_at DESC",
-                (rs, i) -> new Response(rs.getString(1), rs.getString(2), rs.getString(3), rs.getInt(4)), f.id());
+            List<Response> responses = db.query("SELECT guest_name,guest_email,attendance,party_size,meal_choice FROM event_function_rsvps WHERE function_id=? ORDER BY updated_at DESC",
+                (rs, i) -> new Response(rs.getString(1), rs.getString(2), rs.getString(3), rs.getInt(4), rs.getString(5)), f.id());
+            // Catering headcount: people coming, by meal choice (unanswered counted as NOT_SAID).
+            Map<String, Long> meals = new TreeMap<>();
+            responses.stream().filter(r -> r.attendance().equals("YES")).forEach(r -> meals.merge(r.mealChoice() == null ? "NOT_SAID" : r.mealChoice(), (long) r.partySize(), Long::sum));
             long yes = responses.stream().filter(r -> r.attendance().equals("YES")).count();
             long maybe = responses.stream().filter(r -> r.attendance().equals("MAYBE")).count();
             long guests = responses.stream().filter(r -> r.attendance().equals("YES")).mapToLong(Response::partySize).sum();
-            return new HostFunction(f, new Counts(yes, maybe, responses.size() - yes - maybe, guests), responses);
+            return new HostFunction(f, new Counts(yes, maybe, responses.size() - yes - maybe, guests, meals), responses);
         }).toList();
         return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(out);
     }
@@ -127,6 +130,7 @@ public class EventFunctionsController {
         if (email.length() > 254 || !email.matches("[^\\s@]+@[^\\s@]+\\.[^\\s@]+")) throw bad("Enter a valid email so you can change your answer later");
         limit(e.getId(), http);
         Set<UUID> open = new HashSet<>(db.queryForList("SELECT id FROM event_functions WHERE event_id=? AND rsvp_enabled", UUID.class, e.getId()));
+        boolean meals = permissions.eventEnabled(e.getOwnerId(), e.getId(), "CATERING_HEADCOUNT");
         Set<UUID> seen = new HashSet<>();
         for (GuestAnswer a : in.answers()) {
             if (a == null || a.functionId() == null || !open.contains(a.functionId()) || !seen.add(a.functionId())) throw bad("One of the functions is no longer taking RSVPs. Refresh and try again.");
@@ -134,10 +138,15 @@ public class EventFunctionsController {
             if (!Set.of("YES", "NO", "MAYBE").contains(att)) throw bad("Choose yes, maybe or no");
             int party = att.equals("NO") ? 0 : a.partySize() == null ? 1 : a.partySize();
             if (party < (att.equals("NO") ? 0 : 1) || party > 10) throw bad("Party size must be between 1 and 10");
+            String meal = null;
+            if (meals && !att.equals("NO") && a.mealChoice() != null && !a.mealChoice().isBlank()) {
+                meal = a.mealChoice().strip().toUpperCase(Locale.ROOT);
+                if (!Set.of("VEG", "JAIN", "NON_VEG", "VEGAN", "NONE").contains(meal)) throw bad("Choose a meal preference");
+            }
             db.update("""
-                INSERT INTO event_function_rsvps(id,function_id,guest_name,guest_email,attendance,party_size) VALUES(?,?,?,?,?,?)
+                INSERT INTO event_function_rsvps(id,function_id,guest_name,guest_email,attendance,party_size,meal_choice) VALUES(?,?,?,?,?,?,?)
                 ON CONFLICT(function_id,guest_email) DO UPDATE SET guest_name=EXCLUDED.guest_name,attendance=EXCLUDED.attendance,
-                  party_size=EXCLUDED.party_size,updated_at=now()""", UUID.randomUUID(), a.functionId(), name, email, att, party);
+                  party_size=EXCLUDED.party_size,meal_choice=EXCLUDED.meal_choice,updated_at=now()""", UUID.randomUUID(), a.functionId(), name, email, att, party, meal);
         }
         return Map.of("message", "Thank you! Your answers are saved. Use the same email to change them.");
     }

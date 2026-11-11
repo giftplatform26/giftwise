@@ -39,28 +39,31 @@ public class ShagunRegisterController {
     private final JdbcTemplate db;
     private final ActorContext actor;
     private final EventAccess access;
+    private final com.giftplatform.admin.EffectiveModulePermissionService permissions;
 
-    public ShagunRegisterController(JdbcTemplate db, ActorContext actor, EventAccess access) {
-        this.db = db; this.actor = actor; this.access = access;
+    public ShagunRegisterController(JdbcTemplate db, ActorContext actor, EventAccess access, com.giftplatform.admin.EffectiveModulePermissionService permissions) {
+        this.db = db; this.actor = actor; this.access = access; this.permissions = permissions;
     }
 
     public record Input(String giverName, String giverPhone, String side, String kind, Long amountPaise, String itemDescription,
                         String note, String clientKey, Long version) {}
     public record Entry(UUID id, String giverName, String giverPhone, String side, String kind, Long amountPaise, String itemDescription,
-                        String note, OffsetDateTime createdAt, long version) {}
+                        String note, OffsetDateTime createdAt, long version, OffsetDateTime returnGiftAt) {}
     public record OnlineGift(UUID id, String giverName, long amountPaise, String kind, OffsetDateTime createdAt) {}
     public record SideTotal(String side, long amountPaise, int entries) {}
     public record Totals(long inPersonPaise, long onlinePaise, int itemGifts, int givers) {}
     public record Register(List<Entry> entries, List<OnlineGift> online, Totals totals, List<SideTotal> sides,
-                           List<String> sideSuggestions, List<String> nameSuggestions, boolean canManage) {}
+                           List<String> sideSuggestions, List<String> nameSuggestions, boolean canManage, boolean returnGifts, int returnGiftsGiven) {}
 
     @GetMapping
     public ResponseEntity<Register> list(@PathVariable UUID id) {
-        boolean canManage = owned(id, Capability.REGISTER_ADD).can(Capability.REGISTER_MANAGE);
+        var acc = owned(id, Capability.REGISTER_ADD);
+        boolean canManage = acc.can(Capability.REGISTER_MANAGE);
+        boolean returnGifts = permissions.eventEnabled(acc.event().getOwnerId(), id, "RETURN_GIFTS");
         List<Entry> entries = db.query("SELECT * FROM event_shagun_entries WHERE event_id=? AND deleted_at IS NULL ORDER BY created_at DESC",
             (rs, i) -> new Entry(rs.getObject("id", UUID.class), rs.getString("giver_name"), rs.getString("giver_phone"), rs.getString("side"),
                 rs.getString("kind"), (Long) rs.getObject("amount_paise"), rs.getString("item_description"), rs.getString("note"),
-                rs.getObject("created_at", OffsetDateTime.class), rs.getLong("version")), id);
+                rs.getObject("created_at", OffsetDateTime.class), rs.getLong("version"), rs.getObject("return_gift_at", OffsetDateTime.class)), id);
         List<OnlineGift> online = db.query("SELECT * FROM (" + CONFIRMED_ONLINE + ") o WHERE o.event_id=? ORDER BY created_at DESC",
             (rs, i) -> new OnlineGift(rs.getObject("id", UUID.class), rs.getString("giver_name"), rs.getLong("amount_paise"),
                 rs.getString("kind"), rs.getObject("created_at", OffsetDateTime.class)), id);
@@ -82,7 +85,8 @@ public class ShagunRegisterController {
             SELECT DISTINCT guest_name FROM (SELECT guest_name FROM event_rsvps WHERE event_id=?
               UNION SELECT guest_name FROM event_guestbook WHERE event_id=?) n ORDER BY guest_name LIMIT 500""", String.class, id, id);
         return ResponseEntity.ok().cacheControl(CacheControl.noStore())
-            .body(new Register(entries, online, new Totals(inPerson, onlineSum, items, givers.size()), sides, sideSuggestions, names, canManage));
+            .body(new Register(entries, online, new Totals(inPerson, onlineSum, items, givers.size()), sides, sideSuggestions, names, canManage, returnGifts,
+                (int) entries.stream().filter(e -> e.returnGiftAt() != null).count()));
     }
 
     @PostMapping
@@ -112,6 +116,19 @@ public class ShagunRegisterController {
               version=version+1,updated_at=now() WHERE id=? AND event_id=? AND deleted_at IS NULL AND version=?""",
             c.name, key(c.name), c.phone, c.side, c.kind, c.amount, c.item, c.note, entryId, id, in.version());
         if (n == 0) throw exists(id, entryId) ? conflict() : new ResponseStatusException(HttpStatus.NOT_FOUND);
+        return entry(id, entryId);
+    }
+
+    public record ReturnGift(boolean given) {}
+
+    /** Tick off a return gift handed to this giver (gift desk can do it too). Needs RETURN_GIFTS for the event. */
+    @PostMapping("/{entryId}/return-gift")
+    public Entry returnGift(@PathVariable UUID id, @PathVariable UUID entryId, @RequestBody ReturnGift in) {
+        var acc = owned(id, Capability.REGISTER_ADD);
+        permissions.requireEvent(acc.event().getOwnerId(), id, "RETURN_GIFTS");
+        String set = in != null && in.given() ? "COALESCE(return_gift_at,now())" : "NULL";
+        if (db.update("UPDATE event_shagun_entries SET return_gift_at=" + set + " WHERE id=? AND event_id=? AND deleted_at IS NULL", entryId, id) == 0)
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         return entry(id, entryId);
     }
 
@@ -167,7 +184,8 @@ public class ShagunRegisterController {
     private Entry entry(UUID event, UUID entryId) {
         return db.query("SELECT * FROM event_shagun_entries WHERE id=? AND event_id=?", (rs, i) -> new Entry(rs.getObject("id", UUID.class),
                 rs.getString("giver_name"), rs.getString("giver_phone"), rs.getString("side"), rs.getString("kind"), (Long) rs.getObject("amount_paise"),
-                rs.getString("item_description"), rs.getString("note"), rs.getObject("created_at", OffsetDateTime.class), rs.getLong("version")), entryId, event)
+                rs.getString("item_description"), rs.getString("note"), rs.getObject("created_at", OffsetDateTime.class), rs.getLong("version"),
+                rs.getObject("return_gift_at", OffsetDateTime.class)), entryId, event)
             .stream().findFirst().orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
     private EventAccess.Access owned(UUID id, Capability capability) { return access.require(id, capability, MODULE); }

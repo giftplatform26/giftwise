@@ -31,6 +31,7 @@ public class LiveWallController {
     private final EffectiveModulePermissionService permissions;
     private final com.giftplatform.qr.QrRenderer qr;
     private final com.giftplatform.cohost.EventAccess access;
+    @org.springframework.beans.factory.annotation.Autowired private com.giftplatform.eventops.LiveUpdatesController updates;
     private final String guestBaseUrl;
 
     public LiveWallController(JdbcTemplate db, EventRepository events, ActorContext actor, EffectiveModulePermissionService permissions,
@@ -45,7 +46,7 @@ public class LiveWallController {
                         int slideSeconds, long version) {}
     public record Item(UUID id, String guestName, String message, String photoUrl, OffsetDateTime createdAt) {}
     public record Wall(String eventTitle, String hostName, String headline, String theme, boolean showJoinQr, int slideSeconds,
-                       String invitationPath, List<Item> items) {}
+                       String invitationPath, List<Item> items, String announcement) {}
 
     // ---- Host ----
 
@@ -125,7 +126,7 @@ public class LiveWallController {
             }, e.getId());
         String host = e.getHostDisplayName() == null || e.getHostDisplayName().isBlank() ? null : e.getHostDisplayName();
         Wall body = new Wall(e.getTitle(), host, (String) w.get("headline"), (String) w.get("theme"), (Boolean) w.get("show_join_qr"),
-            ((Number) w.get("slide_seconds")).intValue(), "/e/" + e.getPublicToken(), items);
+            ((Number) w.get("slide_seconds")).intValue(), "/e/" + e.getPublicToken(), items, updates.latestForWall(e));
         return ResponseEntity.ok().cacheControl(CacheControl.noStore()).header("X-Robots-Tag", "noindex, nofollow").body(body);
     }
 

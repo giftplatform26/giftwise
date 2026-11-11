@@ -1,6 +1,6 @@
-# GiftWise growth features release (G1–G4) — 11 November 2026
+# GiftWise growth and event-management release (G1–G5) — 11 November 2026
 
-Fifteen opt-in features that make GiftWise useful before, during and after a celebration, and bring guests back as hosts. Every feature reuses the existing module-permission system and **starts switched off**. Migrations V113–V116 are additive. This release also contains the direct-transfer payment codes, host confirmation and custom receipts work (V111–V112).
+Twenty-two opt-in features that make GiftWise useful before, during and after a celebration, and bring guests back as hosts. Every feature reuses the existing module-permission system and **starts switched off**. Migrations V113–V117 are additive. This release also contains the direct-transfer payment codes, host confirmation and custom receipts work (V111–V112).
 
 ## Switch model
 
@@ -21,11 +21,18 @@ A feature is available only when every applicable level is on. Turning any level
 | `CO_HOSTS` | platform, host, event | Owner: `/events/[id]/co-hosts`. Invitee: `/join-team/[token]`, `/helping` |
 | `WHATSAPP_MESSAGING` | platform, host, event | `/events/[id]/whatsapp` |
 | `OCCASION_REMINDERS` | platform, host | `/reminders` |
-| `HOST_REFERRALS` | platform, host | `/referrals`; admin rewards in Admin → Plans & partnerships |
+| `HOST_REFERRALS` | platform, host | `/referrals`; admin rewards in Admin → Monetization |
 | `YEARLY_REHOST` | platform, host | Suggestion cards on `/dashboard` |
 | `MEMORY_BOOK` | platform, host, event | `/events/[id]/memory-book` |
-| `VENDOR_DIRECTORY` | platform, host | `/vendors`; admin curation in Admin → Plans & partnerships |
+| `VENDOR_DIRECTORY` | platform, host | `/vendors`; admin curation in Admin → Monetization |
 | `EXPERIENCE_GIFTS` | platform, host, event | "Gift type" on wishlist cards (`/gifts`); badges and donate buttons on the invitation |
+| `PLANNING_CHECKLIST` | platform, host, event | `/events/[id]/checklist` (co-hosts too) |
+| `EVENT_BUDGET` | platform, host, event | `/events/[id]/budget` (owner only) |
+| `RUN_SHEET` | platform, host, event | `/events/[id]/run-sheet`; vendors: `/run/[token]` |
+| `CATERING_HEADCOUNT` | platform, host, event | Meal choice in the guest schedule RSVP; totals on `/events/[id]/functions` (needs `EVENT_FUNCTIONS`) |
+| `GUEST_CHECKIN` | platform, host, event | `/events/[id]/checkin` (co-hosts and gift desk too) |
+| `LIVE_UPDATES` | platform, host, event | `/events/[id]/updates`; banner on the invitation, ticker on the live wall |
+| `RETURN_GIFTS` | platform, host, event | "Return gift" tick on gift register rows |
 
 The live wall also needs `GUESTBOOK` (it shows guestbook wishes).
 
@@ -49,7 +56,7 @@ Payments, receiving accounts, invitation design, event details and deletion rema
 
 **Dates to remember.** Birthdays and anniversaries with a six-week "coming up" list, "turns N", and what the user gave that person last time.
 
-**Invite friends (referrals).** Built on the V105 referral tables. A friend who signs up with `/register?ref=CODE` within 14 days of account creation is attributed once; the referral qualifies when they publish their first celebration. The admin grants the reward and marks it in Admin → Plans & partnerships (audited as `REFERRAL_REWARDED`). The reward text is configurable (`gift.referrals.reward-text`); granting the reward itself is manual.
+**Invite friends (referrals).** Built on the V105 referral tables. A friend who signs up with `/register?ref=CODE` within 14 days of account creation is attributed once; the referral qualifies when they publish their first celebration. The admin grants the reward and marks it in Admin → Monetization (audited as `REFERRAL_REWARDED`). The reward text is configurable (`gift.referrals.reward-text`); granting the reward itself is manual.
 
 **Yearly re-hosting.** Birthdays and anniversaries hosted at least six months ago are suggested about 60 days before their next date. One tap creates a private draft with the same details, this year's date, a retitled name (year updated) and the WhatsApp guest list minus opted-out numbers. Each source event is suggested once a year.
 
@@ -58,6 +65,24 @@ Payments, receiving accounts, invitation design, event details and deletion rema
 **Vendor directory.** Admin-curated vendors (category, city, phone, website, Instagram, price hint, verified flag). Hosts filter, shortlist and contact vendors directly (WhatsApp, call, website). No bookings or payments.
 
 **Experience and charity wishes.** Wishlist items can be marked *Experience* (works like any gift) or *Charity* (name plus https donation link). Guests donate on the charity's site; the database trigger `reject_charity_gift_payment` refuses payment orders and direct-transfer claims for charity wishes. A gift with existing contributions cannot become a charity wish.
+
+## Event-management tools (G5, migration V117)
+
+**Planning checklist.** Tasks with due dates, categories, an owner (host or co-host) and notes, grouped as Overdue, This week, Coming up, No date and Done, with a progress ring and a days-to-go count. "Add starter tasks" inserts 8–12 occasion-specific tasks dated back from the event (tasks whose date has already passed move to three days from now). Co-hosts share the list; gift-desk helpers can't see it.
+
+**Budget and vendor payments.** Owner only. Optional total budget, then one line per expense with planned, booked (quoted) and paid amounts and the next due date. Shows totals, health ("82% of budget allocated", "Over budget"), payments due in the next 14 days, and per-category groups. Paid can't exceed the booked amount. A planning aid; it never pays anyone.
+
+**Day-of run sheet.** Time, what happens, who is responsible, where, optional link to a function, and a done tick. Printable. "Share with vendors" creates a read-only link (`/run/[token]`) that refreshes every minute and can be replaced at any time.
+
+**Catering headcount.** When on (with the schedule), guests choose a meal preference (vegetarian, Jain, non-vegetarian, vegan, no meal) per function. The host's schedule shows people per meal for each function. When off, no meal is stored.
+
+**Entry check-in.** A phone-first door screen: live headcount, search across RSVPs, schedule answers and the WhatsApp guest list (highest expected party size wins), one tap plus party size per family, walk-ins, and undo. Refreshes every 15 seconds so several helpers can check guests in at once.
+
+**Live updates and stream link.** Short announcements (200 characters, up to 40 a day) shown on the invitation for 24 hours and on the live wall for 6 hours, with quick suggestions such as "Dinner is now being served". An optional https livestream link appears as a "Watch live" button on the invitation. Guests never see who posted.
+
+**Return gifts.** A "Return gift" tick on each gift register row and a "given / total" counter. Gift-desk helpers can tick it too.
+
+Co-host roles now include: co-host → planning checklist, run sheet, check-in and live updates; gift-desk helper → check-in. The budget stays with the owner.
 
 ## Configuration
 
@@ -90,15 +115,20 @@ The mobile app loads the main web application, so all host and guest features ab
 
 ## Verification performed (11 November 2026)
 
-- New backend suites: `LiveWallRegisterLedgerIntegrationTest` (10), `CoHostFunctionsIntegrationTest` (8), `WhatsAppIntegrationTest` (8), `GrowthBatchFourIntegrationTest` (7), plus the affected existing suites — 173 tests in total, all passing.
-- Web: 473 unit tests passing, TypeScript clean, production build compiled (all new routes).
+- Backend, full: 686 unit tests (`./mvnw test`) and 719 PostgreSQL integration tests across all 78 integration classes (`./mvnw test-compile failsafe:integration-test failsafe:verify`), all passing. Note: `./mvnw test` alone does not run the `*IntegrationTest` classes.
+- New integration suites: `LiveWallRegisterLedgerIntegrationTest` (10), `CoHostFunctionsIntegrationTest` (8), `WhatsAppIntegrationTest` (8), `GrowthBatchFourIntegrationTest` (7), `EventManagementIntegrationTest` (8).
+- Web: 478 unit tests passing, TypeScript clean, production build compiled (all new routes).
 - Mobile: 14 tests passing.
 - Not yet performed: browser acceptance on desktop and phones, live WhatsApp delivery (needs Meta approval), and physical-device checks.
 
 ## Rollout checklist
 
-1. Deploy backend (Flyway applies V111–V116) and web together.
+1. Deploy backend (Flyway applies V111–V117) and web together.
 2. In Admin, enable one feature at platform level, grant it to a test host and test event, and try it end to end.
 3. For WhatsApp, keep `DEV_OUTBOX` until templates are approved; then set `META_CLOUD`, the credentials, and the webhook in the Meta dashboard.
 4. Add a few verified vendors before enabling `VENDOR_DIRECTORY`.
 5. Decide the referral reward and update `gift.referrals.reward-text`.
+
+## Page speed
+
+Measured 11 November 2026 on the development Mac. The time to fetch a host page when navigating was 0.012–0.038 s with a production build (`npm run preview`), against 0.7–3.9 s on the first visit to each page under `npm run dev`, which compiles pages on demand. Browser testing should use the production build. `npm run dev:fast` (Turbopack) roughly halves first-visit compile time for development. The localization catalog is no longer re-downloaded on every page change.

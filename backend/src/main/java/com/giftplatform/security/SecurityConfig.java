@@ -200,7 +200,7 @@ public class SecurityConfig {
                                 "/api/host/group-member-email-policy", "/api/v1/events", "/api/v1/events/**"
                         ).authenticated()
                         .requestMatchers("/api/v1/me/**").authenticated()
-                        .requestMatchers(HttpMethod.GET,"/api/public/live/*","/api/public/live/*/join-qr.png","/api/public/events/*/gift-kinds").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/public/live/*","/api/public/live/*/join-qr.png","/api/public/events/*/gift-kinds","/api/public/events/*/live-updates","/api/public/run-sheet/*").permitAll()
                         .requestMatchers(
                                 "/api/v1/host/notifications",
                                 "/api/v1/host/notifications/**"

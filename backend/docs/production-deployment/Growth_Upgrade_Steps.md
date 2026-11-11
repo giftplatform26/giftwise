@@ -43,12 +43,12 @@ For keepsakes, enable Public keepsakes, grant the host Guestbook, and opt in fro
 
 Run the coordinated backup/restore and encrypted offsite checks again. The updated configuration backup includes `giftwise/web.env`. Keep the owner-held recovery keys available. Re-enable the backup timer only after successful verification. Do not enable live payment collection as part of this upgrade.
 
-# Upgrade to the 11 November 2026 release (V111–V116)
+# Upgrade to the 11 November 2026 release (V111–V117)
 
-This release adds direct-transfer payment codes and custom receipts (V111–V112) and fifteen switchable growth features (V113–V116). Full details: `../application/releases/2026-11-11_GROWTH_FEATURES_G1_G4.md`.
+This release adds direct-transfer payment codes and custom receipts (V111–V112) and twenty-two switchable growth and event-management features (V113–V117). Full details: `../application/releases/2026-11-11_GROWTH_FEATURES_G1_G4.md`.
 
 1. Take the coordinated backup as in the main runbook. Stop both services.
-2. Activate the new backend and web archives together. Backend startup applies V111–V116; all migrations are additive. Verify readiness and schema head **116**.
+2. Activate the new backend and web archives together. Backend startup applies V111–V117; all migrations are additive. Verify readiness and schema head **117**.
 3. No new settings are needed to start: every new module is off, and WhatsApp defaults to practice mode (`DEV_OUTBOX`, nothing is sent).
 4. Only when Meta has approved the three WhatsApp templates, add these to the existing **backend** environment file (never to `web.env`), then restart the backend:
 
