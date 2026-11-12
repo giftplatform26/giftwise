@@ -43,12 +43,12 @@ For keepsakes, enable Public keepsakes, grant the host Guestbook, and opt in fro
 
 Run the coordinated backup/restore and encrypted offsite checks again. The updated configuration backup includes `giftwise/web.env`. Keep the owner-held recovery keys available. Re-enable the backup timer only after successful verification. Do not enable live payment collection as part of this upgrade.
 
-# Upgrade to the 11 November 2026 release (V111–V118)
+# Upgrade to the 11 November 2026 release (V111–V119)
 
-This release adds direct-transfer payment codes and custom receipts (V111–V112) and twenty-eight switchable growth, event-management and acquisition features (V113–V118). Full details: `../application/releases/2026-11-11_GROWTH_FEATURES_G1_G4.md`.
+This release adds direct-transfer payment codes and custom receipts (V111–V112) and thirty-one switchable growth, event-management and acquisition features (V113–V119). Full details: `../application/releases/2026-11-11_GROWTH_FEATURES_G1_G4.md`.
 
 1. Take the coordinated backup as in the main runbook. Stop both services.
-2. Activate the new backend and web archives together. Backend startup applies V111–V118; all migrations are additive. Verify readiness and schema head **118**.
+2. Activate the new backend and web archives together. Backend startup applies V111–V119; all migrations are additive. Verify readiness and schema head **119**.
 3. No new settings are needed to start: every new module is off, and WhatsApp defaults to practice mode (`DEV_OUTBOX`, nothing is sent).
 4. Only when Meta has approved the three WhatsApp templates, add these to the existing **backend** environment file (never to `web.env`), then restart the backend:
 
@@ -63,3 +63,5 @@ This release adds direct-transfer payment codes and custom receipts (V111–V112
    In the Meta dashboard, set the webhook to `https://YOUR_BACKEND_HOST/api/webhooks/whatsapp` with the same verify token, and subscribe to `messages`. The backend refuses to start with `META_CLOUD` and missing credentials.
 5. Optional: `GIFT_REFERRALS_REWARD_TEXT` (referral reward text) and `GIFT_OFFERS_FIRST_FREE_DAYS` (premium days for the guest welcome offer, default 90).
 6. Roll out one feature at a time: Admin → Hosts & privileges (platform and host), then Admin → Events → Celebration feature controls (event). Confirm on a staging event before granting real hosts.
+7. Optional: set `DB_POOL_SIZE` (default 20) in the backend environment. With several backend instances, keep the total below PostgreSQL `max_connections`.
+8. Fastest setup for a new wedding host: Admin → Hosts & privileges → Feature presets → "Wedding pack", applied to the platform, then the host, then their event.

@@ -5,6 +5,7 @@
 !/backend/
 !/web/
 !/website/
+!/.github/
 
 # Generated files and local configuration
 **/node_modules/
@@ -17,6 +18,7 @@
 **/.DS_Store
 **/*.log
 **/*.tsbuildinfo
+**/__pycache__/
 **/.env*
 !**/.env.example
 **/application.properties

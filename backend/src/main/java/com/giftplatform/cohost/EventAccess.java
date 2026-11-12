@@ -20,15 +20,15 @@ import java.util.UUID;
  */
 @Service
 public class EventAccess {
-    public enum Capability { REGISTER_ADD, REGISTER_MANAGE, GUESTS, LIVE_WALL, FUNCTIONS, PLANNING, CHECKIN, UPDATES }
+    public enum Capability { REGISTER_ADD, REGISTER_MANAGE, GUESTS, LIVE_WALL, FUNCTIONS, PLANNING, CHECKIN, UPDATES, SEATING }
     public static final String MODULE = "CO_HOSTS";
     static final Map<String, Set<Capability>> ROLES = Map.of(
         "CO_HOST", Set.of(Capability.REGISTER_ADD, Capability.REGISTER_MANAGE, Capability.GUESTS, Capability.LIVE_WALL, Capability.FUNCTIONS,
-            Capability.PLANNING, Capability.CHECKIN, Capability.UPDATES),
+            Capability.PLANNING, Capability.CHECKIN, Capability.UPDATES, Capability.SEATING),
         "GIFT_DESK", Set.of(Capability.REGISTER_ADD, Capability.CHECKIN),
         // A planner or venue partner keeps co-host abilities after handing an event over to the client.
         "PARTNER", Set.of(Capability.REGISTER_ADD, Capability.REGISTER_MANAGE, Capability.GUESTS, Capability.LIVE_WALL, Capability.FUNCTIONS,
-            Capability.PLANNING, Capability.CHECKIN, Capability.UPDATES));
+            Capability.PLANNING, Capability.CHECKIN, Capability.UPDATES, Capability.SEATING));
 
     public record Access(Event event, UUID userId, boolean owner, String role) {
         public boolean can(Capability c) { return owner || (role != null && ROLES.getOrDefault(role, Set.of()).contains(c)); }

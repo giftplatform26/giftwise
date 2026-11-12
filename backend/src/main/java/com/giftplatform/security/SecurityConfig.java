@@ -105,6 +105,7 @@ public class SecurityConfig {
                                 "/api/webhooks/whatsapp",
                                 "/api/public/celebrations/*/rsvp",
                                 "/api/public/celebrations/*/functions/rsvp",
+                                "/api/public/acquisition-events",
                                 "/api/public/celebrations/*/wishes",
                                  "/api/public/celebrations/*/wishes/photo"
                         )
@@ -202,7 +203,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/me/**").authenticated()
                         .requestMatchers(HttpMethod.GET,"/api/public/live/*","/api/public/live/*/join-qr.png","/api/public/events/*/gift-kinds","/api/public/events/*/live-updates","/api/public/run-sheet/*",
                                 "/api/public/acquisition-modules","/api/public/showcase","/api/public/partners/*","/api/public/partners/*/logo.png",
-                                "/api/public/events/*/partner","/api/public/events/*/collection","/api/public/events/*/first-free").permitAll()
+                                "/api/public/events/*/partner","/api/public/events/*/collection","/api/public/events/*/first-free",
+                                "/api/public/celebrations/*/find-table","/api/public/passes/*","/api/public/passes/*/qr.png").permitAll()
+                        .requestMatchers(HttpMethod.POST,"/api/public/acquisition-events").permitAll()
                         .requestMatchers(
                                 "/api/v1/host/notifications",
                                 "/api/v1/host/notifications/**"

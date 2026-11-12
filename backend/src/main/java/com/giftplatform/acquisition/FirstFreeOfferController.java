@@ -77,6 +77,7 @@ public class FirstFreeOfferController {
         db.update("INSERT INTO commercial_entitlements(order_id,buyer_kind,buyer_id,stream,resource_id,starts_at,expires_at) VALUES(?, 'HOST', ?, 'HOST_PLAN', ?, now(), ?)",
             order, me, me, expires);
         db.update("INSERT INTO guest_offer_claims(user_id,source_event_id,order_id) VALUES(?,?,?)", me, source.getId(), order);
+        AcquisitionEventsController.record(db, "OFFER_CLAIMED", me, source.getId());
         return new Result(true, "Premium is yours free for " + days + " days. Enjoy planning!", expires);
     }
 

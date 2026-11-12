@@ -1,0 +1,14 @@
+GiftWise Logo: {{brandLogoUrl}}
+
+Your celebrations need a quick look
+
+Hi {{recipientName}}, here is what is waiting for you today: {{summary}}
+
+Open your dashboard: {{dashboardUrl}}
+
+You receive this because notifications are on in your account. Turn them off any time in Account settings.
+
+Contact Support: {{supportUrl}}
+Privacy Policy: {{privacyUrl}}
+Terms & Conditions: {{termsUrl}}
+© 2026 GiftWise

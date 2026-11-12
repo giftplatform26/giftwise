@@ -1,6 +1,6 @@
 # GiftWise growth, event-management and acquisition release (G1–G6) — 11 November 2026
 
-Twenty-eight opt-in features that make GiftWise useful before, during and after a celebration, and bring guests back as hosts. Every feature reuses the existing module-permission system and **starts switched off**. Migrations V113–V118 are additive. This release also contains the direct-transfer payment codes, host confirmation and custom receipts work (V111–V112).
+Twenty-eight opt-in features that make GiftWise useful before, during and after a celebration, and bring guests back as hosts. Every feature reuses the existing module-permission system and **starts switched off**. Migrations V113–V119 are additive. This release also contains the direct-transfer payment codes, host confirmation and custom receipts work (V111–V112).
 
 ## Switch model
 
@@ -39,6 +39,9 @@ A feature is available only when every applicable level is on. Turning any level
 | `GROUP_COLLECTIONS` | platform, host, event (each collection) | `/collections`; guest page header on the collection's invitation link |
 | `GUEST_FIRST_FREE` | platform, host, event | Offer on invitations and receipts of enabled events; claimed automatically after sign-up |
 | `CELEBRATION_SHOWCASE` | platform, host, event + admin approval | Host: `/events/[id]/showcase`. Admin: Admin → Monetization → Showcase submissions. Public: `/showcase` and the home page |
+| `SEATING_PLAN` | platform, host, event | `/events/[id]/seating`; optional "Find your table" on the invitation |
+| `GUEST_PASSES` | platform, host, event | `/events/[id]/passes`; guest pass page `/pass/[token]`; scanning in Guest check-in |
+| `HOST_NOTIFICATIONS` | platform, host | "Needs your attention" on the dashboard and a daily digest email |
 
 The live wall also needs `GUESTBOOK` (it shows guestbook wishes).
 
@@ -104,6 +107,24 @@ Co-host roles now include: co-host → planning checklist, run sheet, check-in a
 
 **Celebration showcase.** Hosts submit a published celebration with a public title, city, one line and up to six approved wishes, after confirming consent. Submissions wait for platform-admin approval; any edit sends them back for review; hosts can withdraw at any time. Public cards show first names only, never amounts, contacts or unapproved photos. Approved items appear on `/showcase`, the home page and the partner's page.
 
+## Making it easier to run (G7, migration V119, 12 November 2026)
+
+**Feature presets (admin).** Admin → Hosts & privileges → Feature presets switches on a whole pack in one step: Essentials, Wedding pack, Birthday & party pack, Growth pack, Planner & venue pack, or Everything. Apply to the platform, one host, every host, or one event (event scope also sets the memory-album and AI switches). Presets only switch things on and every apply is audited. `POST /api/admin/console/presets/modules/{code}/all-hosts` switches one module on or off for every host.
+
+**Grouped host menu.** The celebration menu is grouped into Plan, Invites & guests, Gifts & money, On the day and After the event. Sections collapse, remember their state, and the one holding the current page opens automatically. Icon-only mode stays a flat list.
+
+**Setup guide.** The celebration overview shows a checklist of only the tools switched on for that event (receiving account, publish, functions, checklist, budget, co-host, guest list, seating, passes, run sheet, live wall, showcase), ticked as the host starts using each. Hosts can hide it.
+
+**Needs your attention and daily digest.** With `HOST_NOTIFICATIONS`, the dashboard lists gifts to confirm, wishes to approve, new RSVPs and WhatsApp replies, vendor payments due within 3 days, overdue tasks and tasks due today, and showcase decisions — for owned and co-hosted celebrations. A digest email (template `attention-digest`) is sent at most once a day at 08:30 IST (`gift.notifications.digest-cron`), only if there is something to report and the host's notification preference is on.
+
+**Seating plan.** Tables (round or long) with capacities; tap a family then a table (or drag on desktop). Tables never overfill. Printable chart. "Let guests find their table" adds a lookup on the invitation (3+ letters, up to 5 matches, 60 lookups per device per day).
+
+**Guest passes.** One QR pass and a 6-letter code per family, created for all expected guests in one tap, sent by WhatsApp. Door staff scan the QR with the phone camera (where the browser supports it) or type the code in Guest check-in; the family is checked in once with its party size and shown its table.
+
+**Growth results.** Admin → Clicks & outcomes → Growth results counts what the acquisition features achieved, from business events (no cookies): try started → claimed → published, Status cards shared, offers claimed and how many then published, referrals, handovers, group gifts, showcase approvals, WhatsApp messages delivered and passes scanned.
+
+**Performance.** The feature check used on every invitation view now runs 2 queries instead of about 40; the database pool is configurable (`DB_POOL_SIZE`, default 20). Load test results are in `backend/docs/PRODUCTION_READINESS_2026-11.md`.
+
 ## Configuration
 
 | Property | Default | Purpose |
@@ -118,6 +139,8 @@ Co-host roles now include: co-host → planning checklist, run sheet, check-in a
 | `gift.whatsapp.batch-size`, `gift.whatsapp.worker-delay-ms` | `20`, `10000` | Delivery worker pace. |
 | `gift.referrals.reward-text` | "A free premium celebration…" | Shown to hosts on `/referrals`. |
 | `gift.offers.first-free-days` | `90` | Premium days granted by the first-celebration-free offer (1–365). |
+| `gift.notifications.digest-cron` | `0 30 8 * * *` (IST) | When the daily host digest runs. |
+| `DB_POOL_SIZE`, `DB_POOL_MIN_IDLE` | `20`, `5` | Database connection pool per backend instance. |
 | `gift.guest-base-url` | existing | Used in WhatsApp links, wall QR codes and referral links. |
 
 ### WhatsApp templates to submit to Meta
@@ -137,14 +160,14 @@ The mobile app loads the main web application, so all host and guest features ab
 ## Verification performed (11 November 2026)
 
 - Backend, full: 686 unit tests (`./mvnw test`) and 726 PostgreSQL integration tests across all 79 integration classes (`./mvnw test-compile failsafe:integration-test failsafe:verify`), all passing. Note: `./mvnw test` alone does not run the `*IntegrationTest` classes.
-- New integration suites: `LiveWallRegisterLedgerIntegrationTest` (10), `CoHostFunctionsIntegrationTest` (8), `WhatsAppIntegrationTest` (8), `GrowthBatchFourIntegrationTest` (7), `EventManagementIntegrationTest` (8), `AcquisitionIntegrationTest` (7).
+- New integration suites: `LiveWallRegisterLedgerIntegrationTest` (10), `CoHostFunctionsIntegrationTest` (8), `WhatsAppIntegrationTest` (8), `GrowthBatchFourIntegrationTest` (7), `EventManagementIntegrationTest` (8), `AcquisitionIntegrationTest` (7), `ImprovementsIntegrationTest` (7).
 - Web: 483 unit tests passing, TypeScript clean, production build compiled (all new routes).
 - Mobile: 14 tests passing.
 - Not yet performed: browser acceptance on desktop and phones, live WhatsApp delivery (needs Meta approval), and physical-device checks.
 
 ## Rollout checklist
 
-1. Deploy backend (Flyway applies V111–V118) and web together.
+1. Deploy backend (Flyway applies V111–V119) and web together.
 2. In Admin, enable one feature at platform level, grant it to a test host and test event, and try it end to end.
 3. For WhatsApp, keep `DEV_OUTBOX` until templates are approved; then set `META_CLOUD`, the credentials, and the webhook in the Meta dashboard.
 4. Add a few verified vendors before enabling `VENDOR_DIRECTORY`.

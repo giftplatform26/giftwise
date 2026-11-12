@@ -4,7 +4,7 @@ import {useRouter} from 'next/navigation';
 import Link from 'next/link';
 import {localizeText} from '../../../lib/localization.mjs';
 import {useLocalizationRender} from '../../../components/LocalizationProvider';
-import {hostApi} from '../../../lib/host-api.mjs';
+import {hostApi,hostRequest} from '../../../lib/host-api.mjs';
 import {readTryDraft,TRY_DRAFT_KEY} from '../../../lib/acquisition.mjs';
 import '../../../components/acquisition.css';
 
@@ -15,6 +15,7 @@ export default function ClaimTryDraft(){useLocalizationRender();
   const draft=readTryDraft(localStorage);if(!draft){router.replace('/events/new');return}
   const key=`gift.event.draft.${me.userId||me.username}`;
   localStorage.setItem(key,JSON.stringify({...draft,contactName:draft.hostName,savedAt:Date.now()}));localStorage.removeItem(TRY_DRAFT_KEY);
+  void hostRequest(fetch,'/v1/me/acquisition-events',{method:'POST',payload:{kind:'TRY_CLAIMED'}}).catch(()=>{});
   router.replace('/events/new')}).catch(()=>{if(active)setMessage('Please sign in to continue with your invitation.')});return()=>{active=false}},[router]);
  return <main className="tyPage"><section className="tyCard"><p role="status">{localizeText(message)}</p>{message.startsWith('Please')&&<Link className="focusPrimary" href={`/login?next=${encodeURIComponent('/try/claim')}`}>{localizeText('Sign in')}</Link>}</section></main>;
 }

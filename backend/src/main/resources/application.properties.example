@@ -25,9 +25,9 @@ spring.servlet.multipart.max-file-size=5MB
 spring.servlet.multipart.max-request-size=6MB
 # Razorpay Test Mode configuration
 # Never commit real credentials.
-gift.payment.razorpay.key-id=${RAZORPAY_KEY_ID}
-gift.payment.razorpay.key-secret=${RAZORPAY_KEY_SECRET}
-gift.payment.razorpay.webhook-secret=${RAZORPAY_WEBHOOK_SECRET}
+gift.payment.razorpay.key-id=${RAZORPAY_KEY_ID:}
+gift.payment.razorpay.key-secret=${RAZORPAY_KEY_SECRET:}
+gift.payment.razorpay.webhook-secret=${RAZORPAY_WEBHOOK_SECRET:}
 
 # Host payment profile management
 gift.payment.profiles.enabled=true
@@ -37,8 +37,8 @@ gift.payment.direct-transfers.reconciliation.enabled=false
 
 # Cashfree Secure ID sandbox (disabled pending approved entitlement and confirmed API schema)
 gift.cashfree.secureid.sandbox.enabled=${CASHFREE_SECUREID_SANDBOX_ENABLED:false}
-gift.cashfree.secureid.client-id=${CASHFREE_SECUREID_CLIENT_ID}
-gift.cashfree.secureid.client-secret=${CASHFREE_SECUREID_CLIENT_SECRET}
+gift.cashfree.secureid.client-id=${CASHFREE_SECUREID_CLIENT_ID:}
+gift.cashfree.secureid.client-secret=${CASHFREE_SECUREID_CLIENT_SECRET:}
 
 # Operational request timings. SecurityConfig restricts metrics to platform administrators.
 management.endpoints.web.exposure.include=health,metrics
@@ -51,7 +51,7 @@ gift.payment.account-verification.environment=${GIFT_ACCOUNT_VERIFICATION_ENVIRO
 
 # AI invitation design. Keep the API key in the backend environment only.
 gift.invitation.ai.enabled=${GIFT_INVITATION_AI_ENABLED:true}
-gift.invitation.ai.api-key=${OPENAI_API_KEY}
+gift.invitation.ai.api-key=${OPENAI_API_KEY:}
 gift.invitation.ai.model=${OPENAI_INVITATION_MODEL:gpt-4.1-mini}
 
 # Recovery/contact OTP signing: preserve an explicit recovery key, otherwise use the existing OTP secret.
@@ -89,3 +89,7 @@ gift.otp.sms.expiry-minutes=${GIFT_OTP_SMS_EXPIRY_MINUTES:5}
 # Disable/bypass either channel there during provider outages; bypass never sets
 # email_verified_at / phone_verified_at / mobile_verified_at. Account collection,
 # passwords, PINs, ownership checks and receiving-account requirements still apply.
+
+# Connection pool: sized for many guests opening invitations at once. Keep the total across all instances below PostgreSQL max_connections.
+spring.datasource.hikari.maximum-pool-size=${DB_POOL_SIZE:20}
+spring.datasource.hikari.minimum-idle=${DB_POOL_MIN_IDLE:5}

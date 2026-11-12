@@ -111,6 +111,7 @@ public class ShowcaseController {
         if (db.update("UPDATE event_showcase SET status=?,review_note=?,reviewed_by=?,reviewed_at=now() WHERE event_id=? AND status='PENDING'",
             decision, text(in.note(), 300, "Note"), admin, eventId) == 0) throw new ResponseStatusException(HttpStatus.CONFLICT, "Only pending submissions can be reviewed");
         db.update("INSERT INTO platform_admin_action_audit(id,actor_id,action,target_id,module_code) VALUES(?,?,?,?,?)", UUID.randomUUID(), admin, "SHOWCASE_" + decision, eventId, MODULE);
+        if (decision.equals("APPROVED")) AcquisitionEventsController.record(db, "SHOWCASE_APPROVED", null, eventId);
         return Map.of("status", decision);
     }
 

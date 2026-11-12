@@ -11,8 +11,13 @@ The conversion journey moves from recognition (unwanted gifts) to possibility (w
 7. Contribution methods: four selectable visual cards.
 8. Host dashboard: overview, wishlist, contributions and group gift tabs, sample analytics and wallet.
 9. Benefits: six icon-led reasons to choose meaningful gifting.
-10. Stories: three explicitly illustrative host/guest stories; ready to replace with consented real testimonials.
-11. Final CTA: violet celebration panel leading to event creation.
+10. Features journey (`#features`): five tabs — Plan, Invite, Gift, Celebrate, Remember — each with five features and a product mock-up (checklist and budget, WhatsApp RSVP and meal totals, a gift receipt, the live wall and check-in, the memory book and gift ledger). All panels are in the HTML for search engines; inactive ones use `hidden`.
+11. Try band: "Try it free" (app `/try`) and "See real celebrations" (app `/showcase`).
+12. For planners (`#for-planners`): partner workspace and handover, venues and decorators, office group gifts, vendor directory.
+13. Trust: direct payments to the host, receipts, privacy, host control.
+14. Stories: three explicitly illustrative host/guest stories; ready to replace with consented real testimonials.
+15. FAQ (`#faq`): ten native `<details>` questions.
+16. Final CTA: violet celebration panel leading to event creation.
 
 Footer: company/features links, pricing, privacy, terms, contact and configurable social profiles. Informational dialogs are honest about missing launch details.
 
@@ -27,7 +32,9 @@ RootLayout — metadata, structured data, local font
         ├── WishlistShowcase → ProductArt / Avatars
         ├── PhoneShowcase
         ├── GroupGifting / ContributionWays
-        ├── DashboardPreview / Benefits / Stories / FinalCta
+        ├── FeatureJourney → PhaseScreen / TryBand
+        ├── DashboardPreview / ForPlanners / TrustSection
+        ├── Benefits / Stories / Faq / FinalCta
         ├── Footer → InfoDialog
         └── GiftPreviewDialog / WalkthroughDialog
 ```

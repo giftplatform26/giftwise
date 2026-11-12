@@ -7,12 +7,14 @@ import {wrapLines,cardCopy,daysUntil} from '../lib/acquisition.mjs';
 import './acquisition.css';
 
 export type CardKind='INVITE'|'COUNTDOWN'|'THANK_YOU'|'LIVE';
-type Props={title:string;hostName?:string|null;occasion:string;date?:string|null;link:string;kinds?:CardKind[];accent?:string};
+type Props={title:string;hostName?:string|null;occasion:string;date?:string|null;link:string;kinds?:CardKind[];accent?:string;eventToken?:string};
 const KIND_LABEL:Record<CardKind,string>={INVITE:'Invitation',COUNTDOWN:'Countdown',THANK_YOU:'Thank you',LIVE:'Happening now'};
 const W=1080,H=1920;
 
 /** Draws a 1080×1920 card for WhatsApp Status / Instagram Stories, then shares it as a file or downloads it. */
-export default function StoryCardMaker({title,hostName,occasion,date,link,kinds=['INVITE','COUNTDOWN','THANK_YOU'],accent='#683c55'}:Props){useLocalizationRender();
+export default function StoryCardMaker({title,hostName,occasion,date,link,kinds=['INVITE','COUNTDOWN','THANK_YOU'],accent='#683c55',eventToken}:Props){useLocalizationRender();
+ const counted=useRef(false);
+ const count=()=>{if(counted.current)return;counted.current=true;void fetch('/backend/api/public/acquisition-events',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({kind:'STORY_CARD_SHARED',...(eventToken?{eventToken}:{})})}).catch(()=>{})};
  const canvas=useRef<HTMLCanvasElement>(null);const [kind,setKind]=useState<CardKind>(kinds[0]);const [busy,setBusy]=useState(false),[note,setNote]=useState('');
  useEffect(()=>{const c=canvas.current;if(!c)return;const ctx=c.getContext('2d');if(!ctx)return;let cancelled=false;
   const art=new Image();art.src=`/invitation-backgrounds/${occasionArt(occasion)}.svg`;
@@ -33,9 +35,9 @@ export default function StoryCardMaker({title,hostName,occasion,date,link,kinds=
   art.onload=()=>draw(true);art.onerror=()=>draw(false);draw(false);return()=>{cancelled=true}},[kind,title,hostName,occasion,date,link,accent]);
  async function blob(){return new Promise<Blob|null>(r=>canvas.current?.toBlob(b=>r(b),'image/png'))}
  async function share(){setBusy(true);setNote('');try{const b=await blob();if(!b)throw Error();const file=new File([b],'giftwise-card.png',{type:'image/png'});
-  if(navigator.canShare?.({files:[file]})){await navigator.share({files:[file],text:`${title} — ${link}`})}else{download(b);setNote('Saved the image. Open WhatsApp → Status → add the image, and paste the link.')}}
+  if(navigator.canShare?.({files:[file]})){await navigator.share({files:[file],text:`${title} — ${link}`});count()}else{download(b);setNote('Saved the image. Open WhatsApp → Status → add the image, and paste the link.')}}
   catch(e){if((e as Error)?.name!=='AbortError')setNote('Could not share. Use Download instead.')}finally{setBusy(false)}}
- function download(b?:Blob|null){const go=(x:Blob)=>{const u=URL.createObjectURL(x);const a=document.createElement('a');a.href=u;a.download='giftwise-card.png';a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)};if(b)go(b);else void blob().then(x=>x&&go(x))}
+ function download(b?:Blob|null){count();const go=(x:Blob)=>{const u=URL.createObjectURL(x);const a=document.createElement('a');a.href=u;a.download='giftwise-card.png';a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)};if(b)go(b);else void blob().then(x=>x&&go(x))}
  async function copyLink(){try{await navigator.clipboard.writeText(link);setNote('Link copied — paste it with your Status.')}catch{setNote(link)}}
  return <div className="scMaker">
   {kinds.length>1&&<div className="gbTabs" role="tablist" aria-label={localizeText('Card type')}>{kinds.map(k=><button key={k} type="button" role="tab" aria-selected={kind===k} onClick={()=>setKind(k)}>{localizeText(KIND_LABEL[k])}</button>)}</div>}

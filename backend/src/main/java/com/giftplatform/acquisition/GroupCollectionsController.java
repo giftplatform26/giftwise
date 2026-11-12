@@ -106,6 +106,7 @@ public class GroupCollectionsController {
         db.update("INSERT INTO platform_event_module_grants(event_id,module_code,enabled,changed_by) VALUES(?,?,TRUE,?)", id, MODULE, me);
         // Publishing reuses every existing check (verification, plan limits, receiving account); any failure rolls the collection back.
         eventService.changeStatus(id, EventStatus.PUBLISHED);
+        AcquisitionEventsController.record(db, "COLLECTION_CREATED", me, id);
         UUID token = db.queryForObject("SELECT public_token FROM events WHERE id=?", UUID.class, id);
         return Map.of("eventId", id, "publicToken", token);
     }

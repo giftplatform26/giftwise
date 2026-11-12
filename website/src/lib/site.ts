@@ -15,3 +15,6 @@ export const site = {
 };
 export const createEventUrl = `${site.appUrl}/events/new`;
 export const loginUrl = `${site.appUrl}/login`;
+export const tryUrl = `${site.appUrl}/try`;
+export const registerUrl = `${site.appUrl}/register`;
+export const showcaseUrl = `${site.appUrl}/showcase`;

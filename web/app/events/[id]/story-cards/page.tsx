@@ -22,6 +22,6 @@ export default function StoryCards(){useLocalizationRender();
   {error&&<p className="focusError" role="alert">{localizeText(error)}</p>}
   {on===false&&<p className="gbQueued">{localizeText('Story cards are not switched on for this celebration.')}</p>}
   {e&&on&&(e.status==='DRAFT'?<p className="gbQueued">{localizeText('Publish your invitation first so the link on the card works.')}</p>:
-   <StoryCardMaker title={e.title} hostName={e.hostDisplayName??e.hostName} occasion={e.occasionType} date={e.eventDate} link={link} kinds={['INVITE','COUNTDOWN','THANK_YOU','LIVE']}/>)}
+   <StoryCardMaker title={e.title} hostName={e.hostDisplayName??e.hostName} occasion={e.occasionType} date={e.eventDate} link={link} kinds={['INVITE','COUNTDOWN','THANK_YOU','LIVE']} eventToken={e.publicToken}/>)}
  </main>;
 }

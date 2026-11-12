@@ -68,3 +68,44 @@ export function AdminShowcase(){useLocalizationRender();
    {r.status==='PENDING'&&<div><button type="button" onClick={()=>void decide(r,'APPROVED')}>{localizeText('Approve')}</button> <button type="button" onClick={()=>void decide(r,'REJECTED')}>{localizeText('Reject')}</button></div>}</article>)}
  </section>;
 }
+
+type Preset={code:string;name:string;description:string;modules:string[]};
+type Pick={id:string;label:string};
+/** One-click feature packs for the platform, one host, every host or one event. Presets only switch features on. */
+export function AdminPresets(){useLocalizationRender();
+ const [presets,setPresets]=useState<Preset[]>([]),[preset,setPreset]=useState('WEDDING'),[scope,setScope]=useState('HOST'),[query,setQuery]=useState(''),[options,setOptions]=useState<Pick[]>([]),[target,setTarget]=useState<Pick|null>(null),[result,setResult]=useState(''),[error,setError]=useState(''),[busy,setBusy]=useState(false);
+ useEffect(()=>{admin('/presets').then(setPresets).catch(e=>setError(e.message))},[]);
+ useEffect(()=>{setTarget(null);setOptions([]);if(!['HOST','EVENT'].includes(scope)||query.trim().length<2)return;const t=setTimeout(()=>{
+  admin(scope==='HOST'?`/hosts?search=${encodeURIComponent(query)}`:`/events?search=${encodeURIComponent(query)}`).then((rows:Record<string,string>[])=>setOptions(rows.slice(0,8).map(r=>({id:r.id,label:scope==='HOST'?`${r.username??''} · ${r.email??''}`:`${r.title} · ${r.host_name??''}`})))).catch(()=>{})},300);return()=>clearTimeout(t)},[query,scope]);
+ const chosen=presets.find(p=>p.code===preset);
+ async function apply(){if(scope==='ALL_HOSTS'&&!confirm(localizeText('Switch these features on for every host?')))return;setBusy(true);setError('');setResult('');
+  try{const r=await admin(`/presets/${preset}/apply`,'POST',{scope,hostId:scope==='HOST'?target?.id:undefined,eventId:scope==='EVENT'?target?.id:undefined}) as {changed:number;skipped:string[]};
+   setResult(localizeText('{{n}} switches turned on.').replace('{{n}}',String(r.changed))+(r.skipped.length?' '+localizeText('Not event-level: {{m}}.').replace('{{m}}',r.skipped.join(', ')):''))}
+  catch(e){setError(e instanceof Error?e.message:'Could not apply')}finally{setBusy(false)}}
+ return <section className="acPanel"><h2>{localizeText('Feature presets')}</h2><p>{localizeText('Turn on a whole set of features in one step. Presets only switch features on; to switch something off, use the individual module switches below. Every apply is recorded in Activity & audit.')}</p>
+  {error&&<p role="alert">{localizeText(error)}</p>}
+  <div style={{display:'grid',gap:10,gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))'}}>
+   <label>{localizeText('Preset')}<select value={preset} onChange={e=>setPreset(e.target.value)}>{presets.map(p=><option key={p.code} value={p.code}>{localizeText(p.name)}</option>)}</select></label>
+   <label>{localizeText('Apply to')}<select value={scope} onChange={e=>{setScope(e.target.value);setQuery('')}}><option value="PLATFORM">{localizeText('The platform (master switches)')}</option><option value="HOST">{localizeText('One host')}</option><option value="ALL_HOSTS">{localizeText('Every host')}</option><option value="EVENT">{localizeText('One event')}</option></select></label>
+   {['HOST','EVENT'].includes(scope)&&<label>{localizeText(scope==='HOST'?'Find host':'Find event')}<input value={target?target.label:query} onChange={e=>{setTarget(null);setQuery(e.target.value)}} placeholder={localizeText('Type at least 2 letters')}/></label>}</div>
+  {options.length>0&&!target&&<ul style={{listStyle:'none',padding:0,margin:'8px 0',display:'grid',gap:4}}>{options.map(o=><li key={o.id}><button type="button" onClick={()=>{setTarget(o);setOptions([])}}>{o.label}</button></li>)}</ul>}
+  {chosen&&<p><small>{localizeText(chosen.description)} <b>{chosen.modules.length}</b> {localizeText('modules')}: {chosen.modules.join(', ')}</small></p>}
+  <button type="button" disabled={busy||(['HOST','EVENT'].includes(scope)&&!target)} onClick={()=>void apply()}>{busy?localizeText('Applying…'):localizeText('Apply preset')}</button>
+  {result&&<p role="status">{result}</p>}
+  <p><small>{localizeText('Tip: a feature works only when the platform, the host and (for event tools) the event are all switched on. To set up a new wedding host, apply “Wedding pack” to the platform, the host, then their event.')}</small></p></section>;
+}
+
+type Growth={days:number;events:Record<string,number>;registrations:number;published:number;tryClaimedThenPublished:number;offerClaimedThenPublished:number;referralsAttributed:number;referralsQualified:number;whatsappSent:number};
+/** Did the acquisition features work? Business events only (no tracking cookies). */
+export function AdminGrowthResults(){useLocalizationRender();
+ const [days,setDays]=useState(30),[g,setG]=useState<Growth|null>(null),[error,setError]=useState('');
+ useEffect(()=>{admin(`/growth-results?days=${days}`).then(setG).catch(e=>setError(e.message))},[days]);
+ const e=g?.events??{};
+ const funnel:[string,number|undefined][]=[['Visitors who started “Try it free”',e.TRY_STARTED],['…who created an account and kept their draft',e.TRY_CLAIMED],['…who then published a celebration',g?.tryClaimedThenPublished]];
+ const rows:[string,number|undefined][]=[['New host accounts',g?.registrations],['Celebrations published',g?.published],['Status & Story cards shared',e.STORY_CARD_SHARED],['First-celebration-free offers claimed',e.OFFER_CLAIMED],['…of those who published',g?.offerClaimedThenPublished],['Referral sign-ups',g?.referralsAttributed],['Referrals that published',g?.referralsQualified],['Partner handovers accepted',e.HANDOVER_ACCEPTED],['Group gifts started',e.COLLECTION_CREATED],['Showcase celebrations approved',e.SHOWCASE_APPROVED],['WhatsApp messages delivered',g?.whatsappSent],['Guest passes scanned at the door',e.PASS_SCANNED]];
+ return <section className="acPanel"><h2>{localizeText('Growth results')}</h2><p>{localizeText('How the customer-acquisition features are performing. Counted from what actually happened (accounts, publishes, shares, claims), not from cookies.')}</p>
+  {error&&<p role="alert">{localizeText(error)}</p>}
+  <label>{localizeText('Period')}<select value={days} onChange={x=>setDays(Number(x.target.value))}><option value={7}>{localizeText('Last 7 days')}</option><option value={30}>{localizeText('Last 30 days')}</option><option value={90}>{localizeText('Last 90 days')}</option></select></label>
+  {g&&<><h3>{localizeText('Try without an account')}</h3><ol>{funnel.map(([l,v],i)=><li key={l}>{localizeText(l)}: <b>{v??0}</b>{i>0&&funnel[i-1][1]?` (${Math.round(((v??0)/(funnel[i-1][1]||1))*100)}%)`:''}</li>)}</ol>
+   <div className="acTable"><table><tbody>{rows.map(([l,v])=><tr key={l}><td>{localizeText(l)}</td><td style={{textAlign:'right'}}><b>{v??0}</b></td></tr>)}</tbody></table></div></>}</section>;
+}

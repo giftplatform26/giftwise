@@ -7,6 +7,7 @@ import {hostRequest} from '../../../../lib/host-api.mjs';
 import {searchGuests,percent} from '../../../../lib/eventops.mjs';
 import '../../../../components/gift-books.css';
 import '../../../../components/eventops.css';
+import PassScanner from '../../../../components/PassScanner';
 
 type Guest={key:string;name:string;expectedParty:number;source:string;arrived:boolean;arrivedParty:number|null;arrivedAt:string|null};
 type Board={guests:Guest[];expectedPeople:number;arrivedGuests:number;arrivedPeople:number;walkIns:number;recent:{key:string;name:string;partySize:number;walkIn:boolean;at:string;by:string|null}[]};
@@ -17,6 +18,8 @@ export default function CheckIn(){useLocalizationRender();
  const {id}=useParams();const eventId=String(id??'');const route=`/v1/events/${eventId}/checkin`;
  const [b,setB]=useState<Board|null>(null),[q,setQ]=useState(''),[error,setError]=useState(''),[picked,setPicked]=useState<Guest|null>(null),[party,setParty]=useState(1),[toast,setToast]=useState<{text:string;key:string}|null>(null),[walkIn,setWalkIn]=useState(false);
  const search=useRef<HTMLInputElement>(null);
+ const [passes,setPasses]=useState(false);
+ useEffect(()=>{if(/^[0-9a-f-]{36}$/i.test(eventId))fetch(`/backend/api/v1/events/${eventId}/features`,{credentials:'include',cache:'no-store'}).then(r=>r.ok?r.json():{}).then((f:Record<string,boolean>)=>setPasses(Boolean(f.GUEST_PASSES))).catch(()=>{})},[eventId]);
  const load=useCallback(async()=>{try{setB(await hostRequest(fetch,route) as Board);setError('')}catch(e){setError(e instanceof Error?e.message:'Could not load guests')}},[route]);
  useEffect(()=>{if(!/^[0-9a-f-]{36}$/i.test(eventId))return;void load();const t=setInterval(()=>{if(document.visibilityState==='visible')void load()},15000);return()=>clearInterval(t)},[eventId,load]);
  useEffect(()=>{if(!toast)return;const t=setTimeout(()=>setToast(null),6000);return()=>clearTimeout(t)},[toast]);
@@ -34,6 +37,7 @@ export default function CheckIn(){useLocalizationRender();
   {b&&<section className="eoHeadcount" aria-live="polite"><div><strong>{b.arrivedPeople}</strong><span>{localizeText('people here')}</span></div>
    <div className="eoBar" aria-hidden="true"><span className="eoBar--paid" style={{width:`${pct}%`}}/></div>
    <p>{localizeText('{{a}} of about {{e}} expected · {{g}} families · {{w}} walk-ins').replace('{{a}}',String(b.arrivedPeople)).replace('{{e}}',String(b.expectedPeople)).replace('{{g}}',String(b.arrivedGuests)).replace('{{w}}',String(b.walkIns))}</p></section>}
+  {passes&&<PassScanner eventId={eventId} onDone={()=>void load()}/>}
   <div className="eoSearch"><input ref={search} type="search" autoFocus value={q} onChange={e=>{setQ(e.target.value);setPicked(null)}} placeholder={localizeText('Type a guest’s name')} aria-label={localizeText('Search guests')}/></div>
   {picked&&<section className="gbEntry eoPick"><h2>{picked.name}</h2>{picked.arrived&&<p className="gbQueued">{localizeText('Already checked in at {{t}}. Saving updates the number of people.').replace('{{t}}',picked.arrivedAt?time(picked.arrivedAt):'')}</p>}
    <div className="eoParty"><span>{localizeText('How many people?')}</span><button type="button" aria-label={localizeText('Fewer')} onClick={()=>setParty(p=>Math.max(1,p-1))}>−</button><strong aria-live="polite">{party}</strong><button type="button" aria-label={localizeText('More')} onClick={()=>setParty(p=>Math.min(30,p+1))}>+</button></div>

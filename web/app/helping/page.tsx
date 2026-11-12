@@ -30,7 +30,9 @@ export default function HelpingHub(){useLocalizationRender();
    [can.has('CHECKIN')&&h.features.GUEST_CHECKIN,`/helping/${h.eventId}/checkin`,'Guest check-in'],
    [can.has('PLANNING')&&h.features.PLANNING_CHECKLIST,`/helping/${h.eventId}/checklist`,'Planning checklist'],
    [can.has('PLANNING')&&h.features.RUN_SHEET,`/helping/${h.eventId}/run-sheet`,'Run sheet'],
-   [can.has('UPDATES')&&h.features.LIVE_UPDATES,`/helping/${h.eventId}/updates`,'Live updates']];
+   [can.has('UPDATES')&&h.features.LIVE_UPDATES,`/helping/${h.eventId}/updates`,'Live updates'],
+   [can.has('SEATING')&&h.features.SEATING_PLAN,`/helping/${h.eventId}/seating`,'Seating plan'],
+   [can.has('GUESTS')&&h.features.GUEST_PASSES,`/helping/${h.eventId}/passes`,'Guest passes']];
    const open=tools.filter(t=>t[0]);
    return <article key={h.eventId} className="hpCard"><p className="focusEyebrow">{localizeText(h.role==='CO_HOST'?'Co-host':'Gift-desk helper')}</p><h2>{h.title}</h2>
     <p className="gbFine">{[h.hostName&&localizeText('Hosted by {{name}}').replace('{{name}}',h.hostName),day(h.eventDate)].filter(Boolean).join(' · ')}</p>

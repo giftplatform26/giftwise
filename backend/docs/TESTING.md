@@ -55,7 +55,7 @@ Do not disable PostgreSQL tests or replace them with an in-memory database to ma
 Targeted integration suites for the G1–G4 features (Docker required):
 
 ```sh
-./mvnw test -Dtest='LiveWallRegisterLedgerIntegrationTest,CoHostFunctionsIntegrationTest,WhatsAppIntegrationTest,GrowthBatchFourIntegrationTest,EventManagementIntegrationTest,AcquisitionIntegrationTest'
+./mvnw test -Dtest='LiveWallRegisterLedgerIntegrationTest,CoHostFunctionsIntegrationTest,WhatsAppIntegrationTest,GrowthBatchFourIntegrationTest,EventManagementIntegrationTest,AcquisitionIntegrationTest,ImprovementsIntegrationTest'
 ```
 
 They cover the platform/host/event switches, co-host roles, register idempotency and CSV safety, WhatsApp webhook signatures and opt-outs, referral rules, yearly re-hosting and the charity payment guard. The WhatsApp suite disables the background worker and calls it directly.
@@ -63,3 +63,11 @@ They cover the platform/host/event switches, co-host roles, register idempotency
 For browser testing, run the web app as a production build: `cd web && npm run preview`. Development mode (`npm run dev`) compiles each page on its first visit (0.7–3.9 s measured), which looks like slowness but isn't representative.
 
 `./mvnw test` runs unit tests only. To run every integration class: `./mvnw test-compile failsafe:integration-test failsafe:verify` (about 25 minutes, Docker required).
+
+## Continuous integration
+
+`.github/workflows/ci.yml` runs on every push and pull request: backend unit tests, all backend integration tests (Testcontainers on the GitHub runner), the web app (type-check, tests, build), the website (type-check, build, tests) and the mobile shell tests. Because `application.properties` is not committed, CI copies `application.properties.example` and generates throwaway payment keys for each run.
+
+## Load test
+
+`backend/ops/loadtest/loadtest.mjs` simulates many guests and hosts at once. See `docs/PRODUCTION_READINESS_2026-11.md` for usage and the latest results.

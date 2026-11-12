@@ -177,6 +177,7 @@ public class PartnerController {
             ON CONFLICT(host_id,module_code) DO NOTHING""", me, partner);
         db.update("UPDATE event_partner_links SET client_id=?,handed_over_at=now(),handover_token_hash=NULL WHERE event_id=?", me, eventId);
         db.update("INSERT INTO platform_admin_action_audit(id,actor_id,action,target_id,module_code) VALUES(?,?,?,?,?)", UUID.randomUUID(), me, "PARTNER_HANDOVER", eventId, MODULE);
+        AcquisitionEventsController.record(db, "HANDOVER_ACCEPTED", me, eventId);
         return Map.of("eventId", eventId, "featuresGranted", copied);
     }
 

@@ -7,7 +7,7 @@ import {HostLanguageSwitcher,useLocalizationRender} from './LocalizationProvider
 import {createContext,useContext,useEffect,useId,useState,type ReactNode} from 'react';
 import {usePathname,useRouter,useSearchParams} from 'next/navigation';
 import Link from 'next/link';
-import {ShieldCheck,Activity,CalendarDays,CheckSquare,Eye,Pencil,Gift,Heart,Images,Landmark,LayoutDashboard,LogOut,Mail,PanelLeftClose,PanelLeftOpen,Plus,QrCode,ReceiptText,Sparkles,BookOpen,NotebookPen,MonitorPlay,CalendarRange,UsersRound,HandHeart,MessageCircle,CalendarHeart,Gift as GiftIcon2,Store,BookHeart,ListChecks,Wallet,Clock,DoorOpen,Megaphone,Smartphone,Briefcase,Users2,Award,UserRound,Users,type LucideIcon} from 'lucide-react';
+import {ShieldCheck,Activity,CalendarDays,CheckSquare,Eye,Pencil,Gift,Heart,Images,Landmark,LayoutDashboard,LogOut,Mail,PanelLeftClose,PanelLeftOpen,Plus,QrCode,ReceiptText,Sparkles,BookOpen,NotebookPen,MonitorPlay,CalendarRange,UsersRound,HandHeart,MessageCircle,CalendarHeart,Gift as GiftIcon2,Store,BookHeart,ListChecks,Wallet,Clock,DoorOpen,Megaphone,Smartphone,Briefcase,Users2,Award,Armchair,Ticket,ChevronDown,UserRound,Users,type LucideIcon} from 'lucide-react';
 import {hostApi,hostRequest} from '../lib/host-api.mjs';
 import {useGrowth} from './GrowthProvider';
 import {pendingReferral} from '../lib/reminders.mjs';
@@ -47,6 +47,7 @@ export default function HostWorkspace({children}:{children:ReactNode}){useLocali
   {href:base+'/edit',label:'Event details',Icon:Pencil},
   ...(features.EVENT_FUNCTIONS?[{href:base+'/functions',label:'Schedule & functions',Icon:CalendarRange}]:[]),
   ...(features.PLANNING_CHECKLIST?[{href:base+'/checklist',label:'Planning checklist',Icon:ListChecks}]:[]),
+  ...(features.SEATING_PLAN?[{href:base+'/seating',label:'Seating plan',Icon:Armchair}]:[]),
   ...(features.EVENT_BUDGET?[{href:base+'/budget',label:'Budget',Icon:Wallet}]:[]),
   ...(features.RUN_SHEET?[{href:base+'/run-sheet',label:'Run sheet',Icon:Clock}]:[]),
   ...(features.CO_HOSTS?[{href:base+'/co-hosts',label:'Co-hosts & helpers',Icon:UsersRound}]:[]),
@@ -58,6 +59,7 @@ export default function HostWorkspace({children}:{children:ReactNode}){useLocali
   ...(features.MEMORY_ALBUM?[{href:base+'/album',label:'Memory album',Icon:Images}]:[]),
   ...(features.LIVE_WALL?[{href:base+'/live-wall',label:'Live venue wall',Icon:MonitorPlay}]:[]),
   ...(features.GUEST_CHECKIN?[{href:base+'/checkin',label:'Guest check-in',Icon:DoorOpen}]:[]),
+  ...(features.GUEST_PASSES?[{href:base+'/passes',label:'Guest passes',Icon:Ticket}]:[]),
   ...(features.LIVE_UPDATES?[{href:base+'/updates',label:'Live updates',Icon:Megaphone}]:[]),
   {href:base+'/contributions',label:'Contribution report',Icon:Activity},
   ...(features.SHAGUN_REGISTER?[{href:base+'/register',label:'Gift register',Icon:NotebookPen}]:[]),
@@ -72,11 +74,32 @@ export default function HostWorkspace({children}:{children:ReactNode}){useLocali
   ...(features.MEMORY_BOOK?[{href:base+'/memory-book',label:'Memory book',Icon:BookHeart}]:[]),
  ]:[{href:'/studio',label:'Invitation studio',Icon:Sparkles}];
  const visibleEventLinks=eventLinks.filter(item=>features.GIFTING_ENABLED!==false||!['Receiving accounts','Gift wishlist','Contribution report','Payment verification','Guest receipts'].includes(item.label));
+ // The celebration menu, grouped by stage so 30+ tools stay easy to scan. Collapsed (icon-only) mode stays a flat list.
+ const GROUPS:[string,string[]][]=[
+  ['Plan',['Event details','Schedule & functions','Planning checklist','Seating plan','Budget','Run sheet','Co-hosts & helpers','Celebration settings']],
+  ['Invites & guests',['Invitation design & QR','Preview invitation','Status & Story cards','WhatsApp messages','Guests & responses','Guest passes','Notification history']],
+  ['Gifts & money',['Gift wishlist','Receiving accounts','Payment verification','Contribution report','Gift register','Guest receipts']],
+  ['On the day',['Live venue wall','Guest check-in','Live updates']],
+  ['After the event',['Memory album','Memory book','Thank-you cards','Share in showcase']],
+ ];
+ const [openGroups,setOpenGroups]=useState<Record<string,boolean>>({});
+ useEffect(()=>{try{setOpenGroups(JSON.parse(localStorage.getItem('gift.host.nav.groups')||'{}'))}catch{}},[]);
+ function toggleGroup(name:string,open:boolean){setOpenGroups(g=>{const next={...g,[name]:open};try{localStorage.setItem('gift.host.nav.groups',JSON.stringify(next))}catch{}return next})}
+ function renderEventNav(){
+  if(!eventId||collapsed)return visibleEventLinks.map(navItem);
+  const isActive=(i:Item)=>i.active??(path===i.href);
+  const grouped=new Set(GROUPS.flatMap(([,labels])=>labels));
+  const top=visibleEventLinks.filter(i=>!grouped.has(i.label));
+  return <>{top.map(navItem)}{GROUPS.map(([name,labels])=>{const items=visibleEventLinks.filter(i=>labels.includes(i.label));if(!items.length)return null;
+   const open=items.some(isActive)||(openGroups[name]??name==='Plan');
+   return <details key={name} className="hostNavGroup" open={open} onToggle={e=>{const o=(e.currentTarget as HTMLDetailsElement).open;if(o!==open)toggleGroup(name,o)}}>
+    <summary className="hostNavGroupTitle">{localizeText(name)}<span className="hostNavGroupCount">{items.length}</span><ChevronDown size={14} aria-hidden="true"/></summary>{items.map(navItem)}</details>})}</>;
+ }
  function navItem({href,label,Icon,active}:Item){return <Link key={href} href={href} className="hostNavItem" aria-label={label} aria-current={(active??(path===href))?'page':undefined} aria-describedby={tooltip?.label===label?tooltipId:undefined} title={collapsed?label:undefined} onClick={navigate} onMouseEnter={e=>showTooltip(e.currentTarget,label)} onMouseLeave={()=>setTooltip(null)} onFocus={e=>showTooltip(e.currentTarget,label)} onBlur={()=>setTooltip(null)}><Icon size={21} aria-hidden="true"/><span className="hostNavLabel">{localizeText(label)}</span></Link>}
  return <WorkspaceContext.Provider value={{eventId,event}}><div className={`hostWorkspace${collapsed?' hostWorkspaceCollapsed':''}${ready?' hostWorkspaceReady':''}`}>
  <header className="hostIdentity"><button className="hostSidebarToggle" type="button" onClick={toggle} aria-expanded={!collapsed} aria-controls="hostSidebarNav" aria-label={collapsed?localize("ui.37a5d6485e109bf6",{defaultValue:"Expand sidebar"}):localize("ui.aab31cde23ba9783",{defaultValue:"Collapse sidebar"})} title={collapsed?localize("ui.37a5d6485e109bf6",{defaultValue:"Expand sidebar"}):localize("ui.aab31cde23ba9783",{defaultValue:"Collapse sidebar"})}>{collapsed?<PanelLeftOpen size={20}/>:<PanelLeftClose size={20}/>}</button><div className="hostIdentityMain"><Link href="/events" className="hostBrand" aria-label="Celebrations home"><BrandLogo size={32}/></Link><div className="hostWelcome"><HostLanguageSwitcher/><p className="hostGreeting">{name?localize("ui.53271b7f71daf571",{defaultValue:"Welcome back, {{value0}}!",value0:(name)}):localize("ui.38533a49bd19232c",{defaultValue:"Welcome to your workspace"})}</p></div></div></header>
  <aside className="hostSidebar" aria-label={localize("ui.ad47638d3660c9b1",{defaultValue:"Host navigation"})}>
- <div className="hostSidebarBody" id="hostSidebarNav"><nav aria-label={localize("ui.87bb59ba2f92f2a5",{defaultValue:"Workspace"})}><p className="hostNavSection">{localize("ui.87bb59ba2f92f2a5",{defaultValue:"Workspace"})}</p>{account.map(navItem)}<div className="hostNavDivider"/><p className="hostNavSection" title={event?.title||localize("ui.af4ea02852eb08ea",{defaultValue:"Invitation"})}>{eventId?event?.title||localize("ui.af38142a10020703",{defaultValue:"Your celebration"}):localize("ui.af4ea02852eb08ea",{defaultValue:"Invitation"})}</p><nav aria-label={eventId?localize("ui.4a8b403035a2b673",{defaultValue:"Celebration"}):localize("ui.af4ea02852eb08ea",{defaultValue:"Invitation"})}>{visibleEventLinks.map(navItem)}</nav></nav></div>
+ <div className="hostSidebarBody" id="hostSidebarNav"><nav aria-label={localize("ui.87bb59ba2f92f2a5",{defaultValue:"Workspace"})}><p className="hostNavSection">{localize("ui.87bb59ba2f92f2a5",{defaultValue:"Workspace"})}</p>{account.map(navItem)}<div className="hostNavDivider"/><p className="hostNavSection" title={event?.title||localize("ui.af4ea02852eb08ea",{defaultValue:"Invitation"})}>{eventId?event?.title||localize("ui.af38142a10020703",{defaultValue:"Your celebration"}):localize("ui.af4ea02852eb08ea",{defaultValue:"Invitation"})}</p><nav aria-label={eventId?localize("ui.4a8b403035a2b673",{defaultValue:"Celebration"}):localize("ui.af4ea02852eb08ea",{defaultValue:"Invitation"})}>{renderEventNav()}</nav></nav></div>
  <div className="hostSidebarFooter">{error&&<p className="hostSidebarError" role="alert">{localizeText(error)}</p>}<button type="button" className="hostNavItem" disabled={busy} onClick={()=>void signOut()} aria-label={busy?localize("ui.08c6bd357b7d7b81",{defaultValue:"Signing out…"}):localize("ui.48f0d3d397d49f13",{defaultValue:"Sign out"})} title={localize("ui.48f0d3d397d49f13",{defaultValue:"Sign out"})} onMouseEnter={e=>showTooltip(e.currentTarget,'Sign out')} onMouseLeave={()=>setTooltip(null)} onFocus={e=>showTooltip(e.currentTarget,'Sign out')} onBlur={()=>setTooltip(null)}><LogOut size={21} aria-hidden="true"/><span className="hostNavLabel">{busy?localize("ui.08c6bd357b7d7b81",{defaultValue:"Signing out…"}):localize("ui.48f0d3d397d49f13",{defaultValue:"Sign out"})}</span></button></div></aside>
  {!collapsed&&<button className="hostSidebarBackdrop" aria-label={localize("ui.17e28e2302175d33",{defaultValue:"Close sidebar"})} onClick={()=>setCollapsed(true)}/>}
  <div className="hostWorkspaceContent" id="host-workspace-content">{children}</div>{tooltip&&<div className="hostNavTooltip" id={tooltipId} role="tooltip" style={{left:tooltip.x,top:tooltip.y}}>{tooltip.label}</div>}

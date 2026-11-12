@@ -35,9 +35,10 @@ export function InvitationExtras({token,title,hostName,occasion,date,features}:{
  useEffect(()=>{if(features?.PARTNER_ACCOUNTS)void json<Credit>(`/backend/api/public/events/${encodeURIComponent(token)}/partner`).then(setCredit);
   if(features?.GUEST_FIRST_FREE)void json<{available:boolean;days:number}>(`/backend/api/public/events/${encodeURIComponent(token)}/first-free`).then(setOffer)},[token,features?.PARTNER_ACCOUNTS,features?.GUEST_FIRST_FREE]);
  const link=typeof window!=='undefined'?`${window.location.origin}/e/${token}`:'';
- if(!features?.STORY_CARDS&&!credit&&!offer?.available)return null;
+ if(!features?.STORY_CARDS&&!features?.SEATING_PLAN&&!credit&&!offer?.available)return null;
  return <section className="cxExtras">
-  {features?.STORY_CARDS&&<div className="cxShare">{sharing?<StoryCardMaker title={title} hostName={hostName} occasion={occasion} date={date} link={link} kinds={['INVITE']}/>:
+  {features?.SEATING_PLAN&&<FindMyTable token={token}/>}
+  {features?.STORY_CARDS&&<div className="cxShare">{sharing?<StoryCardMaker title={title} hostName={hostName} occasion={occasion} date={date} link={link} kinds={['INVITE']} eventToken={token}/>:
    <button type="button" className="focusSecondary" onClick={()=>setSharing(true)}>{localizeText('Share this invitation to your Status')}</button>}</div>}
   {credit&&<p className="cxCredit">{credit.hasLogo&&<img src={`/backend/api/public/partners/${encodeURIComponent(credit.slug)}/logo.png`} alt="" width={36} height={36}/>}
    <span>{localizeText('Planned by')} <Link href={`/p/${encodeURIComponent(credit.slug)}`}>{credit.businessName}</Link></span></p>}
@@ -54,4 +55,19 @@ export function ReceiptOffer({invitationPath}:{invitationPath:string|null}){useL
  if(!token||!offer?.available)return null;
  return <aside className="cxOffer"><div><strong>{localizeText('Planning your own celebration?')}</strong><p>{localizeText('Your first one comes with premium free for {{n}} days.').replace('{{n}}',String(offer.days))}</p></div>
   <Link className="focusPrimary" href="/register" onClick={()=>{try{rememberOffer(token,localStorage)}catch{}}}>{localizeText('Start free')}</Link></aside>;
+}
+
+
+/** Guests type their name to find their table, when the host allows it. Hidden when seating lookup is off. */
+export function FindMyTable({token}:{token:string}){useLocalizationRender();
+ const [name,setName]=useState(''),[results,setResults]=useState<{name:string;table:string}[]|null>(null),[error,setError]=useState(''),[available,setAvailable]=useState(true);
+ async function search(e:React.FormEvent){e.preventDefault();setError('');
+  try{const r=await fetch(`/backend/api/public/celebrations/${encodeURIComponent(token)}/find-table?name=${encodeURIComponent(name)}`,{cache:'no-store'});
+   if(r.status===404){setAvailable(false);return}const body=await r.json().catch(()=>null);if(!r.ok)throw Error(body?.error||'Please try again');setResults(body)}
+  catch(err){setError(err instanceof Error?err.message:'Please try again')}}
+ if(!available)return null;
+ return <section className="ftBox" aria-labelledby="ft-title"><h3 id="ft-title">{localizeText('Find your table')}</h3>
+  <form onSubmit={search}><input value={name} maxLength={60} onChange={e=>setName(e.target.value)} placeholder={localizeText('Type your name')} aria-label={localizeText('Your name')}/><button className="focusPrimary">{localizeText('Find')}</button></form>
+  {error&&<p className="focusError" role="alert">{localizeText(error)}</p>}
+  {results&&(results.length===0?<p>{localizeText('We couldn’t find that name. Please ask at the entrance.')}</p>:<ul>{results.map(r=><li key={r.name}><strong>{r.name}</strong> — {r.table}</li>)}</ul>)}</section>;
 }

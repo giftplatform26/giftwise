@@ -151,13 +151,18 @@ public class CoHostController {
             UUID eventId = rs.getObject("id", UUID.class), owner = rs.getObject("owner_id", UUID.class);
             if (!permissions.eventEnabled(owner, eventId, EventAccess.MODULE)) return;
             String role = rs.getString("role");
-            Map<String, Boolean> features = Map.of(
-                "SHAGUN_REGISTER", permissions.eventEnabled(owner, eventId, "SHAGUN_REGISTER"),
-                "LIVE_WALL", permissions.eventEnabled(owner, eventId, "LIVE_WALL"),
-                "EVENT_FUNCTIONS", permissions.eventEnabled(owner, eventId, "EVENT_FUNCTIONS"),
-                "GUESTBOOK", permissions.enabled(owner, "GUESTBOOK"), "RSVP", permissions.enabled(owner, "RSVP"),
-                "PLANNING_CHECKLIST", permissions.eventEnabled(owner, eventId, "PLANNING_CHECKLIST"), "RUN_SHEET", permissions.eventEnabled(owner, eventId, "RUN_SHEET"),
-                "GUEST_CHECKIN", permissions.eventEnabled(owner, eventId, "GUEST_CHECKIN"), "LIVE_UPDATES", permissions.eventEnabled(owner, eventId, "LIVE_UPDATES"));
+            Map<String, Boolean> features = Map.ofEntries(
+                Map.entry("SHAGUN_REGISTER", permissions.eventEnabled(owner, eventId, "SHAGUN_REGISTER")),
+                Map.entry("LIVE_WALL", permissions.eventEnabled(owner, eventId, "LIVE_WALL")),
+                Map.entry("EVENT_FUNCTIONS", permissions.eventEnabled(owner, eventId, "EVENT_FUNCTIONS")),
+                Map.entry("GUESTBOOK", permissions.enabled(owner, "GUESTBOOK")),
+                Map.entry("RSVP", permissions.enabled(owner, "RSVP")),
+                Map.entry("PLANNING_CHECKLIST", permissions.eventEnabled(owner, eventId, "PLANNING_CHECKLIST")),
+                Map.entry("RUN_SHEET", permissions.eventEnabled(owner, eventId, "RUN_SHEET")),
+                Map.entry("GUEST_CHECKIN", permissions.eventEnabled(owner, eventId, "GUEST_CHECKIN")),
+                Map.entry("LIVE_UPDATES", permissions.eventEnabled(owner, eventId, "LIVE_UPDATES")),
+                Map.entry("SEATING_PLAN", permissions.eventEnabled(owner, eventId, "SEATING_PLAN")),
+                Map.entry("GUEST_PASSES", permissions.eventEnabled(owner, eventId, "GUEST_PASSES")));
             out.add(new Helping(eventId, rs.getString("title"), rs.getObject("event_date", LocalDate.class), rs.getString("host_display_name"), role,
                 EventAccess.ROLES.get(role).stream().map(Enum::name).sorted().toList(), features));
         }, me);

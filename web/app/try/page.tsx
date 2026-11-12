@@ -20,6 +20,8 @@ export default function TryWithoutAccount(){useLocalizationRender();
  useEffect(()=>{fetch('/backend/api/public/acquisition-modules',{cache:'no-store'}).then(r=>r.ok?r.json():{}).then((v:{TRY_WITHOUT_ACCOUNT?:boolean})=>setOn(Boolean(v.TRY_WITHOUT_ACCOUNT))).catch(()=>setOn(false));
   try{const d=readTryDraft(localStorage);if(d)setForm(f=>({...f,...d}))}catch{}},[]);
  useEffect(()=>{if(!form.occasionType)return;try{localStorage.setItem(TRY_DRAFT_KEY,JSON.stringify(tryDraft(form)))}catch{}},[form]);
+ // Count a visitor once per browser session when they start designing.
+ useEffect(()=>{if(!form.occasionType)return;try{if(sessionStorage.getItem('gift.try.counted'))return;sessionStorage.setItem('gift.try.counted','1')}catch{}void fetch('/backend/api/public/acquisition-events',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({kind:'TRY_STARTED'})}).catch(()=>{})},[form.occasionType]);
  const set=(k:keyof Form,v:string)=>setForm(f=>({...f,[k]:v}));
  if(on===false)return <main className="tyPage"><section className="tyCard"><h1>{localizeText('Create your free account to start')}</h1><p>{localizeText('Designing without an account is not available right now.')}</p><Link className="focusPrimary" href="/register">{localizeText('Create your celebration')}</Link></section></main>;
  if(on===null)return <main className="tyPage"><p role="status">{localizeText('Loading…')}</p></main>;
