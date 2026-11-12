@@ -33,6 +33,17 @@ abstract class EventOpsSupport {
         if (v != null && !v.matches("https://[^\\s<>\"]+")) throw bad(label + " must start with https://");
         return v;
     }
+    /** Per-device daily limit for public guest submissions (device = hashed IP, never stored raw). */
+    static void limit(org.springframework.jdbc.core.JdbcTemplate db, java.util.UUID eventId, jakarta.servlet.http.HttpServletRequest request, String type, int max) {
+        String fp;
+        try { fp = java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(request.getRemoteAddr().getBytes(java.nio.charset.StandardCharsets.UTF_8))); }
+        catch (Exception ex) { throw new IllegalStateException(ex); }
+        int updated = db.update("""
+            INSERT INTO event_guest_submission_limits(event_id,fingerprint,submission_date,submission_type,count) VALUES (?,?,?,?,1)
+            ON CONFLICT(event_id,fingerprint,submission_date,submission_type) DO UPDATE SET count=event_guest_submission_limits.count+1
+            WHERE event_guest_submission_limits.count < ?""", eventId, fp, java.time.LocalDate.now(java.time.ZoneOffset.UTC), type, max);
+        if (updated == 0) throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS, "Please try again later");
+    }
     static ResponseStatusException bad(String m) { return new ResponseStatusException(HttpStatus.BAD_REQUEST, m); }
     static ResponseStatusException conflict(String m) { return new ResponseStatusException(HttpStatus.CONFLICT, m); }
     static ResponseStatusException notFound() { return new ResponseStatusException(HttpStatus.NOT_FOUND); }

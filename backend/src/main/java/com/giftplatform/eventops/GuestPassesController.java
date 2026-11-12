@@ -58,7 +58,8 @@ public class GuestPassesController extends EventOpsSupport {
     public ResponseEntity<Passes> list(@PathVariable UUID id) {
         access.require(id, Capability.GUESTS, MODULE);
         List<Pass> passes = db.query("""
-            SELECT p.*, (SELECT phone FROM event_guest_contacts c WHERE c.event_id=p.event_id AND lower(c.name)=lower(p.guest_name) LIMIT 1) AS phone,
+            SELECT p.*, COALESCE((SELECT phone FROM event_guest_contacts c WHERE c.event_id=p.event_id AND lower(c.name)=lower(p.guest_name) LIMIT 1),
+                                (SELECT h.phone FROM event_households h WHERE h.event_id=p.event_id AND h.name_key=p.guest_key)) AS phone,
                    EXISTS(SELECT 1 FROM event_checkins k WHERE k.event_id=p.event_id AND k.guest_key=p.guest_key) AS arrived
             FROM event_guest_passes p WHERE p.event_id=? ORDER BY p.guest_name""", (rs, i) -> new Pass(rs.getObject("id", UUID.class), rs.getString("guest_name"),
             rs.getInt("party_size"), rs.getObject("pass_token", UUID.class), rs.getString("short_code"), rs.getString("phone"), rs.getObject("revoked_at") != null, rs.getBoolean("arrived")), id);

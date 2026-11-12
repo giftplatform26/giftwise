@@ -41,17 +41,19 @@ public class SeatingController extends EventOpsSupport {
 
     public record Seated(String key, String name, int party) {}
     public record Table(UUID id, String name, int capacity, String shape, int seated, List<Seated> guests) {}
-    public record Unseated(String key, String name, int party, String source) {}
+    public record Unseated(String key, String name, int party, String source, String group) {}
     public record Plan(List<Table> tables, List<Unseated> unseated, int seatedPeople, int expectedPeople, boolean guestLookup) {}
     public record TableInput(String name, Integer capacity, String shape) {}
     public record Assign(String guestName, Integer partySize, UUID tableId) {}
     public record Key(String key) {}
     public record Settings(boolean guestLookup) {}
     public record Found(String name, String table) {}
+    public record AutoResult(int families, int people, int left) {}
 
     @GetMapping("/api/v1/events/{id}/seating")
     public ResponseEntity<Plan> plan(@PathVariable UUID id) {
-        access.require(id, Capability.SEATING, MODULE);
+        var a = access.require(id, Capability.SEATING, MODULE);
+        Map<String, String> groups = groups(a.event().getOwnerId(), id);
         Map<UUID, List<Seated>> byTable = new HashMap<>();
         Set<String> seatedKeys = new HashSet<>();
         db.query("SELECT table_id, guest_key, guest_name, party_size FROM event_seat_assignments WHERE event_id=? ORDER BY guest_name", rs -> {
@@ -65,7 +67,7 @@ public class SeatingController extends EventOpsSupport {
         }, id);
         Map<String, ExpectedGuests.Guest> expected = ExpectedGuests.of(db, id);
         List<Unseated> unseated = expected.values().stream().filter(g -> !seatedKeys.contains(g.key()))
-            .map(g -> new Unseated(g.key(), g.name(), g.party(), g.source())).sorted(Comparator.comparing(Unseated::name, String.CASE_INSENSITIVE_ORDER)).toList();
+            .map(g -> new Unseated(g.key(), g.name(), g.party(), g.source(), groups.get(g.key()))).sorted(Comparator.comparing(Unseated::name, String.CASE_INSENSITIVE_ORDER)).toList();
         boolean lookup = Boolean.TRUE.equals(db.query("SELECT guest_lookup FROM event_seating_settings WHERE event_id=?", (rs, i) -> rs.getBoolean(1), id).stream().findFirst().orElse(false));
         return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(new Plan(tables, unseated, tables.stream().mapToInt(Table::seated).sum(),
             expected.values().stream().mapToInt(ExpectedGuests.Guest::party).sum(), lookup));
@@ -122,6 +124,71 @@ public class SeatingController extends EventOpsSupport {
             ON CONFLICT(event_id,guest_key) DO UPDATE SET table_id=EXCLUDED.table_id,guest_name=EXCLUDED.guest_name,party_size=EXCLUDED.party_size""",
             UUID.randomUUID(), id, in.tableId(), name, key, party);
         return Map.of("seated", true);
+    }
+
+    /**
+     * Seats everyone not yet seated into tables with room, keeping the same side/group together where possible
+     * (biggest groups and families first, best-fitting table). Never moves anyone already seated and never overfills.
+     */
+    @PostMapping("/api/v1/events/{id}/seating/auto")
+    @Transactional
+    public AutoResult auto(@PathVariable UUID id) {
+        var a = access.require(id, Capability.SEATING, MODULE);
+        db.queryForList("SELECT id FROM event_seating_tables WHERE event_id=? FOR UPDATE", id);
+        Map<String, String> groups = groups(a.event().getOwnerId(), id);
+        Set<String> seated = new HashSet<>(db.queryForList("SELECT guest_key FROM event_seat_assignments WHERE event_id=?", String.class, id));
+        List<ExpectedGuests.Guest> waiting = ExpectedGuests.of(db, id).values().stream().filter(g -> !seated.contains(g.key()) && g.party() <= 200).toList();
+        record Room(UUID id, int sort, int[] free, Set<String> groups) {}
+        List<Room> rooms = new ArrayList<>();
+        db.query("""
+            SELECT t.id, t.sort_order, t.capacity - COALESCE((SELECT SUM(party_size) FROM event_seat_assignments s WHERE s.table_id=t.id),0) AS free
+            FROM event_seating_tables t WHERE t.event_id=? ORDER BY t.sort_order, t.created_at""",
+            rs -> { rooms.add(new Room(rs.getObject(1, UUID.class), rs.getInt(2), new int[]{rs.getInt(3)}, new HashSet<>())); }, id);
+        if (rooms.isEmpty()) throw bad("Add tables first, then auto-seat");
+        db.query("SELECT a.table_id, a.guest_key FROM event_seat_assignments a WHERE a.event_id=?", rs -> {
+            String g = groups.get(rs.getString(2));
+            UUID table = rs.getObject(1, UUID.class);
+            if (g != null) rooms.stream().filter(r -> r.id().equals(table)).findFirst().ifPresent(r -> r.groups().add(g));
+        }, id);
+        Map<String, List<ExpectedGuests.Guest>> byGroup = new LinkedHashMap<>();
+        for (var g : waiting) byGroup.computeIfAbsent(groups.getOrDefault(g.key(), ""), k -> new ArrayList<>()).add(g);
+        List<Map.Entry<String, List<ExpectedGuests.Guest>>> ordered = new ArrayList<>(byGroup.entrySet());
+        ordered.sort(Comparator.comparingInt((Map.Entry<String, List<ExpectedGuests.Guest>> e) -> e.getKey().isEmpty() ? 1 : 0)
+            .thenComparingInt(e -> -e.getValue().stream().mapToInt(ExpectedGuests.Guest::party).sum()));
+        int families = 0, people = 0, left = 0;
+        for (var entry : ordered) {
+            String group = entry.getKey();
+            List<ExpectedGuests.Guest> list = new ArrayList<>(entry.getValue());
+            list.sort(Comparator.comparingInt(ExpectedGuests.Guest::party).reversed().thenComparing(ExpectedGuests.Guest::name, String.CASE_INSENSITIVE_ORDER));
+            for (var g : list) {
+                Room best = null;
+                for (Room r : rooms) {
+                    if (r.free()[0] < g.party()) continue;
+                    boolean together = !group.isEmpty() && r.groups().contains(group);
+                    boolean bestTogether = best != null && !group.isEmpty() && best.groups().contains(group);
+                    if (best == null || (together && !bestTogether) || (together == bestTogether && r.free()[0] < best.free()[0])) best = r;
+                }
+                if (best == null) { left++; continue; }
+                db.update("INSERT INTO event_seat_assignments(id,event_id,table_id,guest_name,guest_key,party_size) VALUES(?,?,?,?,?,?) ON CONFLICT(event_id,guest_key) DO NOTHING",
+                    UUID.randomUUID(), id, best.id(), g.name(), g.key(), g.party());
+                best.free()[0] -= g.party();
+                if (!group.isEmpty()) best.groups().add(group);
+                families++; people += g.party();
+            }
+        }
+        return new AutoResult(families, people, left);
+    }
+
+    /** Household side/group label per guest key, when the guest list is on for this event (used to keep groups together). */
+    private Map<String, String> groups(UUID owner, UUID eventId) {
+        Map<String, String> out = new HashMap<>();
+        if (!permissions.eventEnabled(owner, eventId, HouseholdsController.MODULE)) return out;
+        db.query("SELECT name_key, side, group_tag FROM event_households WHERE event_id=?", rs -> {
+            String side = rs.getString(2), tag = rs.getString(3);
+            String label = side == null && tag == null ? null : (side == null ? "" : side.charAt(0) + side.substring(1).toLowerCase(Locale.ROOT)) + (side != null && tag != null ? " · " : "") + (tag == null ? "" : tag);
+            if (label != null) out.put(rs.getString(1), label);
+        }, eventId);
+        return out;
     }
 
     @PostMapping("/api/v1/events/{id}/seating/unassign")

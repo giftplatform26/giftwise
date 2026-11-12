@@ -1,6 +1,5 @@
 package com.giftplatform.eventops;
 
-import com.giftplatform.cohost.EventAccess;
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -12,7 +11,8 @@ import java.util.*;
 
 /**
  * Celebration budget: planned vs committed (quoted/booked) vs paid per line, and dues coming up.
- * Owner only — money plans are private even from co-hosts. A planning aid; it never moves money.
+ * Owner only by default — money plans are private even from co-hosts — unless the owner shares the budget with family
+ * (BUDGET_SHARING: view-only or edit). A planning aid; it never moves money.
  */
 @RestController
 @RequestMapping("/api/v1/events/{id}/budget")
@@ -21,21 +21,21 @@ public class EventBudgetController extends EventOpsSupport {
     static final List<String> CATEGORIES = List.of("Venue", "Food", "Decor", "Photos", "Attire", "Music", "Gifts", "Travel", "Stay", "Invitations", "Other");
 
     private final JdbcTemplate db;
-    private final EventAccess access;
+    private final BudgetAccess access;
 
-    public EventBudgetController(JdbcTemplate db, EventAccess access) { this.db = db; this.access = access; }
+    public EventBudgetController(JdbcTemplate db, BudgetAccess access) { this.db = db; this.access = access; }
 
     public record Input(String category, String item, String vendorName, Long plannedPaise, Long committedPaise, Long paidPaise, LocalDate dueDate, String note, Long version) {}
     public record Line(UUID id, String category, String item, String vendorName, long plannedPaise, long committedPaise, long paidPaise, long balancePaise,
                        LocalDate dueDate, boolean dueSoon, boolean overdue, String note, long version) {}
     public record CategoryTotal(String category, long plannedPaise, long committedPaise, long paidPaise) {}
     public record Summary(Long totalBudgetPaise, long plannedPaise, long committedPaise, long paidPaise, long balanceDuePaise, Long remainingPaise) {}
-    public record Budget(Summary summary, List<Line> lines, List<CategoryTotal> categories, List<Line> upcoming, List<String> categoryChoices) {}
+    public record Budget(Summary summary, List<Line> lines, List<CategoryTotal> categories, List<Line> upcoming, List<String> categoryChoices, String access) {}
     public record Total(Long totalPaise) {}
 
     @GetMapping
     public ResponseEntity<Budget> get(@PathVariable UUID id) {
-        access.requireOwner(id, MODULE);
+        var who = access.require(id, false, MODULE);
         LocalDate today = LocalDate.now(ZoneId.of("Asia/Kolkata"));
         List<Line> lines = db.query("SELECT * FROM event_budget_lines WHERE event_id=? ORDER BY category, created_at", (rs, i) -> line(rs, today), id);
         Long total = db.query("SELECT total_paise FROM event_budget_settings WHERE event_id=?", (rs, i) -> (Long) rs.getObject(1), id).stream().findFirst().orElse(null);
@@ -47,12 +47,12 @@ public class EventBudgetController extends EventOpsSupport {
         List<Line> upcoming = lines.stream().filter(l -> l.balancePaise() > 0 && l.dueDate() != null && !l.dueDate().isAfter(today.plusDays(14)))
             .sorted(Comparator.comparing(Line::dueDate)).toList();
         Long remaining = total == null ? null : total - Math.max(planned, committed);
-        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(new Budget(new Summary(total, planned, committed, paid, balance, remaining), lines, cats, upcoming, CATEGORIES));
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(new Budget(new Summary(total, planned, committed, paid, balance, remaining), lines, cats, upcoming, CATEGORIES, who.level()));
     }
 
     @PutMapping("/total")
     public Map<String, Object> total(@PathVariable UUID id, @RequestBody Total in) {
-        access.requireOwner(id, MODULE);
+        access.require(id, true, MODULE);
         Long v = in == null ? null : in.totalPaise();
         if (v != null) paise(v, "Total budget");
         db.update("INSERT INTO event_budget_settings(event_id,total_paise) VALUES(?,?) ON CONFLICT(event_id) DO UPDATE SET total_paise=EXCLUDED.total_paise", id, v);
@@ -61,7 +61,7 @@ public class EventBudgetController extends EventOpsSupport {
 
     @PostMapping("/lines")
     public Line create(@PathVariable UUID id, @RequestBody Input in) {
-        access.requireOwner(id, MODULE);
+        access.require(id, true, MODULE);
         Clean c = clean(in);
         Integer n = db.queryForObject("SELECT count(*) FROM event_budget_lines WHERE event_id=?", Integer.class, id);
         if (n != null && n >= 300) throw bad("A budget can have up to 300 lines");
@@ -73,7 +73,7 @@ public class EventBudgetController extends EventOpsSupport {
 
     @PutMapping("/lines/{lineId}")
     public Line update(@PathVariable UUID id, @PathVariable UUID lineId, @RequestBody Input in) {
-        access.requireOwner(id, MODULE);
+        access.require(id, true, MODULE);
         Clean c = clean(in);
         if (in.version() == null) throw changed();
         int n = db.update("""
@@ -85,7 +85,7 @@ public class EventBudgetController extends EventOpsSupport {
 
     @PostMapping("/lines/{lineId}/delete")
     public Map<String, Object> delete(@PathVariable UUID id, @PathVariable UUID lineId) {
-        access.requireOwner(id, MODULE);
+        access.require(id, true, MODULE);
         if (db.update("DELETE FROM event_budget_lines WHERE id=? AND event_id=?", lineId, id) == 0) throw notFound();
         return Map.of("deleted", true);
     }

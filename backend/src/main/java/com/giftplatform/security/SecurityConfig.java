@@ -107,7 +107,10 @@ public class SecurityConfig {
                                 "/api/public/celebrations/*/functions/rsvp",
                                 "/api/public/acquisition-events",
                                 "/api/public/celebrations/*/wishes",
-                                 "/api/public/celebrations/*/wishes/photo"
+                                 "/api/public/celebrations/*/wishes/photo",
+                                 "/api/public/travel/*",
+                                 "/api/public/albums/*/photos",
+                                 "/api/public/celebrations/*/feedback"
                         )
                         .csrfTokenRepository(
                                 CookieCsrfTokenRepository.withHttpOnlyFalse()
@@ -204,7 +207,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET,"/api/public/live/*","/api/public/live/*/join-qr.png","/api/public/events/*/gift-kinds","/api/public/events/*/live-updates","/api/public/run-sheet/*",
                                 "/api/public/acquisition-modules","/api/public/showcase","/api/public/partners/*","/api/public/partners/*/logo.png",
                                 "/api/public/events/*/partner","/api/public/events/*/collection","/api/public/events/*/first-free",
-                                "/api/public/celebrations/*/find-table","/api/public/passes/*","/api/public/passes/*/qr.png").permitAll()
+                                "/api/public/celebrations/*/find-table","/api/public/passes/*","/api/public/passes/*/qr.png",
+                                "/api/public/travel/*","/api/public/albums/*","/api/public/albums/*/qr.png","/api/public/albums/*/photos/*","/api/public/albums/*/photos/*/thumb",
+                                "/api/public/celebrations/*/feedback","/api/public/celebrations/*/shared-album").permitAll()
+                        .requestMatchers(HttpMethod.PUT,"/api/public/travel/*").permitAll()
+                        .requestMatchers(HttpMethod.POST,"/api/public/albums/*/photos","/api/public/celebrations/*/feedback").permitAll()
                         .requestMatchers(HttpMethod.POST,"/api/public/acquisition-events").permitAll()
                         .requestMatchers(
                                 "/api/v1/host/notifications",

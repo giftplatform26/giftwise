@@ -1,6 +1,7 @@
 'use client';
 import {useCallback,useEffect,useState} from 'react';
-import {useParams} from 'next/navigation';
+import {useParams,usePathname} from 'next/navigation';
+import Link from 'next/link';
 import {localizeText} from '../../../../lib/localization.mjs';
 import {useLocalizationRender} from '../../../../components/LocalizationProvider';
 import {hostRequest} from '../../../../lib/host-api.mjs';
@@ -11,7 +12,7 @@ type Pass={id:string;guestName:string;partySize:number;token:string;shortCode:st
 type Data={passes:Pass[];withoutPass:number};
 
 export default function GuestPasses(){useLocalizationRender();
- const {id}=useParams();const eventId=String(id??'');const route=`/v1/events/${eventId}/passes`;
+ const {id}=useParams();const path=usePathname();const eventId=String(id??'');const route=`/v1/events/${eventId}/passes`;
  const [d,setD]=useState<Data|null>(null),[error,setError]=useState(''),[notice,setNotice]=useState(''),[busy,setBusy]=useState(false),[one,setOne]=useState({name:'',party:'1'});
  const load=useCallback(async()=>{try{setD(await hostRequest(fetch,route) as Data);setError('')}catch(e){setError(e instanceof Error?e.message:'Could not load passes')}},[route]);
  useEffect(()=>{if(/^[0-9a-f-]{36}$/i.test(eventId))void load()},[eventId,load]);
@@ -24,11 +25,11 @@ export default function GuestPasses(){useLocalizationRender();
    <p>{localizeText('A personal pass with a QR code for every family. At the entrance, scan it (or type its 6-letter code) in Guest check-in.')}</p></div></header>
   {error&&<p className="focusError" role="alert">{localizeText(error)}</p>}
   {notice&&<p className="gbNotice" role="status">{notice}</p>}
-  {d&&<section className="gbEntry"><div className="gbEntryActions"><button type="button" className="focusPrimary" disabled={busy||d.withoutPass===0} onClick={()=>void generate({})}>{d.withoutPass>0?localizeText('Create passes for {{n}} guests').replace('{{n}}',String(d.withoutPass)):localizeText('Everyone expected has a pass')}</button></div>
+  {d&&<section className="gbEntry"><div className="gbEntryActions"><button type="button" className="focusPrimary" disabled={busy||d.withoutPass===0} onClick={()=>void generate({})}>{d.withoutPass>0?localizeText('Create passes for {{n}} guests').replace('{{n}}',String(d.withoutPass)):localizeText('Everyone expected has a pass')}</button>{d.passes.length>0&&<Link className="focusSecondary gbButtonLink" href={`${path}/print`}>{localizeText('Print all passes')}</Link>}</div>
    <form className="gbEntryRow" onSubmit={e=>{e.preventDefault();if(one.name.trim())void generate({guestName:one.name,partySize:Number(one.party)||1}).then(()=>setOne({name:'',party:'1'}))}}>
     <label className="gbGrow">{localizeText('Or add one guest')}<input value={one.name} maxLength={120} onChange={e=>setOne({...one,name:e.target.value})}/></label>
     <label>{localizeText('People')}<input inputMode="numeric" value={one.party} onChange={e=>setOne({...one,party:e.target.value.replace(/\D/g,'')})}/></label><button className="focusSecondary">{localizeText('Create')}</button></form></section>}
-  {d&&(d.passes.length===0?<p className="gbEmpty">{localizeText('Passes are made from your RSVPs, schedule answers and WhatsApp guest list.')}</p>:
+  {d&&(d.passes.length===0?<p className="gbEmpty">{localizeText('Passes are made from your guest list, RSVPs, schedule answers and WhatsApp guest list.')}</p>:
    <ul className="gbRows">{d.passes.map(p=><li key={p.id}><div><span className="gbWho"><strong>{p.guestName}</strong><small>{p.partySize} · {localizeText('code')} <b className="psCode">{p.shortCode}</b>{p.arrived?` · ${localizeText('arrived')}`:''}{p.revoked?` · ${localizeText('cancelled')}`:''}</small></span>
     {!p.revoked&&<span className="chMemberTools"><a className="focusSecondary gbButtonLink" href={wa(p)} target="_blank" rel="noopener noreferrer">{localizeText('Send')}</a><a href={link(p)} target="_blank" rel="noopener noreferrer">{localizeText('View')}</a><button type="button" className="gbPlain" onClick={()=>void revoke(p)}>{localizeText('Cancel')}</button></span>}</div></li>)}</ul>)}
  </main>;

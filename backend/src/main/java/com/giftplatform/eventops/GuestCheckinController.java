@@ -35,19 +35,9 @@ public class GuestCheckinController extends EventOpsSupport {
     public ResponseEntity<Board> board(@PathVariable UUID id) {
         access.require(id, Capability.CHECKIN, MODULE);
         Map<String, Guest> expected = new LinkedHashMap<>();
-        // Highest party size wins when the same name appears in several lists.
-        db.query("""
-            SELECT guest_name, party_size, 'RSVP' AS src FROM event_rsvps WHERE event_id=? AND attendance='YES'
-            UNION ALL SELECT r.guest_name, max(r.party_size), 'SCHEDULE' FROM event_function_rsvps r JOIN event_functions f ON f.id=r.function_id
-              WHERE f.event_id=? AND r.attendance='YES' GROUP BY r.guest_name
-            UNION ALL SELECT name, COALESCE(reply_party_size,1), 'GUEST_LIST' FROM event_guest_contacts WHERE event_id=? AND COALESCE(reply_attendance,'YES')<>'NO'
-            LIMIT 5000""", rs -> {
-            String name = rs.getString(1), key = GiftPeople.key(name);
-            if (key.isEmpty()) return;
-            int party = Math.max(1, rs.getInt(2));
-            Guest g = expected.get(key);
-            if (g == null || g.expectedParty() < party) expected.put(key, new Guest(key, name, party, rs.getString(3), false, null, null));
-        }, id, id, id);
+        // Same expected list as seating and passes (households first, then the highest party size across lists).
+        for (ExpectedGuests.Guest g : ExpectedGuests.of(db, id).values())
+            expected.put(g.key(), new Guest(g.key(), g.name(), g.party(), g.source(), false, null, null));
         List<Arrival> arrivals = db.query("""
             SELECT c.guest_key, c.guest_name, c.party_size, c.walk_in, c.checked_in_at, COALESCE(NULLIF(u.full_name,''), u.username) AS by_name
             FROM event_checkins c LEFT JOIN users u ON u.id=c.checked_in_by WHERE c.event_id=? ORDER BY c.checked_in_at DESC""",

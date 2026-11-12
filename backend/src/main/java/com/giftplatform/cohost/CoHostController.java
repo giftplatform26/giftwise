@@ -162,7 +162,11 @@ public class CoHostController {
                 Map.entry("GUEST_CHECKIN", permissions.eventEnabled(owner, eventId, "GUEST_CHECKIN")),
                 Map.entry("LIVE_UPDATES", permissions.eventEnabled(owner, eventId, "LIVE_UPDATES")),
                 Map.entry("SEATING_PLAN", permissions.eventEnabled(owner, eventId, "SEATING_PLAN")),
-                Map.entry("GUEST_PASSES", permissions.eventEnabled(owner, eventId, "GUEST_PASSES")));
+                Map.entry("GUEST_PASSES", permissions.eventEnabled(owner, eventId, "GUEST_PASSES")),
+                Map.entry("GUEST_HOUSEHOLDS", permissions.eventEnabled(owner, eventId, "GUEST_HOUSEHOLDS")),
+                Map.entry("GUEST_TRAVEL", permissions.eventEnabled(owner, eventId, "GUEST_TRAVEL")),
+                Map.entry("SHARED_ALBUM", permissions.eventEnabled(owner, eventId, "SHARED_ALBUM")),
+                Map.entry("GUEST_FEEDBACK", permissions.eventEnabled(owner, eventId, "GUEST_FEEDBACK")));
             out.add(new Helping(eventId, rs.getString("title"), rs.getObject("event_date", LocalDate.class), rs.getString("host_display_name"), role,
                 EventAccess.ROLES.get(role).stream().map(Enum::name).sorted().toList(), features));
         }, me);

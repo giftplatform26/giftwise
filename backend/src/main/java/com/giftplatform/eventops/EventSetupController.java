@@ -41,12 +41,18 @@ public class EventSetupController {
         add(steps, f, "EVENT_FUNCTIONS", "Add your functions", "Each with its own time, venue and RSVP", "SELECT 1 FROM event_functions WHERE event_id=?", id, base + "/functions");
         add(steps, f, "PLANNING_CHECKLIST", "Start your planning checklist", "One tap adds the usual tasks for your occasion", "SELECT 1 FROM event_tasks WHERE event_id=?", id, base + "/checklist");
         add(steps, f, "EVENT_BUDGET", "Set up your budget", "Track planned, booked and paid", "SELECT 1 FROM event_budget_lines WHERE event_id=?", id, base + "/budget");
+        add(steps, f, "VENDOR_BOOKINGS", "Collect vendor quotes", "Compare quotes and track bookings and payments", "SELECT 1 FROM event_vendors WHERE event_id=?", id, base + "/vendors");
+        add(steps, f, "BUDGET_SHARING", "Share the budget with family", "View-only or edit access", "SELECT 1 FROM event_budget_members WHERE event_id=?", id, base + "/budget");
         add(steps, f, "CO_HOSTS", "Invite a co-host", "Family can help with guests and the gift desk", "SELECT 1 FROM event_co_hosts WHERE event_id=?", id, base + "/co-hosts");
         add(steps, f, "WHATSAPP_MESSAGING", "Add your guest list", "Then send the invitation on WhatsApp", "SELECT 1 FROM event_guest_contacts WHERE event_id=?", id, base + "/whatsapp");
+        add(steps, f, "GUEST_HOUSEHOLDS", "Build your guest list", "Add families, or import from a spreadsheet", "SELECT 1 FROM event_households WHERE event_id=?", id, base + "/guests");
         add(steps, f, "SEATING_PLAN", "Plan the seating", "Add tables and seat families", "SELECT 1 FROM event_seating_tables WHERE event_id=?", id, base + "/seating");
         add(steps, f, "GUEST_PASSES", "Create guest passes", "A QR per family for quick check-in", "SELECT 1 FROM event_guest_passes WHERE event_id=?", id, base + "/passes");
+        add(steps, f, "GUEST_TRAVEL", "Plan travel & stay", "Hotels, rooms and pickups for outstation guests", "SELECT 1 FROM events e WHERE e.id=? AND (EXISTS(SELECT 1 FROM event_guest_travel t WHERE t.event_id=e.id) OR EXISTS(SELECT 1 FROM event_stay_options s WHERE s.event_id=e.id))", id, base + "/travel");
+        add(steps, f, "SHARED_ALBUM", "Share the photo album QR", "Guests add their photos by scanning it", "SELECT 1 FROM event_shared_photos WHERE event_id=?", id, base + "/shared-album");
         add(steps, f, "RUN_SHEET", "Draft your run sheet", "Who does what on the day", "SELECT 1 FROM event_run_items WHERE event_id=?", id, base + "/run-sheet");
         add(steps, f, "LIVE_WALL", "Set up the live wall", "Wishes and photos on the big screen", "SELECT 1 FROM event_live_walls WHERE event_id=?", id, base + "/live-wall");
+        add(steps, f, "GUEST_FEEDBACK", "Ask guests for feedback", "Open it after the celebration", "SELECT 1 FROM event_feedback_settings WHERE event_id=? AND collecting", id, base + "/feedback");
         add(steps, f, "CELEBRATION_SHOWCASE", "Share in the showcase", "Inspire other hosts (optional)", "SELECT 1 FROM event_showcase WHERE event_id=? AND status<>'WITHDRAWN'", id, base + "/showcase");
         int done = (int) steps.stream().filter(Step::done).count();
         return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(new Setup(steps, done, steps.size()));

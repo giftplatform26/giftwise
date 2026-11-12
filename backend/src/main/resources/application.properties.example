@@ -93,3 +93,6 @@ gift.otp.sms.expiry-minutes=${GIFT_OTP_SMS_EXPIRY_MINUTES:5}
 # Connection pool: sized for many guests opening invitations at once. Keep the total across all instances below PostgreSQL max_connections.
 spring.datasource.hikari.maximum-pool-size=${DB_POOL_SIZE:20}
 spring.datasource.hikari.minimum-idle=${DB_POOL_MIN_IDLE:5}
+
+# Shared photo album (guests upload by scanning a QR). Blank uses a shared-album folder inside gift.guestbook.photos.dir
+gift.shared-album.dir=${GIFT_SHARED_ALBUM_DIR:}

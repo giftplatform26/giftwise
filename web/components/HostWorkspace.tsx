@@ -7,7 +7,7 @@ import {HostLanguageSwitcher,useLocalizationRender} from './LocalizationProvider
 import {createContext,useContext,useEffect,useId,useState,type ReactNode} from 'react';
 import {usePathname,useRouter,useSearchParams} from 'next/navigation';
 import Link from 'next/link';
-import {ShieldCheck,Activity,CalendarDays,CheckSquare,Eye,Pencil,Gift,Heart,Images,Landmark,LayoutDashboard,LogOut,Mail,PanelLeftClose,PanelLeftOpen,Plus,QrCode,ReceiptText,Sparkles,BookOpen,NotebookPen,MonitorPlay,CalendarRange,UsersRound,HandHeart,MessageCircle,CalendarHeart,Gift as GiftIcon2,Store,BookHeart,ListChecks,Wallet,Clock,DoorOpen,Megaphone,Smartphone,Briefcase,Users2,Award,Armchair,Ticket,ChevronDown,UserRound,Users,type LucideIcon} from 'lucide-react';
+import {ShieldCheck,Activity,CalendarDays,CheckSquare,Eye,Pencil,Gift,Heart,Images,Landmark,LayoutDashboard,LogOut,Mail,PanelLeftClose,PanelLeftOpen,Plus,QrCode,ReceiptText,Sparkles,BookOpen,NotebookPen,MonitorPlay,CalendarRange,UsersRound,HandHeart,MessageCircle,CalendarHeart,Gift as GiftIcon2,Store,BookHeart,ListChecks,Wallet,Clock,DoorOpen,Megaphone,Smartphone,Briefcase,Users2,Award,Armchair,Ticket,BookUser,Plane,Camera,Handshake,MessageSquareHeart,ChevronDown,UserRound,Users,type LucideIcon} from 'lucide-react';
 import {hostApi,hostRequest} from '../lib/host-api.mjs';
 import {useGrowth} from './GrowthProvider';
 import {pendingReferral} from '../lib/reminders.mjs';
@@ -28,7 +28,7 @@ export default function HostWorkspace({children}:{children:ReactNode}){useLocali
  useEffect(()=>{let token:string|null=null;try{token=pendingOffer(localStorage)}catch{}if(!token)return;void hostRequest(fetch,'/v1/me/offers/first-free',{method:'POST',payload:{eventToken:token}}).then((r:{granted?:boolean;message?:string})=>{try{localStorage.removeItem('gift.offer');if(r?.message)saveFlash(sessionStorage,r.granted?'success':'info',r.message)}catch{}}).catch(()=>{try{localStorage.removeItem('gift.offer')}catch{}})},[]);
  // A friend's referral link remembered at sign-up is claimed once, then forgotten.
  useEffect(()=>{let code:string|null=null;try{code=pendingReferral(localStorage)}catch{}if(!code)return;void hostRequest(fetch,'/v1/me/referrals/claim',{method:'POST',payload:{code}}).then(()=>{try{localStorage.removeItem('gift.ref')}catch{}}).catch(()=>{})},[]);
- useEffect(()=>{let active=true;void fetch('/backend/api/v1/me/co-hosting',{credentials:'include',cache:'no-store'}).then(r=>r.ok?r.json():[]).then(list=>{if(active&&Array.isArray(list))setHelping(list.length)}).catch(()=>{});return()=>{active=false}},[]);
+ useEffect(()=>{let active=true;const count=(u:string)=>fetch(u,{credentials:'include',cache:'no-store'}).then(r=>r.ok?r.json():[]).then(l=>Array.isArray(l)?l.length:0).catch(()=>0);void Promise.all([count('/backend/api/v1/me/co-hosting'),count('/backend/api/v1/me/shared-budgets')]).then(([a,b])=>{if(active)setHelping(a+b)});return()=>{active=false}},[]);
  useEffect(()=>{let active=true;void fetch('/backend/api/v1/me/features',{credentials:'include',cache:'no-store'}).then(r=>r.ok?r.json():{}).then(f=>{if(active)setHostFeatures(f)}).catch(()=>{});return()=>{active=false}},[]);
  const [event,setEvent]=useState<EventInfo|null>(null),[features,setFeatures]=useState<Record<string,boolean>>({}),[tooltip,setTooltip]=useState<{label:string;x:number;y:number}|null>(null);const tooltipId=useId();
  useEffect(()=>{try{setCollapsed(window.matchMedia('(max-width:700px)').matches||localStorage.getItem('gift.host.sidebar.collapsed')==='true')}catch{}setReady(true)},[]);
@@ -47,8 +47,11 @@ export default function HostWorkspace({children}:{children:ReactNode}){useLocali
   {href:base+'/edit',label:'Event details',Icon:Pencil},
   ...(features.EVENT_FUNCTIONS?[{href:base+'/functions',label:'Schedule & functions',Icon:CalendarRange}]:[]),
   ...(features.PLANNING_CHECKLIST?[{href:base+'/checklist',label:'Planning checklist',Icon:ListChecks}]:[]),
+  ...(features.GUEST_HOUSEHOLDS?[{href:base+'/guests',label:'Guest list',Icon:BookUser}]:[]),
+  ...(features.GUEST_TRAVEL?[{href:base+'/travel',label:'Travel & stay',Icon:Plane}]:[]),
   ...(features.SEATING_PLAN?[{href:base+'/seating',label:'Seating plan',Icon:Armchair}]:[]),
   ...(features.EVENT_BUDGET?[{href:base+'/budget',label:'Budget',Icon:Wallet}]:[]),
+  ...(features.VENDOR_BOOKINGS?[{href:base+'/vendors',label:'Vendors & bookings',Icon:Handshake}]:[]),
   ...(features.RUN_SHEET?[{href:base+'/run-sheet',label:'Run sheet',Icon:Clock}]:[]),
   ...(features.CO_HOSTS?[{href:base+'/co-hosts',label:'Co-hosts & helpers',Icon:UsersRound}]:[]),
   ...(features.WHATSAPP_MESSAGING?[{href:base+'/whatsapp',label:'WhatsApp messages',Icon:MessageCircle}]:[]),
@@ -57,6 +60,7 @@ export default function HostWorkspace({children}:{children:ReactNode}){useLocali
   {href:`/gifts?eventId=${eventId}`,label:'Gift wishlist',Icon:Gift,active:path==='/gifts'},
   ...((features.RSVP||features.GUESTBOOK)?[{href:base+'/celebration',label:'Guests & responses',Icon:Users}]:[]),
   ...(features.MEMORY_ALBUM?[{href:base+'/album',label:'Memory album',Icon:Images}]:[]),
+  ...(features.SHARED_ALBUM?[{href:base+'/shared-album',label:'Shared photo album',Icon:Camera}]:[]),
   ...(features.LIVE_WALL?[{href:base+'/live-wall',label:'Live venue wall',Icon:MonitorPlay}]:[]),
   ...(features.GUEST_CHECKIN?[{href:base+'/checkin',label:'Guest check-in',Icon:DoorOpen}]:[]),
   ...(features.GUEST_PASSES?[{href:base+'/passes',label:'Guest passes',Icon:Ticket}]:[]),
@@ -71,16 +75,17 @@ export default function HostWorkspace({children}:{children:ReactNode}){useLocali
   {href:base+'/preview',label:'Preview invitation',Icon:Eye},
   {href:base+'/notifications',label:'Notification history',Icon:Mail},
   {href:base+'/thank-you',label:'Thank-you cards',Icon:Heart},
+  ...(features.GUEST_FEEDBACK?[{href:base+'/feedback',label:'Guest feedback',Icon:MessageSquareHeart}]:[]),
   ...(features.MEMORY_BOOK?[{href:base+'/memory-book',label:'Memory book',Icon:BookHeart}]:[]),
  ]:[{href:'/studio',label:'Invitation studio',Icon:Sparkles}];
  const visibleEventLinks=eventLinks.filter(item=>features.GIFTING_ENABLED!==false||!['Receiving accounts','Gift wishlist','Contribution report','Payment verification','Guest receipts'].includes(item.label));
  // The celebration menu, grouped by stage so 30+ tools stay easy to scan. Collapsed (icon-only) mode stays a flat list.
  const GROUPS:[string,string[]][]=[
-  ['Plan',['Event details','Schedule & functions','Planning checklist','Seating plan','Budget','Run sheet','Co-hosts & helpers','Celebration settings']],
-  ['Invites & guests',['Invitation design & QR','Preview invitation','Status & Story cards','WhatsApp messages','Guests & responses','Guest passes','Notification history']],
+  ['Plan',['Event details','Schedule & functions','Planning checklist','Seating plan','Budget','Vendors & bookings','Run sheet','Co-hosts & helpers','Celebration settings']],
+  ['Invites & guests',['Guest list','Invitation design & QR','Preview invitation','Status & Story cards','WhatsApp messages','Guests & responses','Guest passes','Travel & stay','Notification history']],
   ['Gifts & money',['Gift wishlist','Receiving accounts','Payment verification','Contribution report','Gift register','Guest receipts']],
-  ['On the day',['Live venue wall','Guest check-in','Live updates']],
-  ['After the event',['Memory album','Memory book','Thank-you cards','Share in showcase']],
+  ['On the day',['Live venue wall','Guest check-in','Live updates','Shared photo album']],
+  ['After the event',['Guest feedback','Memory album','Memory book','Thank-you cards','Share in showcase']],
  ];
  const [openGroups,setOpenGroups]=useState<Record<string,boolean>>({});
  useEffect(()=>{try{setOpenGroups(JSON.parse(localStorage.getItem('gift.host.nav.groups')||'{}'))}catch{}},[]);
