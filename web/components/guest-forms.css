@@ -1,0 +1,42 @@
+/* Public guest pages: travel form, shared album, feedback. Built on the pass page look (.psPage/.psCard). */
+.gfPage{min-height:100vh;padding:24px 16px 48px;background:linear-gradient(160deg,#fbf3f7,#fffaf3);font-family:Inter,ui-sans-serif,system-ui,sans-serif;color:#30232b}
+.gfCard{width:min(100%,560px);margin:0 auto;display:grid;gap:14px;padding:26px 22px;border-radius:24px;background:#fff;box-shadow:0 24px 60px #30232b1f}
+.gfCard--wide{width:min(100%,1080px)}
+.gfCard h1{margin:0;font:500 26px/1.2 Georgia,serif}.gfCard h2{margin:6px 0 0;font-size:1.05rem}
+.gfKicker{margin:0;font-size:11px;letter-spacing:.2em;font-weight:800;color:#683c55;text-transform:uppercase}
+.gfMeta{margin:0;color:#6d5a65}
+.gfCard label{display:grid;gap:4px;font-size:.9rem;font-weight:600}
+.gfCard input,.gfCard select,.gfCard textarea{font:inherit;font-weight:400;padding:10px 12px;border:1px solid #e3d5dd;border-radius:12px;background:#fff;min-width:0}
+.gfRow{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.gfCheck{display:flex!important;grid-template-columns:none;align-items:center;gap:8px;font-weight:500!important}
+.gfCheck input{width:20px;height:20px}
+.gfLegend{border:1px solid #efe4ea;border-radius:16px;padding:12px;display:grid;gap:10px}
+.gfLegend legend{padding:0 6px;font-weight:700}
+.gfStay{background:#fbf6f9;border-radius:16px;padding:14px;display:grid;gap:4px}.gfStay p{margin:0}
+.gfButton{appearance:none;border:0;border-radius:999px;padding:13px 20px;font:inherit;font-weight:700;background:#683c55;color:#fff;cursor:pointer;text-align:center;text-decoration:none}
+.gfButton[disabled]{opacity:.55;cursor:default}.gfButton--ghost{background:#f3e9ef;color:#683c55}
+.gfOk{background:#eef8f1;color:#1d6b3a;border-radius:12px;padding:10px 12px;margin:0}
+.gfErr{background:#fdeeee;color:#9a2a2a;border-radius:12px;padding:10px 12px;margin:0}
+.gfFine{font-size:.82rem;color:#7b6873;margin:0}
+.gfGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+.gfGrid button{padding:0;border:0;background:#f3eef1;border-radius:12px;overflow:hidden;aspect-ratio:1;cursor:zoom-in}
+.gfGrid img{width:100%;height:100%;object-fit:cover;display:block}
+.gfDrop{border:2px dashed #d8c3cf;border-radius:18px;padding:22px;text-align:center;display:grid;gap:10px;justify-items:center;background:#fffbfd}
+.gfProgress{height:8px;border-radius:999px;background:#f1e6ec;overflow:hidden}.gfProgress span{display:block;height:100%;background:#683c55;transition:width .2s}
+.gfLightbox{position:fixed;inset:0;background:#000d;display:grid;place-items:center;z-index:50;padding:16px}
+.gfLightbox img{max-width:100%;max-height:85vh;border-radius:10px}
+.gfLightbox figcaption{color:#fff;text-align:center;margin-top:8px}
+.gfLightbox button{position:absolute;top:14px;right:14px;background:#fff;border:0;border-radius:999px;width:40px;height:40px;font-size:20px;cursor:pointer}
+.gfStars{display:flex;gap:6px}.gfStars button{border:0;background:none;font-size:30px;line-height:1;cursor:pointer;color:#d8c3cf;padding:2px}
+.gfStars button[aria-pressed=true]{color:#e2a23b}
+.gfAspect{display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px}
+/* Host shared-album page */
+.saTop{display:flex;flex-wrap:wrap;gap:22px;align-items:flex-start;margin:12px 0}
+.saQr{margin:0;padding:16px;border:1px solid #eee;border-radius:18px;background:#fff;display:grid;justify-items:center;gap:6px;text-align:center}
+.saQr figcaption{display:grid;gap:2px}.saSide{flex:1 1 300px;display:grid;gap:10px}
+.saItem{display:grid;gap:4px}.saItem small{color:#7b6873;font-size:.78rem}
+.saItem--pending button:first-child{outline:3px solid #e2a23b}.saItem--hidden img{opacity:.35}
+.saTools{display:flex;gap:6px;flex-wrap:wrap}.saTools button{border:1px solid #e3d5dd;background:#fff;border-radius:999px;padding:3px 10px;font-size:.78rem;cursor:pointer}
+.saGrid>div>button{padding:0;border:0;background:#f3eef1;border-radius:12px;overflow:hidden;aspect-ratio:1;cursor:zoom-in}
+.saGrid img{width:100%;height:100%;object-fit:cover;display:block}
+@media print{.saTop{justify-content:center;margin-top:60px}.saQr{border:0}.saQr img{width:420px;height:420px}.saQr figcaption{font-size:28px}}

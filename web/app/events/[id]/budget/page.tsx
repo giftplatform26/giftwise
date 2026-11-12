@@ -9,9 +9,11 @@ import {parseRupees,rupeesInput} from '../../../../lib/register.mjs';
 import {budgetHealth,percent} from '../../../../lib/eventops.mjs';
 import '../../../../components/gift-books.css';
 import '../../../../components/eventops.css';
+import '../../../../components/households.css';
+import BudgetSharing from '../../../../components/BudgetSharing';
 
 type Line={id:string;category:string;item:string;vendorName:string|null;plannedPaise:number;committedPaise:number;paidPaise:number;balancePaise:number;dueDate:string|null;dueSoon:boolean;overdue:boolean;note:string|null;version:number};
-type Budget={summary:{totalBudgetPaise:number|null;plannedPaise:number;committedPaise:number;paidPaise:number;balanceDuePaise:number;remainingPaise:number|null};lines:Line[];categories:{category:string;plannedPaise:number;committedPaise:number;paidPaise:number}[];upcoming:Line[];categoryChoices:string[]};
+type Budget={summary:{totalBudgetPaise:number|null;plannedPaise:number;committedPaise:number;paidPaise:number;balanceDuePaise:number;remainingPaise:number|null};lines:Line[];categories:{category:string;plannedPaise:number;committedPaise:number;paidPaise:number}[];upcoming:Line[];categoryChoices:string[];access?:string};
 type Draft={category:string;item:string;vendorName:string;planned:string;committed:string;paid:string;dueDate:string;note:string};
 const empty:Draft={category:'Food',item:'',vendorName:'',planned:'',committed:'',paid:'',dueDate:'',note:''};
 const day=(d:string)=>new Intl.DateTimeFormat(undefined,{day:'numeric',month:'short'}).format(new Date(`${d}T12:00:00`));
@@ -29,16 +31,16 @@ export default function EventBudget(){useLocalizationRender();
   setBusy(true);try{await hostRequest(fetch,editing?`${route}/lines/${editing.id}`:`${route}/lines`,{method:editing?'PUT':'POST',payload:body});setDraft({...empty,category:draft.category});setEditing(null);setOpen(false);await load()}
   catch(err){setError(err instanceof Error?err.message:'Could not save')}finally{setBusy(false)}}
  async function remove(l:Line){if(!confirm(localizeText('Delete “{{item}}”?').replace('{{item}}',l.item)))return;try{await hostRequest(fetch,`${route}/lines/${l.id}/delete`,{method:'POST'});setEditing(null);setOpen(false);await load()}catch(e){setError(e instanceof Error?e.message:'Could not delete')}}
- function edit(l:Line){setEditing(l);setOpen(true);setDraft({category:l.category,item:l.item,vendorName:l.vendorName??'',planned:rupeesInput(l.plannedPaise||null),committed:rupeesInput(l.committedPaise||null),paid:rupeesInput(l.paidPaise||null),dueDate:l.dueDate??'',note:l.note??''});window.scrollTo({top:0,behavior:'smooth'})}
- const s=b?.summary;const health=budgetHealth(s);
+ function edit(l:Line){if(readOnly)return;setEditing(l);setOpen(true);setDraft({category:l.category,item:l.item,vendorName:l.vendorName??'',planned:rupeesInput(l.plannedPaise||null),committed:rupeesInput(l.committedPaise||null),paid:rupeesInput(l.paidPaise||null),dueDate:l.dueDate??'',note:l.note??''});window.scrollTo({top:0,behavior:'smooth'})}
+ const s=b?.summary;const health=budgetHealth(s);const readOnly=b?.access==='VIEW';const owner=!b?.access||b.access==='OWNER';
 
  return <main className="focusPage gbPage">
-  <header className="focusPageHeading"><div><p className="focusEyebrow">{localizeText('Private to you')}</p><h1>{localizeText('Budget')}</h1>
-   <p>{localizeText('What you planned, what you have booked and what you have paid, with the payments coming up. Only you can see this page.')}</p></div>
-   <button type="button" className="focusPrimary" onClick={()=>{setEditing(null);setDraft(empty);setOpen(true)}}>{localizeText('Add an expense')}</button></header>
+  <header className="focusPageHeading"><div><p className="focusEyebrow">{localizeText(owner?'Private to you':readOnly?'Shared with you — view only':'Shared with you')}</p><h1>{localizeText('Budget')}</h1>
+   <p>{localizeText(owner?'What you planned, what you have booked and what you have paid, with the payments coming up. Only you, and family you share it with, can see this page.':'What is planned, booked and paid for this celebration, with the payments coming up.')}</p></div>
+   {!readOnly&&<button type="button" className="focusPrimary" onClick={()=>{setEditing(null);setDraft(empty);setOpen(true)}}>{localizeText('Add an expense')}</button>}</header>
   {error&&<p className="focusError" role="alert">{localizeText(error)}</p>}
   {s&&<section className="eoBudgetTop">
-   <div className="eoTotal"><label>{localizeText('Total budget (₹)')}<input inputMode="decimal" value={total} onChange={e=>setTotal(e.target.value)} onBlur={()=>void saveTotal()} placeholder={localizeText('e.g. 10,00,000')}/></label>
+   <div className="eoTotal"><label>{localizeText('Total budget (₹)')}<input inputMode="decimal" value={total} readOnly={readOnly} onChange={e=>setTotal(e.target.value)} onBlur={()=>{if(!readOnly)void saveTotal()}} placeholder={localizeText('e.g. 10,00,000')}/></label>
     <p className={`eoHealth eoHealth--${health.tone}`}>{localizeText(health.label)}</p>
     {s.totalBudgetPaise?<div className="eoBar" aria-hidden="true"><span className="eoBar--paid" style={{width:`${percent(s.paidPaise,s.totalBudgetPaise)}%`}}/><span className="eoBar--booked" style={{width:`${Math.max(0,percent(s.committedPaise,s.totalBudgetPaise)-percent(s.paidPaise,s.totalBudgetPaise))}%`}}/></div>:null}</div>
    <div className="gbStats"><div><span>{localizeText('Planned')}</span><strong>{inr(s.plannedPaise)}</strong></div><div><span>{localizeText('Booked')}</span><strong>{inr(s.committedPaise)}</strong></div>
@@ -61,6 +63,7 @@ export default function EventBudget(){useLocalizationRender();
     <ul className="gbRows">{b.lines.filter(l=>l.category===c.category).map(l=><li key={l.id}><button type="button" onClick={()=>edit(l)}>
      <span className="gbWho"><strong>{l.item}</strong><small>{[l.vendorName,l.plannedPaise?localizeText('planned {{a}}').replace('{{a}}',inr(l.plannedPaise)):null].filter(Boolean).join(' · ')}</small></span>
      <span className="gbWhat"><strong>{inr(l.committedPaise||l.plannedPaise)}</strong><small>{l.committedPaise?(l.balancePaise>0?localizeText('{{a}} to pay').replace('{{a}}',inr(l.balancePaise)):localizeText('Fully paid')):localizeText('Not booked yet')}</small></span></button></li>)}</ul></section>))}
+  {b&&owner&&<BudgetSharing eventId={eventId}/>}
   <p className="gbFine">{localizeText('A planning aid only — GiftWise does not pay vendors.')}</p>
  </main>;
 }

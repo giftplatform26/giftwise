@@ -31,12 +31,17 @@ export function CollectionHero({token}:{token:string}){useLocalizationRender();
 
 /** Bottom of the invitation: share card, planner credit, and the first-celebration-free offer. */
 export function InvitationExtras({token,title,hostName,occasion,date,features}:{token:string;title:string;hostName?:string|null;occasion:string;date?:string|null;features?:Record<string,boolean>}){useLocalizationRender();
+ const [album,setAlbum]=useState<{path:string;uploadsOpen:boolean}|null>(null),[feedback,setFeedback]=useState<{open:boolean}|null>(null);
  const [credit,setCredit]=useState<Credit|null>(null),[offer,setOffer]=useState<{available:boolean;days:number}|null>(null),[sharing,setSharing]=useState(false);
  useEffect(()=>{if(features?.PARTNER_ACCOUNTS)void json<Credit>(`/backend/api/public/events/${encodeURIComponent(token)}/partner`).then(setCredit);
-  if(features?.GUEST_FIRST_FREE)void json<{available:boolean;days:number}>(`/backend/api/public/events/${encodeURIComponent(token)}/first-free`).then(setOffer)},[token,features?.PARTNER_ACCOUNTS,features?.GUEST_FIRST_FREE]);
+  if(features?.GUEST_FIRST_FREE)void json<{available:boolean;days:number}>(`/backend/api/public/events/${encodeURIComponent(token)}/first-free`).then(setOffer);
+  if(features?.SHARED_ALBUM)void json<{path:string;uploadsOpen:boolean}>(`/backend/api/public/celebrations/${encodeURIComponent(token)}/shared-album`).then(setAlbum);
+  if(features?.GUEST_FEEDBACK)void json<{open:boolean}>(`/backend/api/public/celebrations/${encodeURIComponent(token)}/feedback`).then(setFeedback)},[token,features?.PARTNER_ACCOUNTS,features?.GUEST_FIRST_FREE,features?.SHARED_ALBUM,features?.GUEST_FEEDBACK]);
  const link=typeof window!=='undefined'?`${window.location.origin}/e/${token}`:'';
- if(!features?.STORY_CARDS&&!features?.SEATING_PLAN&&!credit&&!offer?.available)return null;
+ if(!features?.STORY_CARDS&&!features?.SEATING_PLAN&&!credit&&!offer?.available&&!album&&!feedback?.open)return null;
  return <section className="cxExtras">
+  {album&&<div className="cxShare"><Link className="focusSecondary" href={album.path}>{localizeText(album.uploadsOpen?'Add your photos to the shared album':'See the shared photo album')}</Link></div>}
+  {feedback?.open&&<div className="cxShare"><Link className="focusSecondary" href={`/e/${token}/feedback`}>{localizeText('Tell the hosts how it went')}</Link></div>}
   {features?.SEATING_PLAN&&<FindMyTable token={token}/>}
   {features?.STORY_CARDS&&<div className="cxShare">{sharing?<StoryCardMaker title={title} hostName={hostName} occasion={occasion} date={date} link={link} kinds={['INVITE']} eventToken={token}/>:
    <button type="button" className="focusSecondary" onClick={()=>setSharing(true)}>{localizeText('Share this invitation to your Status')}</button>}</div>}

@@ -1,0 +1,19 @@
+/* Guest list & households */
+.hhHeadActions{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start}
+.hhStats{grid-template-columns:repeat(auto-fit,minmax(130px,1fr))}
+.hhStats small{display:block;color:var(--muted,#6b6b6b);font-size:.78rem;margin-top:2px}
+.hhMeals,.hhSides{margin:6px 0;color:var(--muted,#555);font-size:.92rem;display:flex;flex-wrap:wrap;gap:14px}
+.hhPaste{width:100%;font:inherit;font-size:.9rem;padding:10px;border:1px solid var(--line,#ddd);border-radius:10px;resize:vertical}
+.hhMembers{border:1px dashed var(--line,#ddd);border-radius:12px;padding:10px 12px;margin:8px 0;display:grid;gap:8px}
+.hhMembers legend{font-weight:600;padding:0 6px}.hhMembers legend small{font-weight:400;color:var(--muted,#6b6b6b)}
+.hhMember{display:grid;grid-template-columns:minmax(140px,2fr) 1fr 1fr auto auto;gap:6px;align-items:center}
+.hhMember input,.hhMember select{min-width:0}
+.hhOut{align-self:end}
+.hhFilters{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:14px 0 6px}
+.hhFilters input[type=search]{flex:1 1 220px}
+.hhRows>li>div{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.hhMain{flex:1 1 260px;display:flex;justify-content:space-between;gap:12px;background:none;border:0;text-align:left;font:inherit;cursor:pointer;padding:0}
+.hhQuick{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.hhRow--yes{border-left:4px solid #3c9a5f}.hhRow--no{border-left:4px solid #b9b9b9;opacity:.8}.hhRow--maybe{border-left:4px solid #d9a441}.hhRow--pending{border-left:4px solid transparent}
+.hhDetail{padding:8px 4px 2px;font-size:.92rem}.hhDetail ul{margin:0;padding-left:18px}.hhDetail small{color:var(--muted,#6b6b6b)}
+@media (max-width:640px){.hhMember{grid-template-columns:1fr 1fr}.hhMember input{grid-column:1/-1}}
