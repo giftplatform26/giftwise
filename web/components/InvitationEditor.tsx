@@ -8,6 +8,9 @@ import {useLocalizationRender} from './LocalizationProvider';
 // batch-3d4d2c-layout: compact galleries and reorganized controls
 import {useEffect,useRef,useState,useReducer} from 'react';
 import {beginAction,completeAction} from '../lib/interaction-analytics.mjs';
+// Editor-only styles (kept out of the root layout so guest and auth pages don't download them). Order matters.
+import './invitation-editor-toolbar.css';
+import './ai-invitation.css';
 import './invitation-studio.css';
 import {invitationHistoryReducer} from '../lib/invitation-history.mjs';
 import HostInvitationUploads from './HostInvitationUploads';
@@ -201,7 +204,7 @@ async function downloadArtwork(){
   <p>{localize("ui.1220d9c4780b8249",{defaultValue:"Add a decoration, then drag or resize it. QR overlap is blocked."})}</p>
   <HostInvitationUploads category="DECORATION" onUse={asset=>insertSticker(`upload:${asset.id}`)}/><div className="studioCategoryChips">{['All','Floral','Celebration','Love','Botanical','Frames'].map(category=><button key={category} type="button" aria-pressed={decorationCategory===category} onClick={()=>setDecorationCategory(category)}>{localizeText(category)}</button>)}</div><div className="studioDecorationGrid">
     {STICKERS.filter(sticker=>decorationCategory==='All'||sticker.category===decorationCategory).map(sticker=><button type="button" key={sticker.id} title={localize("ui.ddcadea790b77482",{defaultValue:"Add {{value0}}",value0:(sticker.name)})} onClick={()=>insertSticker(sticker.id)} style={{padding:6,border:'1px solid #ddd',borderRadius:8,background:'#fff',cursor:'pointer'}}>
-      <img src={sticker.src} alt="" style={{width:'100%',height:58,objectFit:'contain'}}/>
+      <img src={sticker.src} alt="" loading="lazy" decoding="async" style={{width:'100%',height:58,objectFit:'contain'}}/>
       <span style={{display:'block',fontSize:11}}>{localizeText(sticker.name)}</span>
     </button>)}
   </div>

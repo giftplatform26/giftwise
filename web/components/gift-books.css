@@ -52,7 +52,7 @@
 .gbSubhead{margin:10px 0 0;font-size:15px;color:var(--focus-muted,#66565e)}
 .gbEmpty{padding:28px 20px;text-align:center;color:var(--focus-muted,#66565e);border:1px dashed #d8c8d1;border-radius:16px;margin:0}
 .gbFine{font-size:13px;color:var(--focus-muted,#66565e)}
-.gbToast{position:fixed;left:50%;bottom:max(20px,env(safe-area-inset-bottom));transform:translateX(-50%);z-index:40;display:flex;align-items:center;gap:16px;max-width:calc(100% - 32px);padding:12px 14px 12px 18px;border-radius:14px;background:#2d2129;color:#fff;box-shadow:0 12px 30px #0003;animation:gbUp .25s ease-out}
+.gbToast{position:fixed;left:50%;bottom:calc(max(20px,env(safe-area-inset-bottom)) + var(--gw-cookie-offset,0px));transform:translateX(-50%);z-index:40;display:flex;align-items:center;gap:16px;max-width:calc(100% - 32px);padding:12px 14px 12px 18px;border-radius:14px;background:#2d2129;color:#fff;box-shadow:0 12px 30px #0003;animation:gbUp .25s ease-out}
 .gbToast button{min-height:36px!important;padding:4px 14px!important;background:#ffffff1f!important;color:#fff!important;border:0!important;font-weight:700}
 .gbCheck{display:flex!important;align-items:center;gap:10px;font-weight:450!important}
 .gbPerson{margin:0 0 24px;padding:22px;border-radius:20px;background:linear-gradient(160deg,#f7f1f5,#fbf8f2);border:1px solid var(--focus-line,#e6dfe2)}

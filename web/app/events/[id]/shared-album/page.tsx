@@ -52,6 +52,6 @@ export default function SharedAlbum(){useLocalizationRender();
     <div className="saTools">{p.status!=='APPROVED'&&<button type="button" onClick={()=>status(p,'APPROVED')}>{localizeText('Show')}</button>}{p.status!=='HIDDEN'&&<button type="button" onClick={()=>status(p,'HIDDEN')}>{localizeText('Hide')}</button>}<button type="button" onClick={()=>remove(p)}>{localizeText('Delete')}</button></div>
     {p.uploaderName&&<small>{p.uploaderName}</small>}</div>)}</div>)}
   {view&&<div className="gfLightbox" role="dialog" aria-modal="true" onClick={()=>setView(null)}><button type="button" aria-label={localizeText('Close')} onClick={()=>setView(null)}>✕</button>
-   <figure onClick={e=>e.stopPropagation()}><img src={`/backend/api${route}/photos/${view.id}`} alt={view.caption||''}/><figcaption>{[view.caption,view.uploaderName].filter(Boolean).join(' — ')}</figcaption></figure></div>}
+   <figure onClick={e=>e.stopPropagation()}><img src={`/backend/api${route}/photos/${view.id}`} alt={view.caption||''} loading="lazy" decoding="async"/><figcaption>{[view.caption,view.uploaderName].filter(Boolean).join(' — ')}</figcaption></figure></div>}
  </main>;
 }

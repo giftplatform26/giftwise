@@ -16,5 +16,5 @@ export const metadata: Metadata = {
 export const viewport: Viewport = { width: 'device-width', initialScale: 1, themeColor: '#F8F9FC' };
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const schema = { '@context': 'https://schema.org', '@type': 'WebSite', name: 'GiftWise', url: site.url, description: 'Plan, invite, gift and celebrate in one place: invitations, RSVPs, wishlists, group gifts, direct gifts with receipts and event-day tools.' };
-  return <html lang="en"><head><link rel="preload" href="/fonts/manrope-variable.ttf" as="font" type="font/ttf" crossOrigin="anonymous" /></head><body><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema).replace(/</g, '\\u003c') }} />{children}</body></html>;
+  return <html lang="en"><head><link rel="preload" href="/fonts/manrope-variable.woff2" as="font" type="font/woff2" crossOrigin="anonymous" /></head><body><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema).replace(/</g, '\\u003c') }} />{children}</body></html>;
 }

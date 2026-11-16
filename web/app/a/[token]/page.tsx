@@ -45,6 +45,6 @@ export default function GuestAlbum(){useLocalizationRender();
    :<p className="gfFine">{localizeText('Your photos go straight to the hosts.')}</p>}
   <Link className="gfFine" href={a.invitationPath}>{localizeText('Open the invitation')}</Link></section>
   {view&&<div className="gfLightbox" role="dialog" aria-modal="true" onClick={()=>setView(null)}><button type="button" aria-label={localizeText('Close')} onClick={()=>setView(null)}>✕</button>
-   <figure onClick={e=>e.stopPropagation()}><img src={`${base}/photos/${view.id}`} alt={view.caption||''}/><figcaption>{[view.caption,view.uploaderName].filter(Boolean).join(' — ')}</figcaption></figure></div>}
+   <figure onClick={e=>e.stopPropagation()}><img src={`${base}/photos/${view.id}`} alt={view.caption||''} loading="lazy" decoding="async"/><figcaption>{[view.caption,view.uploaderName].filter(Boolean).join(' — ')}</figcaption></figure></div>}
  </main>;
 }

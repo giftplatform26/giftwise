@@ -12,7 +12,7 @@ test('admin pages and APIs are detected, including encoded and traversal variant
   for(const path of ['/login','/events','/events/new','/gifts','/host/account','/e/token','/administrator-guide','/backend/api/auth/me'])assert.equal(isAdminPath(path),false,path);
 });
 test('middleware and login enforce web-only administration for the app',()=>{
-  const middleware=fs.readFileSync(new URL('../middleware.ts',import.meta.url),'utf8');
+  const middleware=fs.readFileSync(new URL('../proxy.ts',import.meta.url),'utf8');
   assert.match(middleware,/isNativeAppUserAgent\(request\.headers\.get\('user-agent'\)\) && isAdminPath\(request\.nextUrl\.pathname\)/);
   assert.match(middleware,/status: 404/);
   const login=fs.readFileSync(new URL('../app/login/page.tsx',import.meta.url),'utf8');

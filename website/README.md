@@ -22,7 +22,7 @@ npm test
 npm start
 ```
 
-`npm start` previews the static production export on port 3001. Deploy the **out/** directory to any static host. Environment variables are embedded at build time: rebuild after changing them. `NEXT_PUBLIC_SITE_URL` must be the public marketing origin so canonical links, sitemap, social metadata and the QR invitation point to the correct website.
+`npm run build` refuses to run unless `NEXT_PUBLIC_SITE_URL` and `NEXT_PUBLIC_APP_URL` are set (https, or an explicit localhost origin); `npm run build:local` builds against localhost:3001/3000 for previews. `npm start` previews the static production export on port 3001. Deploy the **out/** directory to any static host. Environment variables are embedded at build time: rebuild after changing them. `NEXT_PUBLIC_SITE_URL` must be the public marketing origin so canonical links, sitemap, social metadata and the QR invitation point to the correct website.
 
 ## What is included
 

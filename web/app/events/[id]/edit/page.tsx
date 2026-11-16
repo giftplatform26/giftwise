@@ -9,11 +9,12 @@ import {hostApi,OCCASIONS} from '../../../../lib/host-api.mjs';
 import {occasionLabel,statusLabel,statusHint,lifecycleActions} from '../../../../lib/event-labels.mjs';
 import {saveFlash} from '../../../../lib/flash.mjs';
 import HostToast from '../../../components/HostToast';
+import {GIFT_MODES,DEFAULT_GIFT_MODE,isContributionOnly,occasionFields} from '../../../../lib/occasion-details.mjs';
 
 type Address={addressLine1?:string|null;city?:string|null;state?:string|null;postalCode?:string|null;country?:string|null};
-type EventDetails={id:string;title:string;description:string|null;occasionType:string;eventDate:string|null;status:string;hostName:string|null;eventAddress?:Address|null;deliveryAddress?:Address|null;deliverySameAsEvent?:boolean;contactName?:string|null;contactPhone?:string|null;contactEmail?:string|null};
-type Form={title:string;description:string;occasionType:string;eventDate:string;hostName:string;addressLine1:string;city:string;state:string;postalCode:string;country:string;contactName:string;contactPhone:string;contactEmail:string;deliverySameAsEvent:boolean;deliveryAddress:DeliveryAddress};
-type TextKey=Exclude<keyof Form,'deliverySameAsEvent'|'deliveryAddress'>;
+type EventDetails={id:string;title:string;description:string|null;occasionType:string;eventDate:string|null;status:string;hostName:string|null;eventAddress?:Address|null;deliveryAddress?:Address|null;deliverySameAsEvent?:boolean;contactName?:string|null;contactPhone?:string|null;contactEmail?:string|null;giftMode?:string|null;occasionDetails?:Record<string,string>|null};
+type Form={title:string;description:string;occasionType:string;eventDate:string;hostName:string;addressLine1:string;city:string;state:string;postalCode:string;country:string;contactName:string;contactPhone:string;contactEmail:string;deliverySameAsEvent:boolean;deliveryAddress:DeliveryAddress;giftMode:string;occasionDetails:Record<string,string>};
+type TextKey=Exclude<keyof Form,'deliverySameAsEvent'|'deliveryAddress'|'giftMode'|'occasionDetails'>;
 type Pending=null|'complete'|'cancel';
 
 const text=(value:string|null|undefined)=>value??'';
@@ -22,7 +23,7 @@ function toForm(e:EventDetails):Form{
  return {title:e.title,description:text(e.description),occasionType:e.occasionType,eventDate:text(e.eventDate),hostName:text(e.hostName),
   addressLine1:text(a.addressLine1),city:text(a.city),state:text(a.state),postalCode:text(a.postalCode),country:text(a.country)||'India',
   contactName:text(e.contactName),contactPhone:text(e.contactPhone),contactEmail:text(e.contactEmail),
-  deliverySameAsEvent:e.deliverySameAsEvent!==false,
+  deliverySameAsEvent:e.deliverySameAsEvent!==false,giftMode:e.giftMode||DEFAULT_GIFT_MODE,occasionDetails:{...(e.occasionDetails||{})},
   deliveryAddress:{addressLine1:text(d.addressLine1),city:text(d.city),state:text(d.state),postalCode:text(d.postalCode),country:text(d.country)||emptyDeliveryAddress.country}};
 }
 
@@ -44,8 +45,11 @@ export default function EditEventPage(){useLocalizationRender();
  const input=(key:TextKey,label:string,options:{required?:boolean;type?:string;maxLength?:number;autoComplete?:string}={})=>
   <label>{localizeText(label)}{options.required?' *':''}<input {...options} disabled={!actions.canEdit||busy} value={form?.[key]??''} onChange={e=>field(key,e.target.value)}/></label>;
 
+ const detail=(key:string,value:string)=>{setForm(f=>f?{...f,occasionDetails:{...f.occasionDetails,[key]:value}}:f);setError('');setNotice('');};
+ const fields=occasionFields(form?.occasionType||'OTHER');const contributionOnly=isContributionOnly(form?.giftMode);
+ const detailInput=(f:ReturnType<typeof occasionFields>['who'][number])=><label key={f.key}>{localizeText(f.label)}{f.optional?` (${localizeText('optional')})`:''}<input disabled={!actions.canEdit||busy} maxLength={f.maxLength} inputMode={f.inputMode as React.HTMLAttributes<HTMLInputElement>['inputMode']} placeholder={localizeText(f.placeholder)} value={form?.occasionDetails[f.key]||''} onChange={e=>detail(f.key,e.target.value)}/></label>;
  async function save(e:React.FormEvent){e.preventDefault();if(!form||busy)return;setBusy(true);setError('');setNotice('');
-  try{const updated=await hostApi.updateEvent(fetch,id,form) as EventDetails;setEvent(updated);setForm(toForm(updated));setNotice(localizeText('Your changes are saved.'));}
+  try{const updated=await hostApi.updateEvent(fetch,id,{...form,...(isContributionOnly(form.giftMode)?{deliverySameAsEvent:true}:{})}) as EventDetails;setEvent(updated);setForm(toForm(updated));setNotice(localizeText('Your changes are saved.'));}
   catch(err){setError(err instanceof Error?err.message:'Could not save your changes');}
   finally{setBusy(false);}
  }
@@ -73,6 +77,10 @@ export default function EditEventPage(){useLocalizationRender();
     <label>{localizeText('Occasion')}<select disabled={!actions.canEdit||busy} value={form.occasionType} onChange={e=>field('occasionType',e.target.value)}>{OCCASIONS.map((o:string)=><option key={o} value={o}>{occasionLabel(o)}</option>)}</select></label>
     {input('hostName','Hosted by',{required:true,maxLength:200})}
     {input('eventDate','Date (optional)',{type:'date'})}
+    {(fields.who.length>0||fields.where.length>0)&&<><h3>{localizeText(fields.heading)}</h3><p className="finePrint">{localizeText('Used to make your automatic and AI invitations specific. All optional.')}</p>{fields.who.map(detailInput)}{fields.where.map(detailInput)}</>}
+    <h3>{localizeText('How guests can give')}</h3>
+    <div role="radiogroup" aria-label={localizeText('How guests can give')}>{Object.entries(GIFT_MODES).map(([value,mode])=><label key={value} style={{display:'block'}}><input type="radio" name="giftMode" value={value} disabled={!actions.canEdit||busy} checked={form.giftMode===value} onChange={()=>{setForm(f=>f?{...f,giftMode:value}:f);setError('');setNotice('')}}/> <strong>{localizeText(mode.label)}</strong> — {localizeText(mode.hint)}</label>)}</div>
+    {contributionOnly&&event?.giftMode!=='CONTRIBUTION_ONLY'&&<p className="finePrint" role="note">{localizeText('Your wishlist will be hidden from guests and group gifting turns off. Contributions already received stay in your reports, and you can switch back any time.')}</p>}
     <label>{localizeText('About this event')}<textarea disabled={!actions.canEdit||busy} maxLength={10000} rows={4} value={form.description} onChange={e=>field('description',e.target.value)}/></label>
     <h3>{localizeText('Event address')}</h3>
     {input('addressLine1','Street address',{required:true,maxLength:200,autoComplete:'street-address'})}
@@ -84,7 +92,7 @@ export default function EditEventPage(){useLocalizationRender();
     {input('contactName','Contact name',{required:true,maxLength:150,autoComplete:'name'})}
     {input('contactPhone','Contact phone',{required:true,type:'tel',maxLength:30,autoComplete:'tel'})}
     {input('contactEmail','Contact email (optional)',{type:'email',maxLength:254,autoComplete:'email'})}
-    {actions.canEdit&&<DeliveryAddressFields same={form.deliverySameAsEvent} address={form.deliveryAddress} onSameChange={same=>setForm(f=>f?{...f,deliverySameAsEvent:same}:f)} onAddressChange={address=>setForm(f=>f?{...f,deliveryAddress:address}:f)}/>}
+    {actions.canEdit&&!contributionOnly&&<DeliveryAddressFields same={form.deliverySameAsEvent} address={form.deliveryAddress} onSameChange={same=>setForm(f=>f?{...f,deliverySameAsEvent:same}:f)} onAddressChange={address=>setForm(f=>f?{...f,deliveryAddress:address}:f)}/>}
     {actions.canEdit&&<button className="focusPrimary" type="submit" disabled={busy}>{busy?localizeText('Saving…'):localizeText('Save changes')}</button>}
    </form>}
   </section>

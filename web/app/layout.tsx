@@ -4,18 +4,16 @@ import BrandingProvider,{BrandHeader} from '../components/BrandingProvider';
 import '../components/branding.css';
 import LegalFooter from '../components/LegalFooter';
 import CookieNotice from '../components/CookieNotice';
+import FieldFormatMessages from '../components/FieldFormatMessages';
 import ApplicationInteractions from './components/ApplicationInteractions';
 import LocalizationProvider from '../components/LocalizationProvider';
 import type { Metadata } from 'next';
 import './style.css';
 import '../components/focused/focused.css';
-import '../components/invitation-editor-toolbar.css';
-import '../components/ai-invitation.css';
-import '../components/invitation-studio.css';
 import VerificationProvider from '../components/VerificationProvider';
 import ExperienceProvider from '../components/ExperienceProvider';
 import PerformanceDiagnostics from './components/PerformanceDiagnostics';
 import HostSessionRedirect from './components/HostSessionRedirect';
 import HostGlobalNav from './components/HostGlobalNav';
 export const metadata: Metadata = { title: 'GiftWise | Invitation Studio', icons: {icon:'/giftwise-icon.svg'}, description: 'Design beautiful gift invitation cards', robots: {index:false,follow:false} };
-export default function RootLayout({children}:{children:React.ReactNode}) {return <html lang="en"><body><LocalizationProvider><BrandingProvider><BrandHeader/><HostSessionRedirect/><GrowthProvider><ApplicationInteractions/><ExperienceProvider><VerificationProvider><PerformanceDiagnostics/><HostGlobalNav>{children}</HostGlobalNav><LegalFooter/><CookieNotice/></VerificationProvider></ExperienceProvider></GrowthProvider></BrandingProvider></LocalizationProvider></body></html>}
+export default function RootLayout({children}:{children:React.ReactNode}) {return <html lang="en"><body><FieldFormatMessages/><LocalizationProvider><BrandingProvider><BrandHeader/><HostSessionRedirect/><GrowthProvider><ApplicationInteractions/><ExperienceProvider><VerificationProvider><PerformanceDiagnostics/><HostGlobalNav>{children}</HostGlobalNav><LegalFooter/><CookieNotice/></VerificationProvider></ExperienceProvider></GrowthProvider></BrandingProvider></LocalizationProvider></body></html>}

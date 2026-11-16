@@ -1,5 +1,8 @@
 import {stickerById} from './invitation-stickers.mjs';
 import {filterBackgrounds} from './background-gallery.mjs';
+import {isContributionOnly,occasionHeadline,occasionExtraLines,invitationTime} from './occasion-details.mjs';
+// Largest font size (<= max) at which text wraps inside a w×h box; a rough average-glyph estimate is enough here.
+function fitFont(text,w,h,max,min=12){let size=max;while(size>min&&Math.ceil(Math.max(1,text.length)*size*.55/w)*size*1.25>h)size--;return size;}
 export const initialDesign = {
   version: 1, width: 600, height: 800, background: '#fff8ef', accent: '#9e674c', backgroundImage: '', backgroundOverlay: .53, occasionType:'OTHER', backgroundTransform: {x:0,y:0,zoom:1},
   elements: [
@@ -36,19 +39,24 @@ export function createOccasionDesign(occasion='OTHER',details={}){
  const t=occasionTemplates[occasion]??occasionTemplates.OTHER;
  const title=typeof details.title==='string'&&details.title.trim()?details.title.trim():t.title;
  const d=structuredClone(initialDesign);
+ // Host-entered occasion details (bride & groom, age, ...) and the gift mode make the automatic wording specific to this event.
+ const extra=details.occasionDetails&&typeof details.occasionDetails==='object'?details.occasionDetails:{};
+ const contributionOnly=isContributionOnly(details.giftMode);
+ const subtitle=occasionHeadline(occasion,extra)||t.subtitle;
  d.occasionType=occasionTemplates[occasion]?occasion:'OTHER';d.background=t.background;d.accent=t.accent;d.backgroundOverlay=0;
  d.backgroundImage=details.backgroundImage||filterBackgrounds(occasion)[0]?.src||'';
  d.elements=d.elements.map(e=>{
    if(e.id==='title')return {...e,text:title,color:t.accent,fontFamily:['BIRTHDAY','FIRST_BIRTHDAY','BABY_SHOWER'].includes(occasion)?'"Comic Sans MS", cursive':'Georgia, serif',fontSize:Math.max(24,Math.min(43,Math.round(1700/Math.max(title.length,1))))};
-   if(e.id==='subtitle')return {...e,text:t.subtitle,color:t.accent};
-   if(e.id==='gift')return {...e,text:'SCAN TO EXPLORE GIFTS & CONTRIBUTE',color:t.accent};
-   if(e.id==='cta')return {...e,text:'Choose a gift or contribute with love',color:t.accent};
+   if(e.id==='subtitle')return {...e,text:subtitle,color:t.accent,fontSize:fitFont(subtitle,e.w,e.h,22,14)};
+   if(e.id==='gift')return {...e,text:contributionOnly?'SCAN TO JOIN & SEND YOUR BLESSINGS':'SCAN TO EXPLORE GIFTS & CONTRIBUTE',color:t.accent};
+   if(e.id==='cta')return {...e,text:contributionOnly?'Your blessings mean the world to us':'Choose a gift or contribute with love',color:t.accent};
    return e;
  });
  const address=details.eventAddress;
- const venue=address?[address.addressLine1,address.city,address.state].filter(Boolean).join(', '):'';
- const lines=[details.eventDate,details.hostName,venue].filter(v=>typeof v==='string'&&v.trim());
- if(lines.length)d.elements.push({id:'event-details',type:'text',text:lines.join(' · '),x:65,y:276,w:470,h:64,fontSize:17,color:t.accent,fontWeight:500,align:'center'});
+ const venue=[extra.venueName,...(address?[address.addressLine1,address.city,address.state]:[])].filter(v=>typeof v==='string'&&v.trim()).join(', ');
+ const when=[details.eventDate,invitationTime(extra)].filter(v=>typeof v==='string'&&v.trim()).join(' · ');
+ const lines=[when,details.hostName,venue,...occasionExtraLines(occasion,extra)].filter(v=>typeof v==='string'&&v.trim());
+ if(lines.length){const text=lines.join(' · ');d.elements.push({id:'event-details',type:'text',text,x:65,y:276,w:470,h:64,fontSize:fitFont(text,470,64,17,11),color:t.accent,fontWeight:500,align:'center'});}
  const layout=details.layout||(['BIRTHDAY','FIRST_BIRTHDAY','MILESTONE_BIRTHDAY'].includes(occasion)?'celebration':['BABY_SHOWER'].includes(occasion)?'storybook':'classic');
  d.layout=layout;
  const arrangements={

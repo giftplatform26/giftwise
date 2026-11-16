@@ -89,3 +89,19 @@
 @media(max-width:540px){.gc-form.gc-register-grid{grid-template-columns:1fr}.gc-dialog:has(.gc-auth-heading){padding:22px 18px}.gc-auth-heading h2{font-size:1.5rem}.gc-dialog .gc-metrics{grid-template-columns:1fr 1fr}.gc-dialog .gc-metrics>div:last-child{grid-column:1/-1}.gc-member-auth>h1{font-size:1.65rem}}
 
 .special-gift-choices{display:grid;gap:16px;margin:24px 0}.special-gift-choices button{text-align:left;padding:20px;display:grid;gap:8px}.special-gift-choices strong{font-size:1.15rem}.special-gift-choices span{font-weight:400;line-height:1.5}.gc-form fieldset{border:1px solid #e4cbd3;border-radius:14px;padding:16px;display:grid;gap:14px;min-width:0}.gc-form legend{font-weight:700;padding:0 6px}.special-gift-methods label{display:flex;align-items:flex-start;gap:10px}.special-gift-methods input[type=radio]{width:auto;flex-shrink:0;margin-top:4px}.gc-dialog address{font-style:normal;line-height:1.7;margin:16px 0}
+
+/* Group creator and member sign-up: grouped sections, paired fields side by side, single column on phones. */
+.gc-auth-form .gc-auth-section{border:1px solid #ecdbe2;border-radius:16px;padding:14px 16px 16px;margin:0;display:grid;gap:12px;min-width:0;background:#fff}
+.gc-auth-form .gc-auth-section legend{font-size:.78rem;font-weight:750;letter-spacing:.06em;text-transform:uppercase;color:#8a5a70;padding:0 6px}
+.gc-auth-form .gc-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:start}
+.gc-auth-form .gc-pair>*{min-width:0}
+.gc-auth-form .gc-hint{margin:-4px 0 0;font-size:.8rem;line-height:1.45;color:#7a6570}
+.gc-auth-form .gc-auth-section>div[id$="-rules"]{margin:-4px 0 0!important;padding:10px 12px;border-radius:12px;background:#faf3f6}
+.gc-auth-form .gc-auth-section>div[id$="-rules"] ul{margin:4px 0 0!important}
+.gc-auth-form>label:has(input[type=checkbox]){align-items:flex-start!important;font-weight:500;line-height:1.5}
+.gc-auth-form>label:has(input[type=checkbox]) input{margin-top:3px;min-height:auto}
+.gc-auth-form .gc-launch{width:100%}
+@media(max-width:540px){
+ .gc-auth-form .gc-pair{grid-template-columns:1fr}
+ .gc-auth-form .gc-auth-section{padding:12px}
+}

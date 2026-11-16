@@ -5,7 +5,7 @@ const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 function route(id){if(!uuid.test(String(id)))throw Error('Choose an event before designing with AI.');return `/v1/events/${id}/qr/ai-design`;}
 export const aiDesignOptions=f=>hostRequest(f,'/v1/events/ai-design-options');
 export const aiEventContext=(f,id)=>hostRequest(f,route(id)+'/context');
-export function preferencesFromEvent(context){return {visualStyle:context.visualStyle||'ELEGANT',tone:'WARM',language:'English',displayNames:String(context.hostName||'').slice(0,200),publicVenue:String(context.venue||'').slice(0,160),startTime:'',specialMessage:String(context.description||'').slice(0,400)};}
+export function preferencesFromEvent(context){return {visualStyle:context.visualStyle||'ELEGANT',tone:'WARM',language:'English',displayNames:String(context.displayNames||context.hostName||'').slice(0,200),publicVenue:String(context.venue||'').slice(0,160),startTime:String(context.startTime||'').slice(0,40),specialMessage:String(context.description||'').slice(0,400)};}
 export const aiDesignSettings=(f,id)=>hostRequest(f,route(id));
 export async function generateAiInvitation(f,id,input,cookie=''){
  const messages={

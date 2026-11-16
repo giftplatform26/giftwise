@@ -2,7 +2,8 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { isAdminPath, isNativeAppUserAgent } from './lib/native-app.mjs';
 
 // Administration is web-only: refuse admin pages and admin APIs to the GiftWise mobile app.
-export function middleware(request: NextRequest) {
+// Next.js 16 renamed the middleware file convention to proxy (proxy.ts / export function proxy).
+export function proxy(request: NextRequest) {
   if (isNativeAppUserAgent(request.headers.get('user-agent')) && isAdminPath(request.nextUrl.pathname)) {
     return new NextResponse('This page is not available in the GiftWise app.', {
       status: 404,

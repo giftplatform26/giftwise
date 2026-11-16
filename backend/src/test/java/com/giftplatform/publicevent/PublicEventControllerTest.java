@@ -38,7 +38,8 @@ class PublicEventControllerTest {
     @Test
     void contributionOnlyEventsSkipBothGiftQueries() {
         UUID token = UUID.randomUUID();
-        when(events.findByPublicToken(token)).thenReturn(Optional.of(event(true, GiftMode.CONTRIBUTION_ONLY)));
+        Event event = event(true, GiftMode.CONTRIBUTION_ONLY);
+        when(events.findByPublicToken(token)).thenReturn(Optional.of(event));
         var body = controller.view(token).getBody();
         assertNotNull(body);
         assertTrue(body.gifts().isEmpty());
@@ -48,7 +49,8 @@ class PublicEventControllerTest {
     @Test
     void giftingDisabledEventsSkipBothGiftQueries() {
         UUID token = UUID.randomUUID();
-        when(events.findByPublicToken(token)).thenReturn(Optional.of(event(false, GiftMode.CONTRIBUTION_AND_GIFTS)));
+        Event event = event(false, GiftMode.CONTRIBUTION_AND_GIFTS);
+        when(events.findByPublicToken(token)).thenReturn(Optional.of(event));
         var body = controller.view(token).getBody();
         assertNotNull(body);
         assertTrue(body.gifts().isEmpty());

@@ -12,3 +12,6 @@
 .qrBelowPreview .compactQrPanel button{margin:5px 8px 5px 0}
 .qrBelowPreview .compactQrPanel select{max-width:100%;padding:7px;border:1px solid #eaddd5;border-radius:8px}
 @media(max-width:680px){.qrBelowPreview{margin-top:14px}.qrBelowPreview .compactQrPanel{padding:14px}.app{border-radius:16px}}
+
+/* Touch screens: give standalone text links ("Sign in", "Return to sign in", logo) a ~40px tap height. */
+@media (pointer:coarse){main p>a:only-child:not([class]),main>a:not([class]),main nav>a:not([class]),.hostAuth p>a:not([class]),.growthOccasions>a:not([class]),.hostLogo,.focusGiftProduct,article>a[target=_blank]:not([class]){display:inline-block;padding-block:10px}}

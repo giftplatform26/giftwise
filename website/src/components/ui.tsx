@@ -1,4 +1,3 @@
-'use client';
 import { ArrowUpRight, Gift, Heart, Check, type LucideIcon } from 'lucide-react';
 import { createEventUrl } from '@/lib/site';
 export function Brand({ inverse = false }: { inverse?: boolean }) {

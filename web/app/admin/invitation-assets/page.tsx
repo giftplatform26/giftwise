@@ -108,7 +108,7 @@ export default function AdminInvitationAssetsPage(){useLocalizationRender();
     <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(220px,1fr))',gap:16}}>
      {visible.map(a=><article key={a.id} style={{border:'1px solid #dedde8',borderRadius:16,overflow:'hidden',background:'#fff'}}>
       <div style={{height:180,background:'#f2f0f8',display:'flex',alignItems:'center',justifyContent:'center'}}>
-       <img src={assetImageUrl(a.id)} alt={a.title} style={{maxHeight:'100%',maxWidth:'100%',objectFit:'contain'}}/>
+       <img src={assetImageUrl(a.id)} alt={a.title} loading="lazy" decoding="async" style={{maxHeight:'100%',maxWidth:'100%',objectFit:'contain'}}/>
       </div>
       <div style={{padding:14}}>
        <strong style={{display:'block',overflowWrap:'anywhere'}}>{a.title}</strong>

@@ -33,7 +33,15 @@ test('RSVP and wishes show a single heading each',()=>{
 test('below-the-fold sections are lazy and invitation + progress load in parallel',()=>{
   for(const name of ['GuestGiftBoard','GroupContribution','CommercialPlacements','GuestContributionCheckout','GuestCelebration','GuestDiscovery'])
     assert.match(invitation,new RegExp(`const ${name}=dynamic\\(\\(\\)=>import\\('\\.\\./${name}'\\)\\)`),name);
-  assert.match(invitation,/const progress=loadProgress\(controller\.signal\);fetch\(`\/backend\/api\/public\/events\//);
+  // Progress starts before the event: either the server-rendered event is used, or the event fetch runs alongside it.
+  assert.match(invitation,/const progress=loadProgress\(controller\.signal\);if\(initialEvent\)\{[^]*?return\(\)=>controller\.abort\(\)\}setEvent\(null\);fetch\(`\/backend\/api\/public\/events\//);
+});
+test('guest invitation is server-rendered from the public event and falls back to the client fetch',()=>{
+  const page=readFileSync(new URL('../app/e/[token]/page.tsx',import.meta.url),'utf8');
+  assert.match(page,/fetch\(new URL\(`\/api\/public\/events\/\$\{token\}`,backend\),\{cache:'no-store',signal:AbortSignal\.timeout\(2500\)\}\)/);
+  assert.match(page,/<PublicEventClient initialEvent=\{await initialEvent\(token\)\}\/>/);
+  assert.match(page,/catch\{return null\}/);
+  assert.match(invitation,/useState<InvitationEvent\|null>\(initialEvent\)/);
 });
 test('language bar stays quiet for guests and only appears with a real choice',()=>{
   assert.doesNotMatch(localization,/setError\(e instanceof Error\?e\.message:'Language settings are unavailable'\)/);

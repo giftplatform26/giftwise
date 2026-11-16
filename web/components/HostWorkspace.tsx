@@ -78,7 +78,7 @@ export default function HostWorkspace({children}:{children:ReactNode}){useLocali
   ...(features.GUEST_FEEDBACK?[{href:base+'/feedback',label:'Guest feedback',Icon:MessageSquareHeart}]:[]),
   ...(features.MEMORY_BOOK?[{href:base+'/memory-book',label:'Memory book',Icon:BookHeart}]:[]),
  ]:[{href:'/studio',label:'Invitation studio',Icon:Sparkles}];
- const visibleEventLinks=eventLinks.filter(item=>features.GIFTING_ENABLED!==false||!['Receiving accounts','Gift wishlist','Contribution report','Payment verification','Guest receipts'].includes(item.label));
+ const visibleEventLinks=eventLinks.filter(item=>features.GIFTING_ENABLED!==false||!['Receiving accounts','Gift wishlist','Contribution report','Payment verification','Guest receipts'].includes(item.label)).filter(item=>features.GIFT_WISHLIST!==false||item.label!=='Gift wishlist');
  // The celebration menu, grouped by stage so 30+ tools stay easy to scan. Collapsed (icon-only) mode stays a flat list.
  const GROUPS:[string,string[]][]=[
   ['Plan',['Event details','Schedule & functions','Planning checklist','Seating plan','Budget','Vendors & bookings','Run sheet','Co-hosts & helpers','Celebration settings']],

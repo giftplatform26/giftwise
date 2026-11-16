@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { ArrowRight, ArrowUpRight, CalendarDays, Check, CheckCheck, ChevronRight, Gift, Heart, Home, ImagePlus, Laptop, LayoutDashboard, Link2, LockKeyhole, MessageCircle, MousePointer2, Plus, QrCode, ScanLine, Send, Settings2, ShieldCheck, Sparkles, TrendingUp, Users, Wallet } from 'lucide-react';
 import { gifts, inr, percent, steps, type DemoGift } from '@/lib/demo-data';
 import { Avatars, Brand, CheckLine, CreateButton, Eyebrow, ProductArt } from './ui';
+import { useMarketing } from './marketing-context';
 
 export function MiniEventWindow({ step = 0 }: { step?: number }) {
   return <div className="mini-window"><div className="window-chrome"><span className="window-dots"><i /><i /><i /></span><span>your little celebration space</span><LockKeyhole size={11} /></div><div className="mini-window-body" key={step}>
@@ -15,13 +16,15 @@ export function MiniEventWindow({ step = 0 }: { step?: number }) {
   </div><div className="mini-window-footer"><span className="status-dot" /> Illustrative product preview <span>Made meaningful.</span></div></div>;
 }
 
-export function HowItWorks({ onWalkthrough }: { onWalkthrough: () => void }) {
+export function HowItWorks() {
+  const { openWalkthrough: onWalkthrough } = useMarketing();
   const [step, setStep] = useState(0);
   const icons = [CalendarDays, Sparkles, Heart, QrCode, Gift, Users];
   return <section id="how-it-works" className="section-space works-section"><div className="container-shell"><div className="section-heading" data-reveal><Eyebrow>SMALL STEPS. BIG SMILES.</Eyebrow><h2>A little planning.<br /><span>A lot more meaning.</span></h2><p>From your first idea to their thoughtful contribution.<br className="hidden sm:block" /> Here&apos;s how a better kind of gifting happens.</p></div><div className="works-layout" data-reveal><div className="step-list" aria-label="How GiftWise works">{steps.map((item, index) => { const Icon = icons[index]; return <button key={item.title} className={`step-item${step === index ? ' is-active' : ''}`} onClick={() => setStep(index)} aria-pressed={step === index}><span className="step-number">0{index + 1}</span><span className="step-copy"><b>{item.title}</b>{step === index && <span>{item.text}</span>}</span><Icon size={19} /><ChevronRight size={15} className="step-arrow" /></button>; })}<button className="text-link walkthrough-link" onClick={onWalkthrough}>Take the 30-second tour <ArrowRight size={15} /></button></div><div className="works-demo"><span className="demo-decoration demo-decoration-one" /><span className="demo-decoration demo-decoration-two" /><MiniEventWindow step={step} /><div className="step-pagination">{steps.map((s, i) => <button key={s.title} onClick={() => setStep(i)} className={step === i ? 'selected' : ''} aria-label={`Show step ${i + 1}: ${s.title}`} aria-pressed={step === i} />)}</div></div></div></div></section>;
 }
 
-export function WishlistShowcase({ onGift }: { onGift: (gift: DemoGift) => void }) {
+export function WishlistShowcase() {
+  const { openGift: onGift } = useMarketing();
   const [filter, setFilter] = useState('all');
   const filters = [{ id: 'all', label: 'A little of everything' }, { id: 'home', label: 'For your home' }, { id: 'dreams', label: 'For your next chapter' }, { id: 'baby', label: 'For little beginnings' }];
   const shown = gifts.filter(g => filter === 'all' || g.category === filter);
