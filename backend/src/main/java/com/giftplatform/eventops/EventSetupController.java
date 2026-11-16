@@ -36,7 +36,7 @@ public class EventSetupController {
         String base = "/events/" + id;
         List<Step> steps = new ArrayList<>();
         if (Boolean.TRUE.equals(f.get("GIFTING_ENABLED")))
-            steps.add(step("RECEIVING", "Connect a receiving account", "So guests can send gifts straight to you", exists("SELECT 1 FROM event_payment_account_links WHERE event_id=? AND enabled", id), base + "/receiving-accounts"));
+            steps.add(step("RECEIVING", "Connect a receiving account", Boolean.TRUE.equals(f.get("GIFT_WISHLIST")) ? "So guests can send gifts straight to you" : "So guests can send their contributions straight to you", exists("SELECT 1 FROM event_payment_account_links WHERE event_id=? AND enabled", id), base + "/receiving-accounts"));
         steps.add(step("PUBLISH", "Publish your invitation", "Share it once everything looks right", e.getStatus() != com.giftplatform.event.entity.EventStatus.DRAFT, base + "/preview"));
         add(steps, f, "EVENT_FUNCTIONS", "Add your functions", "Each with its own time, venue and RSVP", "SELECT 1 FROM event_functions WHERE event_id=?", id, base + "/functions");
         add(steps, f, "PLANNING_CHECKLIST", "Start your planning checklist", "One tap adds the usual tasks for your occasion", "SELECT 1 FROM event_tasks WHERE event_id=?", id, base + "/checklist");

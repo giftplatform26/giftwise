@@ -45,6 +45,9 @@ public class GiftManagementService {
         UUID actor = actors.requireAuthenticatedUserId();
         Event event = ownedEvent(eventId, actor);
         ensureEditable(event);
+        if (event.getGiftMode() == com.giftplatform.event.entity.GiftMode.CONTRIBUTION_ONLY)
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.CONFLICT,
+                "This celebration is set to contributions only. Switch it to contributions and gifts in Edit details to add a wishlist.");
         Gift gift = new Gift(event, request.name(), request.targetAmount());
         UUID lookup=request.retailerLookupId();
         if(retailer!=null && lookup==null && request.productUrl()!=null && !request.productUrl().isBlank() && !request.productUrl().trim().equals(gift.getProductUrl()))

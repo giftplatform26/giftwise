@@ -70,20 +70,20 @@ public class EventAccountLinkService {
         UUID host=owned(eventId,false);
         return db.query("""
             SELECT a.id,a.upi_id_masked,a.verification_status,(a.enabled AND l.enabled),l.preferred,
-                a.host_confirmed_at IS NOT NULL,a.account_label
+                a.host_confirmed_at IS NOT NULL,a.account_label,a.event_id
             FROM host_upi_accounts a JOIN event_payment_account_links l
               ON l.destination_id=a.id AND l.destination_kind='UPI' AND l.host_id=a.host_id
             WHERE l.event_id=? AND l.host_id=? AND a.archived_at IS NULL ORDER BY a.created_at,a.id
-            """,(rs,n)->new HostPaymentProfileService.UpiView(rs.getObject(1,UUID.class),rs.getString(2),VerificationStatus.valueOf(rs.getString(3)),rs.getBoolean(4),rs.getBoolean(5),rs.getBoolean(6),rs.getString(7),qr.hasValidQr(host,rs.getObject(1,UUID.class)),host,eventId),eventId,host);
+            """,(rs,n)->new HostPaymentProfileService.UpiView(rs.getObject(1,UUID.class),rs.getString(2),VerificationStatus.valueOf(rs.getString(3)),rs.getBoolean(4),rs.getBoolean(5),rs.getBoolean(6),rs.getString(7),qr.hasValidQr(host,rs.getObject(1,UUID.class)),host,rs.getObject(8,UUID.class)),eventId,host);
     }
     @Transactional(readOnly=true) public List<HostPaymentProfileService.BankView> banks(UUID eventId){
         UUID host=owned(eventId,false);
         return db.query("""
             SELECT a.id,a.account_number_masked,a.ifsc_masked,a.verification_status,(a.enabled AND l.enabled),l.preferred,
-                a.host_confirmed_at IS NOT NULL,a.account_label
+                a.host_confirmed_at IS NOT NULL,a.account_label,a.event_id
             FROM host_bank_accounts a JOIN event_payment_account_links l
               ON l.destination_id=a.id AND l.destination_kind='BANK' AND l.host_id=a.host_id
             WHERE l.event_id=? AND l.host_id=? AND a.archived_at IS NULL ORDER BY a.created_at,a.id
-            """,(rs,n)->new HostPaymentProfileService.BankView(rs.getObject(1,UUID.class),rs.getString(2),rs.getString(3),VerificationStatus.valueOf(rs.getString(4)),rs.getBoolean(5),rs.getBoolean(6),rs.getBoolean(7),rs.getString(8),host,eventId),eventId,host);
+            """,(rs,n)->new HostPaymentProfileService.BankView(rs.getObject(1,UUID.class),rs.getString(2),rs.getString(3),VerificationStatus.valueOf(rs.getString(4)),rs.getBoolean(5),rs.getBoolean(6),rs.getBoolean(7),rs.getString(8),host,rs.getObject(9,UUID.class)),eventId,host);
     }
 }

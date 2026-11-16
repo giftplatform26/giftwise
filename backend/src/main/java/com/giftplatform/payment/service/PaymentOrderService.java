@@ -102,6 +102,11 @@ public class PaymentOrderService {
                         HttpStatus.BAD_REQUEST,
                         "Gift is required");
             }
+            if (event.getGiftMode() == com.giftplatform.event.entity.GiftMode.CONTRIBUTION_ONLY) {
+                throw new ResponseStatusException(
+                        HttpStatus.CONFLICT,
+                        "This celebration accepts contributions toward the celebration only");
+            }
 
             Gift gift = gifts.findById(giftId)
                     .orElseThrow(() -> new ResponseStatusException(

@@ -36,6 +36,7 @@ public class EventManagementService {
             input.postalCode().trim(),input.country().trim(),input.contactName().trim(),
             input.contactPhone().trim(),input.contactEmail()==null?null:input.contactEmail().trim());
         event.update(input.title().trim(), input.description(), input.occasionType(), input.eventDate());
+        applyInvitationChoices(event,input);
         repository.saveAndFlush(event);
         log(actor,event,AuditAction.CREATE,null,snapshot(event));
         return response(event);
@@ -59,6 +60,7 @@ public class EventManagementService {
             input.contactPhone().trim(),input.contactEmail()==null?null:input.contactEmail().trim());
         event.setHostDisplayName(input.hostName().trim());
         event.update(input.title().trim(),input.description(),input.occasionType(),input.eventDate());
+        applyInvitationChoices(event,input);
         repository.saveAndFlush(event);
         log(actors.requireAuthenticatedUserId(),event,AuditAction.UPDATE,before,snapshot(event));
         return response(event);
@@ -77,6 +79,12 @@ public class EventManagementService {
         log(actors.requireAuthenticatedUserId(),event,AuditAction.STATUS_CHANGE,before,snapshot(event));
         if(next==EventStatus.COMPLETED&&emails!=null)emails.completed(event.getId());
         return response(event);
+    }
+    /** Gift mode and occasion details are optional so older clients keep working: null leaves the saved value alone. */
+    private void applyInvitationChoices(Event event,EventRequest input){
+        if(input.giftMode()!=null)event.setGiftMode(input.giftMode());
+        try{ event.setOccasionDetails(input.occasionDetails()!=null?input.occasionDetails():event.getOccasionDetails()); }
+        catch(IllegalArgumentException ex){ throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Please check the celebration details: "+ex.getMessage()); }
     }
     private void applyDelivery(Event event,EventRequest input){
         boolean same=!Boolean.FALSE.equals(input.deliverySameAsEvent());
@@ -120,6 +128,8 @@ public class EventManagementService {
         if(e.getContactEmail()!=null)m.put("contactEmail",e.getContactEmail());
         m.put("deliverySameAsEvent",e.isDeliverySameAsEvent());
         m.put("deliveryAddress",e.getDeliveryAddress());
+        m.put("giftMode",GiftMode.orDefault(e.getGiftMode()).name());
+        if(!e.getOccasionDetails().isEmpty())m.put("occasionDetails",new LinkedHashMap<>(e.getOccasionDetails()));
         return m;
     }
     private void log(UUID actor,Event e,AuditAction action,Map<String,Object> oldValues,Map<String,Object> newValues) {

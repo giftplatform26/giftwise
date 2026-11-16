@@ -24,7 +24,11 @@ public class AiInvitationService {
     public record Option(UUID id,String title){}
     public List<Option> options(){UUID host=actor.requireAuthenticatedUserId();if(!permissions.enabled(host,"AI_INVITATION"))return List.of();return db.query("SELECT e.id,e.title FROM events e JOIN platform_event_ai_design_settings a ON a.event_id=e.id AND a.enabled WHERE e.owner_id=? ORDER BY e.created_at DESC,e.id",(rs,n)->new Option(rs.getObject("id",UUID.class),rs.getString("title")),host);}
     public record EventContext(UUID eventId,String title,String occasionType,LocalDate eventDate,String hostName,
-        String description,String venue,String visualStyle){}
+        String description,String venue,String visualStyle,String displayNames,String startTime,String giftMode,Map<String,String> occasionDetails){
+        public EventContext(UUID eventId,String title,String occasionType,LocalDate eventDate,String hostName,String description,String venue,String visualStyle){
+            this(eventId,title,occasionType,eventDate,hostName,description,venue,visualStyle,"","","CONTRIBUTION_AND_GIFTS",Map.of());
+        }
+    }
     public EventContext context(UUID id){
         Event event=owned(id);permissions.requireAiInvitation(event.getOwnerId(),id);
         String style=switch(event.getOccasionType()){
@@ -33,8 +37,25 @@ public class AiInvitationService {
             case HOUSEWARMING -> "MINIMAL";
             default -> "ELEGANT";
         };
-        return new EventContext(id,event.getTitle(),event.getOccasionType().name(),event.getEventDate(),event.getHostDisplayName(),clean(event.getDescription()),venue(event),style);
+        var details=event.getOccasionDetails();
+        return new EventContext(id,event.getTitle(),event.getOccasionType().name(),event.getEventDate(),event.getHostDisplayName(),clean(event.getDescription()),
+            limit(join(", ",details.get("venueName"),venue(event)),160),style,limit(featuredNames(event.getOccasionType(),details),200),
+            limit(clean(details.getOrDefault("startTime",details.get("muhurtham"))),40),com.giftplatform.event.entity.GiftMode.orDefault(event.getGiftMode()).name(),details);
     }
+    /** The people the invitation is about, e.g. "Anu & Rahul" for a wedding; empty when the host gave none. */
+    static String featuredNames(com.giftplatform.event.entity.OccasionType occasion,Map<String,String> d){
+        return switch(occasion){
+            case WEDDING -> join(" & ",d.get("brideName"),d.get("groomName"));
+            case BIRTHDAY -> clean(d.get("celebrantName"));
+            case BABY_SHOWER -> clean(d.get("parentNames"));
+            case HOUSEWARMING -> clean(d.get("familyName"));
+            case ANNIVERSARY -> clean(d.get("coupleNames"));
+            case REUNION -> clean(d.get("groupName"));
+            default -> clean(d.get("honoreeName"));
+        };
+    }
+    private static String join(String sep,String... parts){return Arrays.stream(parts).filter(v->v!=null&&!v.isBlank()).map(String::strip).collect(java.util.stream.Collectors.joining(sep));}
+    private static String limit(String value,int max){return value.length()<=max?value:value.substring(0,max).strip();}
     private static String venue(Event e){
         for(String[] parts:List.of(new String[]{e.getAddressLine1(),e.getCity(),e.getState(),e.getPostalCode(),e.getCountry()},
             new String[]{e.getAddressLine1(),e.getCity(),e.getState()},new String[]{e.getCity(),e.getState()},new String[]{e.getCity()})){
@@ -59,10 +80,13 @@ public class AiInvitationService {
             if(count!=null&&count>=10)throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,"You have reached the hourly AI design limit. Please try again later.");
             db.update("INSERT INTO invitation_ai_requests(id,host_id,event_id,status) VALUES(?,?,?,'PENDING')",request,host,id);
         });
-        String names=clean(preferences.displayNames());if(names.isEmpty())names=event.getHostDisplayName();
+        String names=clean(preferences.displayNames());if(names.isEmpty())names=featuredNames(event.getOccasionType(),event.getOccasionDetails());if(names.isEmpty())names=event.getHostDisplayName();
         Map<String,Object> details=new LinkedHashMap<>();details.put("eventTitle",event.getTitle());details.put("occasion",event.getOccasionType().name());details.put("hostNames",names);
         if(event.getEventDate()!=null)details.put("eventDate",event.getEventDate().toString());
         details.put("visualStyle",preferences.visualStyle());details.put("tone",preferences.tone());details.put("language",preferences.language());
+        // Host-entered invitation details for this occasion (e.g. bride and groom). Contact and payment data are never included.
+        if(!event.getOccasionDetails().isEmpty())details.put("occasionDetails",event.getOccasionDetails());
+        details.put("giftingStyle",!event.isGiftingEnabled()?"PRESENCE_ONLY":event.getGiftMode()==com.giftplatform.event.entity.GiftMode.CONTRIBUTION_ONLY?"CONTRIBUTION_ONLY":"GIFTS_AND_CONTRIBUTIONS");
         details.put("publicVenue",clean(preferences.publicVenue()));details.put("startTime",clean(preferences.startTime()));details.put("personalMessage",clean(preferences.specialMessage()));
         try{
             var blueprint=client.generate(details);db.update("UPDATE invitation_ai_requests SET status='COMPLETED' WHERE id=?",request);

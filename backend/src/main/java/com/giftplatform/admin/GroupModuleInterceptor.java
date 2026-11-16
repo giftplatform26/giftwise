@@ -30,8 +30,12 @@ public final class GroupModuleInterceptor implements HandlerInterceptor {
         var event=events.findByPublicToken(id).filter(e->e.getStatus()==EventStatus.PUBLISHED)
             .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
         if(!event.isGiftingEnabled())throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Gifting is not enabled for this invitation");
+        // Group gifting and guest gifts revolve around gift items, which contribution-only celebrations do not have.
+        if(event.getGiftMode()==com.giftplatform.event.entity.GiftMode.CONTRIBUTION_ONLY)throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Gifts are not part of this invitation");
         permissions.require(event.getOwnerId(),"GROUP_GIFTING");
-        if(path.matches(".*/guest-gifts(?:/.*)?"))permissions.require(event.getOwnerId(),"GUEST_GIFTS");
+        if(path.matches(".*/guest-gifts(?:/.*)?")){
+            permissions.require(event.getOwnerId(),"GUEST_GIFTS");
+        }
         return true;
     }
 }

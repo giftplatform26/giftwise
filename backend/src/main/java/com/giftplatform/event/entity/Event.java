@@ -17,6 +17,19 @@ public class Event {
     private boolean giftingEnabled = true;
     public boolean isGiftingEnabled(){ return giftingEnabled; }
     public void setGiftingEnabled(boolean value){ giftingEnabled=value; }
+    @Enumerated(EnumType.STRING)
+    @Column(name="gift_mode", nullable=false, length=30)
+    private GiftMode giftMode = GiftMode.CONTRIBUTION_AND_GIFTS;
+    public GiftMode getGiftMode(){ return giftMode==null?GiftMode.CONTRIBUTION_AND_GIFTS:giftMode; }
+    public void setGiftMode(GiftMode value){ giftMode=GiftMode.orDefault(value); }
+    /** Guests may give toward wishlist gift items (not just toward the celebration). */
+    public boolean acceptsGiftItems(){ return giftingEnabled && getGiftMode()==GiftMode.CONTRIBUTION_AND_GIFTS; }
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
+    @Column(name="occasion_details", nullable=false, columnDefinition="jsonb")
+    private java.util.Map<String,String> occasionDetails = new java.util.LinkedHashMap<>();
+    public java.util.Map<String,String> getOccasionDetails(){ return occasionDetails==null?java.util.Map.of():java.util.Collections.unmodifiableMap(occasionDetails); }
+    /** Replaces the details, keeping only the fields that belong to the current occasion. */
+    public void setOccasionDetails(java.util.Map<String,String> details){ occasionDetails=new java.util.LinkedHashMap<>(OccasionDetails.normalize(occasionType,details)); }
 
     @Version
     @Column(name = "version", nullable = false)

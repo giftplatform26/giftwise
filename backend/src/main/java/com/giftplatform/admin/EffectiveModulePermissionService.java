@@ -41,7 +41,7 @@ public class EffectiveModulePermissionService {
  public Map<String,Boolean> eventModules(UUID hostId,UUID eventId){
   var result=new LinkedHashMap<>(modules(hostId));
   var rows=hostId==null?List.<Map<String,Object>>of():db.queryForList("""
-    SELECT e.gifting_enabled, COALESCE(a.enabled,FALSE) AS album, COALESCE(ai.enabled,FALSE) AS ai,
+    SELECT e.gifting_enabled, e.gift_mode, COALESCE(a.enabled,FALSE) AS album, COALESCE(ai.enabled,FALSE) AS ai,
            ARRAY(SELECT g.module_code FROM platform_event_module_grants g WHERE g.event_id=e.id AND g.enabled) AS grants
     FROM events e LEFT JOIN platform_event_album_settings a ON a.event_id=e.id LEFT JOIN platform_event_ai_design_settings ai ON ai.event_id=e.id
     WHERE e.id=? AND e.owner_id=?""",eventId,hostId);
@@ -56,6 +56,10 @@ public class EffectiveModulePermissionService {
   boolean gifting=owned&&Boolean.TRUE.equals(row.get("gifting_enabled"));
   result.put("GIFTING_ENABLED",gifting);
   if(!gifting){result.put("GROUP_GIFTING",false);result.put("GUEST_GIFTS",false);}
+  // Contribution-only events keep "give toward the celebration" but hide the wishlist and gift-item features.
+  boolean wishlist=gifting&&!"CONTRIBUTION_ONLY".equals(row.get("gift_mode"));
+  result.put("GIFT_WISHLIST",wishlist);
+  if(!wishlist){result.put("GROUP_GIFTING",false);result.put("GUEST_GIFTS",false);result.put("EXPERIENCE_GIFTS",false);}
   return Map.copyOf(result);
  }
  public boolean eventEnabled(UUID hostId,UUID eventId,String code){

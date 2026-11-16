@@ -36,7 +36,8 @@ public class HybridCheckoutQuoteService {
             WHERE e.id = ? AND e.status = 'PUBLISHED' AND gifting_enabled
               AND (?::uuid IS NULL OR EXISTS (
                   SELECT 1 FROM gifts g WHERE g.id = ? AND g.event_id = e.id
-                    AND g.status = 'ACTIVE' AND g.visibility = 'PUBLIC'))
+                    AND g.status = 'ACTIVE' AND g.visibility = 'PUBLIC'
+                    AND e.gift_mode = 'CONTRIBUTION_AND_GIFTS'))
             """, Integer.class, eventId, giftId, giftId);
         if (valid == null || valid != 1)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation unavailable");

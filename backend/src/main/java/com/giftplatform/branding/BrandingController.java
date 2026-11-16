@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 public class BrandingController {
  private final BrandingService service;
  public BrandingController(BrandingService service){this.service=service;}
- @GetMapping("/api/public/branding") public ResponseEntity<BrandingService.Settings> get(){return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(service.get());}
+ @GetMapping("/api/public/branding") public ResponseEntity<BrandingService.Settings> get(){return ResponseEntity.ok().cacheControl(CacheControl.maxAge(java.time.Duration.ofSeconds(60)).cachePublic()).body(service.get());}
  @GetMapping("/api/admin/branding") public BrandingService.Settings admin(){service.admin();return service.get();}
  @PostMapping("/api/admin/branding") public BrandingService.Settings save(@RequestBody BrandingService.Update body){return service.save(body);}
  @PostMapping(value="/api/admin/branding/{kind}",consumes=MediaType.MULTIPART_FORM_DATA_VALUE)

@@ -21,8 +21,15 @@ public record EventRequest(
     @Size(max=254) String contactEmail,
     @NotBlank @Size(max=200) String hostName,
     Boolean deliverySameAsEvent,
-    @jakarta.validation.Valid com.giftplatform.event.entity.DeliveryAddress deliveryAddress
+    @jakarta.validation.Valid com.giftplatform.event.entity.DeliveryAddress deliveryAddress,
+    // Optional: null keeps the current mode on update and defaults to CONTRIBUTION_AND_GIFTS on create.
+    com.giftplatform.event.entity.GiftMode giftMode,
+    // Optional: null keeps the current details on update. Keys are validated per occasion.
+    @Size(max=30) java.util.Map<@Size(max=40) String,@Size(max=200) String> occasionDetails
 ) {
+    public EventRequest(String title,String description,OccasionType occasionType,LocalDate eventDate,String addressLine1,String city,String state,String postalCode,String country,String contactName,String contactPhone,String contactEmail,String hostName,Boolean deliverySameAsEvent,com.giftplatform.event.entity.DeliveryAddress deliveryAddress){
+        this(title,description,occasionType,eventDate,addressLine1,city,state,postalCode,country,contactName,contactPhone,contactEmail,hostName,deliverySameAsEvent,deliveryAddress,null,null);
+    }
     public EventRequest(String title,String description,OccasionType occasionType,LocalDate eventDate,String addressLine1,String city,String state,String postalCode,String country,String contactName,String contactPhone,String contactEmail,String hostName){
         this(title,description,occasionType,eventDate,addressLine1,city,state,postalCode,country,contactName,contactPhone,contactEmail,hostName,true,null);
     }

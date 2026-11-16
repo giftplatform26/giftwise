@@ -45,7 +45,7 @@ class GrowthExperienceIntegrationTest {
   // Every migration (including V107 growth controls and later ones) applied successfully.
   assertEquals(0,db.queryForObject("SELECT count(*) FROM flyway_schema_history WHERE NOT success",Integer.class));
   org.junit.jupiter.api.Assertions.assertTrue(db.queryForObject("SELECT max(version::int) FROM flyway_schema_history WHERE version IS NOT NULL",Integer.class)>=107);
-  mvc.perform(get("/api/public/growth-settings")).andExpect(status().isOk()).andExpect(header().string("Cache-Control","no-store")).andExpect(jsonPath("$.features.SHARE_PREVIEWS").value(false)).andExpect(jsonPath("$.features.PUBLIC_DEMO").value(true));
+  mvc.perform(get("/api/public/growth-settings")).andExpect(status().isOk()).andExpect(header().string("Cache-Control","max-age=60, public")).andExpect(jsonPath("$.features.SHARE_PREVIEWS").value(false)).andExpect(jsonPath("$.features.PUBLIC_DEMO").value(true));
  }
  @Test void onlyAdministratorWithCsrfCanSaveAndStaleVersionsAreRejected()throws Exception{
   long revision=growth.current().version();String body=settings(revision);

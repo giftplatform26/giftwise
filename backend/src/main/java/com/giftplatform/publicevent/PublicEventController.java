@@ -48,10 +48,11 @@ public class PublicEventController {
         Event event = events.findByPublicToken(token)
                 .filter(e -> e.getStatus() == EventStatus.PUBLISHED)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        java.util.Set<UUID> reserved=new java.util.HashSet<>(db.query("SELECT reserved_gift_id FROM gift_groups WHERE event_id=? AND reserved_gift_id IS NOT NULL",(rs,n)->rs.getObject(1,UUID.class),event.getId()));
-        List<PublicGiftView> visibleGifts = gifts.findByEventIdOrderByCreatedAtAsc(event.getId())
+        // Gifting off or contribution-only: no wishlist is shown, so skip both gift queries on this hot path.
+        boolean wishlist = event.isGiftingEnabled() && event.getGiftMode() != com.giftplatform.event.entity.GiftMode.CONTRIBUTION_ONLY;
+        java.util.Set<UUID> reserved=!wishlist?java.util.Set.of():new java.util.HashSet<>(db.query("SELECT reserved_gift_id FROM gift_groups WHERE event_id=? AND reserved_gift_id IS NOT NULL",(rs,n)->rs.getObject(1,UUID.class),event.getId()));
+        List<PublicGiftView> visibleGifts = !wishlist?List.of():gifts.findByEventIdOrderByCreatedAtAsc(event.getId())
                 .stream()
-                .filter(g -> event.isGiftingEnabled())
                 .filter(g -> g.getVisibility() == GiftVisibility.PUBLIC && g.getStatus() == GiftStatus.ACTIVE)
                 .sorted(Comparator.comparing((com.giftplatform.gift.entity.Gift g) -> g.getPriority().ordinal())
                         .thenComparing(com.giftplatform.gift.entity.Gift::getCreatedAt, Comparator.nullsLast(Comparator.naturalOrder()))
@@ -61,7 +62,14 @@ public class PublicEventController {
         return ResponseEntity.ok()
                 .cacheControl(CacheControl.noStore())
                 .body(new PublicEventView(event.getTitle(), event.getDescription(),
-                        event.getOccasionType().name(), event.getEventDate(), visibleGifts, permissions.eventModules(event.getOwnerId(),event.getId()), event.getHostDisplayName(), event.getQrTheme()==null?null:event.getQrTheme().name()));
+                        event.getOccasionType().name(), event.getEventDate(), visibleGifts, permissions.eventModules(event.getOwnerId(),event.getId()), event.getHostDisplayName(), event.getQrTheme()==null?null:event.getQrTheme().name(), com.giftplatform.event.entity.GiftMode.orDefault(event.getGiftMode()).name(), publicDetails(event)));
+    }
+
+    /** Names and wording only: venue and timings stay behind the host's "share venue" celebration setting. */
+    private static Map<String,String> publicDetails(Event event) {
+        var details = new java.util.LinkedHashMap<>(event.getOccasionDetails());
+        details.keySet().removeAll(java.util.Set.of("venueName", "startTime", "muhurtham", "receptionDetails"));
+        return details;
     }
 
     @GetMapping("/{token}/features")
@@ -75,5 +83,10 @@ public class PublicEventController {
 
     public record PublicGiftView(UUID id, String name, String description, BigDecimal targetAmount, GiftPriority priority,String imageUrl,boolean contributionEnabled,String contributionDisabledReason,String productUrl) {}
     public record PublicEventView(String title, String description, String occasionType,
-                                  LocalDate eventDate, List<PublicGiftView> gifts, Map<String,Boolean> features, String hostName, String invitationTheme) {}
+                                  LocalDate eventDate, List<PublicGiftView> gifts, Map<String,Boolean> features, String hostName, String invitationTheme,
+                                  String giftMode, Map<String,String> occasionDetails) {
+        public PublicEventView(String title, String description, String occasionType, LocalDate eventDate, List<PublicGiftView> gifts, Map<String,Boolean> features, String hostName, String invitationTheme) {
+            this(title,description,occasionType,eventDate,gifts,features,hostName,invitationTheme,"CONTRIBUTION_AND_GIFTS",Map.of());
+        }
+    }
 }

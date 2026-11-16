@@ -86,6 +86,11 @@ public class YearlyRehostController {
         e.setDeliveryAddress(source.isDeliverySameAsEvent(), source.getDeliveryAddress());
         e.update(title, source.getDescription(), source.getOccasionType(), next);
         e.setGiftingEnabled(source.isGiftingEnabled());
+        e.setGiftMode(source.getGiftMode());
+        // Names and venue carry over; values that change every year (age, years married) are left for the host to update.
+        var details = new java.util.LinkedHashMap<>(source.getOccasionDetails());
+        details.keySet().removeAll(java.util.Set.of("age", "years", "yearsOfService", "dueMonth", "startTime", "muhurtham"));
+        e.setOccasionDetails(details);
         events.saveAndFlush(e);
         db.update("UPDATE events SET repeated_from=? WHERE id=?", eventId, e.getId());
         int guests = 0;

@@ -92,7 +92,8 @@ public class GuestDirectTransferService {
   if(controls!=null)controls.require(eventId,r.method());
   if(r.giftId()!=null) {
    Integer count=jdbc.queryForObject("""
-    SELECT COUNT(*) FROM gifts WHERE id=? AND event_id=? AND status='ACTIVE' AND visibility='PUBLIC'
+    SELECT COUNT(*) FROM gifts g JOIN events e ON e.id=g.event_id
+    WHERE g.id=? AND g.event_id=? AND g.status='ACTIVE' AND g.visibility='PUBLIC' AND e.gift_mode='CONTRIBUTION_AND_GIFTS'
     """,Integer.class,r.giftId(),eventId);
    if(count==null || count!=1) throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Gift unavailable");
   }

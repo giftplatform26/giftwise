@@ -27,7 +27,7 @@ public class VerificationSettingsController {
     error.getStatusCode(),error.getReason()==null?"Unable to change verification settings":error.getReason()));
  }
  @GetMapping("/api/public/verification-settings")
- public ResponseEntity<VerificationSettings.Settings> current(){return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(settings.current());}
+ public ResponseEntity<VerificationSettings.Settings> current(){return ResponseEntity.ok().cacheControl(CacheControl.maxAge(java.time.Duration.ofSeconds(60)).cachePublic()).body(settings.current());}
  @GetMapping("/api/admin/verification-settings")
  public ResponseEntity<Map<String,Object>> read(){admin();return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(details());}
  private Map<String,Object> details(){return Map.of("settings",settings.current(),"mobileConfigured",keyReady&&sms.isAvailable()&&sms.establishesMobileOwnership(),"emailConfigured",keyReady&&email.isAvailable());}

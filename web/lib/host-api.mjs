@@ -1,18 +1,29 @@
 import {passwordRules} from './credential-policy.mjs';
 import {redirectIfSessionExpired} from './host-session.mjs';
 import {csrfToken} from './gift-api.mjs';
+import {GIFT_MODES,normalizeOccasionDetails} from './occasion-details.mjs';
 export const OCCASIONS=['WEDDING','BIRTHDAY','BABY_SHOWER','HOUSEWARMING','ANNIVERSARY','FAREWELL','RETIREMENT','REUNION','OTHER'];
 const base='/backend/api';
+// Accepts +<country code><number>, or an Indian mobile typed without a code (9994030203, 09994030203, 919994030203).
+// Spaces, dashes and brackets are ignored. Returns the international form the backend stores, or '' if it isn't valid.
+export function normalizeMobile(value){
+ const raw=String(value||'').trim().replace(/[\s\-().]/g,'');
+ if(/^\+[1-9][0-9]{7,14}$/.test(raw))return raw;
+ const digits=raw.replace(/^0+/,'');
+ if(/^[6-9][0-9]{9}$/.test(digits))return '+91'+digits;
+ if(/^91[6-9][0-9]{9}$/.test(digits))return '+'+digits;
+ return '';
+}
 export function validateRegistration({fullName,username,email,mobile,password,emailVerificationToken,termsAccepted}) {
  if(!fullName || fullName.trim().length<2 || fullName.trim().length>120)throw Error('Enter your full name');
  if(!/^[A-Za-z0-9][A-Za-z0-9_]{3,29}$/.test(username||'')) throw Error('Username must be 4–30 letters, numbers or underscores, starting with a letter or number');
  if(!email || email.length>254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw Error('Enter a valid email');
- if(!/^\+[1-9][0-9]{7,14}$/.test(mobile||'')) throw Error('Enter a mobile number with country code, e.g. +919876543210');
+ const normalizedMobile=normalizeMobile(mobile);if(!normalizedMobile) throw Error('Enter a valid mobile number, e.g. 9876543210 or +919876543210');
  if(passwordRules(password||'').some(([,valid])=>!valid)) throw Error('Password must contain at least 8 characters, uppercase and lowercase letters, a number and a special character, within 72 UTF-8 bytes.');
  if(termsAccepted!==true) throw Error('Please agree to the Terms & Conditions and Privacy Policy.');
- return {fullName:fullName.trim(),username,email,mobile,password,termsAccepted,...(emailVerificationToken?{emailVerificationToken}:{})};
+ return {fullName:fullName.trim(),username,email,mobile:normalizedMobile,password,termsAccepted,...(emailVerificationToken?{emailVerificationToken}:{})};
 }
-export function validateEvent({title,description='',occasionType,eventDate='',addressLine1='',city='',state='',postalCode='',country='India',contactName='',contactPhone='',contactEmail='',hostName='',deliverySameAsEvent=true,deliveryAddress=null}) {
+export function validateEvent({title,description='',occasionType,eventDate='',addressLine1='',city='',state='',postalCode='',country='India',contactName='',contactPhone='',contactEmail='',hostName='',deliverySameAsEvent=true,deliveryAddress=null,giftMode,occasionDetails}) {
  if(!title?.trim()||title.trim().length>200) throw Error('Event title must be 1–200 characters');
  if(typeof hostName!=='string'||hostName.trim().length>200)throw Error('Host name must be at most 200 characters');
  if(description.length>10000) throw Error('Description too long');
@@ -33,7 +44,10 @@ export function validateEvent({title,description='',occasionType,eventDate='',ad
    }
    if(normalizedDelivery.country.toLowerCase()==='india'&&!/^[1-9][0-9]{5}$/.test(normalizedDelivery.postalCode))throw Error('Enter a valid 6-digit Indian delivery PIN code');
   }
-  return {deliverySameAsEvent:deliverySameAsEvent!==false,deliveryAddress:normalizedDelivery,title:title.trim(),description,occasionType,eventDate:eventDate||null,addressLine1:addressLine1.trim(),city:city.trim(),state:state.trim(),postalCode:postalCode.trim(),country:country.trim(),contactName:contactName.trim(),contactPhone:contactPhone.trim(),contactEmail:contactEmail.trim()||null,...(hostName.trim()?{hostName:hostName.trim()}:{})};
+  return {deliverySameAsEvent:deliverySameAsEvent!==false,deliveryAddress:normalizedDelivery,title:title.trim(),description,occasionType,eventDate:eventDate||null,addressLine1:addressLine1.trim(),city:city.trim(),state:state.trim(),postalCode:postalCode.trim(),country:country.trim(),contactName:contactName.trim(),contactPhone:contactPhone.trim(),contactEmail:contactEmail.trim()||null,...(hostName.trim()?{hostName:hostName.trim()}:{}),
+   // Optional so older callers keep the saved gift mode and occasion details untouched.
+   ...(giftMode!==undefined?{giftMode:Object.hasOwn(GIFT_MODES,giftMode)?giftMode:(()=>{throw Error('Choose how guests can give')})()}:{}),
+   ...(occasionDetails!==undefined?{occasionDetails:normalizeOccasionDetails(occasionType,occasionDetails)}:{})};
 }
 export async function bootstrapCsrf(fetcher) {
  const r=await fetcher(`${base}/auth/csrf`,{method:'GET',credentials:'include',cache:'no-store'});
