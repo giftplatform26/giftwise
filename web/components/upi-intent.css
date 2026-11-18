@@ -1,0 +1,42 @@
+.upiIntent{display:grid;gap:12px;margin:14px 0;padding:14px;border:1px solid #ded6cc;border-radius:14px;background:#fffdfa;color:#3d2c2e;max-width:100%;box-sizing:border-box}
+.upiIntentStep{display:grid;gap:10px}
+.upiIntentStep h4{margin:0;font-size:1.05rem}
+.upiIntentPrimary,.upiIntentSecondary{display:block;width:100%;box-sizing:border-box;text-align:center;text-decoration:none;font:inherit;font-weight:700;padding:13px 16px;border-radius:12px;cursor:pointer;min-height:48px}
+.upiIntentPrimary{background:#5b2a86;color:#fff;border:0}
+.upiIntentPrimary:disabled{opacity:.55;cursor:not-allowed}
+.upiIntentSecondary{background:#fff;color:#5b2a86;border:1px solid #c9b6dc}
+.upiIntentLink{background:none;border:0;color:#5b2a86;text-decoration:underline;font:inherit;padding:6px 0;cursor:pointer;justify-self:start}
+.upiIntentHint{margin:0;font-size:.9rem;color:#6a5658}
+.upiIntentError{margin:0;color:#9d2a2a;font-weight:600}
+.upiIntentFacts{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:0}
+.upiIntentFacts dt{color:#6a5658}.upiIntentFacts dd{margin:0;font-weight:600;overflow-wrap:anywhere}
+.upiIntentSteps{margin:0;padding-left:20px;display:grid;gap:4px}
+.upiIntentQr{margin:0;text-align:center}.upiIntentQr img{max-width:100%;height:auto;background:#fff;border-radius:8px}
+.upiIntentQr figcaption{font-size:.85rem;color:#6a5658}
+.upiIntentFallback{display:grid;gap:8px;padding-top:8px}.upiIntentFallback p{margin:0;overflow-wrap:anywhere}
+.upiIntentFallback button:not(.upiIntentLink){border:1px solid #d7c4bb;border-radius:8px;padding:4px 10px;background:#fff;cursor:pointer;font:inherit;font-size:.85rem}
+.upiIntentDetails summary{cursor:pointer;font-weight:600}
+.upiIntentChoices{display:grid;gap:8px}
+.upiIntentChoices label{display:flex;gap:10px;align-items:center;padding:12px;border:1px solid #ded6cc;border-radius:10px;cursor:pointer;min-height:44px;box-sizing:border-box}
+.upiIntentChoices label.selected{border-color:#5b2a86;background:#f6f0fb}
+.upiIntentField{display:grid;gap:4px;font-weight:600}
+.upiIntentField input{font:inherit;padding:10px;border:1px solid #cdbfb3;border-radius:8px;width:100%;box-sizing:border-box}
+.upiIntentField small{font-weight:400;color:#6a5658}
+/* Status chips: unverified states are never green. Green is only for independent verification. */
+.upiIntentStatus{margin:0}.upiIntentStatus span{display:inline-block;padding:4px 10px;border-radius:999px;font-size:.85rem;font-weight:700}
+.upiIntentStatus.tone-neutral span{background:#efe9e4;color:#4b3b3d}
+.upiIntentStatus.tone-pending span{background:#fff1d6;color:#7a4b00}
+.upiIntentStatus.tone-attention span{background:#fde3e1;color:#8a2420}
+.upiIntentStatus.tone-confirmed span{background:#e2ecfb;color:#1d4580}
+.upiIntentStatus.tone-success span{background:#dff3e4;color:#1d5a2d}
+.upiIntentStatus.tone-muted span{background:#eee;color:#555}
+@media (min-width:640px){.upiIntentPrimary,.upiIntentSecondary{width:auto;justify-self:start;min-width:260px}}
+@media (prefers-color-scheme:dark){
+ .upiIntent{background:#231c1d;color:#f3e9e6;border-color:#4a3c3d}
+ .upiIntentHint,.upiIntentFacts dt,.upiIntentField small,.upiIntentQr figcaption{color:#cbb9b6}
+ .upiIntentSecondary,.upiIntentFallback button:not(.upiIntentLink){background:#2d2425;color:#e3d2f3;border-color:#5a4a6b}
+ .upiIntentLink{color:#d9c2f0}
+ .upiIntentChoices label{border-color:#4a3c3d}.upiIntentChoices label.selected{background:#33284a;border-color:#a98bd0}
+ .upiIntentField input{background:#1b1516;color:#f3e9e6;border-color:#4a3c3d}
+ .upiIntentError{color:#ff9d93}
+}

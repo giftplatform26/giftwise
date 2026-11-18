@@ -89,6 +89,43 @@ public final class UpiQrPayload {
         return generate(verifiedUpiId, payeeName) + "&am=" + amount + "&tn=" + encode(note);
     }
 
+    public static final String TRANSACTION_REF = "GWT[A-Z0-9]{12,32}";
+
+    /**
+     * Build a UPI intent URI for one payment attempt: pa, pn, am, cu, tr (unique attempt reference) and tn.
+     * Values are percent-encoded per RFC 3986 (spaces as %20, which every UPI app decodes; '+' is not safe).
+     * Caller MUST have authorised the payee as the event host's eligible destination.
+     */
+    public static String generateIntent(String verifiedUpiId, String payeeName, long amountPaise,
+                                        String transactionRef, String note, boolean includeTransactionRef) {
+        if (verifiedUpiId == null || !verifiedUpiId.matches("(?i)[a-z0-9._-]{2,128}@[a-z0-9.-]{2,64}"))
+            throw new IllegalArgumentException("Invalid UPI ID");
+        if (payeeName == null || payeeName.isBlank() || payeeName.length() > 100 ||
+            payeeName.chars().anyMatch(Character::isISOControl))
+            throw new IllegalArgumentException("Invalid payee name");
+        if (amountPaise < 100 || amountPaise > 100_000_000L) throw new IllegalArgumentException("Invalid amount");
+        if (transactionRef == null || !transactionRef.matches(TRANSACTION_REF))
+            throw new IllegalArgumentException("Invalid transaction reference");
+        if (note == null || !note.matches("[A-Za-z0-9 \\-]{1,50}")) throw new IllegalArgumentException("Invalid note");
+        String amount = java.math.BigDecimal.valueOf(amountPaise, 2).toPlainString();
+        return "upi://pay?pa=" + percent(verifiedUpiId.toLowerCase(Locale.ROOT)) +
+            "&pn=" + percent(payeeName.strip()) + "&am=" + amount + "&cu=INR" +
+            (includeTransactionRef ? "&tr=" + percent(transactionRef) : "") + "&tn=" + percent(note);
+    }
+
+    /** RFC 3986 unreserved characters pass through; everything else is %XX (UTF-8). */
+    static String percent(String value) {
+        StringBuilder out = new StringBuilder();
+        for (byte b : value.getBytes(StandardCharsets.UTF_8)) {
+            int c = b & 0xFF;
+            if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') ||
+                c == '-' || c == '.' || c == '_' || c == '~' || c == '@') out.append((char) c);
+            else out.append('%').append(Character.toUpperCase(Character.forDigit(c >> 4, 16)))
+                    .append(Character.toUpperCase(Character.forDigit(c & 0xF, 16)));
+        }
+        return out.toString();
+    }
+
     private static String decode(String value) {
         try { return URLDecoder.decode(value, StandardCharsets.UTF_8); }
         catch (IllegalArgumentException ex) { throw new IllegalArgumentException("Malformed UPI encoding"); }

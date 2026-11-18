@@ -33,6 +33,11 @@ gift.payment.razorpay.webhook-secret=${RAZORPAY_WEBHOOK_SECRET:}
 gift.payment.profiles.enabled=true
 gift.payment.direct-transfers.enabled=true
 gift.payment.direct-transfers.reconciliation.enabled=false
+# Direct UPI intent (guest pays the host's own UPI ID; no gateway). Include the per-attempt "tr" reference in the
+# upi:// link; set false if real-device testing shows a payer app rejecting tr on personal (non-merchant) UPI IDs.
+gift.payment.upi-intent.include-transaction-ref=true
+# Minutes a payment attempt can be reported before it expires (max 30 days).
+gift.payment.upi-intent.attempt-ttl-minutes=1440
 
 
 # Cashfree Secure ID sandbox (disabled pending approved entitlement and confirmed API schema)

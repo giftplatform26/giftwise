@@ -45,6 +45,12 @@ public final class UpiQrImageCodec {
         return render(UpiQrPayload.generatePayment(verifiedUpiId, payeeName, amountPaise, note));
     }
 
+    /** QR for a server-built UPI intent URI. The URI is re-parsed so only a valid upi://pay payload is drawn. */
+    public static byte[] generateIntentPng(String upiIntentUri) {
+        UpiQrPayload.parse(upiIntentUri);
+        return render(upiIntentUri);
+    }
+
     private static byte[] render(String payload) {
         try {
             BitMatrix bits = new MultiFormatWriter().encode(

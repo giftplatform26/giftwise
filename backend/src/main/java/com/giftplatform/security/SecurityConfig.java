@@ -161,6 +161,14 @@ public class SecurityConfig {
                                 "/api/public/payments/direct/*/destinations").permitAll()
                         .requestMatchers(HttpMethod.POST,
                                 "/api/public/payments/direct/*/claims").permitAll()
+                        // Direct UPI intent attempts: public guest endpoints, CSRF stays enforced.
+                        .requestMatchers(HttpMethod.POST,
+                                "/api/public/payments/upi-intent/*/attempts",
+                                "/api/public/payments/upi-intent/*/attempts/*/response",
+                                "/api/public/payments/upi-intent/*/attempts/*/report",
+                                "/api/public/payments/upi-intent/*/attempts/*/evidence").permitAll()
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/public/payments/upi-intent/*/attempts/*").permitAll()
                         .requestMatchers(HttpMethod.GET,
                                 "/api/public/payments/verified-destinations/*",
                                 "/api/public/payments/verified-destinations/*/payment-qr",

@@ -12,6 +12,7 @@ import {useEffect,useRef,useState} from 'react';
 import {useExperience} from './ExperienceProvider';
 import FocusedCheckout from './focused/Checkout';
 import GuestVerifiedDestination from './GuestVerifiedDestination';
+import UpiIntentPayment from './UpiIntentPayment';
 import {newPaymentCode,normaliseReference,referenceProblem} from '../lib/direct-transfer.mjs';
 
 type Gift = {id:string;name:string;targetAmount:number};
@@ -62,6 +63,8 @@ export default function GuestContributionCheckout({token,gifts,selectedGiftId=''
   const [destinationRetry,setDestinationRetry]=useState(0);
   const [transferReference,setTransferReference]=useState('');
   const [directStatus,setDirectStatus]=useState('');
+  // UPI: the guided UPI-app flow comes first; manual reference reporting stays available as a fallback.
+  const [manualUpi,setManualUpi]=useState(false);
   const [giftId,setGiftId]=useState(selectedGiftId);const [amount,setAmount]=useState('500');
   const [name,setName]=useState('');const [email,setEmail]=useState('');const [phone,setPhone]=useState('');
   const [showContact,setShowContact]=useState(false);const [busy,setBusy]=useState(false);const [error,setError]=useState('');const [receipt,setReceipt]=useState<Capture|null>(null);
@@ -134,7 +137,7 @@ export default function GuestContributionCheckout({token,gifts,selectedGiftId=''
       onProviderVisibilityChange?.(true);instance.open();
     }catch(e){completeAction(interaction,'FAILURE','CHECKOUT_REQUEST_FAILED');setPricing(null);setPricingError('Checkout could not start. Refresh fees before retrying.');onProviderVisibilityChange?.(false);recordFlow('guest_contribution','failed');setError(e instanceof Error?e.message:'Unable to start payment');setBusy(false)}
   }
-  if(mode==='FOCUSED')return <><div aria-live="polite">{destinationsLoading&&<p role="status">{localize("ui.587f32a685d7c85e",{defaultValue:"Loading payment methods…"})}</p>}{destinationsError&&<p role="alert">{destinationsError} <button type="button" onClick={()=>setDestinationRetry(v=>v+1)}>{localize("ui.942087cc2d41e013",{defaultValue:"Retry"})}</button></p>}</div><FocusedCheckout token={token} amount={amount} name={name} email={email} phone={phone} method={paymentMethod} busy={busy} error={error} valid={validAmount} ready={!!eventId&&quoteReady&&razorpayAllowed} razorpayAllowed={razorpayAllowed} pricingNotice={pricingNotice} totalPaise={pricing?.totalPaise} gift={!!giftId} destination={directDestinationId} reference={transferReference} referenceError={referenceError} reported={directStatus} paymentCode={paymentCode} directReceipt={directReceipt} receipt={receipt} available={canUseDirect} setAmount={v=>{setAmount(v);requestKey.current=''}} setName={v=>{setName(v);requestKey.current=''}} setEmail={v=>{setEmail(v);requestKey.current=''}} setPhone={v=>{setPhone(v);requestKey.current=''}} setMethod={v=>{setPaymentMethod(v);setDirectDestinationId('');setDirectStatus('');requestKey.current=''}} setDestination={v=>{setDirectDestinationId(v);requestKey.current='';setDirectStatus('')}} setReference={v=>{setTransferReference(normaliseReference(paymentMethod==='upi'?'upi':'bank',v));requestKey.current='';setError('')}} submit={submit} report={()=>void reportDirectPayment()} close={onClose}/></>;
+  if(mode==='FOCUSED')return <><div aria-live="polite">{destinationsLoading&&<p role="status">{localize("ui.587f32a685d7c85e",{defaultValue:"Loading payment methods…"})}</p>}{destinationsError&&<p role="alert">{destinationsError} <button type="button" onClick={()=>setDestinationRetry(v=>v+1)}>{localize("ui.942087cc2d41e013",{defaultValue:"Retry"})}</button></p>}</div><FocusedCheckout token={token} amount={amount} name={name} email={email} phone={phone} method={paymentMethod} busy={busy} error={error} valid={validAmount} ready={!!eventId&&quoteReady&&razorpayAllowed} razorpayAllowed={razorpayAllowed} pricingNotice={pricingNotice} totalPaise={pricing?.totalPaise} gift={!!giftId} giftId={giftId} destination={directDestinationId} reference={transferReference} referenceError={referenceError} reported={directStatus} paymentCode={paymentCode} directReceipt={directReceipt} receipt={receipt} available={canUseDirect} setAmount={v=>{setAmount(v);requestKey.current=''}} setName={v=>{setName(v);requestKey.current=''}} setEmail={v=>{setEmail(v);requestKey.current=''}} setPhone={v=>{setPhone(v);requestKey.current=''}} setMethod={v=>{setPaymentMethod(v);setDirectDestinationId('');setDirectStatus('');requestKey.current=''}} setDestination={v=>{setDirectDestinationId(v);requestKey.current='';setDirectStatus('')}} setReference={v=>{setTransferReference(normaliseReference(paymentMethod==='upi'?'upi':'bank',v));requestKey.current='';setError('')}} submit={submit} report={()=>void reportDirectPayment()} close={onClose}/></>;
   return <section id="contribute" aria-label={localize("ui.f03be6fa028cbdd8",{defaultValue:"Contribute to celebration"})} className="loveCheckout">
     <div className="loveCheckoutHeader"><div><h2>{localize("ui.c643cf7e27505d20",{defaultValue:"Share a Gift with Love ❤️"})}</h2><p>{localize("ui.ecf968003d31f7a8",{defaultValue:"Razorpay: card, UPI and netbanking · Direct transfers to the host when enabled"})}</p></div>{onClose&&<button type="button" onClick={onClose} aria-label={localize("ui.cd1fde315c4e8998",{defaultValue:"Close contribution popup"})} className="loveModalClose">✕</button>}</div>
     {directStatus?<div role="status" className="loveCheckoutReceipt">
@@ -151,7 +154,7 @@ export default function GuestContributionCheckout({token,gifts,selectedGiftId=''
       <fieldset className="lovePaymentMethods" aria-label={localize("ui.b948ac04b854394f",{defaultValue:"Payment method"})} style={{border:'1px solid #ded6cc',borderRadius:12,padding:14,marginBottom:16}}>
         <legend style={{fontWeight:700,padding:'0 6px'}}>{localize("ui.d9d980b02f122917",{defaultValue:"Choose how to send your gift"})}</legend>
         {guestPaymentMethodChoices.filter(method=>method.id!=='razorpay'||razorpayAllowed).map(method=><label key={method.id} style={{display:'flex',alignItems:'flex-start',gap:10,margin:'10px 0',opacity:method.available||availableDirect.some(d=>d.method===method.id.toUpperCase())?1:0.65}}>
-          <input type="radio" name="guestPaymentMethod" value={method.id} checked={paymentMethod===method.id} disabled={busy||(!method.available&&!availableDirect.some(d=>d.method===method.id.toUpperCase()))} onChange={()=>{setPaymentMethod(method.id);setDirectDestinationId('');setDirectStatus('');requestKey.current=''}}/>
+          <input type="radio" name="guestPaymentMethod" value={method.id} checked={paymentMethod===method.id} disabled={busy||(!method.available&&!availableDirect.some(d=>d.method===method.id.toUpperCase()))} onChange={()=>{setPaymentMethod(method.id);setDirectDestinationId('');setDirectStatus('');setManualUpi(false);requestKey.current=''}}/>
           <span><strong>{method.label}</strong>{!method.available&&!availableDirect.some(d=>d.method===method.id.toUpperCase())&&localize("ui.77649d652d5dfc7d",{defaultValue:" · Unavailable"})}<small style={{display:'block'}}>{method.description}</small></span>
         </label>)}
       </fieldset>
@@ -163,6 +166,10 @@ export default function GuestContributionCheckout({token,gifts,selectedGiftId=''
       {paymentMethod!=='razorpay'&&<div className="loveCheckoutField">
         <GuestVerifiedDestination amountPaise={amountPaise} token={token} method={paymentMethod} destinationId={directDestinationId}
           onSelect={id=>{setDirectDestinationId(id);requestKey.current='';setDirectStatus('')}} />
+        {paymentMethod==='upi'&&<UpiIntentPayment token={token} destinationId={directDestinationId} giftId={giftId} amountPaise={amountPaise} validAmount={validAmount}
+          guestName={name} guestEmail={email} guestPhone={phone} onUnavailable={()=>setManualUpi(true)}/>}
+        {paymentMethod==='upi'&&!manualUpi&&<button type="button" className="loveCheckoutContactToggle" onClick={()=>setManualUpi(true)}>{localizeText('Already paid another way? Report it with your UPI reference')}</button>}
+        {(paymentMethod==='bank'||manualUpi)&&<>
         <label>{localize("ui.0c0b7cca57d23288",{defaultValue:"UPI transaction ID / Bank UTR"})}<input value={transferReference} maxLength={40} aria-invalid={!!referenceValue&&!!referenceError} aria-describedby="transfer-reference-help" onChange={e=>{setTransferReference(e.target.value);requestKey.current='';setError('')}} placeholder={localize("ui.11f7fb5414400a9b",{defaultValue:"Enter the reference after paying"})} />
           <span id="transfer-reference-help" role={referenceValue&&referenceError?'alert':undefined}>{referenceValue&&referenceError?referenceError:localize("ui.633b081a01d30bd6",{defaultValue:"Use 8–40 letters, numbers, or hyphens. No spaces or symbols."})}</span>
         </label>
@@ -171,6 +178,7 @@ export default function GuestContributionCheckout({token,gifts,selectedGiftId=''
         <button type="button" className="loveCheckoutPay"
           disabled={busy||!canUseDirect(paymentMethod==='upi'?'upi':'bank')||!directDestinationId||!referenceValue||!validAmount||!name.trim()}
           onClick={reportDirectPayment}>{localize("ui.6280d7748e32d3ac",{defaultValue:"I have done the payment"})}</button>
+        </>}
         {!directDestinationId&&<p>{localize("ui.f5f52a3394a90e27",{defaultValue:"Select the host’s preferred payment destination to continue."})}</p>}
       </div>}
       <p className="loveCheckoutDisclosure">{giftId?localize("ui.462374a04042068d",{defaultValue:"Your gift contribution may be split with the celebration wallet if the gift reaches its value. Any excess is handled in the celebration wallet when the payment is confirmed in our records."}):localize("ui.c7e71af4212581d7",{defaultValue:"Your contribution goes to the celebration wallet."})}</p>
