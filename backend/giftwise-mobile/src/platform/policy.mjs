@@ -19,9 +19,17 @@ export function navigationTarget(value, origin, checkoutOrigins = []) {
     if (url.origin === origin && isAdminPath(url.pathname)) return 'blocked';
     if (url.origin === origin && ['https:', 'http:'].includes(url.protocol)) return 'internal';
     if (url.protocol === 'https:' && checkoutOrigins.includes(url.origin)) return 'checkout';
-    if (['https:', 'http:', 'mailto:', 'tel:', 'sms:', 'whatsapp:', 'upi:'].includes(url.protocol)) return 'external';
+    if (['https:', 'http:', 'mailto:', 'tel:', 'sms:', 'whatsapp:'].includes(url.protocol) || isUpiAppUrl(value)) return 'external';
   } catch {}
   return 'blocked';
+}
+// UPI payment hand-off: the generic upi://pay link (Android chooser) and the iPhone app-specific
+// schemes the web page offers (web/lib/upi-intent.mjs). Money goes straight from the guest's UPI app
+// to the host; the app only opens the link.
+const UPI_APP_PREFIXES = ['upi://pay?', 'gpay://upi/pay?', 'phonepe://pay?', 'paytmmp://pay?'];
+export function isUpiAppUrl(value) {
+  return typeof value === 'string' && value.length <= 1024 && !/[\s<>"'\\]/.test(value) &&
+    UPI_APP_PREFIXES.some(prefix => value.toLowerCase().startsWith(prefix));
 }
 export function deepLinkPath(value, origin) {
   try {

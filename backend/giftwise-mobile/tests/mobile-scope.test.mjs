@@ -21,6 +21,6 @@ test('host and guest routes stay available',()=>{
 test('native home has no admin entry and the web middleware refuses admin routes to the app',()=>{
  const app=fs.readFileSync(new URL('../App.tsx',import.meta.url),'utf8');
  assert.doesNotMatch(app,/Platform admin sign in|PLATFORM ADMINISTRATION|open\('\/admin/);
- const middleware=fs.readFileSync(new URL('../../../web/middleware.ts',import.meta.url),'utf8');
+ const middleware=fs.readFileSync(new URL('../../../web/proxy.ts',import.meta.url),'utf8');
  assert.match(middleware,/isAdminPath\(request.nextUrl.pathname\)/);assert.match(middleware,/status: 404/);
 });

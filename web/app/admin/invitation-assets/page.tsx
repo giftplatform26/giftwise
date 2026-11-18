@@ -9,6 +9,7 @@ import {useExperience} from '../../../components/ExperienceProvider';
 import {adminGallery,assetImageUrl,categories,occasions} from '../../../lib/admin-gallery.mjs';
 import {commercialApi} from '../../../components/CommercePurchase';
 import {optimizeGalleryImage} from '../../../lib/gallery-image-optimizer.mjs';
+import AdminShell from '../../../components/admin/AdminShell';
 
 type Asset={id:string;category:string;occasion:string;title:string;published:boolean;width:number;height:number;tier:string};
 
@@ -72,12 +73,10 @@ export default function AdminInvitationAssetsPage(){useLocalizationRender();
   finally{setBusy(false);}
  };
  const visible=assets.filter(a=>(filter==='ALL'||a.occasion===filter)&&(status==='ALL'||(status==='PUBLISHED'?a.published:!a.published)));
- return <main style={{maxWidth:1160,margin:'0 auto',padding:'32px 20px',fontFamily:'system-ui,sans-serif',color:'#202536'}}>
-  <header style={{marginBottom:24}}>
-   <a href="/admin" style={{color:'#6353b5',textDecoration:'none'}}>{localize("ui.12ee0846b8b35e07",{defaultValue:"← Admin dashboard"})}</a>
-   <h1 style={{fontSize:30,margin:'14px 0 6px'}}>{localize("ui.f2b0278a0236c008",{defaultValue:"Invitation asset gallery"})}</h1>
-   <p style={{color:'#636b7a'}}>{localize("ui.a028ddc2ef95a74b",{defaultValue:"Platform administrator workspace · Upload backgrounds and decorations as drafts, then publish them for hosts."})}</p>
-  </header>
+ return <AdminShell current="gallery" title={localize("ui.f2b0278a0236c008",{defaultValue:"Invitation asset gallery"})} description={localize("ui.a028ddc2ef95a74b",{defaultValue:"Platform administrator workspace · Upload backgrounds and decorations as drafts, then publish them for hosts."})}><div style={{maxWidth:1160,color:'#202536'}}>
+  <nav aria-label={localizeText('Breadcrumb')} style={{marginBottom:20,fontSize:14}}>
+   <a href="/admin" style={{color:'#6353b5'}}>{localize("ui.12ee0846b8b35e07",{defaultValue:"← Admin dashboard"})}</a>
+  </nav>
   {error&&<div role="alert" style={{background:'#fff0f0',border:'1px solid #e6a5a5',borderRadius:12,padding:14,marginBottom:16}}>{localizeText(error)}</div>}
   {notice&&<div role="status" style={{background:'#effbf4',border:'1px solid #b5dfc5',borderRadius:12,padding:14,marginBottom:16}}>{localizeText(notice)}</div>}
   <section style={{border:'1px solid #dedde8',borderRadius:18,padding:22,background:'#fff',marginBottom:28}}>
@@ -120,7 +119,7 @@ export default function AdminInvitationAssetsPage(){useLocalizationRender();
      </article>)}
     </div>}
   </section>
- </main>;
+ </div></AdminShell>;
 }
 const field:React.CSSProperties={display:'block',marginTop:7,width:'100%',minHeight:39,padding:'8px 10px',border:'1px solid #cfcddd',borderRadius:9,background:'#fff',fontSize:14};
 const primary:React.CSSProperties={padding:'11px 18px',borderRadius:10,background:'#5d4bb0',color:'#fff',border:0,cursor:'pointer',fontWeight:600};

@@ -1,6 +1,6 @@
 // Native implementation; Metro selects Workspace.web.tsx for browser previews.
 import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, BackHandler, Linking, Pressable, Share, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, AppState, BackHandler, Linking, Pressable, Share, StyleSheet, Text, View } from 'react-native';
 import { WebView } from 'react-native-webview';
 import type { WebViewMessageEvent } from 'react-native-webview';
 import * as Browser from 'expo-web-browser';
@@ -8,7 +8,7 @@ import * as Clipboard from 'expo-clipboard';
 import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { nativeBridge } from './bridge';
-import { navigationTarget, parseNativeMessage, isAdminPath } from './policy.mjs';
+import { navigationTarget, parseNativeMessage, isAdminPath, isUpiAppUrl } from './policy.mjs';
 import { palette } from '../theme/tokens';
 // Lets the shared web app recognise the app (gift-platform/web/lib/native-app.mjs) and keep administration web-only.
 const NATIVE_USER_AGENT = 'GiftWiseApp/1';
@@ -19,8 +19,19 @@ export default function Workspace({ origin, path, onClose, checkoutOrigins }: Wo
   const [current, setCurrent] = useState(origin + path);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  // UPI hand-off: tell the page when the guest comes back from their UPI app, so it can ask
+  // "Did you complete your payment?" (a WebView does not always fire visibilitychange).
+  const upiLaunched = useRef(false);
+  const signal = (name: string) => ref.current?.injectJavaScript(`window.dispatchEvent(new CustomEvent(${JSON.stringify(name)}));true;`);
+  useEffect(() => { const subscription = AppState.addEventListener('change', state => { if (state === 'active' && upiLaunched.current) { upiLaunched.current = false; signal('giftwise:app-resumed'); } }); return () => subscription.remove(); }, []);
   useEffect(() => { const subscription = BackHandler.addEventListener('hardwareBackPress', () => { if (back) ref.current?.goBack(); else onClose(); return true; }); return () => subscription.remove(); }, [back, onClose]);
   async function external(url: string) {
+    if (isUpiAppUrl(url)) {
+      // No UPI app took the link: the page shows its QR / copy-UPI-ID fallback instead of a native alert.
+      try { upiLaunched.current = true; await Linking.openURL(url); }
+      catch { upiLaunched.current = false; signal('giftwise:upi-launch-failed'); }
+      return;
+    }
     try { if (/^https?:/.test(url)) await Browser.openBrowserAsync(url); else await Linking.openURL(url); }
     catch { Alert.alert('Unable to open link', 'The required app may not be installed. You can continue in GiftWise.'); }
   }

@@ -6,6 +6,7 @@ import {trackedCopy} from '../lib/interaction-analytics.mjs';
 import {useCallback,useEffect,useRef,useState} from 'react';
 import {clearStoredAttempt,detectPlatform,isSafeUpiUri,parseUpiResponse,readStoredAttempt,screenshotProblem,storeAttempt,upiLaunchOptions,upiStatusCopy} from '../lib/upi-intent.mjs';
 import {normaliseReference,receiptPath,referenceProblem} from '../lib/direct-transfer.mjs';
+import {isNativeAppUserAgent} from '../lib/native-app.mjs';
 import './upi-intent.css';
 
 type Attempt={attemptId:string;status:string;amountPaise:number;paymentCode:string;transactionRef:string;payeeName:string;upiId:string|null;
@@ -82,10 +83,19 @@ export default function UpiIntentPayment(p:Props){useLocalizationRender();
   useEffect(()=>{document.addEventListener('visibilitychange',onVisibility);return()=>{document.removeEventListener('visibilitychange',onVisibility);if(stuckTimer.current)clearTimeout(stuckTimer.current)}},[onVisibility]);
   function launched(){if(!attempt)return;hiddenSinceLaunch.current=false;setPhase('launched');setLaunchStuck(false);storeAttempt(session(),p.token,attempt.attemptId,true);
     if(stuckTimer.current)clearTimeout(stuckTimer.current);
+    // Inside the GiftWise app the shell reports launch failure and return itself (see the listener below).
+    if(isNativeAppUserAgent(navigator.userAgent))return;
     // Still visible after a few seconds: no UPI app took the link (none installed, or the browser blocked it).
     stuckTimer.current=setTimeout(()=>{if(!hiddenSinceLaunch.current&&document.visibilityState==='visible')setLaunchStuck(true)},2500);
   }
 
+  // GiftWise mobile app: the shell signals when the guest returns from the UPI app, or when no app opened.
+  useEffect(()=>{
+    const resumed=()=>{if(stuckTimer.current)clearTimeout(stuckTimer.current);setLaunchStuck(false);setPhase(ph=>ph==='launched'?'report':ph)};
+    const failed=()=>{if(stuckTimer.current)clearTimeout(stuckTimer.current);setLaunchStuck(true)};
+    window.addEventListener('giftwise:app-resumed',resumed);window.addEventListener('giftwise:upi-launch-failed',failed);
+    return()=>{window.removeEventListener('giftwise:app-resumed',resumed);window.removeEventListener('giftwise:upi-launch-failed',failed)};
+  },[]);
   // Native shells that receive the UPI app's result dispatch it here. It is untrusted and only pre-fills the report.
   useEffect(()=>{if(!attempt)return;
     const handler=(event:Event)=>{const detail=(event as CustomEvent).detail as {response?:unknown;source?:unknown}|undefined;
