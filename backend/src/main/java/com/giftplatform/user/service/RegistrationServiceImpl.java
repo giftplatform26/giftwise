@@ -38,6 +38,22 @@ public class RegistrationServiceImpl implements RegistrationService {
         this.repository=repository; this.passwordEncoder=passwordEncoder; this.policies=null;
     }
     @Override
+    @Transactional(readOnly = true)
+    public java.util.Map<String, FieldAvailability> availability(String username, String email) {
+        var result = new java.util.LinkedHashMap<String, FieldAvailability>();
+        if (username != null && username.matches(com.giftplatform.security.CredentialPolicy.USERNAME_PATTERN))
+            result.put("username", repository.existsByUsernameIgnoreCase(username)
+                    ? new FieldAvailability(false, "This username is already taken. Please choose another one.")
+                    : new FieldAvailability(true, "Username is available."));
+        String normalized = email == null ? null : email.trim().toLowerCase(Locale.ROOT);
+        if (normalized != null && normalized.length() <= 254 && normalized.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$"))
+            result.put("email", repository.existsByEmailIgnoreCase(normalized)
+                    ? new FieldAvailability(false, "An account already uses this email. Sign in instead, or use a different email.")
+                    : new FieldAvailability(true, "Email is available."));
+        return result;
+    }
+
+    @Override
     @Transactional
     public RegistrationResponse register(RegisterRequest request) {
         if (request == null

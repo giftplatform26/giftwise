@@ -125,6 +125,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 HttpMethod.POST,
                                 "/api/auth/register",
+                                "/api/auth/register/availability",
                                 "/api/auth/login"
                         ).permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/recovery/request", "/api/auth/recovery/complete", "/api/auth/recovery/username/request", "/api/auth/signup-email/start", "/api/auth/signup-email/verify").permitAll()

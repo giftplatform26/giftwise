@@ -20,6 +20,7 @@ public class OtpEndpointRateLimiter {
     private static final int REQUEST_IP_LIMIT = 20;
     private static final int VERIFY_USER_LIMIT = 20;
     private static final int VERIFY_IP_LIMIT = 60;
+    private static final int SIGNUP_CHECK_IP_LIMIT = 120;
     private final JdbcTemplate jdbc;
     private final TransactionTemplate transactions;
     private final Clock clock;
@@ -35,6 +36,14 @@ public class OtpEndpointRateLimiter {
         Instant window = clock.instant().truncatedTo(ChronoUnit.HOURS);
         return !Boolean.TRUE.equals(transactions.execute(tx ->
                 increment("REQUEST_IP", digest(remoteAddress), window, REQUEST_IP_LIMIT)));
+    }
+
+    /** Sign-up availability checks (username/email taken?): generous for real typing, tight enough to slow enumeration. */
+    public boolean isSignupCheckBlocked(String remoteAddress) {
+        requireIp(remoteAddress);
+        Instant window = clock.instant().truncatedTo(ChronoUnit.HOURS);
+        return !Boolean.TRUE.equals(transactions.execute(tx ->
+                increment("SIGNUP_CHECK", digest(remoteAddress), window, SIGNUP_CHECK_IP_LIMIT)));
     }
 
     public boolean isVerificationBlocked(UUID userId, String remoteAddress) {

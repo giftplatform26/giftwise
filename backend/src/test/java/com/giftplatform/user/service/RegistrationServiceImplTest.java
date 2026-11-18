@@ -199,4 +199,25 @@ class RegistrationServiceImplTest {
         when(repository.saveAndFlush(any())).thenThrow(new org.springframework.dao.DataIntegrityViolationException("write", new RuntimeException("ux_users_username_normalized")));
         assertThatThrownBy(() -> service.register(validRequest())).isInstanceOf(DuplicateUsernameException.class);
     }
+
+    @Test
+    void availabilityReportsTakenUsernameAndEmailLikeRegisterDoes() {
+        when(repository.existsByUsernameIgnoreCase("taken_name")).thenReturn(true);
+        when(repository.existsByEmailIgnoreCase("used@example.com")).thenReturn(true);
+        var result = service.availability("taken_name", "  USED@example.com ");
+        assertThat(result.get("username").available()).isFalse();
+        assertThat(result.get("email").available()).isFalse();
+        assertThat(result.get("email").message()).contains("Sign in");
+        var free = service.availability("fresh_name", "new@example.com");
+        assertThat(free.get("username").available()).isTrue();
+        assertThat(free.get("email").available()).isTrue();
+    }
+
+    @Test
+    void availabilitySkipsMissingOrMalformedFieldsWithoutQuerying() {
+        assertThat(service.availability("", "not-an-email")).isEmpty();
+        assertThat(service.availability(null, null)).isEmpty();
+        verify(repository, never()).existsByUsernameIgnoreCase(any());
+        verify(repository, never()).existsByEmailIgnoreCase(any());
+    }
 }

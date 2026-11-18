@@ -92,6 +92,7 @@ export const hostApi={
  profileName:f=>hostRequest(f,'/auth/profile-name'),
  setProfileName:(f,fullName)=>hostRequest(f,'/auth/profile-name',{method:'POST',payload:{fullName}}),
  register:(f,input)=>hostRequest(f,'/auth/register',{method:'POST',payload:validateRegistration(input)}),
+ registerAvailability:(f,{username,email})=>hostRequest(f,'/auth/register/availability',{method:'POST',payload:{username:String(username||''),email:String(email||'').trim()}}),
  login:(f,identifier,password)=>hostRequest(f,'/auth/login',{method:'POST',payload:{identifier,password}}),
  logout:f=>hostRequest(f,'/auth/logout',{method:'POST'}),
  deleteAccount:(f,password)=>{if(typeof password!=='string'||!password)throw Error('Enter your password to confirm.');return hostRequest(f,'/auth/profile/delete-account',{method:'POST',payload:{password,confirmation:'DELETE'}});},
