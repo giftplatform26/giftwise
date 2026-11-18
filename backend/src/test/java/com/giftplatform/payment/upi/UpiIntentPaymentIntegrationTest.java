@@ -76,6 +76,9 @@ class UpiIntentPaymentIntegrationTest {
     UpiIntentPaymentService.AttemptView start(long paise) {
         return upi.start(token, new UpiIntentPaymentService.StartRequest(dest, null, paise, UUID.randomUUID().toString(), "ANDROID"));
     }
+    /** UTRs are unique platform-wide and tests share one database, so each test gets its own 12-digit UTRs. */
+    final String utrPrefix = String.valueOf(java.util.concurrent.ThreadLocalRandom.current().nextLong(1_000_000_000L, 10_000_000_000L));
+    String utr(String suffix) { return utrPrefix + suffix; }
     UpiIntentPaymentService.ReportRequest completed(String utr) { return new UpiIntentPaymentService.ReportRequest("COMPLETED", utr, "Ravi", null, null); }
     int count(String sql, Object... args) { return db.queryForObject(sql, Integer.class, args); }
 
@@ -114,14 +117,14 @@ class UpiIntentPaymentIntegrationTest {
 
     @Test void reportUsesTheAttemptAmountAndCreatesExactlyOneClaim() {
         var a = start(50000);
-        var r = upi.report(token, a.attemptId(), completed("412345678901"));
+        var r = upi.report(token, a.attemptId(), completed(utr("01")));
         assertEquals("PAYMENT_REPORTED", r.status());
         var claim = db.queryForMap("SELECT amount_paise,payment_code,status,reported_via,attempt_id,method FROM guest_direct_transfer_claims WHERE id=?", r.claimId());
         assertEquals(50000L, claim.get("amount_paise")); assertEquals(a.paymentCode(), claim.get("payment_code"));
         assertEquals("AWAITING_VERIFICATION", claim.get("status")); assertEquals("UPI_INTENT", claim.get("reported_via"));
         assertEquals(a.attemptId(), claim.get("attempt_id")); assertEquals("UPI", claim.get("method"));
         // Double taps and replays return the same claim.
-        assertEquals(r.claimId(), upi.report(token, a.attemptId(), completed("412345678901")).claimId());
+        assertEquals(r.claimId(), upi.report(token, a.attemptId(), completed(utr("01"))).claimId());
         assertEquals(1, count("SELECT count(*) FROM guest_direct_transfer_claims WHERE event_id=?", event));
         assertEquals(409, assertThrows(ResponseStatusException.class, () -> upi.report(token, a.attemptId(), completed("999999999999"))).getStatusCode().value());
         assertEquals(0, count("SELECT count(*) FROM wallet_ledger_entries WHERE event_id=?", event), "never posts to the ledger");
@@ -129,9 +132,9 @@ class UpiIntentPaymentIntegrationTest {
 
     @Test void duplicateUtrAcrossAttemptsIsRejectedAndRollsBackCleanly() {
         var a = start(10000); var b = start(10000);
-        upi.report(token, a.attemptId(), completed("412345678901"));
+        upi.report(token, a.attemptId(), completed(utr("01")));
         int eventsBefore = count("SELECT count(*) FROM guest_payment_status_events WHERE attempt_id=?", b.attemptId());
-        assertEquals(409, assertThrows(ResponseStatusException.class, () -> upi.report(token, b.attemptId(), completed("412345678901"))).getStatusCode().value());
+        assertEquals(409, assertThrows(ResponseStatusException.class, () -> upi.report(token, b.attemptId(), completed(utr("01")))).getStatusCode().value());
         assertEquals("INITIATED", db.queryForObject("SELECT status FROM guest_upi_payment_attempts WHERE id=?", String.class, b.attemptId()));
         assertEquals(eventsBefore, count("SELECT count(*) FROM guest_payment_status_events WHERE attempt_id=?", b.attemptId()));
         assertEquals(1, count("SELECT count(*) FROM guest_direct_transfer_claims WHERE event_id=?", event));
@@ -139,10 +142,10 @@ class UpiIntentPaymentIntegrationTest {
 
     @Test void appCallbackIsUntrustedDuplicateSafeAndBoundToItsAttempt() {
         var a = start(10000);
-        String raw = "txnId=AXI1&responseCode=00&Status=SUCCESS&txnRef=" + a.transactionRef() + "&ApprovalRefNo=412345678901&amount=100.00";
+        String raw = "txnId=AXI1&responseCode=00&Status=SUCCESS&txnRef=" + a.transactionRef() + "&ApprovalRefNo=" + utr("01") + "&amount=100.00";
         var after = upi.recordResponse(token, a.attemptId(), new UpiIntentPaymentService.ResponseRequest(raw, "com.example.upi"));
         assertEquals("PENDING", after.status(), "an app SUCCESS is at most pending");
-        assertEquals("412345678901", after.suggestedReference());
+        assertEquals(utr("01"), after.suggestedReference());
         assertEquals(0, count("SELECT count(*) FROM guest_direct_transfer_claims WHERE event_id=?", event), "callback alone creates no claim");
         // Duplicate callback: no-op. Different callback: rejected.
         upi.recordResponse(token, a.attemptId(), new UpiIntentPaymentService.ResponseRequest(raw, "com.example.upi"));
@@ -169,11 +172,11 @@ class UpiIntentPaymentIntegrationTest {
         var a = start(10000);
         assertEquals("PENDING", upi.report(token, a.attemptId(), new UpiIntentPaymentService.ReportRequest("PENDING", null, null, null, null)).status());
         assertEquals("FAILED", upi.report(token, a.attemptId(), new UpiIntentPaymentService.ReportRequest("FAILED", null, null, null, null)).status());
-        assertEquals("PAYMENT_REPORTED", upi.report(token, a.attemptId(), completed("412345678902")).status(), "failed then actually paid");
+        assertEquals("PAYMENT_REPORTED", upi.report(token, a.attemptId(), completed(utr("02"))).status(), "failed then actually paid");
         var b = start(10000);
         db.update("UPDATE guest_upi_payment_attempts SET expires_at=now()-interval '1 minute' WHERE id=?", b.attemptId());
         assertEquals("EXPIRED", upi.status(token, b.attemptId()).status());
-        assertEquals(410, assertThrows(ResponseStatusException.class, () -> upi.report(token, b.attemptId(), completed("412345678903"))).getStatusCode().value());
+        assertEquals(410, assertThrows(ResponseStatusException.class, () -> upi.report(token, b.attemptId(), completed(utr("03")))).getStatusCode().value());
     }
 
     @Test void attemptsAreScopedToTheirInvitation() throws Exception {
@@ -193,7 +196,7 @@ class UpiIntentPaymentIntegrationTest {
 
     @Test void hostConfirmationIsAuditedAndOnlyTheOwningHostCanDecide() throws Exception {
         var a = start(10000);
-        var r = upi.report(token, a.attemptId(), completed("412345678901"));
+        var r = upi.report(token, a.attemptId(), completed(utr("01")));
         String decision = "/api/v1/events/" + event + "/transactions/claims/" + r.claimId() + "/decision";
         when(actor.requireAuthenticatedUserId()).thenReturn(otherHost);
         mvc.perform(post(decision).with(user("other")).with(csrf()).contentType(MediaType.APPLICATION_JSON).content("{\"decision\":\"RECEIVED\"}"))
@@ -229,8 +232,8 @@ class UpiIntentPaymentIntegrationTest {
         var a = start(10000); var b = start(10000);
         assertEquals(409, assertThrows(ResponseStatusException.class, () -> upi.attachEvidence(token, a.attemptId(), png())).getStatusCode().value(),
             "only after reporting");
-        var ra = upi.report(token, a.attemptId(), completed("412345678901"));
-        upi.report(token, b.attemptId(), completed("412345678902"));
+        var ra = upi.report(token, a.attemptId(), completed(utr("01")));
+        upi.report(token, b.attemptId(), completed(utr("02")));
         String url = "/api/public/payments/upi-intent/" + token + "/attempts/" + a.attemptId() + "/evidence";
         mvc.perform(multipart(url).file(new MockMultipartFile("file", "x.svg", "image/svg+xml", "<svg onload=alert(1)>".getBytes())).with(csrf()))
             .andExpect(status().isBadRequest());

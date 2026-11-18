@@ -48,6 +48,8 @@ class CelebrationPlanningIntegrationTest {
   mvc.perform(put(path()).session(session(host,"CUSTOMER")).with(csrf()).contentType(MediaType.APPLICATION_JSON).content(body(true,false,0))).andExpect(status().isConflict());
   db.update("UPDATE events SET status='PUBLISHED' WHERE id=?",event);
   mvc.perform(put(path()).session(session(host,"CUSTOMER")).with(csrf()).contentType(MediaType.APPLICATION_JSON).content(body(true,false,1))).andExpect(status().isConflict());
+  // Details other than the gifting switch can still be edited once the invitation is published.
+  mvc.perform(put(path()).session(session(host,"CUSTOMER")).with(csrf()).contentType(MediaType.APPLICATION_JSON).content(body(false,false,1))).andExpect(status().isOk()).andExpect(jsonPath("$.version").value(2));
  }
  @Test void invitationOnlyCanPublishWithoutAnAccountAndClosesGiftEntryPoints() throws Exception {
   mvc.perform(put(path()).session(session(host,"CUSTOMER")).with(csrf()).contentType(MediaType.APPLICATION_JSON).content(body(false,false,0))).andExpect(status().isOk());

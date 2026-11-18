@@ -37,8 +37,8 @@ test('checkout sends the code, shows it, and offers the receipt',()=>{
 test('host can confirm transfers and admins have a Razorpay switch',()=>{
   const tx=read('app/events/[id]/transactions/page.tsx');
   assert.match(tx,/pending=true/);assert.match(tx,/\/claims\/\$\{row\.id\}\/decision/);assert.match(tx,/'RECEIVED'\|'NOT_RECEIVED'\|'UNDECIDED'/);
-  const admin=read('app/admin/page.tsx'),sw=read('components/RazorpaySwitch.tsx');
-  assert.match(admin,/<RazorpaySwitch /);
-  assert.match(sw,/controls\/RAZORPAY\?scope=PLATFORM`,\{revision:view\.revision,enabled:!on,reason:reason\.trim\(\)\}/);
+  const admin=read('app/admin/page.tsx'),sw=read('components/admin/AdminPaymentMethods.tsx');
+  assert.match(admin,/<AdminPaymentMethods scope="PLATFORM"/);
+  assert.match(sw,/\/controls\/\$\{pending\.channel\}\$\{query\}`,\{revision:view\.revision,enabled,reason:reason\.trim\(\)\}/);
   assert.match(sw,/razorpay-status/);
 });

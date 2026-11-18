@@ -17,9 +17,9 @@ export const ADMIN_SECTIONS = [
   {id: 'users', group: 'access', label: 'Users', title: 'Users', description: 'Every host and administrator account, with status, verified contacts and activity.'},
   {id: 'features', group: 'access', label: 'Platform features', title: 'Platform features', description: 'Turn whole features on or off for every host. A feature that is off here is off everywhere.'},
   {id: 'experiences', group: 'access', label: 'Site experiences', title: 'Site experiences', description: 'Site-wide extras such as the public demo, sharing previews and optional analytics.'},
-  {id: 'hosts', group: 'access', label: 'Hosts & access', title: 'Hosts & access', description: 'Find a host and choose which features, uploads and languages they can use.'},
+  {id: 'hosts', group: 'access', label: 'Hosts & access', title: 'Hosts & access', description: 'Find a host and choose which features, payment methods, uploads and languages they can use.'},
   {id: 'events', group: 'access', label: 'Events', title: 'Events', description: 'Per-event switches for memory albums, Design with AI and celebration features.'},
-  {id: 'payments', group: 'money', label: 'Payment methods', title: 'Payment methods', description: 'Razorpay checkout and how payment channels are routed for the platform, hosts and events.'},
+  {id: 'payments', group: 'money', label: 'Payment methods', title: 'Payment methods', description: 'Switch UPI, bank transfers, Razorpay checkout and Razorpay Route on or off for everyone, then make exceptions for one event.'},
   {id: 'groups', group: 'money', label: 'Group gift payments', title: 'Group gift payments', description: 'See every group gift and decide whether its creator may switch the account that receives contributions.'},
   {id: 'monetization', group: 'money', label: 'Fees & partners', title: 'Fees & partners', description: 'Platform fees, pricing, affiliate partners, placements and collected revenue.'},
   {id: 'programs', group: 'growth', label: 'Growth programs', title: 'Growth programs', description: 'Referral rewards, the vendor directory and showcase submissions.'},
@@ -95,8 +95,12 @@ export function groupModules(rows, labels, {query = '', state = 'ALL', isOn = r 
 
 // "Find a setting": plain-language names and synonyms for controls, each pointing at its section.
 export const SETTING_INDEX = [
+  {label: 'UPI payments on/off', section: 'payments', keywords: 'upi qr vpa direct intent gpay phonepe paytm disable payments'},
+  {label: 'Bank transfers on/off', section: 'payments', keywords: 'bank neft imps account transfer direct disable payments'},
   {label: 'Razorpay checkout on/off', section: 'payments', keywords: 'card netbanking gateway razorpay keys test live'},
-  {label: 'Payment channel routing (platform, host, event)', section: 'payments', keywords: 'upi bank transfer route vpa direct channel disable payments'},
+  {label: 'Razorpay Route on/off', section: 'payments', keywords: 'route routing split settlement linked account payout vpa'},
+  {label: 'Payment methods for one event', section: 'payments', keywords: 'event override upi bank razorpay channel'},
+  {label: 'Payment methods for one host', section: 'hosts', keywords: 'host override upi bank razorpay route channel disable'},
   {label: 'Payment control history', section: 'payments', keywords: 'payment changes revision reason'},
   {label: 'Platform fees master switch', section: 'monetization', keywords: 'monetization fee pricing charge percentage commission'},
   {label: 'Pricing history', section: 'monetization', keywords: 'monetization revision fee changes'},

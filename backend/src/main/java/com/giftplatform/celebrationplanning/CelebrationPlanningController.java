@@ -43,7 +43,9 @@ public class CelebrationPlanningController {
   db.queryForObject("SELECT pg_advisory_xact_lock(1195984468,hashtext(?))",Object.class,id.toString());
   e=events.findForUpdate(id).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
   permissions.requireEvent(e.getOwnerId(),id,"CELEBRATION_PLANNING");
-  if(e.getStatus()!=EventStatus.DRAFT)throw new ResponseStatusException(HttpStatus.CONFLICT,"Make the invitation private before changing celebration settings");
+  // Only switching gifting on or off changes what guests can do, so only that needs a private invitation.
+  // The welcome note, timing and arrival details stay editable after publishing.
+  if(e.getStatus()!=EventStatus.DRAFT&&input.giftingEnabled()!=e.isGiftingEnabled())throw new ResponseStatusException(HttpStatus.CONFLICT,"Make the invitation private before turning gifting on or off");
   try{CelebrationCalendar.validateTime(e.getEventDate(),input.startTime(),input.timezone());}catch(DateTimeException ex){throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Choose a valid timezone and a time outside daylight-saving gaps or overlaps");}
   Settings before=settings(e);
   if(before.version()!=input.version())throw new ResponseStatusException(HttpStatus.CONFLICT,"Settings changed. Reload before saving");

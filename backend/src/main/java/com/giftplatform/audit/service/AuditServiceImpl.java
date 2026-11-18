@@ -54,7 +54,9 @@ public class AuditServiceImpl implements AuditService {
             );
         }
 
+        // Guests act anonymously through invitation links, so they have no account ID.
         if (actorType != AuditActorType.SYSTEM
+                && actorType != AuditActorType.GUEST
                 && actorId == null) {
             throw new IllegalArgumentException(
                     "Actor ID is required for non-system actions"

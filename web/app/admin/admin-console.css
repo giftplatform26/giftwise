@@ -171,16 +171,14 @@
 .admDialogActions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px;flex-wrap:wrap}
 .admDialogActions button{min-height:42px}
 
-/* Razorpay platform switch */
-.razorpaySwitch{display:grid;gap:12px}
-.razorpaySwitchHead{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
-.razorpaySwitchHead h2{margin:0}.razorpaySwitchHead p{margin:4px 0 0}
-.razorpayState{flex:none;padding:6px 14px;border-radius:999px;font-weight:800}
-.razorpayState.is-on{background:#e6f5ea;color:#22673a}.razorpayState.is-off{background:#f1edf4;color:#5c4e6b}
-.razorpayKeys{margin:0;padding:10px 12px;border-radius:10px;background:#f7f4fa;font-size:14px}
+/* Payment methods */
+.admPaymentRow .admPill{margin-left:6px;font-size:12px;padding:2px 10px;vertical-align:middle}
+.admPaymentRow small+small{margin-top:4px}
+.admPaymentRow .admHint{color:#7a5200}
+.razorpayKeys{display:block;margin-top:6px;padding:8px 10px;border-radius:8px;background:#f7f4fa;font-size:13px}
 .razorpayKeys--live,.razorpayKeys--unknown,.razorpayKeys--not_configured{background:#fff4dc}
-.razorpaySwitch label{display:grid;gap:6px}
-.razorpaySwitch button{justify-self:start;min-height:44px}
+.admDialog .admField{display:grid;gap:6px;margin-top:12px;font-weight:600;font-size:14px}
+.admDialog .admField input{min-height:42px;padding:8px 12px;border:1px solid var(--adm-line);border-radius:8px;font:inherit}
 .acDanger{background:#9c3028;color:#fff;border:0;border-radius:10px;padding:10px 18px;font-weight:700;cursor:pointer}
 .acPrimary{background:#5b21b6;color:#fff;border:0;border-radius:10px;padding:10px 18px;font-weight:700;cursor:pointer}.acPrimary:disabled,.acDanger:disabled{opacity:.55;cursor:not-allowed}
 

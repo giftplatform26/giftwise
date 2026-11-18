@@ -125,6 +125,15 @@ class AuditServiceImplTest {
     }
 
     @Test
+    void shouldAllowAnonymousGuestWithoutActorId() {
+        service.recordChange(null, AuditActorType.GUEST, "UPI_PAYMENT_ATTEMPT", entityId,
+                AuditAction.CREATE, null, Map.of("status", "STARTED"), null);
+        ArgumentCaptor<AuditLog> captor = ArgumentCaptor.forClass(AuditLog.class);
+        verify(repository).save(captor.capture());
+        assertThat(captor.getValue().getActorId()).isNull();
+    }
+
+    @Test
     void shouldAllowSystemWithoutActorId() {
         service.recordChange(
                 null,

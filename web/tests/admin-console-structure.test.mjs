@@ -20,7 +20,7 @@ test('every in-page section is rendered by the console',()=>{
 });
 
 test('every existing admin control is still mounted',()=>{
-  for(const c of ['<GrowthControls/>','<GrowthFunnel/>','<ProfilePreferences/>','<BusinessAudit/>','<EmailDeliveryStatus/>','<BrandingAdmin/>','<LocalizationAdmin/>','<LanguageScopeControl scope="HOST"','<LanguageScopeControl scope="EVENT"','<PreferredLanguage/>','<ProductionReadiness/>','<AdminEventModules ','<AdminVendors/>','<AdminReferrals/>','<AdminShowcase/>','<AdminPresets/>','<AdminGrowthResults/>','<AdminAiDesignDetails key=','<AdminAiDesignDetails eventId=','<PlatformVerificationControls/>','<MobileVerification/>','<AccountEmailVerification/>','<GroupMemberEmailPolicy ','<AccountPolicies ','<AdminAudit ','<AdminInvitationUploadAccess ','<AdminInteractions/>','<MonetizationControls/>','<CommercialAdminControls/>','<PaymentControls ','<RazorpaySwitch '])
+  for(const c of ['<GrowthControls/>','<GrowthFunnel/>','<ProfilePreferences/>','<BusinessAudit/>','<EmailDeliveryStatus/>','<BrandingAdmin/>','<LocalizationAdmin/>','<LanguageScopeControl scope="HOST"','<LanguageScopeControl scope="EVENT"','<PreferredLanguage/>','<ProductionReadiness/>','<AdminEventModules ','<AdminVendors/>','<AdminReferrals/>','<AdminShowcase/>','<AdminPresets/>','<AdminGrowthResults/>','<AdminAiDesignDetails key=','<AdminAiDesignDetails eventId=','<PlatformVerificationControls/>','<MobileVerification/>','<AccountEmailVerification/>','<GroupMemberEmailPolicy ','<AccountPolicies ','<AdminAudit ','<AdminInvitationUploadAccess ','<AdminInteractions/>','<MonetizationControls/>','<CommercialAdminControls/>','<PaymentControls ','<AdminPaymentMethods scope="PLATFORM"','<AdminPaymentMethods key={`payments-${selected}`} scope="HOST"'])
     assert.ok(page.includes(c),c);
   for(const path of ["'/modules/'+code","'/hosts/'+selected+'/modules/'+m.module_code","'/events/'+e.id+'/album-settings'","'/events/'+e.id+'/ai-design-settings'","'/reports/group-transfers'","'/reports/guestbook'","'/reports/notifications'","'/summary'","'/audit'"])
     assert.ok(page.includes(path),path);
@@ -93,4 +93,17 @@ test('users, verification inbox and group gift payments are reachable and wired 
   assert.equal(findSettings('switching')[0].section,'groups');
   assert.equal(findSettings('pending verification')[0].section,'inbox');
   assert.equal(parseAdminHash('#hosts/2b1c9a0e-1111-4222-8333-444455556666').query,'2b1c9a0e-1111-4222-8333-444455556666');
+});
+
+test('each payment method has its own switch at platform, host and event level',()=>{
+  const sw=readFileSync('components/admin/AdminPaymentMethods.tsx','utf8'),pc=readFileSync('components/PaymentControls.tsx','utf8');
+  for(const channel of ['UPI','BANK','RAZORPAY','ROUTING'])assert.match(sw,new RegExp(`channel:'${channel}'`),channel);
+  assert.match(sw,/role="switch"/);
+  // Host and event switches only add an "off" override; turning on clears it so the platform stays the master.
+  assert.match(sw,/scope==='PLATFORM'\?pending\.on:pending\.on\?null:false/);
+  assert.match(sw,/confirmDisabled=\{!reason\.trim\(\)\}/);
+  assert.match(sw,/Razorpay Route is not connected in this version/);
+  assert.match(pc,/<AdminPaymentMethods key=\{eventId\} scope="EVENT"/);
+  assert.ok(findSettings('bank transfer').some(r=>r.section==='payments'));
+  assert.ok(findSettings('route').some(r=>r.label==='Razorpay Route on/off'));
 });
