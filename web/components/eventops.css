@@ -61,3 +61,6 @@
 @media(max-width:760px){.eoBudgetTop{grid-template-columns:1fr}.eoMine{margin-left:0}}
 @media(prefers-reduced-motion:reduce){.luDot{animation:none}}
 @media print{.no-print,.hostSidebar,.hostIdentity,.focusPageHeading button{display:none!important}.eoRun li{break-inside:avoid}}
+
+/* Phone widths: keep single-column grids inside the screen instead of sizing to their widest child. */
+@media(max-width:760px){.eoBudgetTop{grid-template-columns:minmax(0,1fr)}.eoTotal input{min-width:0;width:100%}}

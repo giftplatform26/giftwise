@@ -8,10 +8,11 @@ import {usePathname} from 'next/navigation';
 import {useExperience} from '../../components/ExperienceProvider';
 import HostWorkspace from '../../components/HostWorkspace';
 import FocusedHostShell from '../../components/focused/HostShell';
+import {isHostPath} from '../../lib/host-routes.mjs';
 function HostNavigation({children}:{children:ReactNode}){useLocalizationRender();
  const path=usePathname(),{mode}=useExperience();
- const host=path==='/studio'||path==='/dashboard'||path==='/events'||path.startsWith('/events/')||path==='/gifts'||path==='/ledger'||path==='/collections'||path==='/partner'||path==='/reminders'||path==='/referrals'||path==='/vendors'||path==='/helping'||path.startsWith('/helping/')||path.startsWith('/host/');
+ const host=isHostPath(path);
  if(!host)return <>{children}</>;
  return <HostWorkspace>{mode==='FOCUSED'?<FocusedHostShell>{children}</FocusedHostShell>:children}</HostWorkspace>;
 }
-export default function HostGlobalNav({children}:{children:ReactNode}){useLocalizationRender();return <Suspense fallback={<main role="status">{localize("ui.bed9096c411e6da3",{defaultValue:"Opening your workspace…"})}</main>}><HostNavigation>{children}</HostNavigation></Suspense>}
+export default function HostGlobalNav({children}:{children:ReactNode}){useLocalizationRender();return <Suspense fallback={<main role="status">{localize("ui.ba3bbbe10d8bef66",{defaultValue:"Loading…"})}</main>}><HostNavigation>{children}</HostNavigation></Suspense>}

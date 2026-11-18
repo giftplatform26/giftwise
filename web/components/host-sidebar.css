@@ -12,3 +12,29 @@
 .hostNavGroup:not([open]) .hostNavGroupTitle svg{transform:rotate(-90deg)}
 .hostNavGroupCount{font-size:10px;font-weight:700;letter-spacing:0;padding:1px 7px;border-radius:999px;background:#efe7ec;color:#7b6d76}
 @media(prefers-reduced-motion:reduce){.hostNavGroupTitle svg{transition:none}}
+
+/* The workspace header already shows the logo, so hide the site-wide brand bar on host pages. */
+body:has(.hostWorkspace) .giftwiseBrandHeader{display:none}
+/* The event title in the banner is a label, not the page heading (each page has its own h1). */
+.hostEventHeading .hostEventTitle{margin:0;font-size:clamp(19px,2vw,25px);font-weight:700;line-height:1.2;letter-spacing:-.025em;color:#422c3d;overflow-wrap:anywhere}
+
+/* Phones: one compact top bar, and the menu opens as a drawer over the page instead of a permanent icon rail. */
+@media(max-width:700px){
+.hostWorkspace{--host-brand-height:56px;grid-template-columns:minmax(0,1fr);grid-template-rows:56px minmax(0,1fr)}
+.hostIdentity{height:56px;min-height:56px;padding:0 12px;gap:10px}
+.hostIdentityMain{flex-direction:row;align-items:center;justify-content:space-between;gap:10px}
+.hostGreeting{display:none}
+.hostSidebar,.hostWorkspaceCollapsed .hostSidebar{position:fixed;top:56px;bottom:0;left:0;width:min(300px,86vw);z-index:50;box-shadow:12px 0 40px #30232b20;transition:transform .2s ease,visibility .2s}
+.hostWorkspaceCollapsed .hostSidebar{transform:translateX(-100%);visibility:hidden;box-shadow:none}
+.hostWorkspaceContent{grid-column:1;padding:0 12px 16px}
+.hostWorkspace aside.hostSidebar{top:calc(56px + var(--gift-language-bar-height,0px))}.hostWorkspace button.hostSidebarBackdrop{inset:56px 0 0 0;top:calc(56px + var(--gift-language-bar-height,0px))}
+.hostWorkspace .hostNavLabel{position:static;width:auto;height:auto;margin:0;clip-path:none}
+.hostWorkspace .hostNavSection{height:auto;margin:8px 12px;visibility:visible}
+.hostWorkspace .hostNavItem{justify-content:flex-start;padding:11px 13px}
+.hostEventMotto{display:none}
+.hostEventBanner{width:calc(100% + 24px);margin:0 -12px 12px;padding:8px 12px;grid-template-columns:minmax(0,1fr) auto}
+.hostEventHeading,.hostEventStatus{grid-row:1}
+.hostEventHeading .hostEventTitle{font-size:16px}
+.hostWorkspaceContent{scroll-padding-top:70px}
+}
+@media(max-width:700px) and (prefers-reduced-motion:reduce){.hostSidebar{transition:none}}

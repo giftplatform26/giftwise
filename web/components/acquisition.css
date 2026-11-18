@@ -56,3 +56,6 @@
 .shStatus--neutral{background:#f1edef}.shStatus--warning{background:#fff2d6;color:#6b4c0c}.shStatus--good{background:#e3f4e8;color:#1f5b33}.shStatus--danger{background:#f6e3e7;color:#8d233b}
 .shWishes{display:grid;gap:8px;border:1px solid #e6dfe2;border-radius:14px;padding:14px}.shWishes label span{font-weight:400}
 @media(max-width:860px){.tyGrid{grid-template-columns:1fr}.tyPreview{position:static;order:-1}.tyPhone{min-height:0}.tyOccasions{grid-template-columns:1fr 1fr}}
+
+/* Phone widths: the story card maker stays inside the screen. */
+.scMaker{grid-template-columns:minmax(0,1fr)}.scMaker>*{max-width:100%}

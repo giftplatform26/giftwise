@@ -72,7 +72,7 @@ export default function ThankYouPage() {useLocalizationRender();
   const label: React.CSSProperties = { display: 'block', fontWeight: 600 };
   return <main style={{ maxWidth: 1180, margin: '0 auto', padding: '28px 20px', color: '#282828' }}><KeepsakeSharing eventId={id}/>
     <Link href="/events">{localize("ui.5442b1b0dcc591c5",{defaultValue:"← Events"})}</Link>
-    <h1 style={{ fontSize: 30, marginTop: 18 }}>{localize("ui.ae2fc37d79fa3fa3",{defaultValue:"Thank-you card studio"})}</h1>
+    <h1 style={{ fontSize: 30, marginTop: 18 }}>{localize("ui.b9d8503f3cae59f3",{defaultValue:"Thank-you cards"})}</h1>
     <p>{localize("ui.1af0d87ed3cee82e",{defaultValue:"Personalize the greeting for your event. Reported UPI and bank transfers are not verified payments."})}</p>
     {notice && <p role="status" style={{ padding: 10, background: '#fff1dc' }}>{localizeText(notice)}</p>}
     <div className={focused?'focusThankyouGrid':undefined} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 360px), 1fr))', gap: 30 }}>

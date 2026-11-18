@@ -65,7 +65,7 @@ export default function EditEventPage(){useLocalizationRender();
   <p><Link className="focusTextLink" href={`/events/${encodeURIComponent(id)}`}>← {localizeText('Back to overview')}</Link></p>
   <section className="focusPanel">
    <span className="focusEyebrow">{localizeText('CELEBRATION DETAILS')}</span>
-   <h1 style={{margin:'8px 0 4px'}}>{event?.title||localizeText('Edit celebration')}</h1>
+   <h1 style={{margin:'8px 0 4px'}}>{localizeText('Event details')}</h1>
    {event&&<p className="finePrint">{statusLabel(event.status)} · {statusHint(event.status)}</p>}
    {loading&&<p role="status">{localizeText('Loading your celebration…')}</p>}
    {error&&<p role="alert" className="focusError">{localizeText(error)}</p>}

@@ -92,3 +92,6 @@
 @media(max-width:760px){.gbStats{grid-template-columns:1fr 1fr}.gbStats--three{grid-template-columns:repeat(3,minmax(0,1fr))}.gbStats>div{padding:12px 14px}.gbEntry{padding:18px}
  .gbMoreFields,.gbPersonCols,.lwThemes{grid-template-columns:1fr}.gbBars{width:38%}.lwStatus{flex-wrap:wrap}.lwStatus>button{width:100%}.gbEntryActions .focusPrimary{flex:1}}
 @media(prefers-reduced-motion:reduce){.lwStatus.is-live .lwDot,.gbToast{animation:none}}
+
+/* Tab rows scroll sideways on narrow screens instead of pushing the page wider. */
+.gbTabs{max-width:100%;overflow-x:auto;scrollbar-width:none}.gbTabs::-webkit-scrollbar{display:none}.gbTabs button{flex:0 0 auto;white-space:nowrap}

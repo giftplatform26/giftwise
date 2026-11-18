@@ -13,3 +13,6 @@
 .waChip{padding:3px 10px;border-radius:30px;font-size:12px;font-weight:700;white-space:nowrap}
 .waChip--yes{background:#e3f4e8;color:#1f5b33}.waChip--maybe{background:#fff2d6;color:#6b4c0c}.waChip--no{background:#f6e3e7;color:#8d233b}.waChip--off{background:#eee;color:#555}
 @media(max-width:900px){.waGrid{grid-template-columns:1fr}.waCompose{position:static}}
+
+/* Phone widths: compose and preview stack within the screen. */
+@media(max-width:760px){.waGrid{grid-template-columns:minmax(0,1fr)}}

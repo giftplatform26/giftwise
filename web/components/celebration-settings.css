@@ -1,0 +1,12 @@
+/* Celebration settings form (events/[id]/planning). */
+.csForm>fieldset,.csGroup{border:0;margin:0;padding:0;min-width:0;display:grid;gap:16px}
+.csForm legend{font-weight:700;font-size:15px;margin-bottom:4px;padding:0}
+.csGroup{margin-top:8px;padding-top:16px;border-top:1px solid var(--focus-line,#e6dfe2)}
+.csForm label,.csField{display:grid;gap:6px;font-size:14px;font-weight:600;color:var(--focus-ink,#30232b);min-width:0}
+.csForm :is(input:not([type=checkbox]),select,textarea),.csField input{width:100%;min-width:0;box-sizing:border-box;border:1px solid #dacac1;border-radius:10px;padding:11px 12px;font:inherit;font-weight:400;background:#fff;color:inherit}
+.csForm .csCheck{display:flex;align-items:flex-start;gap:10px;font-weight:600}
+.csForm .csCheck input{width:20px;height:20px;margin:1px 0 0;flex:0 0 auto;accent-color:var(--focus-accent,#683c55)}
+.csHelp{margin:-8px 0 0;font-size:13px;color:var(--focus-muted,#66565e)}
+.csRow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.csForm .focusPrimary{justify-self:start}
+@media(max-width:760px){.csRow{grid-template-columns:minmax(0,1fr)}.csForm .focusPrimary{justify-self:stretch}}

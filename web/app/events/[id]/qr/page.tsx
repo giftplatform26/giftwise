@@ -150,10 +150,10 @@ export default function EventQrPage() {useLocalizationRender();
 
         <section className="studioCardSection" aria-label={localize("ui.48b59e0a0ebeed24",{defaultValue:"Gift Invitation Studio"})}>
           <SharePreviewControl eventId={eventId}/><SharedVisualInvitationEditor eventId={eventId}>
-<section className="hostPanel compactQrPanel" aria-label={localize("ui.980385b71fcb316d",{defaultValue:"QR Invitation"})}>
+<section className="hostPanel compactQrPanel" aria-label={localize("ui.f45def2d74b2a1a0",{defaultValue:"Invitation design & QR"})}>
           
 
-          <h1>{localize("ui.980385b71fcb316d",{defaultValue:"QR Invitation"})}</h1>
+          <h1>{localize("ui.f45def2d74b2a1a0",{defaultValue:"Invitation design & QR"})}</h1>
           <p>{localize("ui.b09fc31de30e0500",{defaultValue:"Manage and share your celebration invitation."})}</p>
 
           {error && <p role="alert" className="hostError">{localizeText(error)}</p>}

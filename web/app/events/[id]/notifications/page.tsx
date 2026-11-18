@@ -95,7 +95,7 @@ export default function NotificationsPage() {useLocalizationRender();
     }}>
       <Link href="/events">{localize("ui.34bd233410c2ceb9",{defaultValue:"← Back to My Events"})}</Link>
 
-      <GroupCollectionReport eventId={id} notifications/><h1>{focused?localize("ui.783222ed531ca517",{defaultValue:"Activity & notifications"}):localize("ui.61d4e77e9eb4e3c0",{defaultValue:"Notification History"})}</h1>
+      <GroupCollectionReport eventId={id} notifications/><h1>{focused?localize("ui.04c89dc93379e705",{defaultValue:"Notification history"}):localize("ui.61d4e77e9eb4e3c0",{defaultValue:"Notification History"})}</h1>
       <p>
         {localize("ui.747151be868ef32b",{defaultValue:"Review acknowledgments and notification records for this celebration. Queued notifications are not proof of external delivery. Guest-reported UPI and bank transfers are not independently verified payments."})}</p>
 

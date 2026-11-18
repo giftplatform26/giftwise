@@ -42,3 +42,6 @@
 .psSheetCard img{width:150px;height:150px}
 .psSheetCard h3{margin:4px 0 2px;font-size:1rem}.psSheetCard p{margin:2px 0;font-size:.85rem}
 @media print{.psSheet{grid-template-columns:repeat(3,1fr)}.focusPageHeading .no-print,.no-print{display:none!important}}
+
+/* Phone widths: the guest list column wraps instead of overflowing. */
+@media(max-width:760px){.stGuests,.stGuests ul{grid-template-columns:minmax(0,1fr)}.stGuests h2{overflow-wrap:anywhere}}
